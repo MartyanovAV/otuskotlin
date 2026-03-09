@@ -1,0 +1,16 @@
+**/.gradle
+**/build/
+**/src/**/build/
+
+### IntelliJ IDEA ###
+.idea/
+*.iml
+
+### Kotlin ###
+.kotlin
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
