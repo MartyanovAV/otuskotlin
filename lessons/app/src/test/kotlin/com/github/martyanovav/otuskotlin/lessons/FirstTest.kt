@@ -1,4 +1,4 @@
-package com.github.martyanovav
+package com.github.martyanovav.otuskotlin.lessons
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

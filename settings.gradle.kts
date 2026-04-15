@@ -1,9 +1,4 @@
-dependencyResolutionManagement {
-    @Suppress("UnstableApiUsage")
-    repositories {
-        mavenCentral()
-    }
-}
+rootProject.name = "otuskotlin"
 
 pluginManagement {
     plugins {
@@ -12,10 +7,5 @@ pluginManagement {
     }
 }
 
-plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
-}
-
-include("app")
-
-rootProject.name = "otuskotlin"
+includeBuild("lessons")
+includeBuild("fitness-crm-be")
