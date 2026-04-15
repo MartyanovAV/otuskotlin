@@ -1,0 +1,65 @@
+package com.github.martyanovav.otuskotlin.plugin
+
+import org.gradle.accessors.dm.LibrariesForLibs
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.repositories
+import org.gradle.kotlin.dsl.the
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+
+@Suppress("unused")
+internal class BuildPluginMultiplatform : Plugin<Project> {
+
+    override fun apply(project: Project) = with(project) {
+        val libs = the<LibrariesForLibs>()
+        pluginManager.apply("org.jetbrains.kotlin.multiplatform")
+        group = rootProject.group
+        version = rootProject.version
+
+        plugins.withId("org.jetbrains.kotlin.multiplatform") {
+            extensions.configure<KotlinMultiplatformExtension> {
+                configureTargets(this@with)
+                sourceSets.configureEach {
+                    languageSettings.apply {
+                        languageVersion = libs.versions.kotlin.get().substringBeforeLast(".")
+                        progressiveMode = true
+                        optIn("kotlin.time.ExperimentalTime")
+                    }
+                }
+            }
+        }
+        repositories {
+            mavenCentral()
+        }
+    }
+}
+
+@Suppress("LongMethod", "MagicNumber")
+private fun KotlinMultiplatformExtension.configureTargets(project: Project) {
+    val libs = project.the<LibrariesForLibs>()
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(libs.versions.jvm.language.get()))
+//        vendor.set(JvmVendorSpec.AZUL)
+    }
+
+    jvm {
+        compilations.configureEach {
+            compileTaskProvider.configure {
+                compilerOptions {
+                    jvmTarget.set(JvmTarget.valueOf("JVM_${libs.versions.jvm.compiler.get()}"))
+                }
+            }
+        }
+    }
+    linuxX64()
+    macosArm64()
+    macosX64()
+    project.tasks.withType(JavaCompile::class.java) {
+        sourceCompatibility = libs.versions.jvm.language.get()
+        targetCompatibility = libs.versions.jvm.compiler.get()
+    }
+}
