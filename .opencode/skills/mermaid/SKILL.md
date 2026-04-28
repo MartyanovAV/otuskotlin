@@ -1,6 +1,21 @@
+---
+name: mermaid
+description: Standard Mermaid diagram templates for architecture documentation — use flowchart for component relationships, sequence for request flows, C4 for system context, deployment for infrastructure
+---
+
 # Mermaid Diagrams
 
 Стандартные диаграммы для архитектурной документации.
+
+## Выбор типа диаграммы
+
+| Ситуация | Тип диаграммы |
+|----------|---------------|
+| Компоненты и связи между ними | flowchart |
+| Последовательность запросов/операций | sequenceDiagram |
+| Система в контексте внешнего мира | C4Context |
+| Инфраструктура и деплой | deployment-beta |
+| Слои архитектуры (API, Core, Storage) | architecture-beta |
 
 ## Flowchart — компоненты и связи
 

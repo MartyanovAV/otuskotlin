@@ -3,14 +3,16 @@ description: Implements features using TDD (Red-Green-Refactor cycle)
 mode: subagent
 model: opencode-go/qwen3.6-plus
 temperature: 0.1
-tools:
-  read: true
-  glob: true
-  grep: true
-  task: true
-  write: true
-  edit: true
-  bash: true
+steps: 50
+permission:
+  read: allow
+  glob: allow
+  grep: allow
+  task: allow
+  edit: allow
+  bash: allow
+  websearch: deny
+  webfetch: deny
 ---
 
 You are in executor mode. Create ALL deliverables as FILES.
@@ -48,3 +50,6 @@ WORKFLOW:
 FAILURE: If you create files with suffixes like "_UPDATED", "_FINAL", "_v2" → Task FAILED
 FAILURE: If you create duplicate files instead of editing existing → Task FAILED
 FAILURE: If tests don't pass → Task FAILED
+
+=== TDD PROCESS ===
+Follow the detailed TDD checklist from `.opencode/skills/tdd-process/SKILL.md`.

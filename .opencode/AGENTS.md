@@ -125,15 +125,13 @@ Gate 3 Reject:
 - Ensures proper separation of concerns
 - Prevents hallucinated file creation
 
-```
-Gate 2 Reject:
-├─ "Бизнес-план" → product-owner
-├─ "Техника" → architect
-└─ "Реализация" → executor
+---
 
-Gate 3 Reject:
-└─ К нужному этапу
-```
+## MCP Servers
+
+All agents may use any available MCP servers to accomplish their task.
+MCP servers are configured in `opencode.json` — agents do not need to name them explicitly.
+Use MCP when it helps: inspecting project structure, looking up documentation, verifying dependencies.
 
 ---
 

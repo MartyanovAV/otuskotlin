@@ -1,3 +1,8 @@
+---
+name: tdd-process
+description: Detailed TDD Red-Green-Refactor cycle checklist for Executor implementing features — write failing tests first, then minimal implementation, then refactor
+---
+
 # TDD Process
 
 Описание TDD-цикла для агентов.

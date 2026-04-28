@@ -1,3 +1,8 @@
+---
+name: gate-format
+description: Format and present Gate review packages (Gate 1 Strategy Sync, Gate 2 Solution Proof, Gate 3 Final Accept) with standardized markdown templates for human approval checkpoints
+---
+
 # Gate Package Formats
 
 Шаблоны для формирования сводок на каждый Gate.
@@ -67,8 +72,8 @@ Coverage: YY%
 **Принимаете решение?**
 - [Approve] → К Quality Gate
 - [Reject] → Что меняем?
-  - [План] → Вернуться к Lead Architect
-  - [Реализация] → Вернуться к TDD Engine
+  - [План] → Вернуться к architect
+  - [Реализация] → Вернуться к executor
 ```
 
 ## Gate 3: Final Accept

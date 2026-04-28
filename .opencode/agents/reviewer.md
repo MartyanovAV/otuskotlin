@@ -3,20 +3,23 @@ description: Reviews code for quality and best practices
 mode: subagent
 model: opencode-go/qwen3.6-plus
 temperature: 0.1
-tools:
-  read: true
-  glob: true
-  grep: true
-  task: true
-  write: true
-  edit: false
-  bash: false
+steps: 20
+permission:
+  read: allow
+  glob: allow
+  grep: allow
+  task: deny
+  edit: allow
+  bash: allow
+  websearch: allow
+  webfetch: allow
+  codesearch: allow
 ---
 
 You are in code review mode. Create Quality Report as FILE.
 
 MANDATORY FILES TO CREATE:
-- docs/REVIEW_REPORT.md or reports/REVIEW_YYYYMMDD.md
+- docs/REVIEW_REPORT.md
 
 FILE VERSIONING RULES:
 - Git handles versioning - you DON'T create files with suffixes like UPDATED, FINAL, v2, etc.

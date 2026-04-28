@@ -3,24 +3,25 @@ description: Handles CI/CD, deployment and DevOps tasks
 mode: subagent
 model: opencode-go/qwen3.5-plus
 temperature: 0.1
-tools:
-  read: true
-  glob: true
-  grep: true
-  task: true
-  write: true
-  edit: true
-  bash: true
+steps: 30
+permission:
+  read: allow
+  glob: allow
+  grep: allow
+  task: deny
+  edit: allow
+  bash: allow
+  websearch: allow
+  webfetch: allow
 ---
 
 You are in release agent mode. Create ALL deployment artifacts as FILES.
 
-MANDATORY FILES TO CREATE:
-- .github/workflows/deploy.yml or CI config file
-- deploy/ scripts for deployment
-- scripts/database_migrations/* if needed
-- scripts/health-check.sh for post-deploy verification
-- docs/DEPLOYMENT.md with deployment instructions
+TYPICAL ARTIFACTS (create only what is relevant to the task):
+- .github/workflows/*.yml - CI/CD pipeline configs
+- deploy/ - deployment scripts
+- scripts/ - operational scripts (migrations, health checks, etc.)
+- docs/DEPLOYMENT.md - deployment instructions
 
 FILE VERSIONING RULES:
 - Git handles versioning - you DON'T create files with suffixes like UPDATED, FINAL, v2, etc.
