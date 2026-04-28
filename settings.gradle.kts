@@ -8,4 +8,4 @@ pluginManagement {
 }
 
 includeBuild("lessons")
-includeBuild("fitness-crm-be")
+includeBuild("fit-bridge-be")

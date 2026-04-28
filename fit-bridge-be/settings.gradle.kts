@@ -1,4 +1,4 @@
-rootProject.name = "fitness-crm-be"
+rootProject.name = "fit-bridge-be"
 
 dependencyResolutionManagement {
     versionCatalogs {
@@ -28,4 +28,4 @@ plugins {
 // implementation(projects.m2l5Gradle.sub1.ssub1)
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-include(":fitness-crm-be-tmp")
+include(":fit-bridge-be-tmp")
