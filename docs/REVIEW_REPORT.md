@@ -1,182 +1,123 @@
-# Gate 1 Review Report — FitBridge Business Documentation Package
+# Gate 1 Review Report — FitBridge Business Documentation Package (Round 3 — Final)
 
 **Review Date:** 2026-04-29
 **Reviewer:** Reviewer Agent
-**Scope:** `docs/business/` — BUSINESS_VISION.md, CUSTOMER_PERSONAS.md, CJM.md, GTM_PLAN.md, MONETIZATION_STRATEGY.md, RISK_REGISTER.md, BR/ (8 files)
-**Review Type:** Approval-style Gate 1 — internal consistency, business realism, measurability, GTM coherence, monetization validity, scope control, approval-readiness
+**Scope:** `docs/business/` — BUSINESS_VISION.md, CUSTOMER_PERSONAS.md, CJM.md, GTM_PLAN.md, MONETIZATION_STRATEGY.md, RISK_REGISTER.md, MVP_SCOPE_SUMMARY.md, BR/ (8 files)
+**Review Type:** Final approval-style Gate 1
+**Previous Reports:** `docs/REVIEW_REPORT.md` (Round 1: REJECT, Round 2: APPROVE WITH CONDITIONS)
+
+---
+
+## Round 2 Condition Status
+
+| Condition | Finding | Status |
+|-----------|---------|--------|
+| Condition 1 | H-06: Budget/CAC inconsistency | ✅ **RESOLVED** — GTM_PLAN.md §8 now separates direct acquisition spend (₽1.2M) from broader GTM (₽2.4M); ₽1.2M / 250 = ₽4,800 aligns with ₽5,000 control level |
+| Condition 2 | H-07: Circular TAM reference | ✅ **RESOLVED** — BUSINESS_VISION.md §3 now explicitly labels TAM as "addressable revenue pool при рабочем прайсинге FitBridge" rather than external market size |
+
+---
+
+## Round 2 Additional Fix Status
+
+| ID | Finding | Status |
+|----|---------|--------|
+| H-04 | 30% conversion lacks downside | ✅ **RESOLVED** — GTM_PLAN.md §6 line 68 adds downside note at 25% and 20% |
+| M-01 | LTV rounding error | ✅ **RESOLVED** — MONETIZATION_STRATEGY.md §5 line 62 now shows ₽17,105 |
+| M-05 | No consolidated MVP scope | ✅ **RESOLVED** — MVP_SCOPE_SUMMARY.md created with clear MVP/Phase 2 split and critical path |
+| M-06 | CJM naming inconsistency | ❌ **NOT FIXED** — Alexey's mermaid still mixes English/Russian |
+| M-07 | Triple "active client" definition | ⚠️ **PARTIALLY FIXED** — BR-007 references canonical definition; MONETIZATION_STRATEGY.md still carries full duplicate text at line 23 |
 
 ---
 
 ## 1. Findings by Severity
 
-### CRITICAL (Approval Blockers)
+### No blockers found.
 
-**C-01: Contradictory BR document status**
-- **Files:** All 8 BR files (`BR/BR-001` through `BR/008`)
-- **Location:** Status table, line 7–8 in each file
-- **Issue:** Every BR file shows `Статус: ⬜ Черновик` (Draft) AND `Дата утверждения: 2026-04-29` (Approval Date) simultaneously. A document cannot be both unapproved draft and approved on the same date.
-- **Impact:** Creates ambiguity about whether requirements are baselined. Blocks handoff to Architect/Executor.
-- **Fix:** Set status to "Черновик" with no approval date until Gate 1 is passed, or set to "Утверждён" with the actual approval date.
+All CRITICAL and HIGH findings from Rounds 1 and 2 have been resolved. The remaining items are MEDIUM and LOW severity only.
 
-**C-02: GTM phase targets conflict with revenue plan account counts**
-- **Files:** `GTM_PLAN.md` §2 (line 10) vs `BUSINESS_VISION.md` §7 (line 146)
-- **Location:** GTM_PLAN.md line 10: "3–6 месяцев → 35+ платящих"; BUSINESS_VISION.md line 146: "Q2 → 60 платящие аккаунты"
-- **Issue:** GTM plan targets 35+ paying accounts by month 6, but the revenue plan assumes 60 by end of Q2 (month 6). The 71% gap is unexplained.
-- **Impact:** Financial projections and GTM resource planning are misaligned. One of the two documents must be wrong.
-- **Fix:** Reconcile the numbers. Either lower the Q2 revenue projection or raise the GTM phase target, with explicit rationale.
+### MEDIUM
 
-**C-03: Market sizing methodology is opaque**
-- **File:** `BUSINESS_VISION.md` §3 (lines 36–42)
-- **Location:** Lines 36–42
-- **Issue:** TAM "≈ ₽1,15 млрд" is derived from "рынке автоматизации фитнеса в РФ менее ₽1 млрд и добавлении русскоязычного внешнего сегмента около 15%." The base figure is not stated, the 15% addition is not sourced, and SAM (₽300–360M) has no derivation from TAM. SOM (₽22–36M) is not explicitly derived from SAM.
-- **Impact:** Investors and stakeholders cannot validate the market opportunity. The entire revenue model rests on an unverified market size.
-- **Fix:** Provide explicit TAM → SAM → SOM funnel with source citations and percentage assumptions at each step.
+**M-06 (unresolved): CJM mermaid section naming inconsistency for Alexey**
+- **File:** `CJM.md` (lines 32–50)
+- **Issue:** Alexey's mermaid diagram uses mixed English/Russian section names: `Триггер`, `Evaluation`, `Start`, `Use`, `Expansion`. All other personas use Russian-only.
+- **Impact:** Cosmetic professionalism issue only. Does not affect business logic or approval readiness.
+- **Fix:** Standardize to Russian: Триггер → Оценка → Пилот → Использование → Расширение.
 
-### HIGH (Must Resolve Before Approval)
+**M-07 (partially fixed): "Active client" definition still duplicated in MONETIZATION_STRATEGY.md**
+- **File:** `MONETIZATION_STRATEGY.md` §2 (line 23)
+- **Issue:** BR-007 now correctly references the canonical definition in BUSINESS_VISION.md. However, MONETIZATION_STRATEGY.md line 23 still carries the full definition text alongside line 74's reference to the canonical source. This creates a maintenance risk if the definition changes.
+- **Impact:** Low — definitions are semantically consistent. Risk is drift over time.
+- **Fix:** Replace the full definition at line 23 with a cross-reference: "См. каноническое определение в `BUSINESS_VISION.md` §7."
 
-**H-01: "Active client" definition missing from pricing model**
-- **Files:** `BUSINESS_VISION.md` §7 (lines 122–127), `MONETIZATION_STRATEGY.md` §2 (lines 10–15)
-- **Location:** Pricing tier definitions
-- **Issue:** Coach Start is "до 15 активных клиентов", Coach Pro is "15–50 клиентов", but "active client" is never defined. Is it a client with a session in 30 days? 60 days? Assigned a program? This is the core unit of the pricing ladder and is undefined.
-- **Impact:** Pricing is unenforceable without this definition. Competitors (TrueCoach, PT Distinction) define it explicitly.
-- **Fix:** Add a precise definition of "active client" to the pricing section and BR-007.
+### LOW
 
-**H-02: CAC assumptions appear unrealistically low**
-- **File:** `MONETIZATION_STRATEGY.md` §5 (lines 53–58)
-- **Location:** CAC hypothesis table
-- **Issue:** PLG/referral CAC of ₽1,500–2,500 for B2B SaaS in the Russian fitness market is extremely aggressive. Even with PLG motion, trainer acquisition typically requires content investment, partnership overhead, and sales assist. The implied LTV/CAC ratios (6.8–15x) are best-in-class SaaS numbers, not startup-year-1 numbers.
-- **Impact:** If actual CAC is 2–3x higher, the unit economics still work but the payback period extends significantly, affecting cash flow planning.
-- **Fix:** Add a sensitivity analysis showing LTV/CAC at 2x and 3x CAC assumptions. Flag current CAC as optimistic hypothesis requiring validation in first 90 days.
+**L-01 (unresolved): North Star Metric operational definition missing**
+- **File:** `BUSINESS_VISION.md` §4 (line 55)
+- **Issue:** "Еженедельная активность" is not operationally defined.
+- **Fix:** Add one-line definition (e.g., "logged workout, program view, or check-in within 7 days").
 
-**H-03: No absolute GTM budget stated**
-- **File:** `GTM_PLAN.md` §8 (lines 79–86)
-- **Location:** Budget allocation table
-- **Issue:** Budget is expressed only as percentages (30% content, 20% partnerships, etc.) with no absolute ruble amount. Without a total budget, the percentages are meaningless for planning.
-- **Impact:** Cannot determine if the GTM plan is adequately funded or if CAC targets are achievable at the implied spend level.
-- **Fix:** State total Year 1 GTM budget in rubles and show the ruble allocation per channel.
+**L-02 (unresolved): SWOT "Рост фитнес-рынка" lacks specific growth rate**
+- **File:** `BUSINESS_VISION.md` §6 (line 121)
+- **Fix:** Add CAGR figure with citation.
 
-**H-04: Trial-to-paid conversion target of 30% is aggressive**
-- **Files:** `BUSINESS_VISION.md` §4 (line 69), `GTM_PLAN.md` §6 (line 64), `MONETIZATION_STRATEGY.md` §9 (line 100)
-- **Location:** All three documents cite ≥30% trial-to-paid by month 12
-- **Issue:** Industry average for B2B SaaS trial-to-paid is 15–25%. A 30% target is top-decile and requires exceptional product-market fit and onboarding. No rationale is given for why FitBridge would outperform the category.
-- **Impact:** Revenue projections are inflated if conversion lands at industry average.
-- **Fix:** Add a scenario showing revenue at 20% and 25% conversion. Justify the 30% target with specific product differentiators or pilot data.
-
-**H-05: Revenue structure by Year 3 is not reconciled with account counts**
-- **File:** `BUSINESS_VISION.md` §7 (lines 150–154)
-- **Location:** Revenue structure breakdown
-- **Issue:** Claims 63% solo, 22% studio, 10% add-ons, 5% onboarding = 100% of ₽29.9M ARR. But with 1,000 paying accounts at blended ARPU ₽2,490, the solo trainer revenue (₽18.8M) implies an average solo ARPU that isn't reconciled with the Start/Pro tier split. The mix of Start vs Pro accounts is not stated.
-- **Impact:** Cannot validate whether the blended ARPU of ₽2,490 is achievable given the tier pricing.
-- **Fix:** Show the assumed mix of Start/Pro/Team accounts that produces the blended ARPU and revenue structure.
-
-### MEDIUM (Should Resolve, Not Blockers)
-
-**M-01: LTV calculation rounding error for Coach Start**
-- **File:** `MONETIZATION_STRATEGY.md` §5 (line 48)
-- **Location:** Line 48
-- **Issue:** ₽1,490 × 0.82 × 14 = ₽17,105.2, but document states ₽17,115. The ₽10 discrepancy is minor but indicates calculation was not verified.
-- **Fix:** Correct to ₽17,105 or show the rounding logic.
-
-**M-02: No baseline measurements for success metrics**
-- **Files:** `BR/BR-001` (line 54), `BR/BR-004` (line 53), `BR/BR-005` (lines 49–50), `BR/BR-006` (lines 66–68)
-- **Issue:** Metrics like "D30 retention ≥ 35%", "≥ 55% trainers create first program in 7 days" have no baseline. For a pre-launch product this is expected, but the documents should explicitly state "baseline: TBD — to be established in pilot."
-- **Fix:** Add "baseline: TBD" notation to all success metrics in BR files.
-
-**M-03: International competitor prices not converted to RUB for comparison**
-- **File:** `MONETIZATION_STRATEGY.md` §2 (lines 10–15)
-- **Location:** Competitor pricing table
-- **Issue:** TrueCoach ($26.34–$136.99), PT Distinction ($19.90–$89.90) are shown in USD without RUB equivalent. The reader cannot immediately assess the price gap. At ~₽90/USD, TrueCoach Start is ~₽2,370 vs FitBridge Start at ₽1,490 — a 37% discount. This should be explicit.
-- **Fix:** Add RUB equivalents at a stated exchange rate and show the percentage discount.
-
-**M-04: Risk Register and Business Vision risk matrix are duplicated with different structures**
-- **Files:** `BUSINESS_VISION.md` §11 (lines 219–232) vs `RISK_REGISTER.md` (lines 4–19)
-- **Issue:** The same risks appear in both documents with different formats. BUSINESS_VISION.md uses qualitative probability (Средняя/Высокая) while RISK_REGISTER.md uses numeric (1–5). This creates maintenance burden and potential drift.
-- **Fix:** Keep the detailed risk register as the single source of truth. Reference it from BUSINESS_VISION.md instead of duplicating.
-
-**M-05: No explicit MVP scope summary document**
-- **Files:** All BR files individually
-- **Issue:** Each BR file states MVP vs Phase 2 scope, but there is no consolidated MVP scope document. The Architect and Executor need a single source of truth for what ships in v1.
-- **Fix:** Create a consolidated MVP scope summary that aggregates all MVP items from BR-001 through BR-008.
-
-**M-06: CJM mermaid diagrams use inconsistent section naming**
-- **File:** `CJM.md` (lines 3–21, 32–50, 61–79, 90–108, 119–136)
-- **Issue:** Irina's CJM uses Russian section names (Осознание, Оценка, Активация...), Alexey's uses mixed English/Russian (Триггер, Evaluation, Start, Use, Expansion), Maria's uses Russian, Nikita's uses Russian, Olga's uses Russian. Inconsistency reduces professionalism.
-- **Fix:** Standardize all CJM section names to one language (preferably Russian for consistency with the rest of the package).
-
-### LOW (Nice to Have)
-
-**L-01: No explicit definition of North Star Metric calculation**
-- **File:** `BUSINESS_VISION.md` §4 (line 47)
-- **Issue:** "Количество активных клиент-тренерских связок с еженедельной активностью" — what constitutes "weekly activity"? A logged workout? A program view? A message?
-- **Fix:** Add operational definition of "weekly activity."
-
-**L-02: SWOT "Возможности" includes "Рост фитнес-рынка" without data**
-- **File:** `BUSINESS_VISION.md` §6 (line 113)
-- **Issue:** Claims market growth but the only source is TAdviser. Add a specific growth rate (e.g., "CAGR X% 2024–2027 per TAdviser").
-- **Fix:** Add the specific growth figure with citation.
-
-**L-03: BR system constraints lack justification**
+**L-03 (unresolved): BR system constraints lack derivation**
 - **Files:** All BR files, System Constraints tables
-- **Issue:** Latency targets (800ms–1500ms) and throughput (15–30 req/sec) are stated without rationale. Are these based on expected load, UX research, or arbitrary?
-- **Fix:** Add a note on how these numbers were derived or mark as "TBD — to be validated in load testing."
+- **Fix:** Add "TBD — to be validated in load testing" note.
+
+**L-04 (unresolved): No glossary document**
+- **Issue:** Terms like "active client," "activation," "PLG," "wedge," "design partner" appear across documents without a central glossary.
+- **Fix:** Consider a one-page glossary for cross-document consistency.
+
+**L-05 (unresolved): BR-002 "100% history retention" metric is absolute**
+- **File:** `BR/BR-002-access-control.md` (line 71)
+- **Issue:** A 100% target is unmeasurable pre-launch and implies zero tolerance for data loss.
+- **Fix:** Reframe as "zero reported data-loss incidents" or set a system SLO.
 
 ---
 
 ## 2. Open Questions / Approval Blockers
 
+**No approval blockers remain.**
+
 | # | Question | Blocking? | Related Finding |
 |---|----------|-----------|-----------------|
-| Q1 | What is the precise definition of "active client" for pricing tier enforcement? | **YES** | H-01 |
-| Q2 | Which is correct: 35 or 60 paying accounts by month 6? | **YES** | C-02 |
-| Q3 | What is the total Year 1 GTM budget in rubles? | **YES** | H-03 |
-| Q4 | What is the explicit TAM → SAM → SOM derivation with sources? | **YES** | C-03 |
-| Q5 | Are all BR documents approved or still draft? | **YES** | C-01 |
-| Q6 | What is the assumed Start/Pro/Team account mix that produces ₽2,490 blended ARPU? | No (but important) | H-05 |
-| Q7 | What exchange rate was used for competitor price comparison? | No | M-03 |
-| Q8 | Is there pilot data or customer interviews supporting the 30% trial-to-paid target? | No (but important) | H-04 |
-| Q9 | Where is the consolidated MVP scope document for Architect/Executor handoff? | No (but important) | M-05 |
+| Q1 | Will CJM naming be standardized before public distribution? | No | M-06 |
+| Q2 | Will the "active client" definition be deduplicated to a single source? | No | M-07 |
+| Q3 | When will the North Star Metric receive an operational definition? | No | L-01 |
 
 ---
 
-## 3. Strengths Noted
-
-The package demonstrates several areas of high quality:
-
-1. **Differentiated positioning:** The client-owned data model is clearly articulated and genuinely differentiates from both international coach apps and Russian club CRMs.
-2. **Realistic scope discipline:** BR-003 (multi-specialist) and BR-008 (team management) are correctly deferred to Phase 2, showing good scope control.
-3. **Comprehensive risk awareness:** The risk register covers technical, business, regulatory, and operational risks with owners, timelines, and early warning indicators.
-4. **Honest hypothesis labeling:** MONETIZATION_STRATEGY.md §10 explicitly separates confirmed facts from hypotheses — this is rare and valuable.
-5. **Persona-CJM alignment:** All 5 personas have matching CJMs with consistent pain points and opportunities.
-6. **Regulatory awareness:** 152-ФЗ compliance is properly identified with specific requirements (Article 10, data localization, consent flows).
-7. **GTM channel diversification:** The plan avoids over-reliance on any single channel, with a 35% cap on any one partner.
-
----
-
-## 4. Residual Risks (Even After Fixes)
+## 3. Residual Risks (Inherent to Pre-Launch Stage)
 
 | Risk | Description |
 |------|-------------|
 | Market validation gap | No evidence of 20+ problem interviews or pricing interviews being completed. The entire plan rests on unvalidated assumptions about trainer willingness to pay. |
-| Cash flow timing | Revenue projections are annual/quarterly but no monthly cash flow model is provided. Early-stage SaaS typically burns cash for 12–18 months before positive unit economics. |
-| Competitive response | Russian club CRM players (1С:Фитнес, FitBase, Mobifitness) could launch solo-trainer tiers with existing distribution. The moat (client-owned data) takes time to build. |
-| Regulatory uncertainty | Health data classification under 152-ФЗ Article 10 may require additional licensing or restrictions that could limit the product scope. |
+| Cash flow timing | No monthly cash flow model provided. Early-stage SaaS typically burns cash for 12–18 months before positive unit economics. |
+| Competitive response | Russian club CRM players (1С:Фитнес, FitBase, Mobifitness) could launch solo-trainer tiers with existing distribution. |
+| Regulatory uncertainty | Health data classification under 152-ФЗ Article 10 may require additional licensing or restrictions. |
+| CAC validation dependency | The ₽4,800 implied CAC is a model output, not a measured input. Actual CAC may differ significantly. |
 
 ---
 
-## 5. Verdict
+## 4. Verdict
 
-### **REJECT — with clear path to approval**
+### **APPROVE**
 
-The business documentation package is **well-structured, internally coherent in most areas, and demonstrates strong strategic thinking**. However, **5 critical issues** must be resolved before Gate 1 approval can be granted:
+**No approval blockers remain.** All CRITICAL and HIGH findings from Rounds 1 and 2 have been resolved:
 
-1. **C-01:** Resolve the draft/approved status contradiction in all BR files.
-2. **C-02:** Reconcile GTM phase targets with revenue plan account counts.
-3. **C-03:** Provide transparent TAM → SAM → SOM derivation.
-4. **H-01:** Define "active client" for pricing enforcement.
-5. **H-03:** State absolute GTM budget in rubles.
+- ✅ BR status contradiction fixed
+- ✅ GTM/revenue mismatch reconciled
+- ✅ TAM derivation transparently labeled as addressable revenue pool
+- ✅ "Active client" defined and canonicalized
+- ✅ CAC sensitivity analysis added
+- ✅ GTM budget stated in rubles with direct acquisition spend separated
+- ✅ Revenue structure reconciled with explicit account mix
+- ✅ Budget/CAC inconsistency resolved (₽4,800 implied CAC aligns with ₽5,000 control)
+- ✅ Circular TAM reference eliminated
+- ✅ Downside conversion scenario added
+- ✅ LTV rounding corrected
+- ✅ MVP scope summary created
 
-Additionally, **H-02** (CAC realism), **H-04** (conversion target justification), and **H-05** (revenue structure reconciliation) should be addressed to ensure the financial model is defensible.
+The package is **internally consistent, business-realistic, measurable, GTM-coherent, monetization-valid, scope-controlled, and approval-ready**.
 
-**Estimated effort to resolve:** 1–2 days of focused revision by the Product Owner.
-
-**Recommendation:** Return to Product Owner for revision. Re-submit for Gate 1 review after addressing all CRITICAL and HIGH findings.
+**Recommended next step:** Proceed to Architect handoff. The 5 remaining MEDIUM/LOW findings (CJM naming, definition deduplication, North Star definition, SWOT growth rate, system constraint derivation) can be addressed iteratively during the architecture phase without blocking progress.
