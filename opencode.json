@@ -17,6 +17,11 @@
       "url": "https://mcp.context7.com/mcp",
       "enabled": true,
       "timeout": 30000
+    },
+    "duckduckgo-search": {
+      "type": "local",
+      "command": ["npx", "-y", "duckduckgo-mcp-server"],
+      "enabled": true
     }
   }
 }

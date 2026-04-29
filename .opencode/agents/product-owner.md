@@ -1,7 +1,7 @@
 ---
 description: Analyzes business requirements, defines product strategy and vision
 mode: subagent
-model: opencode-go/glm-5.1
+model: openai/gpt-5.4
 temperature: 0.1
 steps: 25
 permission:
