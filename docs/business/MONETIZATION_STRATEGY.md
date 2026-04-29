@@ -9,15 +9,16 @@ FitBridge должен стоить дешевле тяжёлых междуна
 ### Сравнение ориентиров по рынку
 | Продукт | Публичный ориентир цены | Комментарий |
 |---|---:|---|
-| TrueCoach | $26.34 / $57.99 / $136.99 в мес | понятная лестница по числу активных клиентов |
-| PT Distinction | $19.90 / $59.90 / $89.90 в мес | сильный value stack и кастомизация |
-| CoachAccountable | от $20 до $4000 в мес | price scales with clients |
+| TrueCoach | $26.34 / $57.99 / $136.99 в мес | 5 / 20 / 50 активных клиентов и бесплатный клиентский доступ |
+| PT Distinction | $19.90 / $59.90 / $89.90 в мес | 3 / 25 / 50 клиентов, далее доплата за клиента |
+| CoachAccountable | от $20 до $4000 в мес | сильная тарификация по числу активных клиентов |
 | FitBridge | ₽1 490 / ₽2 990 / ₽5 990 | адаптация к русскоязычной покупательной способности |
 
 ### Почему такой price band
 1. Для solo-тренера цена должна быть ниже воспринимаемой ежемесячной потери от 1 ушедшего клиента.
 2. Для микро-студии цена должна быть ниже стоимости одного администраторского часа в день.
 3. Для апгрейда нужен заметный value gap: лимиты, роли, аналитика, automation.
+4. Публичные тарифы конкурентов подтверждают, что рынок принимает лестницу по числу активных клиентов; FitBridge использует тот же якорь, но с более консервативной локальной ценой и без ставки на enterprise-feature overload в MVP.
 
 ## 3. Revenue Streams
 1. Подписки тренеров.
@@ -26,7 +27,16 @@ FitBridge должен стоить дешевле тяжёлых междуна
 4. Партнёрские revenue-share программы с фитнес-школами и эквайрингом.
 5. Позже — сервисные onboarding-пакеты для small teams.
 
-## 4. LTV/CAC Model
+## 4. Сценарии роста выручки
+| Сценарий | Год 1 | Год 2 | Год 3 | ARR на конец 3-го года |
+|---|---:|---:|---:|---:|
+| Downside: платящие аккаунты | 150 | 450 | 750 | ₽22,4 млн |
+| Base-case: платящие аккаунты | 250 | 700 | 1 000 | ₽29,9 млн |
+| Upside: платящие аккаунты | 350 | 900 | 1 200 | ₽35,9 млн |
+
+Base-case опирается на GTM-план: trainer-first acquisition, client activation как обязательный шаг к ценности и умеренный team expansion без предположения, что reverse PLG сам по себе станет главным каналом.
+
+## 5. LTV/CAC Model
 ### Базовые допущения
 | Показатель | Start | Pro | Team |
 |---|---:|---:|---:|
@@ -49,7 +59,7 @@ FitBridge должен стоить дешевле тяжёлых междуна
 
 Цель: LTV/CAC не ниже 3,0 на solo-сегменте и 5,0 на team-сегменте.
 
-## 5. Free Tier Economics
+## 6. Free Tier Economics
 ### Роль free-слоя
 - снижает CAC;
 - формирует вирусный loop;
@@ -62,11 +72,11 @@ FitBridge должен стоить дешевле тяжёлых междуна
 
 ### Ограничители экономики
 - лимиты на heavy-media;
-- базовая аналитика только в free;
-- расширенные отчёты, automation и командная работа — платно;
+- клиентский дневник, история и базовый self-service просмотр прогресса остаются в free-слое;
+- тренерские отчёты, расширенная аналитика, automation и командная работа — платно;
 - self-service support и knowledge base.
 
-## 6. Churn Analysis and Retention Strategy
+## 7. Churn Analysis and Retention Strategy
 ### Причины churn тренера
 1. слабый time-to-value;
 2. клиенты не подключились;
@@ -79,23 +89,31 @@ FitBridge должен стоить дешевле тяжёлых междуна
 - quarterly ROI-summary;
 - playbooks для сегментов solo / online / studio.
 
-## 7. Expansion Revenue
+## 8. Expansion Revenue
 1. Team seats и роли.
 2. Advanced analytics.
 3. Брендированные отчёты и white-label mobile experience.
 4. Интеграции с оплатой и wearable-данными.
 5. Дополнительные роли специалистов.
 
-## 8. Основные метрики монетизации
-- conversion free coach → paid;
-- average clients per paid coach;
-- expansion MRR;
-- downgrade rate;
-- logo churn;
-- gross margin after support and infra.
+## 9. Основные метрики монетизации
+- conversion free/trial coach → paid: цель 25% к 6-му месяцу и 30% к 12-му;
+- average clients per paid coach: цель 8+ в год 1 и 12+ в год 2;
+- expansion MRR: ≥ 10% нового MRR к концу 2-го года;
+- downgrade rate: < 3% MRR в месяц;
+- logo churn: < 4% в месяц по solo и < 2% по team;
+- gross margin after support and infra: ≥ 75%;
+- failed payment rate: < 4% инвойсов в месяц;
+- 7-day payment recovery rate: ≥ 60%.
 
-## 9. Источники
+## 10. Что считаем подтверждённым, а что гипотезой
+- **Подтверждено публичными источниками:** рынок coaching software использует pricing ladders по числу активных клиентов; клиентский доступ часто бесплатный; upgrade/downgrade и trial без большого friction являются нормой категории.
+- **Остаётся гипотезой FitBridge:** готовность русскоязычного solo-тренера стабильно платить ₽2 990 за Pro без доказанного retention uplift; эта гипотеза требует 15–20 pricing interviews и A/B тестов с лимитами клиентов.
+- **Остаётся гипотезой FitBridge:** доля выручки от add-ons выше 10% к 3-му году; в base-case на это не опираемся.
+
+## 11. Источники
 1. TrueCoach Pricing — https://truecoach.co/pricing/
 2. PT Distinction Pricing — https://www.ptdistinction.com/pricing
 3. CoachAccountable Pricing — https://www.coachaccountable.com/pricing
 4. BUSINESS_VISION.md в текущем репозитории.
+5. GTM_PLAN.md в текущем репозитории.

@@ -13,12 +13,17 @@
 | R-08 | Слабый adoption ролей в small teams | 2 | 4 | 8 | Sales/Product | пилоты на 2–3 студиях | 6–9 мес | team feature usage < 30% | перенести expansion на позже |
 | R-09 | Сложная миграция из текущих инструментов | 4 | 4 | 16 | Product/CS | импорт CSV, шаблоны, migration help | 0–6 мес | drop-off на шаге импорта | concierge migration |
 | R-10 | Ошибочное позиционирование как medical product | 2 | 4 | 8 | Legal/Marketing | жёсткие product claims guidelines | 0–3 мес | вопросы партнёров о диагнозах | пересмотр messaging |
+| R-11 | Концентрация лидов в 1–2 партнёрах/школах | 3 | 4 | 12 | Growth | cap на долю одного партнёра, параллельный pipeline | 3–9 мес | >35% новых лидов из одного партнёра | перераспределить бюджет в owned channels |
+| R-12 | Referral abuse и фиктивные приглашения | 3 | 3 | 9 | Product/Growth | reward только после оплаты или 30 дней активности, anti-fraud review | 0–6 мес | anomalous invite-to-pay ratio | заморозка наград и ручная проверка |
+| R-13 | Сбои платежей и involuntary churn | 3 | 5 | 15 | Product/Finance | retries, dunning, уведомления об истечении карты/метода оплаты | 0–3 мес | failed payments > 4% | grace period и ручное восстановление |
+| R-14 | Слабая конверсия client-to-trainer invite | 3 | 4 | 12 | Growth/Product | не закладывать канал как основной, тестировать value prop отдельно | 3–9 мес | client invite acceptance < 20% | усилить trainer-led и partnership channels |
 
 ## 2. Критические риски
 Критическими считаются риски со score 15+:
 - R-01,
 - R-04,
-- R-09.
+- R-09,
+- R-13.
 
 ## 3. Процесс контроля
 1. Еженедельный просмотр leading indicators.
