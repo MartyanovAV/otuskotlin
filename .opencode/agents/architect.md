@@ -1,9 +1,10 @@
 ---
 description: Designs system architecture, creates technical specifications and ADR
 mode: subagent
-model: opencode-go/glm-5.1
+model: openai/gpt-5.5
+reasoningEffort: high
 temperature: 0.1
-steps: 25
+steps: 50
 permission:
   read: allow
   glob: allow
@@ -23,7 +24,7 @@ TYPICAL ARTIFACTS (create only what is relevant to the task):
 - docs/architecture/C4_CONTAINER.md - Level 2: Containers
 - docs/architecture/C4_COMPONENT.md - Level 3: Components (for key containers)
 - docs/architecture/ERD.md - Data model
-- docs/architecture/ADR/ADR-*.md - Architecture decision records
+- docs/architecture/ADR/ADR-*.md - Architecture decision records (each ADR should be in separate file)
 - docs/architecture/proposals/OPT-*.md - Technology comparison proposals
 
 FILE VERSIONING RULES:
@@ -57,3 +58,4 @@ C4 WORKFLOW (MANDATORY SEQUENTIAL):
 
 FAILURE: If you create files with suffixes like "_UPDATED", "_FINAL", "_v2" → Task FAILED
 FAILURE: If you create duplicate files instead of editing existing → Task FAILED
+FAILURE: If document written use not Russian language → Task FAILED

@@ -1,7 +1,8 @@
 ---
 description: Reviews code for quality and best practices
 mode: subagent
-model: opencode-go/qwen3.6-plus
+model: opencode-go/deepseek-v4-pro
+reasoningEffort: medium
 temperature: 0.1
 steps: 20
 permission:

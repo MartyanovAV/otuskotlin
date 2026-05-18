@@ -1,7 +1,7 @@
 ---
 description: Coordinates project flow through gates and agents
 mode: primary
-model: opencode-go/qwen3.6-plus
+model: opencode-go/minimax-m2.7
 temperature: 0.1
 steps: 30
 permission:

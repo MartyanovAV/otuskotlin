@@ -1,0 +1,44 @@
+@startuml Onion_Architecture
+title Архитектура FitBridge (Слоистая)
+
+skinparam roundcorner 15
+skinparam rectangle {
+    BackgroundColor<<Layer>> Transparent
+    BorderColor<<Layer>> Black
+    BorderStyle<<Layer>> dashed
+}
+
+rectangle "Domain DTO" as domainDTO #White
+
+rectangle "Внешний слой (Infrastructure / Outer Layer)" <<Layer>> {
+    
+    rectangle "Client API" as capi1 #White
+    rectangle "Client API..." as capi2 #White
+    rectangle "Coach API" as coapi1 #White
+    rectangle "Coach API..." as coapi2 #White
+    
+    rectangle "Слой Адаптеров (Adapters)" <<Layer>> {
+        
+        rectangle "Ktor " as ktor1 #White
+        rectangle "Ktor  " as ktor2 #White
+        rectangle "Keycloak" as keycloak #White
+        
+        rectangle "Слой Приложения (Application)" <<Layer>> {
+            
+            rectangle "Profile" as app1 #White
+            rectangle "Access" as app2 #White
+            rectangle "Diary" as app3 #White
+            rectangle "Program" as app4 #White
+            rectangle "Reports" as app5 #White
+            
+            rectangle "FitBridge Domain\n(Core)" as domain #LightGoldenRodYellow
+        }
+    }
+    
+    rectangle "Audit" as aud1 #White
+    rectangle "Audit DTO..." as aud2 #White
+    rectangle "Audit DTO" as aud3 #White
+    rectangle "DB DTO..." as db1 #White
+    rectangle "DB DTO" as db2 #White
+}
+@enduml
