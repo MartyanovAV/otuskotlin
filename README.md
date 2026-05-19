@@ -87,7 +87,7 @@ MVP фокусируется на критическом пути первого
 - [диаграмма компонентов](docs/03-architecture/c4/arch-C4-components.drawio.svg);
 - [упрощенная слоистая диаграмма](docs/03-architecture/c4/fitbridge-arch.drawio.svg).
 
-Индекс архитектурной документации: [docs/03-architecture/architecture-overview.md](docs/03-architecture/architecture-overview.md).
+Индекс архитектурной документации: [docs/03-architecture/03-architecture-overview.md](docs/03-architecture/03-architecture-overview.md).
 
 ### Архитектурные решения
 
