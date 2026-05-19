@@ -1,0 +1,43 @@
+# Минимальная версия инфраструктуры на базе:
+# OpenSearch, OpenSearch Dashboards, Fluent Bit, Envoy, Keycloak.
+
+# Адреса:
+# Приложение доступно по http://localhost:8080 через Envoy.
+# Панели мониторинга доступны по http://localhost:5601.
+# Управление пользователями доступно по http://localhost:8080/admin.
+services:
+  app:
+    extends:
+      file: app-base.yml
+      service: app-base
+    depends_on:
+      - fluent-bit
+      - envoy
+
+  fluent-bit:
+    extends:
+      file: fluent-bit-base.yml
+      service: fluent-bit-base
+
+  opensearch:
+    extends:
+      file: open-search-base.yml
+      service: opensearch-base
+
+  dashboards:
+    extends:
+      file: dashboards-base.yml
+      service: dashboards-base
+
+  envoy:
+    extends:
+      file: envoy-base.yml
+      service: envoy-base
+
+  keycloak:
+    extends:
+      file: keycloak-base.yml
+      service: keycloak-base
+
+volumes:
+  opensearch-data:

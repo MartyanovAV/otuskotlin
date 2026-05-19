@@ -1,0 +1,10 @@
+services:
+  envoy-base:
+    image: envoyproxy/envoy:v1.29.0
+    volumes:
+      - ./volumes/envoy/envoy.yaml:/etc/envoy/envoy.yaml
+    ports:
+      - "8080:8080"
+    depends_on:
+      keycloak:
+        condition: service_healthy

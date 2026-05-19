@@ -1,4 +1,4 @@
-# TARGET DIRECTORY: docs/business/
+# TARGET DIRECTORY: docs/01-business/
 # TARGET FILENAME: BUSINESS_VISION.md (single file, edit if exists)
 
 # {{product_name}} Business Vision Document

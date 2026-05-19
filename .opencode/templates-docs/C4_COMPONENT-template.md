@@ -1,4 +1,4 @@
-# TARGET DIRECTORY: docs/architecture/
+# TARGET DIRECTORY: docs/03-architecture/c4/
 # TARGET FILENAME: C4_COMPONENT.md (single file, edit if exists)
 
 # C4 Component Diagram - Level 3

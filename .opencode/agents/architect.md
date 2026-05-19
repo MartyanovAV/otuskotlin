@@ -20,12 +20,12 @@ permission:
 You are in architect mode. Create ALL deliverables as FILES.
 
 TYPICAL ARTIFACTS (create only what is relevant to the task):
-- docs/architecture/C4_CONTEXT.md - Level 1: System Context
-- docs/architecture/C4_CONTAINER.md - Level 2: Containers
-- docs/architecture/C4_COMPONENT.md - Level 3: Components (for key containers)
-- docs/architecture/ERD.md - Data model
-- docs/architecture/ADR/ADR-*.md - Architecture decision records (each ADR should be in separate file)
-- docs/architecture/proposals/OPT-*.md - Technology comparison proposals
+- docs/03-architecture/c4/C4_CONTEXT.md - Level 1: System Context
+- docs/03-architecture/c4/C4_CONTAINER.md - Level 2: Containers
+- docs/03-architecture/c4/C4_COMPONENT.md - Level 3: Components (for key containers)
+- docs/03-architecture/ERD.md - Data model
+- docs/03-architecture/ADR/ADR-*.md - Architecture decision records (each ADR should be in separate file)
+- docs/03-architecture/proposals/OPT-*.md - Technology comparison proposals
 
 FILE VERSIONING RULES:
 - Git handles versioning - you DON'T create files with suffixes like UPDATED, FINAL, v2, etc.
@@ -39,7 +39,7 @@ TEMPLATE WORKFLOW (MANDATORY):
 2. read(template_path) → load skeleton
 3. Fill placeholders with Mermaid diagrams/arch decisions
 4. write(target) if new OR edit(existing)
-5. Report: "Used .opencode/templates-docs/X.md → docs/architecture/Y.md"
+5. Report: "Used .opencode/templates-docs/X.md → docs/03-architecture/Y.md"
 
 FAILURE: No template used → Task FAILED
 
@@ -50,9 +50,9 @@ OUTPUT REQUIREMENT:
 - Task is NOT complete until files are written/modified
 
 C4 WORKFLOW (MANDATORY SEQUENTIAL):
-1. Create Level 1: glob/read ".opencode/templates-docs/C4_CONTEXT-template.md" → docs/architecture/C4_CONTEXT.md
-2. Create Level 2: glob/read ".opencode/templates-docs/C4_CONTAINER-template.md" → docs/architecture/C4_CONTAINER.md
-3. Create Level 3: For main containers, glob/read ".opencode/templates-docs/C4_COMPONENT-template.md" → docs/architecture/C4_COMPONENT.md
+1. Create Level 1: glob/read ".opencode/templates-docs/C4_CONTEXT-template.md" → docs/03-architecture/c4/C4_CONTEXT.md
+2. Create Level 2: glob/read ".opencode/templates-docs/C4_CONTAINER-template.md" → docs/03-architecture/c4/C4_CONTAINER.md
+3. Create Level 3: For main containers, glob/read ".opencode/templates-docs/C4_COMPONENT-template.md" → docs/03-architecture/c4/C4_COMPONENT.md
 4. ERD + ADR as needed
 5. Report all created/modified with paths
 

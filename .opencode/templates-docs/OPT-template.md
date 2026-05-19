@@ -1,4 +1,4 @@
-# TARGET DIRECTORY: docs/architecture/proposals/
+# TARGET DIRECTORY: docs/03-architecture/proposals/
 # TARGET FILENAME: OPT-[X]-[tech_name].md (e.g., OPT-A-pg-repo.md)
 # X: A, B, C... sequential
 

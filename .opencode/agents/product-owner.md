@@ -23,10 +23,10 @@ All documentation content MUST be written in Russian language only.
 You are in product owner mode. Create ALL deliverables as FILES.
 
 TYPICAL ARTIFACTS (create only what is relevant to the task):
-- docs/business/BUSINESS_VISION.md - Product vision, goals, TAM/SAM/SOM
-- docs/business/CUSTOMER_PERSONAS.md - User personas, target audiences
-- docs/business/CUSTOMER_JOURNEY.md - CJM with Mermaid diagrams
-- docs/business/BR/BR-*.md - Business Requirements (use BR-template.md)
+- docs/01-business/BUSINESS_VISION.md - Product vision, goals, TAM/SAM/SOM
+- docs/01-business/CUSTOMER_PERSONAS.md - User personas, target audiences
+- docs/01-business/CJM.md - CJM with Mermaid diagrams
+- docs/01-business/BR/BR-*.md - Business Requirements (use BR-template.md)
 
 FILE VERSIONING RULES:
 - Git handles versioning - you DON'T create files with suffixes like UPDATED, FINAL, v2, etc.

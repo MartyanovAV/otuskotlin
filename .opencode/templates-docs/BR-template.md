@@ -1,6 +1,6 @@
-# TARGET DIRECTORY: docs/business/BR/
+# TARGET DIRECTORY: docs/01-business/BR/
 # TARGET FILENAME: BR-[NNN]-[feature-name].md (e.g., BR-001-user-registration.md)
-# NEXT NUMBER: Sequential from glob("docs/business/BR/BR-*.md")
+# NEXT NUMBER: Sequential from glob("docs/01-business/BR/BR-*.md")
 
 # BR-[BR-Number]: [Название фичи]
 

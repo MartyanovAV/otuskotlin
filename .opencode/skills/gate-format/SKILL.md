@@ -34,8 +34,8 @@ description: Format and present Gate review packages (Gate 1 Strategy Sync, Gate
 - [Известные риски]
 
 ## Артефакты
-- [BR-NNN](../docs/business/BR-NNN.md)
-- [ADR-NNN](../docs/adr/ADR-NNN.md)
+- [BR-NNN](docs/01-business/BR/BR-NNN.md)
+- [ADR-NNN](docs/03-architecture/ADR/ADR-NNN.md)
 
 ---
 **Утверждаете план?**
@@ -98,8 +98,8 @@ Coverage: YY%
 - [Опционально: мелкие улучшения]
 
 ## Артефакты
-- [BR-NNN](../docs/business/BR-NNN.md)
-- [ADR-NNN](../docs/adr/ADR-NNN.md)
+- [BR-NNN](docs/01-business/BR/BR-NNN.md)
+- [ADR-NNN](docs/03-architecture/ADR/ADR-NNN.md)
 - [Код в feature/XXX](link)
 
 ---

@@ -16,7 +16,7 @@
 
 | Документ | Содержание |
 |---|---|
-| [adr/](./adr/) | Архитектурные решения ADR |
+| [ADR/](./ADR/) | Архитектурные решения ADR |
 
 ## 3. Диаграммы
 
@@ -98,10 +98,10 @@ FitBridge закрывает разрыв между таблицами, чат�
 
 ## 10. ADR
 
-- [ADR-001: Использовать Keycloak как Identity Server](./adr/adr-001-use-keycloak.md)
-- [ADR-002: Использовать POST Full API](./adr/adr-002-post-full-api.md)
-- [ADR-003: Использовать Ktor для backend](./adr/adr-003-ktor.md)
-- [ADR-004: Использовать Kotlin как основной язык](./adr/adr-004-kotlin.md)
+- [ADR-001: Использовать Keycloak как Identity Server](./ADR/ADR-001-use-keycloak.md)
+- [ADR-002: Использовать POST Full API](./ADR/ADR-002-post-full-api.md)
+- [ADR-003: Использовать Ktor для backend](./ADR/ADR-003-ktor.md)
+- [ADR-004: Использовать Kotlin как основной язык](./ADR/ADR-004-kotlin.md)
 
 ## 11. Открытые решения
 
