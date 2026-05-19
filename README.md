@@ -108,7 +108,8 @@ ADR:
 Инфраструктура запуска находится в [deploy](deploy):
 
 - [deploy/Dockerfile](deploy/Dockerfile) - образ приложения на базе Nginx для статического прототипа;
-- [deploy/docker-compose.yml](deploy/docker-compose.yml) - локальный запуск приложения и инфраструктуры;
+- [deploy/docker-compose.yml](deploy/docker-compose.yml) - состав локального стенда и конфигурация сервисов;
+- [deploy/README.md](deploy/README.md) - пошаговый запуск, проверка, логи и остановка стенда;
 - `app` - локальный контейнер приложения;
 - `keycloak` - авторизация и импорт realm `fit-bridge`;
 - `opensearch` - хранение и поиск логов;
@@ -120,7 +121,7 @@ ADR:
 
 ```bash
 cd deploy
-docker compose up --build
+docker compose up --build -d
 ```
 
 Полезные адреса после запуска:
