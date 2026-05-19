@@ -26,18 +26,17 @@
 
 ## MVP
 
-MVP фокусируется на критическом пути первого коммерческого релиза:
+MVP фокусируется на сокращённом критическом пути пилотного релиза:
 
-1. Тренер регистрируется и открывает рабочий кабинет.
+1. Тренер регистрируется и открывает минимальный кабинет.
 2. Тренер приглашает первого клиента по ссылке или коду.
 3. Клиент принимает приглашение, создает профиль и явно выдает доступ.
-4. Тренер создает или выбирает простую тренировочную программу.
-5. Тренер назначает программу клиенту.
-6. Клиент ведет дневник, вносит тренировки, замеры и отметки выполнения.
-7. Тренер видит базовый отчет по тренировкам, adherence и замерам.
-8. Тренер видит тариф, лимиты, статус оплаты и подсказки по апгрейду.
+4. Тренер создает простой индивидуальный план.
+5. Тренер назначает план клиенту.
+6. Клиент ведет дневник и отмечает выполнение.
+7. Тренер видит историю и статусы выполнения в карточке клиента.
 
-В MVP не входят полноценный multi-specialist production-сценарий, командный тариф студии, AI-генерация программ, маркетплейс специалистов и продвинутая медицинская аналитика.
+В MVP не входят полноценный multi-specialist production-сценарий, командный тариф студии, шаблоны программ, биллинг, отчётный модуль, замеры, AI-генерация программ, маркетплейс специалистов и продвинутая медицинская аналитика.
 
 Подробнее: [docs/01-business/MVP_SCOPE_SUMMARY.md](docs/01-business/MVP_SCOPE_SUMMARY.md).
 
@@ -45,17 +44,16 @@ MVP фокусируется на критическом пути первого
 
 Фронтенд-представление подготовлено как интерактивные HTML-прототипы:
 
-- [ux-prototype/index.html](ux-prototype/index.html) - мобильный клиентский сценарий дневника, прогресса и доступа.
-- [ux-prototype/desktop.html](ux-prototype/desktop.html) - desktop-сценарий тренера: клиенты, программы, отчеты и биллинг.
+- [ux-prototype/index.html](ux-prototype/index.html) - мобильный клиентский сценарий дневника, плана и доступа.
+- [ux-prototype/desktop.html](ux-prototype/desktop.html) - desktop-сценарий тренера: клиенты, планы и карточка клиента.
 
 Ключевые экраны MVP:
 
 - клиентский дневник тренировок;
 - экран текущих доступов клиента;
 - карточка клиента для тренера;
-- конструктор простой программы;
-- базовый отчет по прогрессу;
-- экран тарифа и лимитов.
+- создание простого плана;
+- история и статусы выполнения.
 
 ## Сущности и методы
 
@@ -65,15 +63,15 @@ MVP фокусируется на критическом пути первого
 |---|---|---|
 | `User` | Учетная запись в Keycloak, базовая идентификация пользователя | `registerClient`, `registerTrainer`, `login`, `logout`, `restoreAccess` |
 | `ClientProfile` | Профиль клиента и принадлежащая ему тренировочная история | `createClientProfile`, `updateClientProfile`, `getClientProfile`, `requestProfileDeletion` |
-| `TrainerProfile` | Профессиональный профиль тренера и рабочий кабинет | `createTrainerProfile`, `updateTrainerProfile`, `getTrainerDashboard` |
-| `AccessGrant` | Разрешение тренеру работать с данными клиента | `createInvite`, `acceptInvite`, `grantAccess`, `revokeAccess`, `listAccesses`, `checkAccess` |
+| `TrainerProfile` | Профессиональный профиль тренера и минимальный кабинет | `createTrainerProfile`, `updateTrainerProfile`, `listClients` |
+| `AccessGrant` | Разрешение одному активному тренеру работать с данными клиента | `createInvite`, `acceptInvite`, `grantAccess`, `revokeAccess`, `getCurrentAccess`, `checkAccess` |
 | `TrainingEntry` | Запись дневника клиента: тренировка, упражнения, комментарии | `createTrainingEntry`, `updateTrainingEntry`, `listTrainingEntries`, `linkEntryToProgram` |
-| `Measurement` | Замеры и показатели прогресса клиента | `createMeasurement`, `updateMeasurement`, `listMeasurements` |
-| `Program` | Тренировочная программа или шаблон тренера | `createProgram`, `updateProgram`, `createProgramTemplate`, `listPrograms` |
+| `Measurement` | Замеры и показатели прогресса клиента | Phase 2 |
+| `Program` | Простой тренировочный план тренера | `createProgram`, `updateProgram`, `listPrograms` |
 | `ProgramAssignment` | Назначение программы клиенту на период | `assignProgram`, `updateAssignment`, `markWorkoutDone`, `getCurrentProgram` |
-| `Report` | Базовая аналитика по тренировкам, adherence и замерам | `buildProgressReport`, `getAdherenceSummary`, `getMeasurementTrends` |
-| `Subscription` | Тариф, лимиты и статус оплаты тренера | `getSubscriptionStatus`, `checkLimits`, `upgradePlan`, `registerPaymentStatus` |
-| `Notification` | Уведомления о приглашениях, программах, лимитах и оплате | `sendInviteNotification`, `sendProgramNotification`, `sendBillingNotification` |
+| `Report` | Отдельный отчётный модуль | Phase 2 |
+| `Subscription` | Тариф, лимиты и статус оплаты тренера | Phase 2 |
+| `Notification` | Уведомления о приглашениях и статусах внутри продукта | `showInviteStatus`, `showProgramStatus` |
 | `AuditEvent` | Журнал действий с чувствительными данными | `writeAuditEvent`, `listAuditEventsForInvestigation` |
 
 Функциональные требования описаны в [docs/02-analysis/01-functional-requiremens.md](docs/02-analysis/01-functional-requiremens.md), нефункциональные - в [docs/02-analysis/02-nonfunctional-requirements.md](docs/02-analysis/02-nonfunctional-requirements.md).
