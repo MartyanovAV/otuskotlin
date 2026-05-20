@@ -36,6 +36,7 @@ Comparing candidates against [BR-NNN](../../01-business/BR/BR-NNN.md):
 - [Минус 1]
 
 **Risks:**
+
 | Risk | Likelihood | Impact | Mitigation |
 |------|------------|--------|------------|
 | ... | ... | ... | ... |

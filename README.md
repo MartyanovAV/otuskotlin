@@ -86,10 +86,10 @@ MVP фокусируется на сокращённом критическом 
 
 Архитектура описана через C4 и draw.io-диаграммы:
 
-- [диаграмма контекста](docs/03-architecture/c4/arch-C4-Context.drawio.svg);
-- [диаграмма контейнеров](docs/03-architecture/c4/arch-C4-containers.drawio.svg);
-- [диаграмма компонентов](docs/03-architecture/c4/arch-C4-components.drawio.svg);
-- [упрощенная слоистая диаграмма](docs/03-architecture/c4/fitbridge-arch.drawio.svg).
+- [диаграмма контекста](docs/03-architecture/c4/arch-C4-context.svg);
+- [диаграмма контейнеров](docs/03-architecture/c4/arch-C4-containers.svg);
+- [диаграмма компонентов](docs/03-architecture/c4/arch-C4-components.svg);
+- [упрощенная слоистая диаграмма](docs/03-architecture/c4/fitbridge-arch.svg).
 
 Индекс архитектурной документации: [docs/03-architecture/03-architecture-overview.md](docs/03-architecture/03-architecture-overview.md).
 

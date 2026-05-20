@@ -22,19 +22,19 @@
 
 ### 3.1. Диаграмма контекста C4
 
-![Диаграмма контекста C4 для FitBridge](./c4/arch-C4-Context.drawio.svg)
+![Диаграмма контекста C4 для FitBridge](c4/arch-C4-context.svg)
 
 ### 3.2. Диаграмма контейнеров C4
 
-![Диаграмма контейнеров C4 для FitBridge](./c4/arch-C4-containers.drawio.svg)
+![Диаграмма контейнеров C4 для FitBridge](c4/arch-C4-containers.svg)
 
 ### 3.3. Диаграмма компонентов C4
 
-![Диаграмма компонентов C4 для FitBridge](./c4/arch-C4-components.drawio.svg)
+![Диаграмма компонентов C4 для FitBridge](c4/arch-C4-components.svg)
 
 ### 3.4. Упрощенная слоистая диаграмма компонентов
 
-![Компонентная архитектура FitBridge](./c4/fitbridge-arch.drawio.svg)
+![Компонентная архитектура FitBridge](c4/fitbridge-arch.svg)
 
 ## 4. Контекст продукта
 
