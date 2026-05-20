@@ -65,8 +65,8 @@
 
 ## Метрики успеха
 
-- activation rate (1 клиент + 1 план в 7 дней) ≥ 55%;
-- invite acceptance rate клиента в 30 дней ≥ 45%;
+- activation rate тренеров: ≥ 55% достигают «один клиент + один план» в течение 7 дней;
+- invite acceptance rate: ≥ 45% клиентских приглашений принимаются в течение 30 дней;
 - median time-to-first-client ≤ 1 день.
 
 

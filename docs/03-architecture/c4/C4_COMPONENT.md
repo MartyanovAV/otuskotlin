@@ -70,8 +70,8 @@ C4Component
 | Audit Logging Component | Masked logs for access, profile, diary and program events | `RTM-013` |
 | Repository Ports | Persistence abstractions for PostgreSQL-backed repositories | `RTM-014` |
 
-## Implementation Notes
+## Заметки по реализации
 
-- The component diagram is intentionally target-state: it guides the future Ktor backend implementation.
-- `AuditEvent` as product API remains Phase 2; this component covers MVP infrastructure logging only.
-- Notification API is not modeled as a component for MVP; statuses are exposed via pull-model reads.
+- Диаграмма компонентов описывает целевое состояние и направляет будущую реализацию Ktor backend.
+- Продуктовый `AuditEvent` API остаётся Phase 2; MVP-компонент покрывает только infrastructure audit-oriented logging по ADR-006.
+- Отдельный `Notification` API/provider не моделируется как MVP-компонент; статусы доступны через pull-model read endpoints/dashboard.

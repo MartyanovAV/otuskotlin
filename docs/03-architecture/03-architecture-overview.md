@@ -21,6 +21,7 @@
 | [c4/C4_CONTAINER.md](./c4/C4_CONTAINER.md) | C4 Container: Web UI, Envoy, Ktor API, DB, Keycloak и observability |
 | [c4/C4_COMPONENT.md](./c4/C4_COMPONENT.md) | C4 Component: целевая структура FitBridge Backend API |
 | [ERD.md](./ERD.md) | ERD: целевая модель данных MVP, связи, ownership и ограничения |
+| [SECURITY_ARCHITECTURE.md](./SECURITY_ARCHITECTURE.md) | Security Architecture / Threat Model: Keycloak/OIDC/JWT, access decision, 152-ФЗ controls и угрозы MVP |
 
 ## 3. Диаграммы
 
@@ -43,6 +44,10 @@ C4-диаграммы ведутся в Mermaid markdown-файлах. SVG-эк�
 ### 3.5. ERD MVP
 
 [ERD MVP](./ERD.md) фиксирует целевые сущности `User`, `ClientProfile`, `TrainerProfile`, `AccessGrant`, `Invite`, `TrainingEntry`, `Program`, `ProgramAssignment`, их связи, ownership и ограничения.
+
+### 3.6. Security Architecture / Threat Model
+
+[Security Architecture / Threat Model](./SECURITY_ARCHITECTURE.md) фиксирует scope безопасности MVP, роли `CLIENT`/`TRAINER`/future `ADMIN`, границу Keycloak и FitBridge Backend, модель owner/grant/scope access decision, controls для 152-ФЗ и health-adjacent данных, а также таблицу угроз для token leakage, IDOR, revoke, invite token abuse, logging и OpenSearch exposure.
 
 ## 4. Контекст продукта
 
@@ -98,6 +103,7 @@ FitBridge закрывает разрыв между таблицами, чат�
 - Тренер не получает доступ к данным без активного разрешения клиента.
 - Операции с доступами, дневником и планами журналируются.
 - Данные о здоровье и замерах рассматриваются как чувствительные данные и не входят в обязательный MVP.
+- Детальная модель безопасности и угроз ведётся в [SECURITY_ARCHITECTURE.md](./SECURITY_ARCHITECTURE.md).
 
 ## 9. Нефункциональные ориентиры
 

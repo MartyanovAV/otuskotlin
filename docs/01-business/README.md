@@ -10,6 +10,7 @@
 | [MONETIZATION_STRATEGY.md](MONETIZATION_STRATEGY.md) | Модель монетизации, тарифы, unit-экономика |
 | [GTM_PLAN.md](GTM_PLAN.md) | Go-To-Market план: каналы, стратегия запуска, метрики |
 | [MVP_SCOPE_SUMMARY.md](MVP_SCOPE_SUMMARY.md) | Границы и состав MVP |
+| [PRODUCT_ROADMAP.md](PRODUCT_ROADMAP.md) | Дорожная карта продукта: MVP / Gate 1, Phase 2, Phase 3 |
 | [RISK_REGISTER.md](RISK_REGISTER.md) | Реестр рисков с вероятностью, влиянием и планами митигации |
 | [GLOSSARY.md](GLOSSARY.md) | Глоссарий ключевых бизнес-терминов |
 | [BR/](BR/) | Бизнес-требования (Business Requirements) |
@@ -26,6 +27,7 @@
 | [BR-006-trainer-onboarding.md](BR/BR-006-trainer-onboarding.md) | Онбординг тренера |
 | [BR-007-billing-subscriptions.md](BR/BR-007-billing-subscriptions.md) | Биллинг и подписки |
 | [BR-008-team-management.md](BR/BR-008-team-management.md) | Управление командой (студия) |
+| [BR-009-consent-privacy-deletion.md](BR/BR-009-consent-privacy-deletion.md) | Согласия, приватность и удаление профиля |
 
 ## Как создать новый BR
 

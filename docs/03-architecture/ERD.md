@@ -184,9 +184,16 @@ erDiagram
 | Area | Notes |
 |---|---|
 | Health-adjacent fields | `heightCm`, `goals`, `intensity`, `mood`, `notes`, упражнения/вес/RPE требуют отдельной классификации данных |
-| Audit | В MVP расширенный `AuditEvent` API не моделируется отдельной таблицей; критичные события логируются инфраструктурно |
+| Audit | В MVP `AuditEvent` API и отдельная audit entity/table не моделируются; критичные события логируются инфраструктурно через ADR-006 |
 | Logs | Персональные и health-adjacent данные не должны попадать в логи без маскирования |
 | Deletion | Полноценная модель consent/privacy/deletion требует отдельного `BR-009-consent-privacy-deletion.md` |
+
+## Scope аудита и уведомлений MVP
+
+| Контур | MVP модель данных | Phase 2 |
+|---|---|---|
+| Аудит | Нет таблицы `AuditEvent`; обязательные события пишутся как masked structured logs: accept/decline invite, grant/revoke access, profile delete/archive request, diary create/update/delete, program assign/update/cancel, complete workout, access denied for scope | Отдельная audit entity/API, продуктовый audit trail, расширенная retention/legal модель |
+| Уведомления | Нет таблицы `Notification`; UI читает статусы приглашений, доступов, назначений и выполнения через существующие read endpoints/dashboard | Отдельный `Notification` API/provider, push/email/in-app notification center и lifecycle communications |
 
 ## Phase 2 / Out Of Scope Entities
 
@@ -195,8 +202,8 @@ erDiagram
 | `Measurement` | Замеры и графики прогресса вынесены после MVP |
 | `Report` | Отдельный отчётный модуль и экспорт отчётов не входят в MVP |
 | `Subscription` | Встроенный биллинг, лимиты и автоплатежи не входят в MVP |
-| `Notification` | Отдельный Push/Email notification API не входит в MVP; используется pull-model UI |
-| `AuditEvent` | Расширенный продуктовый audit API перенесён в Phase 2 |
+| `Notification` | Отдельный push/email `Notification` API/provider не входит в MVP; используется pull-model UI |
+| `AuditEvent` | Продуктовый audit API и отдельная audit entity перенесены в Phase 2; MVP покрыт infrastructure audit-oriented logging |
 | `Team`, `Studio`, `SpecialistRole` | Командный и multi-specialist production-сценарии вынесены за MVP |
 
 ## Open Decisions

@@ -38,5 +38,10 @@
    - Тренерский dashboard не показывает демо-данные как реальные клиентские данные.
 
 8. **[MVP] Инфраструктурный Аудит**:
-   - Все операции выдачи и отзыва доступа логируются на уровне инфраструктуры.
-   - Персональные данные маскируются.
+   - MVP-аудит — это infrastructure audit-oriented logging через structured logs, Fluent Bit и OpenSearch согласно `ADR-006`; продуктовый `AuditEvent` API и отдельная audit entity не входят в MVP.
+   - Обязательные события MVP: принятие/отклонение приглашения, выдача доступа, отзыв доступа, запрос удаления/архивации профиля, создание/изменение/удаление записи дневника, назначение/изменение/отмена программы, отметка выполнения тренировки, отказ доступа из-за scope.
+   - В audit-oriented logs фиксируются internal ids, action, result, requestId и время события; персональные данные, health-adjacent payload и raw invite token маскируются или не логируются.
+
+9. **[MVP] Pull-model статусы вместо Notification API**:
+   - Статусы приглашений, доступов, назначений и выполнения пользователь видит через существующие read endpoints и `dashboard.getTrainerSummary`.
+   - Отдельный `Notification` API, push/email provider и lifecycle communications не входят в MVP и относятся к Phase 2.

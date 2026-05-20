@@ -80,7 +80,7 @@ MVP фокусируется на сокращённом критическом 
 | `Notification` | Уведомления о приглашениях и статусах внутри продукта | Phase 2 |
 | `AuditEvent` | Журнал действий с чувствительными данными | Phase 2 |
 
-Функциональные требования описаны в [docs/02-analysis/01-functional-requiremens.md](docs/02-analysis/01-functional-requiremens.md), нефункциональные - в [docs/02-analysis/02-nonfunctional-requirements.md](docs/02-analysis/02-nonfunctional-requirements.md). Матрица трассировки BR → MVP → FR/NFR → API → AC → тесты находится в [docs/02-analysis/REQUIREMENTS_TRACEABILITY_MATRIX.md](docs/02-analysis/REQUIREMENTS_TRACEABILITY_MATRIX.md).
+Функциональные требования описаны в [docs/02-analysis/01-functional-requirements.md](docs/02-analysis/01-functional-requirements.md), нефункциональные - в [docs/02-analysis/02-nonfunctional-requirements.md](docs/02-analysis/02-nonfunctional-requirements.md). Матрица трассировки BR → MVP → FR/NFR → API → AC → тесты находится в [docs/02-analysis/REQUIREMENTS_TRACEABILITY_MATRIX.md](docs/02-analysis/REQUIREMENTS_TRACEABILITY_MATRIX.md), а классификация данных, согласия, доступы, логирование и заметки по хранению/удалению — в [docs/02-analysis/DATA_CLASSIFICATION_MATRIX.md](docs/02-analysis/DATA_CLASSIFICATION_MATRIX.md).
 
 ## Архитектурное видение
 
@@ -89,7 +89,8 @@ MVP фокусируется на сокращённом критическом 
 - [C4 Context](docs/03-architecture/c4/C4_CONTEXT.md);
 - [C4 Container](docs/03-architecture/c4/C4_CONTAINER.md);
 - [C4 Component](docs/03-architecture/c4/C4_COMPONENT.md);
-- [ERD MVP](docs/03-architecture/ERD.md).
+- [ERD MVP](docs/03-architecture/ERD.md);
+- [Security Architecture / Threat Model](docs/03-architecture/SECURITY_ARCHITECTURE.md).
 
 Индекс архитектурной документации: [docs/03-architecture/03-architecture-overview.md](docs/03-architecture/03-architecture-overview.md).
 

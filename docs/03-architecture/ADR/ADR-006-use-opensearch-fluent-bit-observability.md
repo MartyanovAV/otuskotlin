@@ -42,6 +42,28 @@ MVP FitBridge должен быть проверяемым в пилоте: ко
 
 Расширенный продуктовый `AuditEvent` API не входит в MVP. Для MVP audit-oriented события фиксируются как masked structured logs без раскрытия лишних персональных и health-adjacent данных.
 
+## Scope аудита MVP
+
+MVP-аудит в рамках этого ADR — это infrastructure audit-oriented logging, а не продуктовая audit-сущность. Обязательные события MVP:
+
+| Event action | Когда логируется | Минимальный результат |
+|---|---|---|
+| `access.acceptInvite` | Клиент принимает приглашение | `SUCCESS` или ожидаемый `ERROR` |
+| `access.declineInvite` | Клиент отклоняет приглашение | `SUCCESS` или ожидаемый `ERROR` |
+| `access.grant` | Доступ тренеру выдан или активирован | `SUCCESS` |
+| `access.revoke` | Клиент отзывает доступ тренера | `SUCCESS` |
+| `profile.deleteOrArchiveRequested` | Пользователь запрашивает удаление или архивацию профиля | `SUCCESS` или `VALIDATION_ERROR` |
+| `diary.createEntry` | Создана запись дневника | `SUCCESS` |
+| `diary.updateEntry` | Изменена запись дневника | `SUCCESS` или `VALIDATION_ERROR` |
+| `diary.deleteEntry` | Запись дневника удалена/soft-deleted | `SUCCESS` |
+| `program.assign` | Программа назначена клиенту | `SUCCESS` |
+| `program.updateAssignment` | Назначение программы изменено | `SUCCESS` или `VALIDATION_ERROR` |
+| `program.cancelAssignment` | Назначение программы отменено | `SUCCESS` |
+| `program.completeWorkout` | Клиент отметил тренировку выполненной | `SUCCESS` |
+| `access.validateScope` | Проверка scope завершилась отказом | `DENIED` |
+
+Phase 2 может добавить продуктовый `AuditEvent` API, отдельную audit entity/table, пользовательский или админский просмотр audit trail и расширенную retention/legal-модель. Эти элементы не входят в MVP.
+
 ## Rationale
 
 - Решение уже частично реализовано в `deploy/docker-compose.yml` и `deploy/volumes/fluent-bit-etc/fluent-bit.conf`, поэтому не требует смены инфраструктурного направления.
@@ -105,9 +127,9 @@ MVP FitBridge должен быть проверяемым в пилоте: ко
 | Нет requestId, сложно связывать события одного запроса | Medium | Medium | Добавить requestId middleware в Ktor backend первым observability task |
 | Local credentials попадут в production | Low | High | Разделить local secrets и production secret management до production deploy |
 
-## Implementation Notes
+## Заметки по реализации
 
-- Для MVP backend должен логировать critical events из `RTM-013`: выдача/отзыв доступа, принятие/отклонение приглашения, изменение дневника, назначение и выполнение программы.
+- Для MVP backend должен логировать critical events из `RTM-013`: принятие/отклонение приглашения, выдача/отзыв доступа, запрос удаления/архивации профиля, создание/изменение/удаление дневника, назначение/изменение/отмена программы, выполнение тренировки и отказ доступа из-за scope.
 - Fluent Bit текущего локального стенда уже настроен на `Logstash_Format On` и daily index prefix `app-logs`.
 - Performance targets из NFR должны попадать в логи через `durationMs`; отдельная metrics-система может быть добавлена позже.
 - Alerting не входит в текущий local MVP, но нарушение порогов latency/error rate должно быть возможно найти через OpenSearch queries.
