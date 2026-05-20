@@ -7,7 +7,7 @@
 | R-02 | Высокая стоимость free-слоя | 3 | 4 | 12 | Product | лимиты на heavy-usage | 3–6 мес | infra cost/user растёт > план | урезание free feature-set |
 | R-03 | Низкий retention клиентов без тренера | 3 | 3 | 9 | Product | reminders, streaks, progress loops | 3–6 мес | D30 retention < 20% | перенос фокуса на trainer-led activation |
 | R-04 | Недоверие к персональным данным | 4 | 5 | 20 | CEO/Legal | privacy-by-design, consent flows, audit logs | 0–3 мес | вопросы в саппорт по privacy > норма | публичный trust-center и юр. аудит |
-| R-05 | Нарушение требований 152-ФЗ | 2 | 5 | 10 | Legal | legal review, локализация данных, DPIA-подход | 0–3 мес и постоянно | замечания юриста/партнёров | временное ограничение чувствительных данных |
+| R-05 | Нарушение требований 152-ФЗ | 2 | 5 | 10 | Legal, Architect | legal review, локализация данных, DPIA-подход, шифрование БД, аудит-логи доступа | 0–3 мес и постоянно | замечания юриста/партнёров | временное ограничение чувствительных данных |
 | R-06 | Атака конкурентов в нишу solo-тренеров | 3 | 4 | 12 | CEO/Growth | усилить client-owned data positioning | 6–12 мес | рост copycat messaging | ускорить партнёрства и бренд |
 | R-07 | Перегрузка roadmap | 4 | 3 | 12 | Product | stage-gate на фичи | постоянно | рост WIP и delay | freeze неприоритетных фич |
 | R-08 | Слабый adoption ролей в small teams | 2 | 4 | 8 | Sales/Product | пилоты на 2–3 студиях | 6–9 мес | team feature usage < 30% | перенести expansion на позже |
