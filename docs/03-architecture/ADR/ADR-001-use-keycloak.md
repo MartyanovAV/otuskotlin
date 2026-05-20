@@ -9,11 +9,14 @@ FitBridge обрабатывает персональные и чувствит�
 
 ## Comparison
 
-| Criteria | Option A | Option B |
+| Criteria | Keycloak | Собственный Identity Server |
 |----------|:---:|:---:|
-| **Scenario** | ✅ | ⚠️ |
-| Latency | Nms | Nms |
-| Throughput | N | N |
+| OIDC/OAuth2 support | ✅ | ⚠️ |
+| Безопасная выдача JWT | ✅ | ⚠️ |
+| Ролевая модель client/trainer | ✅ | ✅ |
+| Стоимость реализации для MVP | ✅ | ❌ |
+| Контроль доменной авторизации FitBridge | ✅ | ✅ |
+| Operational complexity | ⚠️ | ❌ |
 
 ## Decision
 

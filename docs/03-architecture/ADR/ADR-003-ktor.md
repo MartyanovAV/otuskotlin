@@ -9,11 +9,14 @@ FitBridge строится как Kotlin/JVM backend с POST Full API, инте�
 
 ## Comparison
 
-| Criteria | Option A | Option B |
+| Criteria | Ktor | Spring Boot |
 |----------|:---:|:---:|
-| **Scenario** | ✅ | ⚠️ |
-| Latency | Nms | Nms |
-| Throughput | N | N |
+| Kotlin-first API design | ✅ | ⚠️ |
+| Легковесный runtime для MVP | ✅ | ⚠️ |
+| Явная настройка routing/middleware | ✅ | ⚠️ |
+| Богатые enterprise conventions из коробки | ⚠️ | ✅ |
+| Быстрое подключение только нужных модулей | ✅ | ⚠️ |
+| Fit for POST Full API | ✅ | ✅ |
 
 ## Decision
 

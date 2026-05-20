@@ -1,7 +1,7 @@
 ---
 description: Designs system architecture, creates technical specifications and ADR
 mode: subagent
-model: google/gemini-3.1-pro-preview
+model: openai/gpt-5.5
 reasoningEffort: high
 temperature: 0.1
 steps: 50

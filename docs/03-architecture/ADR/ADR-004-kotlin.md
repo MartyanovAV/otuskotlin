@@ -9,11 +9,14 @@
 
 ## Comparison
 
-| Criteria | Option A | Option B |
+| Criteria | Kotlin | Java |
 |----------|:---:|:---:|
-| **Scenario** | ✅ | ⚠️ |
-| Latency | Nms | Nms |
-| Throughput | N | N |
+| Идиоматичная работа с Ktor | ✅ | ⚠️ |
+| Выразительная доменная модель | ✅ | ⚠️ |
+| Null-safety на уровне языка | ✅ | ⚠️ |
+| JVM ecosystem compatibility | ✅ | ✅ |
+| Требования к единому стилю команды | ⚠️ | ✅ |
+| Fit for existing Gradle/Kotlin setup | ✅ | ⚠️ |
 
 ## Decision
 

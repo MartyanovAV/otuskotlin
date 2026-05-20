@@ -80,16 +80,16 @@ MVP фокусируется на сокращённом критическом 
 | `Notification` | Уведомления о приглашениях и статусах внутри продукта | Phase 2 |
 | `AuditEvent` | Журнал действий с чувствительными данными | Phase 2 |
 
-Функциональные требования описаны в [docs/02-analysis/01-functional-requiremens.md](docs/02-analysis/01-functional-requiremens.md), нефункциональные - в [docs/02-analysis/02-nonfunctional-requirements.md](docs/02-analysis/02-nonfunctional-requirements.md).
+Функциональные требования описаны в [docs/02-analysis/01-functional-requiremens.md](docs/02-analysis/01-functional-requiremens.md), нефункциональные - в [docs/02-analysis/02-nonfunctional-requirements.md](docs/02-analysis/02-nonfunctional-requirements.md). Матрица трассировки BR → MVP → FR/NFR → API → AC → тесты находится в [docs/02-analysis/REQUIREMENTS_TRACEABILITY_MATRIX.md](docs/02-analysis/REQUIREMENTS_TRACEABILITY_MATRIX.md).
 
 ## Архитектурное видение
 
-Архитектура описана через C4 и draw.io-диаграммы:
+Архитектура описана через C4-диаграммы Mermaid:
 
-- [диаграмма контекста](docs/03-architecture/c4/arch-C4-context.svg);
-- [диаграмма контейнеров](docs/03-architecture/c4/arch-C4-containers.svg);
-- [диаграмма компонентов](docs/03-architecture/c4/arch-C4-components.svg);
-- [упрощенная слоистая диаграмма](docs/03-architecture/c4/fitbridge-arch.svg).
+- [C4 Context](docs/03-architecture/c4/C4_CONTEXT.md);
+- [C4 Container](docs/03-architecture/c4/C4_CONTAINER.md);
+- [C4 Component](docs/03-architecture/c4/C4_COMPONENT.md);
+- [ERD MVP](docs/03-architecture/ERD.md).
 
 Индекс архитектурной документации: [docs/03-architecture/03-architecture-overview.md](docs/03-architecture/03-architecture-overview.md).
 
@@ -99,6 +99,7 @@ MVP фокусируется на сокращённом критическом 
 - Ktor как backend framework.
 - Keycloak как внешний Identity Server.
 - POST Full API для бизнес-операций.
+- PostgreSQL как основное хранилище приложения.
 - OpenSearch и OpenSearch Dashboards для мониторинга и анализа логов.
 - Fluent Bit для доставки логов приложения в OpenSearch.
 
@@ -108,6 +109,8 @@ ADR:
 - [ADR-002: использовать POST Full API](docs/03-architecture/ADR/ADR-002-post-full-api.md)
 - [ADR-003: использовать Ktor](docs/03-architecture/ADR/ADR-003-ktor.md)
 - [ADR-004: использовать Kotlin](docs/03-architecture/ADR/ADR-004-kotlin.md)
+- [ADR-005: использовать PostgreSQL](docs/03-architecture/ADR/ADR-005-use-postgresql.md)
+- [ADR-006: использовать OpenSearch, OpenSearch Dashboards и Fluent Bit для observability](docs/03-architecture/ADR/ADR-006-use-opensearch-fluent-bit-observability.md)
 
 ## Инфраструктура
 

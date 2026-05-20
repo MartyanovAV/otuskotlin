@@ -17,24 +17,32 @@
 | Документ | Содержание |
 |---|---|
 | [ADR/](./ADR/) | Архитектурные решения ADR |
+| [c4/C4_CONTEXT.md](./c4/C4_CONTEXT.md) | C4 Context: пользователи, FitBridge и внешние системы |
+| [c4/C4_CONTAINER.md](./c4/C4_CONTAINER.md) | C4 Container: Web UI, Envoy, Ktor API, DB, Keycloak и observability |
+| [c4/C4_COMPONENT.md](./c4/C4_COMPONENT.md) | C4 Component: целевая структура FitBridge Backend API |
+| [ERD.md](./ERD.md) | ERD: целевая модель данных MVP, связи, ownership и ограничения |
 
 ## 3. Диаграммы
 
 ### 3.1. Диаграмма контекста C4
 
-![Диаграмма контекста C4 для FitBridge](c4/arch-C4-context.svg)
+[C4 Context diagram](./c4/C4_CONTEXT.md) описывает FitBridge как систему в окружении клиентов, тренеров, Keycloak, OpenSearch и ручной проверки платёжной гипотезы.
 
 ### 3.2. Диаграмма контейнеров C4
 
-![Диаграмма контейнеров C4 для FitBridge](c4/arch-C4-containers.svg)
+[C4 Container diagram](./c4/C4_CONTAINER.md) описывает контейнеры target-state MVP и текущий transition-state локального стенда.
 
 ### 3.3. Диаграмма компонентов C4
 
-![Диаграмма компонентов C4 для FitBridge](c4/arch-C4-components.svg)
+[C4 Component diagram](./c4/C4_COMPONENT.md) описывает целевые компоненты Ktor backend API: Profile, Access, Diary, Program, Progress, Auth и Audit Logging.
 
-### 3.4. Упрощенная слоистая диаграмма компонентов
+### 3.4. Статус диаграмм
 
-![Компонентная архитектура FitBridge](c4/fitbridge-arch.svg)
+C4-диаграммы ведутся в Mermaid markdown-файлах. SVG-экспорты могут быть добавлены позднее как производные артефакты, но источником правды являются `.md` файлы в `docs/03-architecture/c4/`.
+
+### 3.5. ERD MVP
+
+[ERD MVP](./ERD.md) фиксирует целевые сущности `User`, `ClientProfile`, `TrainerProfile`, `AccessGrant`, `Invite`, `TrainingEntry`, `Program`, `ProgramAssignment`, их связи, ownership и ограничения.
 
 ## 4. Контекст продукта
 
@@ -59,7 +67,7 @@ FitBridge закрывает разрыв между таблицами, чат�
 - **POST Full API:** все бизнес-операции проходят через `POST` с JSON-контрактами.
 - **Identity externalization:** вход и токены делегируются Keycloak.
 - **Модульность домена:** дневник, доступы, планы и история выполнения разделены внутри backend.
-- **TBD без преждевременного выбора:** UI-фреймворк, СУБД, платформа деплоя и провайдеры остаются открытыми решениями.
+- **TBD без преждевременного выбора:** UI-фреймворк, платформа деплоя и notification-провайдеры остаются открытыми решениями.
 
 ## 6. Технологический контур
 
@@ -70,7 +78,8 @@ FitBridge закрывает разрыв между таблицами, чат�
 | Identity Server | Keycloak |
 | API style | POST Full, HTTPS/JSON |
 | UI | Web UI, конкретный фреймворк TBD |
-| Хранилище приложения | DBMS TBD |
+| Хранилище приложения | PostgreSQL |
+| Observability | OpenSearch, OpenSearch Dashboards, Fluent Bit |
 | Уведомления | MVP: статус приглашения в продукте; внешние провайдеры TBD |
 
 ## 7. Доменные контуры MVP
@@ -106,11 +115,13 @@ FitBridge закрывает разрыв между таблицами, чат�
 - [ADR-002: Использовать POST Full API](./ADR/ADR-002-post-full-api.md)
 - [ADR-003: Использовать Ktor для backend](./ADR/ADR-003-ktor.md)
 - [ADR-004: Использовать Kotlin как основной язык](./ADR/ADR-004-kotlin.md)
+- [ADR-005: Использовать PostgreSQL как основное хранилище приложения](./ADR/ADR-005-use-postgresql.md)
+- [ADR-006: Использовать OpenSearch, OpenSearch Dashboards и Fluent Bit для observability MVP](./ADR/ADR-006-use-opensearch-fluent-bit-observability.md)
 
 ## 11. Открытые решения
 
 - Выбор UI-фреймворка.
-- Выбор СУБД и схемы хранения аудита.
+- Детализация схемы хранения и retention для инфраструктурного аудита.
 - Выбор платформы деплоя.
 - Выбор notification-провайдера.
 - Детализация API-контрактов POST Full.

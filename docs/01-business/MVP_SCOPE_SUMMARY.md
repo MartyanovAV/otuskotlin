@@ -52,7 +52,7 @@
 
 | Constraint | Value | Notes |
 |-----------|-------|-------|
-| Scope discipline | MVP pilot only | В MVP входят только сценарии критического пути тренер-клиент |
+| Scope discipline | MVP pilot only | В MVP входят два критических пути: Trainer-led и Solo-client (PLG) |
 | Commercial readiness | Deferred | Биллинг и тарифные ограничения не блокируют Gate 1 |
 | Approval state | Approved | Документ утверждён; пересмотр при изменении scope MVP |
 
