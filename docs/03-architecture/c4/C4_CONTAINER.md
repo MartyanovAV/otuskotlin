@@ -1,6 +1,6 @@
-# C4 Container - FitBridge
+# C4 Container / Контейнеры - FitBridge
 
-Диаграмма показывает целевой контейнерный состав MVP FitBridge и явно разделяет application boundary, platform/observability boundary и операционное сопровождение пилота. OpenSearch используется FitBridge для логов, но не является частью приложения FitBridge. In-product `ADMIN`/support UI и support domain API не входят в MVP.
+Диаграмма показывает контейнеры MVP и границы ответственности. Политики безопасности, API-контракты и ERD описаны в канонических документах: [Security](../SECURITY_ARCHITECTURE.md), [API](../02-api.md), [ERD](../ERD.md).
 
 ```mermaid
 C4Container
@@ -13,18 +13,18 @@ C4Container
   System_Boundary(fitbridge, "FitBridge application boundary / граница приложения") {
     Container(webUi, "Web UI", "UI framework TBD", "Клиентский и тренерский интерфейс")
     Container(envoy, "Envoy Gateway", "Envoy", "Входной proxy, маршрутизация и JWT validation для всех MVP /v1/* endpoints")
-    Container(api, "FitBridge Backend API", "Kotlin/JVM, Ktor", "POST Full API, backend JWT/user-context validation и доменная авторизация")
+    Container(api, "FitBridge Backend API", "Kotlin/JVM, Ktor", "POST Full API, backend JWT/user-context validation, domain policy")
     ContainerDb(appDb, "Application DB", "PostgreSQL", "Профили, доступы, дневник, программы, назначения")
   }
 
-  Boundary(observability, "Platform / Observability boundary / граница платформы", "Platform") {
+  Boundary(observability, "Platform / Observability boundary", "Platform") {
     Container_Ext(logAgent, "Fluent Bit", "Fluent Bit", "Сбор и доставка логов контейнеров вне application boundary")
-    Container_Ext(logStore, "OpenSearch", "OpenSearch", "Внешнее хранилище технических логов и audit-oriented событий")
+    Container_Ext(logStore, "OpenSearch", "OpenSearch", "Внешнее хранилище masked logs")
     Container_Ext(dashboards, "OpenSearch Dashboards", "OpenSearch Dashboards", "Просмотр логов и диагностика")
   }
 
   System_Ext(keycloak, "Keycloak", "OIDC/OAuth2 Identity Server")
-  System_Ext(runbook, "Controlled operational runbook", "Provisioning/block/revoke/cancel invite procedures для пилота")
+  System_Ext(runbook, "Controlled operational runbook", "Процедуры пилота вне domain API")
   System_Ext(manualBilling, "Manual billing validation", "Внешний ручной процесс проверки willingness-to-pay")
 
   Rel(client, webUi, "Использует", "HTTPS")
@@ -46,17 +46,26 @@ C4Container
   UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
 ```
 
-## Целевые обязанности контейнеров
+## Ответственность контейнеров
 
-| Container | Целевая ответственность MVP |
+| Контейнер | Целевая ответственность MVP |
 |---|---|
-| Web UI | Пользовательский интерфейс клиента и тренера; in-product ADMIN/support UI в MVP отсутствует |
+| Web UI | Пользовательский интерфейс клиента и тренера; ADMIN/support UI отсутствует |
 | Envoy Gateway | Маршрутизация всех MVP `/v1/*` endpoints и обязательная JWT validation на edge/proxy layer |
-| FitBridge Backend API | Ktor backend с Profile, Access, Diary, Program, Progress, Auth и Audit Logging capability; независимо проверяет JWT/user context и owner/grant/scope policy |
+| FitBridge Backend API | Ktor backend с Profile, Access, Diary, Program, Progress, Auth и Audit Logging; независимо проверяет JWT/user context и owner/grant/scope policy |
 | Application DB | PostgreSQL storage для доменных данных MVP |
 | Keycloak | Identity provider для пользователей, ролей и JWT |
-| Controlled operational runbook | Внешний процесс пилота для provisioning/block/revoke/cancel invite действий без доступа к domain API и sensitive payload |
+| Controlled operational runbook | Внешний процесс пилота без доступа к domain API и sensitive payload |
 | Fluent Bit / OpenSearch / Dashboards | Platform/observability-контур вне application boundary; принимает только masked structured logs |
+
+## Канонические ссылки
+
+| Тема | Источник |
+|---|---|
+| JWT, roles, support boundary, threat model | [SECURITY_ARCHITECTURE.md](../SECURITY_ARCHITECTURE.md) |
+| Модель данных и ограничения | [ERD.md](../ERD.md) |
+| API-поверхность и лимиты | [02-api.md](../02-api.md), [api/06](../api/06-metrics-and-limits.md) |
+| Observability-стек | [ADR-006](../ADR/ADR-006-use-opensearch-fluent-bit-observability.md) |
 
 ## Открытые решения
 

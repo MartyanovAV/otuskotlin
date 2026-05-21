@@ -1,6 +1,6 @@
-# C4 Component - FitBridge Backend API
+# C4 Component / Компоненты - FitBridge Backend API
 
-Диаграмма показывает целевое внутреннее устройство контейнера `FitBridge Backend API` для MVP. Компоненты отражают доменные контуры из требований и API-документации. Компонент ADMIN/support domain API в MVP отсутствует: пользовательские операции выполняют только `CLIENT` и `TRAINER`, а support/ops действия пилота остаются вне backend domain API. Блок repository ports на диаграмме является только визуальной группировкой per-entity портов; он не задаёт общий repository layer или общий repo-module на уровне сервиса.
+Диаграмма показывает ключевые компоненты backend API MVP. Детальные политики и контракты находятся в [Security](../SECURITY_ARCHITECTURE.md), [API](../02-api.md) и [ERD](../ERD.md). Блок repository ports — только визуальная группировка per-entity портов, не общий repository layer.
 
 ```mermaid
 C4Component
@@ -17,14 +17,14 @@ C4Component
 
   Container_Boundary(api, "FitBridge Backend API - Kotlin/Ktor") {
     Component(postFullRouter, "POST Full Router", "Ktor routing", "Единый вход для domain.action API")
-    Component(authComponent, "Auth & Access Guard", "Ktor plugin / domain service", "Проверяет JWT, user context, роли CLIENT/TRAINER, AccessGrant и scopes; support bypass запрещён")
+    Component(authComponent, "Auth & Access Guard", "Ktor plugin / domain service", "JWT, user context, CLIENT/TRAINER, AccessGrant/scopes; no support bypass")
     Component(profileComponent, "Profile Component", "Kotlin service", "ClientProfile и TrainerProfile")
     Component(accessComponent, "Access Component", "Kotlin service", "Invite, AccessGrant, revoke, validateScope")
     Component(diaryComponent, "Diary Component", "Kotlin service", "TrainingEntry CRUD и поиск истории")
     Component(programComponent, "Program Component", "Kotlin service", "Program, Assignment, completeWorkout")
     Component(progressComponent, "Progress Component", "Kotlin service", "История клиента и статусы выполнения")
     Component(auditComponent, "Audit Logging Component", "Kotlin service", "Инфраструктурный аудит критичных событий")
-    Component(repoPorts, "Per-entity Repository Ports (grouping only)", "Kotlin interfaces in each entities/{entity}/common", "Группировка портов конкретных сущностей; не общий repository layer")
+    Component(repoPorts, "Per-entity Repository Ports (grouping only)", "entities/{entity}/common", "Порты конкретных сущностей; не общий repository layer")
   }
 
   Rel(client, webUi, "Работает с дневником, программами и доступами", "HTTPS")
@@ -45,7 +45,7 @@ C4Component
   Rel(diaryComponent, repoPorts, "Вызывает per-entity порты дневника")
   Rel(programComponent, repoPorts, "Вызывает per-entity порты программ")
   Rel(progressComponent, repoPorts, "Читает через per-entity порты истории и статусов")
-  Rel(repoPorts, appDb, "Каждая реализация entities/{entity}/repo-pgjvm читает/пишет данные своей сущности", "JDBC/R2DBC TBD")
+  Rel(repoPorts, appDb, "Реализации entities/{entity}/repo-* читают/пишут данные своей сущности", "JDBC/R2DBC TBD")
 
   Rel(profileComponent, auditComponent, "Логирует изменения профиля")
   Rel(accessComponent, auditComponent, "Логирует выдачу/отзыв доступа")
@@ -61,20 +61,26 @@ C4Component
 | Компонент | Ответственность | Связь с RTM |
 |---|---|---|
 | POST Full Router | Маршрутизация `domain.action` endpoints, валидация request envelope и response envelope | `RTM-001`..`RTM-011` |
-| Auth & Access Guard | Backend JWT/user-context validation, проверки ролей `CLIENT`/`TRAINER`, `AccessGrant`, scopes, deny by default и запрет support/admin broad bypass | `RTM-003`, `RTM-004`, `RTM-007`, `RTM-012`, `RTM-016` |
+| Auth & Access Guard | Backend JWT/user-context validation, `CLIENT`/`TRAINER`, `AccessGrant`, scopes, deny by default, запрет support/admin broad bypass | `RTM-003`, `RTM-004`, `RTM-007`, `RTM-012`, `RTM-016` |
 | Profile Component | Клиентские и тренерские профили, soft delete/archive, состояние онбординга | `RTM-001`, `RTM-002`, `RTM-012` |
 | Access Component | Invites, accept/decline/revoke, active grant, list grants, validate scope | `RTM-003`, `RTM-004`, `RTM-011` |
 | Diary Component | Записи дневника, soft delete, поиск и client-owned history | `RTM-005`, `RTM-008`, `RTM-010` |
 | Program Component | Простые программы, назначения, self-assignment и отметка выполнения | `RTM-006`, `RTM-007`, `RTM-008` |
 | Progress Component | Карточка клиента тренера, история клиента и проекции статусов выполнения | `RTM-009`, `RTM-010` |
 | Audit Logging Component | Маскированные логи событий доступа, профилей, дневника и программ | `RTM-013` |
-| Per-entity Repository Ports (grouping only) | Визуальная группировка repo-интерфейсов конкретных сущностей: каждый port/interface находится внутри соответствующего `entities/{entity}/common`; реализации размещаются только внутри того же контура сущности в `entities/{entity}/repo-*`, например `repo-pgjvm` или `repo-inmemory`; общего service-level repo-module/repository layer нет | `RTM-014` |
+| Per-entity Repository Ports (grouping only) | Каждый port/interface находится в `entities/{entity}/common`; реализации — только в `entities/{entity}/repo-*`; общего service-level repo-module/repository layer нет | `RTM-014` |
 
 ## Архитектурные ограничения MVP
 
-- Диаграмма компонентов описывает целевое состояние Ktor backend для MVP.
-- Репозитории моделируются только как per-entity ports/implementations: port/interface находится в `entities/{entity}/common`, реализации находятся в `entities/{entity}/repo-*`; общий repository layer на уровне сервиса отсутствует.
-- Любой общий блок `Repository Ports` в C4 Component является только grouping/abstraction для читаемости диаграммы; проектировать по нему общий repo-layer, shared repository module или сервисный каталог `repo-*` запрещено.
-- In-product ADMIN/support component, support console и granular operator roles не моделируются в MVP; controlled support operations выполняются через Keycloak/runbook вне domain API и не читают client profile/diary/training history/health-adjacent data.
-- Продуктовый `AuditEvent` API остаётся Phase 2; MVP-компонент покрывает только infrastructure audit-oriented logging по ADR-006.
-- Отдельный `Notification` API/provider не моделируется как MVP-компонент; статусы доступны через MVP pull-model read endpoints/dashboard.
+- Per-entity repo rule является обязательным: общий repo-layer/shared repository module запрещён.
+- In-product ADMIN/support component и support console не моделируются в MVP; support operations остаются вне domain API.
+- Продуктовый `AuditEvent` API и отдельный `Notification` API/provider — Phase 2; MVP использует masked logs и pull-model статусы.
+
+## Канонические ссылки
+
+| Тема | Источник |
+|---|---|
+| Политика доступа и безопасности | [SECURITY_ARCHITECTURE.md](../SECURITY_ARCHITECTURE.md) |
+| API-методы и лимиты | [../02-api.md](../02-api.md) |
+| Сущности, связи и ограничения | [ERD.md](../ERD.md) |
+| Observability и audit logging | [ADR-006](../ADR/ADR-006-use-opensearch-fluent-bit-observability.md) |

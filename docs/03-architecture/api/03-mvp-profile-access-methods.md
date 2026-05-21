@@ -1,10 +1,14 @@
-# MVP Profile and Access API Methods
+# Методы Profile and Access API MVP
 
-Методы Gate 1 для профилей, онбординга, приглашений и контроля доступа.
+Канонические методы Gate 1 для профилей, онбординга, приглашений и контроля доступа. Все методы используют стиль `domain.action`.
 
-#### 2. Бизнес-функции (методы)
+## Общие правила
 
-Все методы используют единый стиль именования `domain.action`. Нумерация методов локальная внутри этого файла.
+- Авторизация: см. [Security Architecture](../SECURITY_ARCHITECTURE.md). Domain API MVP — `CLIENT`/`TRAINER` only, без in-product `ADMIN`/support bypass.
+- ClientProfile: `gender` и `goals` — optional/nullable MVP; `heightCm` и body metrics — Phase 2.
+- Scopes: trainer `PROFILE_WRITE` для `ClientProfile` запрещён в MVP; доступ тренера основан на active `AccessGrant` и нужном scope.
+
+## Бизнес-функции
 
 **[MVP] Профили и онбординг (BR-006)**
 
@@ -14,13 +18,13 @@
    - *Лимит*: 10 запросов/час на пользователя.
 
 2. **`profile.readClientProfile`** — получить клиентский профиль.
-   - *Бизнес-правило*: доступен только клиенту-владельцу или тренеру с активным `AccessGrant` и scope `PROFILE_READ`; тренеру возвращаются только разрешённые поля, включая optional `gender` и `goals` при наличии подтверждённого доступа. Доступ in-product `ADMIN`/support к этому domain method в MVP отсутствует.
+   - *Бизнес-правило*: доступен клиенту-владельцу или тренеру с активным `AccessGrant` и `PROFILE_READ`; тренеру возвращаются только разрешённые поля.
 
 3. **`profile.updateClientProfile`** — изменить клиентский профиль.
-   - *Бизнес-правило*: в MVP изменять клиентский профиль может только владелец профиля; владелец может установить, изменить или очистить `gender` и `goals`. Тренер не получает write-доступ к `ClientProfile`; trainer `PROFILE_WRITE` для клиентского профиля является Phase 2 / out of MVP и не входит в минимальные MVP scopes.
+   - *Бизнес-правило*: изменять клиентский профиль может только владелец; владелец может установить, изменить или очистить `gender` и `goals`.
 
 4. **`profile.deleteClientProfile`** — удалить или архивировать профиль клиента.
-   - *Бизнес-правило*: физическое удаление заменяется архивированием; пользовательский domain method выполняется владельцем профиля. Операционные privacy/deletion support actions для пилота выполняются вне domain API по controlled runbook и не дают чтение профиля, дневника, истории тренировок или health-adjacent данных.
+   - *Бизнес-правило*: физическое удаление заменяется архивированием; пользовательский domain method выполняется владельцем профиля.
    - *Ограничение*: активные назначения программ переводятся в `CANCELLED`.
 
 5. **`profile.createTrainerProfile`** — создать профиль тренера.
@@ -67,7 +71,7 @@
     - *Бизнес-правило*: `Invite.status` становится `DECLINED`; `AccessGrant` не создаётся. Повторное приглашение тому же получателю возможно не раньше чем через 24 часа, если не было явного запроса клиента.
 
 17. **`access.readGrant`** — получить конкретное разрешение.
-     - *Бизнес-правило*: доступно только клиенту-владельцу и тренеру, получившему этот доступ. Доступ in-product `ADMIN`/support к этому domain method в MVP отсутствует; будущие support-policy сценарии относятся к Phase 2 / out of MVP.
+     - *Бизнес-правило*: доступно только клиенту-владельцу и тренеру, получившему этот доступ.
 
 18. **`access.revoke`** — отозвать доступ тренера.
     - *Бизнес-правило*: отзыв вступает в силу немедленно; тренер теряет `PROFILE_READ` к разрешённым полям профиля, а также доступ к дневнику и планам.
@@ -76,7 +80,11 @@
     - *Бизнес-правило*: клиент видит все доступы; тренер видит только свои связи.
 
 20. **`access.validateScope`** — проверить право на действие перед бизнес-операцией.
-     - *Бизнес-правило*: отказ доступа должен быть безопасным по умолчанию (`deny by default`).
+     - *Бизнес-правило*: отказ доступа безопасен по умолчанию (`deny by default`).
      - *Метрика*: P99 < 100 мс согласно каноническим API SLO в `06-metrics-and-limits.md`.
 
-> **Граница support в MVP:** методы domain API в этом файле являются пользовательскими методами `CLIENT`/`TRAINER`. Операционные действия пилота (`block user`, `revoke pilot trainer access`, `cancel invite edge case`, privacy/deletion support action) выполняются через Keycloak + controlled operational runbook/provisioning вне product UI/domain API, логируются без чувствительных payload и не обходят owner/grant/scope policy.
+## Ссылки без дублирования
+
+- Статусы `Invite`/`AccessGrant` и ограничения данных: [ERD](../ERD.md).
+- Полная owner/grant/scope policy, support boundary и field-level privacy: [Security Architecture](../SECURITY_ARCHITECTURE.md).
+- Rate limits и SLO: [06-metrics-and-limits.md](./06-metrics-and-limits.md).

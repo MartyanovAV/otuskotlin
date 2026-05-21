@@ -1,16 +1,16 @@
-# Deploy and Local Run Guide
+# Инструкция по локальному запуску и deploy
 
-Инструкция описывает целевую модель deployment для MVP через Docker Compose. Целевой состав стенда MVP включает сервисы: Backend API за Envoy, Keycloak, PostgreSQL, OpenSearch, OpenSearch Dashboards и Fluent Bit.
+Операционная инструкция для локального MVP-стенда через Docker Compose. Архитектурные границы не дублируются: контейнеры см. в [C4 Container](../docs/03-architecture/c4/C4_CONTAINER.md), security/JWT — в [Security Architecture](../docs/03-architecture/SECURITY_ARCHITECTURE.md), observability — в [ADR-006](../docs/03-architecture/ADR/ADR-006-use-opensearch-fluent-bit-observability.md).
 
 ## Состав стенда
 
 | Сервис | Назначение | Порт хоста |
 |--------|------------|------------|
-| `app` | Backend API (MVP) | через Envoy `8080` |
-| `envoy` | входной proxy, маршрутизация и edge JWT validation для всех MVP `/v1/*` endpoints | `8080` |
+| `app` | Backend API | через Envoy `8080` |
+| `envoy` | входной proxy и JWT validation для MVP `/v1/*` | `8080` |
 | `keycloak` | Identity Server, импорт realm `fit-bridge` | через Envoy `/admin`, `/realms` |
 | `postgresql` | основное хранилище данных приложения | через app |
-| `opensearch` | хранилище логов | `9200`, `9600` |
+| `opensearch` | хранилище masked logs | `9200`, `9600` |
 | `dashboards` | OpenSearch Dashboards | `5601` |
 | `fluent-bit` | доставка логов контейнеров в OpenSearch | `24224`, `2020` |
 
@@ -70,7 +70,7 @@ cd deploy
 ./call-envoy.sh
 ```
 
-`call-envoy.sh` получает token через `keycloak-tokens.sh` для тестового пользователя:
+`call-envoy.sh` получает token через `keycloak-tokens.sh` для тестового пользователя локального стенда:
 
 - realm: `fit-bridge`
 - client: `fit-bridge-service`
@@ -97,7 +97,7 @@ docker compose logs -f opensearch
 docker compose logs -f fluent-bit
 ```
 
-Логи приложения также отправляются через Fluent Bit в OpenSearch. Для просмотра через UI откройте OpenSearch Dashboards: `http://localhost:5601`.
+Логи приложения отправляются через Fluent Bit в OpenSearch. Для просмотра откройте OpenSearch Dashboards: `http://localhost:5601`. Правила маскирования и события описаны в [ADR-006](../docs/03-architecture/ADR/ADR-006-use-opensearch-fluent-bit-observability.md).
 
 ## Остановка
 
@@ -164,8 +164,6 @@ docker compose logs -f keycloak envoy
 Скрипт рассчитан на Bash и `jq`. Запустите его из Git Bash/WSL или проверьте сервисы вручную через браузер и `curl.exe`.
 
 ## Критерии успешного запуска
-
-Целевое состояние для MVP:
 
 - `docker compose ps` показывает запущенные `app`, `envoy`, `keycloak`, `postgresql`, `opensearch`, `dashboards`, `fluent-bit`.
 - `http://localhost:8080/health` возвращает статус Backend API.
