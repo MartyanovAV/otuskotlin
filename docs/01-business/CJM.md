@@ -240,7 +240,7 @@ journey
 
 ## Источники
 
-1. Внутренний анализ артефактов FitBridge из текущего репозитория.
+1. Внутренний анализ продуктовых артефактов FitBridge.
 2. `docs/01-business/MVP_SCOPE_SUMMARY.md`.
 3. `docs/01-business/PRODUCT_ROADMAP.md`.
 4. `docs/02-analysis/DATA_CLASSIFICATION_MATRIX.md`.

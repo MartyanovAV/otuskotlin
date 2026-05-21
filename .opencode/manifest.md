@@ -11,7 +11,8 @@
 ```
 {имя-сервиса}/
 ├── .opencode/               # Скиллы (технические "рельсы")
-│   └── skills/              # repo-pg.md, cor-biz.md, api-mappers.md, app-spring.md
+│   └── skills/              # gate-format, tdd-process, logging, mermaid
+│                            # Доменные/технические skills для repo/biz/api/app пока не заведены
 ├── app-ktor/               # Точки входа (на выбор)
 ├── app-spring/
 ├── app-kafka/

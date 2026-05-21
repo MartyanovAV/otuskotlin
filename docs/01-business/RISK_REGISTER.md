@@ -32,4 +32,4 @@
 
 ## 4. Источники
 1. КонсультантПлюс, 152-ФЗ — https://www.consultant.ru/document/cons_doc_LAW_61801/
-2. BUSINESS_VISION.md в текущем репозитории.
+2. BUSINESS_VISION.md.

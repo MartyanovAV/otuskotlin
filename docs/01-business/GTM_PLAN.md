@@ -119,5 +119,5 @@
 
 ## 10. Источники
 1. TAdviser, Fitness services (Russian market) — https://tadviser.com/index.php/Article:Fitness_services_(Russian_market)
-2. BUSINESS_VISION.md в текущем репозитории.
+2. BUSINESS_VISION.md.
 3. TrueCoach Pricing — https://truecoach.co/pricing/

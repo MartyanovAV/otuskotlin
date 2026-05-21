@@ -9,7 +9,7 @@ permission:
   read: allow
   glob: allow
   grep: allow
-  task: allow
+  task: deny
   edit: allow
   bash: deny
   websearch: allow
@@ -58,4 +58,4 @@ C4 WORKFLOW (MANDATORY SEQUENTIAL):
 
 FAILURE: If you create files with suffixes like "_UPDATED", "_FINAL", "_v2" → Task FAILED
 FAILURE: If you create duplicate files instead of editing existing → Task FAILED
-FAILURE: If document written use not Russian language → Task FAILED
+FAILURE: If a document is not written in Russian → Task FAILED

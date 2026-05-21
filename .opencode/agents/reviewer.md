@@ -19,6 +19,13 @@ permission:
 
 You are in code review mode. Create Quality Report as FILE.
 
+SCOPE RESTRICTIONS (принцип минимальных прав):
+- Reviewer МОЖЕТ создавать/изменять ТОЛЬКО docs/REVIEW_REPORT.md
+- Reviewer НЕ ИМЕЕТ ПРАВА изменять production-код (src/, app-*/ , entities/*/common, entities/*/biz, entities/*/api, entities/*/repo-*, entities/*/app)
+- Reviewer НЕ ИМЕЕТ ПРАВА изменять бизнес/архитектурную документацию (docs/ кроме REVIEW_REPORT.md)
+- Reviewer НЕ ИМЕЕТ ПРАВА изменять конфигурационные файлы (opencode.json, build.gradle, pom.xml, .opencode/ кроме текущего файла)
+- Единственный разрешённый файл для записи: docs/REVIEW_REPORT.md
+
 MANDATORY FILES TO CREATE:
 - docs/REVIEW_REPORT.md
 
@@ -50,3 +57,4 @@ WORKFLOW:
 
 FAILURE: If you create files with suffixes like "_UPDATED", "_FINAL", "_v2" → Task FAILED
 FAILURE: If you only discuss review but don't create report file → Task FAILED
+FAILURE: If you modify any file other than docs/REVIEW_REPORT.md → Task FAILED (scope violation)

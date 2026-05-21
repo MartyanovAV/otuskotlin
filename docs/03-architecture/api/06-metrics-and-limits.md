@@ -1,6 +1,6 @@
 # API Metrics and Limits
 
-Продуктовые метрики, performance targets, rate limits и требования надёжности.
+Продуктовые метрики, performance targets, rate limits и требования надёжности. Этот файл является каноническим источником API SLO для архитектурной документации MVP.
 
 #### 4. Бизнес-метрики успеха
 
@@ -41,5 +41,5 @@
 1. Доступность публичного API MVP: 99,5% в месяц.
 2. Потеря подтверждённых записей дневника: 0 допустимых случаев.
 3. Время вступления отзыва доступа в силу: не более 5 секунд для пользовательских API.
-4. Scope уведомлений MVP ограничен pull-model UI статусами в существующих read endpoints/dashboard; push/email provider и отдельный `Notification` API — Phase 2.
+4. Scope уведомлений MVP ограничен pull-model UI статусами в MVP read endpoints/dashboard; push/email provider и отдельный `Notification` API — Phase 2.
 5. Scope аудита MVP ограничен infrastructure audit-oriented logging по ADR-006; продуктовый `AuditEvent` API и отдельная audit entity — Phase 2.

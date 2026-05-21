@@ -5,27 +5,26 @@
 
 ## Context
 
-MVP FitBridge должен быть проверяемым в пилоте: команда должна видеть доступность локального стенда, ошибки API, критичные пользовательские события и нарушения performance targets. Нефункциональные требования фиксируют необходимость мониторинга доступности и производительности, логирования событий приглашений, принятия доступа, отзыва доступа, назначения планов и выполнения тренировок.
+MVP FitBridge должен быть проверяемым в пилоте: команда должна видеть доступность MVP-контура, ошибки API, критичные пользовательские события и нарушения performance targets. Нефункциональные требования фиксируют необходимость мониторинга доступности и производительности, логирования событий приглашений, принятия доступа, отзыва доступа, назначения планов и выполнения тренировок.
 
-Текущий deploy уже содержит локальный observability-контур:
+Целевой observability-контур MVP включает:
 
-- `Fluent Bit` принимает логи через fluent forward input `24224` и отдаёт health/metrics endpoint `2020`;
-- `OpenSearch` хранит индексы логов;
-- `OpenSearch Dashboards` предоставляет UI для просмотра логов;
-- `docker-compose.yml` направляет логи `app` в Fluent Bit с tag `app.logs`;
-- `fluent-bit.conf` парсит JSON из поля `message` и пишет daily indices `app-logs-*`, а также `cpu-load-*`.
+- `Fluent Bit` как агент доставки структурированных логов;
+- `OpenSearch` как хранилище и поисковый движок для логов;
+- `OpenSearch Dashboards` как UI для support/debugging сценариев;
+- masked JSON-события от backend API и инфраструктурных контейнеров;
+- индексы логов с retention и lifecycle policy, определёнными для окружения.
 
 ## Comparison
 
 | Criteria | OpenSearch + Dashboards + Fluent Bit | Loki + Grafana + Promtail | ELK / Elastic Cloud | Docker logs only |
 |---|:---:|:---:|:---:|:---:|
-| Already present in repo deploy | ✅ | ❌ | ❌ | ✅ |
-| Full-text search and filtering | ✅ | ⚠️ | ✅ | ❌ |
-| Local MVP setup without external SaaS | ✅ | ✅ | ⚠️ | ✅ |
-| Structured JSON log ingestion | ✅ | ✅ | ✅ | ❌ |
-| Dashboards for support/debugging | ✅ | ✅ | ✅ | ❌ |
-| Operational simplicity for current project | ✅ | ⚠️ | ❌ | ✅ |
-| Sufficient for MVP audit-oriented logs | ✅ | ⚠️ | ✅ | ❌ |
+| Контур MVP без внешнего SaaS | ✅ | ✅ | ⚠️ | ✅ |
+| Полнотекстовый поиск и фильтрация | ✅ | ⚠️ | ✅ | ❌ |
+| Приём структурированных JSON-логов | ✅ | ✅ | ✅ | ❌ |
+| Dashboards для support/debugging | ✅ | ✅ | ✅ | ❌ |
+| Операционная простота для MVP | ✅ | ⚠️ | ❌ | ✅ |
+| Достаточность для MVP audit-oriented logs | ✅ | ⚠️ | ✅ | ❌ |
 
 ## Decision
 
@@ -38,7 +37,7 @@ MVP FitBridge должен быть проверяемым в пилоте: ко
 - просмотр и поиск логов через OpenSearch Dashboards;
 - health endpoint Fluent Bit на `:2020`;
 - инфраструктурное логирование критичных событий доступа, дневника, программ и онбординга;
-- correlation/request id в логах после появления backend API.
+- correlation/request id в логах backend API.
 
 Расширенный продуктовый `AuditEvent` API не входит в MVP. Для MVP audit-oriented события фиксируются как masked structured logs без раскрытия лишних персональных и health-adjacent данных.
 
@@ -66,22 +65,21 @@ Phase 2 может добавить продуктовый `AuditEvent` API, о�
 
 ## Rationale
 
-- Решение уже частично реализовано в `deploy/docker-compose.yml` и `deploy/volumes/fluent-bit-etc/fluent-bit.conf`, поэтому не требует смены инфраструктурного направления.
 - OpenSearch подходит для поиска по событиям доступа, ошибкам API и техническим диагностическим данным.
-- Fluent Bit лёгкий и достаточный для локального MVP-стенда; он уже принимает Docker fluentd logs и отправляет их в OpenSearch.
+- Fluent Bit лёгкий и достаточный для MVP-контура доставки логов в OpenSearch.
 - Dashboards дают быстрый UI для поддержки пилотов без необходимости разрабатывать отдельную админку.
 - Отделение infrastructure logs от будущего `AuditEvent` API сохраняет MVP scope и не смешивает технические логи с продуктовой аудиторской моделью.
 
 ## Required Log Fields
 
-После появления backend API application logs должны быть структурированными JSON-событиями с минимальным набором полей:
+Application logs должны быть структурированными JSON-событиями с минимальным набором полей:
 
 | Field | Required | Description |
 |---|:---:|---|
 | `timestamp` | ✅ | Время события в UTC |
 | `level` | ✅ | `DEBUG`, `INFO`, `WARN`, `ERROR` |
 | `service` | ✅ | Имя сервиса/контейнера |
-| `environment` | ✅ | `local`, `dev`, `stage`, `prod` |
+| `environment` | ✅ | Имя окружения: `dev`, `stage`, `prod` или иной согласованный код окружения |
 | `requestId` | ✅ | Correlation id одного HTTP-запроса |
 | `userId` | ⚠️ | Только внутренний id; не `phone`, не email |
 | `keycloakSubject` | ⚠️ | Допустимо для auth-debug, если не раскрывает PII |
@@ -106,17 +104,17 @@ Phase 2 может добавить продуктовый `AuditEvent` API, о�
 
 **Positive:**
 
-- MVP получает единый локальный путь для сбора и просмотра логов.
+- MVP получает единый путь для сбора и просмотра логов.
 - Поддержка может расследовать ошибки приглашений, доступов, дневника и программ без прямого доступа к БД.
-- Решение совместимо с текущим compose-стендом и не требует внешних SaaS.
+- Решение не требует внешних SaaS для базового observability MVP.
 - Structured logs создают основу для будущих метрик и алертов.
 
 **Negative:**
 
 - OpenSearch тяжелее, чем простой Docker logs или Loki-only стек.
 - Retention, index lifecycle и alerting ещё нужно детализировать отдельно.
-- Fluent Bit/OpenSearch credentials в текущем local compose являются dev-only и не подходят для production.
-- Metrics/traces пока не покрыты полноценно; MVP начинается с logs-first observability.
+- Секреты Fluent Bit/OpenSearch должны управляться отдельно для каждого окружения и не храниться в документации.
+- Metrics/traces вне минимального MVP; MVP начинается с logs-first observability.
 
 **Risks:**
 
@@ -125,12 +123,11 @@ Phase 2 может добавить продуктовый `AuditEvent` API, о�
 | В логи попадут персональные или health-adjacent данные | Medium | High | Ввести deny-list/маскирование, ревью log statements, негативные тесты на sensitive payloads |
 | OpenSearch переполнится из-за отсутствия retention | Medium | Medium | Настроить index lifecycle/retention перед длительным пилотом |
 | Нет requestId, сложно связывать события одного запроса | Medium | Medium | Добавить requestId middleware в Ktor backend первым observability task |
-| Local credentials попадут в production | Low | High | Разделить local secrets и production secret management до production deploy |
+| Небезопасные test/dev credentials попадут в production | Low | High | Разделить secrets по окружениям и ввести production secret management до production deploy |
 
-## Заметки по реализации
+## Архитектурные требования к логированию
 
 - Для MVP backend должен логировать critical events из `RTM-013`: принятие/отклонение приглашения, выдача/отзыв доступа, запрос удаления/архивации профиля, создание/изменение/удаление дневника, назначение/изменение/отмена программы, выполнение тренировки и отказ доступа из-за scope.
-- Fluent Bit текущего локального стенда уже настроен на `Logstash_Format On` и daily index prefix `app-logs`.
 - Performance targets из NFR должны попадать в логи через `durationMs`; отдельная metrics-система может быть добавлена позже.
-- Alerting не входит в текущий local MVP, но нарушение порогов latency/error rate должно быть возможно найти через OpenSearch queries.
+- Alerting не входит в MVP, но нарушение порогов latency/error rate должно быть возможно найти через OpenSearch queries.
 - Для production потребуется отдельное решение по retention, index lifecycle, secrets и resource limits.

@@ -1,14 +1,15 @@
 # Deploy and Local Run Guide
 
-Инструкция описывает локальный запуск FitBridge через Docker Compose. Текущий runtime поднимает статический прототип приложения на Nginx за Envoy, Keycloak, OpenSearch, OpenSearch Dashboards и Fluent Bit.
+Инструкция описывает целевую модель deployment для MVP через Docker Compose. Целевой состав стенда MVP включает сервисы: Backend API за Envoy, Keycloak, PostgreSQL, OpenSearch, OpenSearch Dashboards и Fluent Bit.
 
 ## Состав стенда
 
 | Сервис | Назначение | Порт хоста |
 |--------|------------|------------|
-| `app` | Nginx со статическим прототипом и тестовыми API-заглушками | через Envoy `8080` |
-| `envoy` | входной proxy, маршрутизация и JWT-проверка для `/v1/*` | `8080` |
+| `app` | Backend API (MVP) | через Envoy `8080` |
+| `envoy` | входной proxy, маршрутизация и edge JWT validation для всех MVP `/v1/*` endpoints | `8080` |
 | `keycloak` | Identity Server, импорт realm `fit-bridge` | через Envoy `/admin`, `/realms` |
+| `postgresql` | основное хранилище данных приложения | через app |
 | `opensearch` | хранилище логов | `9200`, `9600` |
 | `dashboards` | OpenSearch Dashboards | `5601` |
 | `fluent-bit` | доставка логов контейнеров в OpenSearch | `24224`, `2020` |
@@ -56,13 +57,13 @@ curl.exe -k -u admin:adm-Password123! https://localhost:9200/_cluster/health?pre
 
 ## Проверка приложения
 
-Проверить главную страницу:
+Ожидаемая проверка доступности Backend API:
 
 ```powershell
-curl.exe http://localhost:8080/
+curl.exe http://localhost:8080/health
 ```
 
-Проверить защищённый endpoint через helper-скрипт:
+Проверка защищённого endpoint через helper-скрипт:
 
 ```bash
 cd deploy
@@ -76,7 +77,7 @@ cd deploy
 - username: `fitbridge-test`
 - password: `fitbridge`
 
-Если запускаете из PowerShell без Bash/JQ, можно просто открыть приложение и Keycloak в браузере; helper-скрипты не обязательны для старта стенда.
+Если запускаете из PowerShell без Bash/JQ, можно просто открыть Keycloak в браузере; helper-скрипты не обязательны для старта стенда.
 
 ## Логи
 
@@ -116,13 +117,13 @@ docker compose down -v
 
 ## Повторная сборка
 
-После изменения файлов Nginx, HTML или compose-конфигурации:
+После изменения кода приложения или compose-конфигурации:
 
 ```powershell
 docker compose up --build -d
 ```
 
-Если менялись только файлы в `deploy/volumes/nginx/html`, они смонтированы volume-ом и обычно достаточно обновить страницу в браузере.
+При изменении конфигурации Envoy, Keycloak realm или других сервисов может потребоваться полная пересборка контейнеров.
 
 ## Типовые проблемы
 
@@ -162,10 +163,12 @@ docker compose logs -f keycloak envoy
 
 Скрипт рассчитан на Bash и `jq`. Запустите его из Git Bash/WSL или проверьте сервисы вручную через браузер и `curl.exe`.
 
-## Что считается успешным запуском
+## Критерии успешного запуска
 
-- `docker compose ps` показывает запущенные `app`, `envoy`, `keycloak`, `opensearch`, `dashboards`, `fluent-bit`.
-- `http://localhost:8080/` возвращает страницу приложения.
+Целевое состояние для MVP:
+
+- `docker compose ps` показывает запущенные `app`, `envoy`, `keycloak`, `postgresql`, `opensearch`, `dashboards`, `fluent-bit`.
+- `http://localhost:8080/health` возвращает статус Backend API.
 - `http://localhost:8080/admin/` открывает Keycloak Admin Console.
 - `https://localhost:9200/_cluster/health` возвращает статус `green` или `yellow`.
 - `http://localhost:5601` открывает OpenSearch Dashboards.

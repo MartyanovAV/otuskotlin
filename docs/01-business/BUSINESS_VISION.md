@@ -254,5 +254,5 @@ Base-case ARPU **₽2 490/мес** — это blended subscription mix; полн
 4. PT Distinction Pricing — https://www.ptdistinction.com/pricing
 5. CoachAccountable Pricing — https://www.coachaccountable.com/pricing
 6. КонсультантПлюс, 152-ФЗ «О персональных данных» — https://www.consultant.ru/document/cons_doc_LAW_61801/
-7. Предыдущая рыночная декомпозиция и user-story анализ проекта FitBridge, подготовленные в рамках текущего репозитория.
+7. Рыночная декомпозиция и user-story анализ проекта FitBridge.
 8. Публичные тарифы TrueCoach, PT Distinction и CoachAccountable проверены 2026-04-29 для калибровки ценового диапазона и клиентских лимитов.

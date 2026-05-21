@@ -14,8 +14,8 @@ description: Standard Mermaid diagram templates for architecture documentation �
 | Компоненты и связи между ними         | flowchart         |
 | Последовательность запросов/операций  | sequenceDiagram   |
 | Система в контексте внешнего мира     | C4Context         |
-| Инфраструктура и деплой               | deployment-beta   |
-| Слои архитектуры (API, Core, Storage) | architecture-beta |
+| Инфраструктура и деплой               | flowchart (subgraph) |
+| Слои архитектуры (API, Core, Storage) | flowchart (subgraph) / C4Component |
 
 ## Flowchart — компоненты и связи
 
@@ -52,35 +52,46 @@ C4Context
 
 ## Deployment — инфраструктура
 
+Для отображения инфраструктуры используйте `flowchart` с `subgraph` для группировки по узлам/контейнерам:
+
 ```mermaid
-deployment-beta
-    docker-bridge network
-    container "api" as api["API Service"]
-    container "worker" as worker["Worker"]
-    database "postgres" as db[(PostgreSQL)]
-    
+flowchart LR
+    subgraph Docker Network
+        subgraph api-node["API Node"]
+            api["API Service"]
+        end
+        subgraph worker-node["Worker Node"]
+            worker["Worker"]
+        end
+        subgraph db-node["Database Node"]
+            db[(PostgreSQL)]
+        end
+    end
+
     api --> worker
     worker --> db
 ```
 
 ## Architecture — компоненты
 
+Для отображения слоёв архитектуры используйте `flowchart` с `subgraph` или `C4Component`:
+
 ```mermaid
-architecture-beta
-    group api[API Layer]
-        service apiService[api-service] [[API Service]]
-        service gateway[gateway] [[Gateway]]
+flowchart TB
+    subgraph API["API Layer"]
+        apiService["API Service"]
+        gateway["Gateway"]
     end
-    
-    group core[Core]
-        service business[business-logic] [[Business Logic]]
-        service repository[repository] [[Repository]]
+
+    subgraph Core["Core"]
+        business["Business Logic"]
+        repository["Repository"]
     end
-    
-    group storage[Storage]
-        database db[(Database)]
+
+    subgraph Storage["Storage"]
+        db[(Database)]
     end
-    
+
     apiService --> business
     gateway --> apiService
     business --> repository

@@ -43,10 +43,10 @@ description: Format and present Gate review packages (Gate 1 Strategy Sync, Gate
 - [Reject] → Укажите что не так
 ```
 
-## Gate 2: Green Build Proof
+## Gate 2: Solution Proof
 
 ```markdown
-# Gate 2: Solution Review
+# Gate 2: Solution Proof
 
 ## Green Build ✅
 ```

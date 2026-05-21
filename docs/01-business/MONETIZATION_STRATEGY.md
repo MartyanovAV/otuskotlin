@@ -71,9 +71,9 @@ Add-ons, onboarding и partner-packages в этот base-case ARR не вклю�
 | Партнёрства со школами | ₽4 000–6 000 |
 | Assisted sales для студий | ₽10 000–18 000 |
 
-Каноническое определение активного клиента для тарификации — в `BUSINESS_VISION.md`; этот документ использует то же правило без дублирования.
+Каноническое определение активного клиента для тарификации — в `GLOSSARY.md`; этот документ использует то же правило без дублирования.
 
-Текущий CAC — **оптимистичная тестовая гипотеза**, а не подтверждённый operating baseline. Для solo blended CAC считаем **только direct acquisition spend**, без broader GTM/lifecycle/partner enablement; для team-сегмента assisted sales контролируется отдельно. Цель: LTV/CAC не ниже 3,0 на solo-сегменте и 5,0 на team-сегменте.
+Плановый CAC — **оптимистичная тестовая гипотеза**, а не подтверждённый operating baseline. Для solo blended CAC считаем **только direct acquisition spend**, без broader GTM/lifecycle/partner enablement; для team-сегмента assisted sales контролируется отдельно. Цель: LTV/CAC не ниже 3,0 на solo-сегменте и 5,0 на team-сегменте.
 
 ### CAC sensitivity
 | Сценарий | Solo blended CAC | Комментарий |
@@ -141,5 +141,5 @@ Bridge с GTM-планом Year 1: при общем GTM-бюджете **₽3,6
 1. TrueCoach Pricing — https://truecoach.co/pricing/
 2. PT Distinction Pricing — https://www.ptdistinction.com/pricing
 3. CoachAccountable Pricing — https://www.coachaccountable.com/pricing
-4. BUSINESS_VISION.md в текущем репозитории.
-5. GTM_PLAN.md в текущем репозитории.
+4. BUSINESS_VISION.md.
+5. GTM_PLAN.md.

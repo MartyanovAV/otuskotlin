@@ -42,16 +42,11 @@ MVP фокусируется на сокращённом критическом 
 3. Клиент сам назначает программу себе и отмечает выполнение.
 4. Позже клиент может пригласить тренера или передать доступ тренеру.
 
-В MVP **не входят**: полноценный multi-specialist production-сценарий, командный тариф студии, шаблоны программ, биллинг, отчётный модуль, замеры, AI-генерация программ, выделенные API уведомлений (Notification) и аудита (AuditEvent).
+В MVP **не входят**: полноценный multi-specialist сценарий, командный тариф студии, шаблоны программ, биллинг, отчётный модуль, замеры, AI-генерация программ, выделенные API уведомлений (Notification) и аудита (AuditEvent).
 
 Подробнее: [docs/01-business/MVP_SCOPE_SUMMARY.md](docs/01-business/MVP_SCOPE_SUMMARY.md).
 
-## Эскиз фронтенда
-
-Фронтенд-представление подготовлено как интерактивные HTML-прототипы:
-
-- [ux-prototype/index.html](ux-prototype/index.html) - мобильный клиентский сценарий дневника, плана и доступа.
-- [ux-prototype/desktop.html](ux-prototype/desktop.html) - desktop-сценарий тренера: клиенты, планы и карточка клиента.
+## Целевой клиентский опыт MVP
 
 Ключевые экраны MVP:
 
@@ -113,30 +108,15 @@ ADR:
 - [ADR-005: использовать PostgreSQL](docs/03-architecture/ADR/ADR-005-use-postgresql.md)
 - [ADR-006: использовать OpenSearch, OpenSearch Dashboards и Fluent Bit для observability](docs/03-architecture/ADR/ADR-006-use-opensearch-fluent-bit-observability.md)
 
-## Инфраструктура
+## Целевая инфраструктура MVP
 
-Инфраструктура запуска находится в [deploy](deploy):
+Целевая инфраструктура MVP описана в архитектурной документации и включает:
 
-- [deploy/Dockerfile](deploy/Dockerfile) - образ приложения на базе Nginx для статического прототипа;
-- [deploy/docker-compose.yml](deploy/docker-compose.yml) - состав локального стенда и конфигурация сервисов;
-- [deploy/README.md](deploy/README.md) - пошаговый запуск, проверка, логи и остановка стенда;
-- `app` - локальный контейнер приложения;
-- `keycloak` - авторизация и импорт realm `fit-bridge`;
-- `opensearch` - хранение и поиск логов;
-- `dashboards` - веб-интерфейс OpenSearch Dashboards;
-- `fluent-bit` - сбор и доставка логов;
-- `envoy` - входной прокси.
+- Web UI для клиентских, тренерских и support-сценариев;
+- Envoy Gateway как входной proxy и boundary для проверки JWT;
+- FitBridge Backend API на Kotlin/Ktor для POST Full бизнес-операций;
+- PostgreSQL как прикладное хранилище;
+- Keycloak как внешний Identity Server;
+- Fluent Bit, OpenSearch и OpenSearch Dashboards для logs-first observability.
 
-Запуск:
-
-```bash
-cd deploy
-docker compose up --build -d
-```
-
-Полезные адреса после запуска:
-
-- приложение: `http://localhost:8080`;
-- OpenSearch: `https://localhost:9200`;
-- OpenSearch Dashboards: `http://localhost:5601`;
-- Keycloak доступен через инфраструктурный контур compose и Envoy.
+Подробности контейнеров и границ ответственности зафиксированы в [C4 Container](docs/03-architecture/c4/C4_CONTAINER.md), [C4 Component](docs/03-architecture/c4/C4_COMPONENT.md) и [Security Architecture / Threat Model](docs/03-architecture/SECURITY_ARCHITECTURE.md).

@@ -1,4 +1,4 @@
-# MVP API Entities
+# API-сущности MVP
 
 Сущности, которые нужны для Gate 1: профили, доступ, приглашение, дневник, простой план и назначение.
 
@@ -10,12 +10,14 @@
 | keycloakSubject | Идентификатор субъекта в Keycloak; является источником аутентификации | `3f8d9f3a-7b2b-4f0b-9e2b-8b4d` |
 | phone | Телефон для восстановления доступа | `+79991234567` |
 | displayName | Отображаемое имя пользователя | `Анна Иванова` |
-| roles | Роли в системе: `CLIENT`, `TRAINER`, `ADMIN` | `["CLIENT", "TRAINER"]` |
-| status | Состояние учётной записи: `ACTIVE`, `PENDING_EMAIL`, `BLOCKED`, `DELETED` | `ACTIVE` |
+| roles | Роли продукта MVP: `CLIENT`, `TRAINER`; in-product `ADMIN`/support роль отсутствует | `["CLIENT", "TRAINER"]` |
+| status | Состояние учётной записи: `ACTIVE`, `PENDING_EMAIL`, `BLOCKED`, `DELETED`; `BLOCKED` может быть результатом controlled support-operation через Keycloak/runbook | `ACTIVE` |
 | locale | Предпочитаемый язык интерфейса | `ru-RU` |
 | timezone | Часовой пояс пользователя | `Europe/Moscow` |
 | createdAt | Дата регистрации | `2026-05-19T10:00:00Z` |
 | lastLoginAt | Последний успешный вход | `2026-05-19T12:30:00Z` |
+
+> В MVP не добавляются admin/support сущности и роли для domain API. Операционное сопровождение пилота выполняется вне продукта через Keycloak + controlled runbook/provisioning и не даёт чтение `ClientProfile`, дневника, тренировочной истории или health-adjacent данных.
 
 **[MVP] ClientProfile (клиентский профиль)**
 
@@ -24,13 +26,16 @@
 | id | Идентификатор профиля клиента | `clp_01HX7M3B1K` |
 | userId | Владелец профиля; только он управляет доступом | `usr_01HX7M2A9Q` |
 | fullName | Имя клиента для тренерского интерфейса | `Анна Иванова` |
-| gender | Самоопределённый пол или `NOT_SPECIFIED` | `FEMALE` |
-| heightCm | Рост в сантиметрах | `168` |
-| goals | Цели клиента | `["снижение веса", "выносливость"]` |
+| gender | MVP optional/nullable: самоопределённый пол или `NOT_SPECIFIED`; отсутствие значения не блокирует onboarding | `FEMALE` |
+| goals | MVP optional/nullable: цели клиента для контекста планирования; отсутствие значения не блокирует onboarding | `["снижение веса", "выносливость"]` |
 | visibility | Видимость профиля: `PRIVATE`, `GRANTED_ONLY` | `GRANTED_ONLY` |
 | activeTrainerIds | Тренеры с действующим доступом | `["trp_01HX7M4C2L"]` |
 | createdAt | Дата создания профиля | `2026-05-19T10:05:00Z` |
 | updatedAt | Дата последнего изменения | `2026-05-19T11:00:00Z` |
+
+> `gender` и `goals` входят в MVP как добровольные поля клиентского профиля: клиент может создать и использовать профиль без их заполнения, а позднее установить, изменить или очистить значения самостоятельно.
+
+> `heightCm` не является активным MVP-полем `ClientProfile`: рост и связанные body metrics перенесены в Phase 2 / later measurement scope и не должны требоваться, валидироваться или передаваться как supported поле MVP API.
 
 **[MVP] TrainerProfile (профессиональный профиль тренера)**
 
@@ -55,10 +60,11 @@
 | clientProfileId | Профиль клиента, к которому выдаётся доступ | `clp_01HX7M3B1K` |
 | trainerProfileId | Тренер, получающий доступ | `trp_01HX7M4C2L` |
 | grantedByUserId | Пользователь, выдавший доступ; для MVP всегда клиент | `usr_01HX7M2A9Q` |
-| status | Статус: `PENDING`, `ACTIVE`, `REVOKED`, `EXPIRED`, `DECLINED` | `ACTIVE` |
-| scopes | MVP: профиль, дневник и планы | `["DIARY_READ", "PROGRAM_WRITE"]` |
+| status | Статус разрешения: `ACTIVE`, `REVOKED`, `EXPIRED` | `ACTIVE` |
+| scopes | MVP: `PROFILE_READ` для разрешённых полей профиля, включая optional `gender`/`goals` при активном доступе, а также scopes дневника и планов; `PROFILE_WRITE` для `ClientProfile` не входит в MVP | `["PROFILE_READ", "DIARY_READ", "PROGRAM_WRITE"]` |
 | grantedAt | Момент активации доступа | `2026-05-19T10:10:00Z` |
 | revokedAt | Момент отзыва доступа | `null` |
+| expiresAt | Дата истечения разрешения, если доступ ограничен по времени | `2026-08-19T10:10:00Z` |
 
 **[MVP] Invite (приглашение клиента)**
 
@@ -71,10 +77,14 @@
 | recipientUserId | Идентификатор получателя, если он уже зарегистрирован | `usr_01HX7M2A9Q` |
 | targetClientProfileId | Профиль клиента, к которому относится приглашение | `clp_01HX7M3B1K` |
 | targetTrainerProfileId | Профиль тренера, если приглашение от тренера | `trp_01HX7M4C2L` |
-| proposedScopes | Запрашиваемые области доступа | `["DIARY_READ", "PROGRAM_READ"]` |
+| proposedScopes | Запрашиваемые области доступа MVP без `PROFILE_WRITE` для клиентского профиля | `["PROFILE_READ", "DIARY_READ", "PROGRAM_READ", "PROGRAM_WRITE"]` |
 | tokenHash | Хэш одноразового токена приглашения | `sha256:...` |
 | status | Статус: `PENDING`, `ACCEPTED`, `DECLINED`, `EXPIRED`, `CANCELLED` | `PENDING` |
 | expiresAt | Дата истечения приглашения | `2026-05-26T10:00:00Z` |
+
+> Модель статусов разделена: жизненный цикл приглашения хранится только в `Invite.status`, а действующее разрешение хранится в `AccessGrant.status`. `PENDING`, `ACCEPTED`, `DECLINED` и `CANCELLED` не используются как статусы `AccessGrant`.
+
+> В MVP `AccessGrant.scopes` и `Invite.proposedScopes` не содержат trainer `PROFILE_WRITE` для `ClientProfile`: тренер читает только разрешённые поля профиля через `PROFILE_READ`, а изменения выполняет в тренировочном домене через `DIARY_WRITE` и `PROGRAM_WRITE`.
 
 **[MVP] TrainingEntry (запись тренировочного дневника)**
 

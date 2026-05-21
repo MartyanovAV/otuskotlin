@@ -37,7 +37,7 @@
 
 #### 0.2. Scope уведомлений: MVP vs Phase 2
 
-**MVP:** используется pull-model: UI получает статусы приглашений, доступов, назначений программ и выполнения тренировок из существующих read endpoints и dashboard. В MVP нет отдельного `Notification` API, push/email provider, очереди коммуникаций или lifecycle communications.
+**MVP:** используется pull-model: UI получает статусы приглашений, доступов, назначений программ и выполнения тренировок из MVP read endpoints и dashboard. В MVP нет отдельного `Notification` API, push/email provider, очереди коммуникаций или lifecycle communications.
 
 **Phase 2:** отдельный `Notification` API/provider, push/email/in-app notification center, lifecycle communications, напоминания по оплате, лимитам и вовлечению.
 
