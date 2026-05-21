@@ -4,7 +4,7 @@ mode: subagent
 model: opencode-go/deepseek-v4-pro
 reasoningEffort: medium
 temperature: 0.1
-steps: 20
+steps: 50
 permission:
   read: allow
   glob: allow

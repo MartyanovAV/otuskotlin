@@ -3,7 +3,7 @@ description: Handles CI/CD, deployment and DevOps tasks
 mode: subagent
 model: opencode-go/qwen3.5-plus
 temperature: 0.1
-steps: 30
+steps: 50
 permission:
   read: allow
   glob: allow
