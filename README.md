@@ -79,15 +79,16 @@ MVP фокусируется на сокращённом критическом 
 
 ## Архитектурное видение
 
-Архитектура описана через C4-диаграммы Mermaid:
+Архитектура описана в обзорном документе и C4-диаграммах Draw.io:
 
-- [C4 Context](docs/03-architecture/c4/C4_CONTEXT.md);
-- [C4 Container](docs/03-architecture/c4/C4_CONTAINER.md);
-- [C4 Component](docs/03-architecture/c4/C4_COMPONENT.md);
+- [Обзор архитектуры](docs/03-architecture/03-arch.md);
+- [C4 Context source](docs/03-architecture/c4/C4_CONTEXT.drawio);
+- [C4 Container source](docs/03-architecture/c4/C4_CONTAINER.drawio);
+- [C4 Component source](docs/03-architecture/c4/C4_COMPONENT.drawio);
 - [ERD MVP](docs/03-architecture/ERD.md);
 - [Security Architecture / Threat Model](docs/03-architecture/SECURITY_ARCHITECTURE.md).
 
-Индекс архитектурной документации: [docs/03-architecture/03-architecture-overview.md](docs/03-architecture/03-architecture-overview.md).
+Индекс архитектурной документации: [docs/03-architecture/03-arch.md](docs/03-architecture/03-arch.md).
 
 ### Архитектурные решения
 
@@ -119,4 +120,4 @@ ADR:
 - Keycloak как внешний Identity Server;
 - Fluent Bit, OpenSearch и OpenSearch Dashboards для logs-first observability.
 
-Подробности контейнеров и границ ответственности зафиксированы в [C4 Container](docs/03-architecture/c4/C4_CONTAINER.md), [C4 Component](docs/03-architecture/c4/C4_COMPONENT.md) и [Security Architecture / Threat Model](docs/03-architecture/SECURITY_ARCHITECTURE.md).
+Подробности контейнеров и границ ответственности зафиксированы в [C4 Container source](docs/03-architecture/c4/C4_CONTAINER.drawio), [C4 Component source](docs/03-architecture/c4/C4_COMPONENT.drawio) и [Security Architecture / Threat Model](docs/03-architecture/SECURITY_ARCHITECTURE.md).

@@ -20,9 +20,6 @@ permission:
 You are in architect mode. Create ALL deliverables as FILES.
 
 TYPICAL ARTIFACTS (create only what is relevant to the task):
-- docs/03-architecture/c4/C4_CONTEXT.md - Level 1: System Context
-- docs/03-architecture/c4/C4_CONTAINER.md - Level 2: Containers
-- docs/03-architecture/c4/C4_COMPONENT.md - Level 3: Components (for key containers)
 - docs/03-architecture/ERD.md - Data model
 - docs/03-architecture/ADR/ADR-*.md - Architecture decision records (each ADR should be in separate file)
 - docs/03-architecture/proposals/OPT-*.md - Technology comparison proposals
@@ -35,7 +32,7 @@ FILE VERSIONING RULES:
 - ONE file = ONE version of truth
 
 TEMPLATE WORKFLOW (MANDATORY):
-1. glob(".opencode/templates-docs/*.md") → find C4/ERD/ADR template
+1. glob(".opencode/templates-docs/*.md") → find ERD/ADR template
 2. read(template_path) → load skeleton
 3. Fill placeholders with Mermaid diagrams/arch decisions
 4. write(target) if new OR edit(existing)
@@ -44,17 +41,14 @@ TEMPLATE WORKFLOW (MANDATORY):
 FAILURE: No template used → Task FAILED
 
 OUTPUT REQUIREMENT:
-- Create C4/ERD/ADR files using write() ONLY if they don't exist
+- Create ERD/ADR files using write() ONLY if they don't exist
 - Modify existing files using edit()
 - File must contain complete diagrams with Mermaid
 - Task is NOT complete until files are written/modified
 
 C4 WORKFLOW (MANDATORY SEQUENTIAL):
-1. Create Level 1: glob/read ".opencode/templates-docs/C4_CONTEXT-template.md" → docs/03-architecture/c4/C4_CONTEXT.md
-2. Create Level 2: glob/read ".opencode/templates-docs/C4_CONTAINER-template.md" → docs/03-architecture/c4/C4_CONTAINER.md
-3. Create Level 3: For main containers, glob/read ".opencode/templates-docs/C4_COMPONENT-template.md" → docs/03-architecture/c4/C4_COMPONENT.md
-4. ERD + ADR as needed
-5. Report all created/modified with paths
+1. ERD + ADR as needed
+2. Report all created/modified with paths
 
 FAILURE: If you create files with suffixes like "_UPDATED", "_FINAL", "_v2" → Task FAILED
 FAILURE: If you create duplicate files instead of editing existing → Task FAILED

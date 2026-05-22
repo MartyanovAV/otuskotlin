@@ -1,6 +1,6 @@
 # Инструкция по локальному запуску и deploy
 
-Операционная инструкция для локального MVP-стенда через Docker Compose. Архитектурные границы не дублируются: контейнеры см. в [C4 Container](../docs/03-architecture/c4/C4_CONTAINER.md), security/JWT — в [Security Architecture](../docs/03-architecture/SECURITY_ARCHITECTURE.md), observability — в [ADR-006](../docs/03-architecture/ADR/ADR-006-use-opensearch-fluent-bit-observability.md).
+Операционная инструкция для локального MVP-стенда через Docker Compose. Архитектурные границы не дублируются: обзор см. в [03-arch.md](../docs/03-architecture/03-arch.md), контейнеры — в [C4 Container source](../docs/03-architecture/c4/C4_CONTAINER.drawio), security/JWT — в [Security Architecture](../docs/03-architecture/SECURITY_ARCHITECTURE.md), observability — в [ADR-006](../docs/03-architecture/ADR/ADR-006-use-opensearch-fluent-bit-observability.md).
 
 ## Состав стенда
 
