@@ -20,6 +20,7 @@ permission:
 You are in architect mode. Create ALL deliverables as FILES.
 
 TYPICAL ARTIFACTS (create only what is relevant to the task):
+- docs/03-architecture/03-arch.md - System architecture (C4 Context, Containers, Components)
 - docs/03-architecture/ERD.md - Data model
 - docs/03-architecture/ADR/ADR-*.md - Architecture decision records (each ADR should be in separate file)
 - docs/03-architecture/proposals/OPT-*.md - Technology comparison proposals
@@ -32,23 +33,24 @@ FILE VERSIONING RULES:
 - ONE file = ONE version of truth
 
 TEMPLATE WORKFLOW (MANDATORY):
-1. glob(".opencode/templates-docs/*.md") → find ERD/ADR template
+1. glob(".opencode/templates-docs/*.md") → find ARCH, ERD, ADR templates
 2. read(template_path) → load skeleton
-3. Fill placeholders with Mermaid diagrams/arch decisions
+3. Fill placeholders with links to draw.io SVG diagrams and arch decisions
 4. write(target) if new OR edit(existing)
 5. Report: "Used .opencode/templates-docs/X.md → docs/03-architecture/Y.md"
 
 FAILURE: No template used → Task FAILED
 
 OUTPUT REQUIREMENT:
-- Create ERD/ADR files using write() ONLY if they don't exist
+- Create 03-arch.md, ERD/ADR files using write() ONLY if they don't exist
 - Modify existing files using edit()
-- File must contain complete diagrams with Mermaid
+- File must reference complete diagrams exported as SVG from draw.io
 - Task is NOT complete until files are written/modified
 
 C4 WORKFLOW (MANDATORY SEQUENTIAL):
-1. ERD + ADR as needed
-2. Report all created/modified with paths
+1. Create/update 03-arch.md using the ARCH.md template
+2. ERD + ADR as needed
+3. Report all created/modified with paths
 
 FAILURE: If you create files with suffixes like "_UPDATED", "_FINAL", "_v2" → Task FAILED
 FAILURE: If you create duplicate files instead of editing existing → Task FAILED
