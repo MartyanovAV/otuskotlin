@@ -1,24 +1,51 @@
 # Минимальная инфраструктура FitBridge:
-# OpenSearch, OpenSearch Dashboards, Fluent Bit, Envoy, Keycloak.
+# PostgreSQL, OpenSearch, OpenSearch Dashboards, Fluent Bit, Envoy, Keycloak.
 
 services:
+  postgresql:
+    image: postgres:16-alpine
+    container_name: postgresql
+    environment:
+      POSTGRES_DB: fitbridge
+      POSTGRES_USER: fitbridge
+      POSTGRES_PASSWORD: fitbridge-password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgresql-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fitbridge -d fitbridge"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - fitbridge-network
+
   app:
     build:
-      context: .
-      dockerfile: Dockerfile
-    image: fitbridge-app:local
+      context: ..
+      dockerfile: deploy/Dockerfile.backend
+    image: fitbridge-backend:local
     depends_on:
-      - fluent-bit
-      - envoy
-    volumes:
-      - ./volumes/nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - ./volumes/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./volumes/nginx/html:/usr/share/nginx/html
+      postgresql:
+        condition: service_healthy
+      fluent-bit:
+        condition: service_started
+      envoy:
+        condition: service_started
+    environment:
+      DB_HOST: postgresql
+      DB_PORT: 5432
+      DB_NAME: fitbridge
+      DB_USER: fitbridge
+      DB_PASSWORD: fitbridge-password
     logging:
       driver: "fluentd"
       options:
         fluentd-address: fluent-bit:24224
         tag: app.logs
+    networks:
+      - fitbridge-network
 
   fluent-bit:
     container_name: fluent-bit
@@ -34,6 +61,8 @@ services:
     volumes:
       - ./volumes/fluent-bit-etc/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
       - ./volumes/fluent-bit-etc/parsers.conf:/fluent-bit/etc/parsers.conf
+    networks:
+      - fitbridge-network
 
   opensearch:
     container_name: opensearch
@@ -61,6 +90,8 @@ services:
       nofile:
         soft: 65536
         hard: 65536
+    networks:
+      - fitbridge-network
 
   dashboards:
     image: opensearchproject/opensearch-dashboards:latest
@@ -74,6 +105,8 @@ services:
     depends_on:
       opensearch:
         condition: service_healthy
+    networks:
+      - fitbridge-network
 
   envoy:
     image: envoyproxy/envoy:v1.29.0
@@ -84,6 +117,8 @@ services:
     depends_on:
       keycloak:
         condition: service_healthy
+    networks:
+      - fitbridge-network
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.1.0
@@ -109,6 +144,13 @@ services:
       - forwarded
       - --hostname-backchannel-dynamic
       - "true"
+    networks:
+      - fitbridge-network
 
 volumes:
   opensearch-data:
+  postgresql-data:
+
+networks:
+  fitbridge-network:
+    driver: bridge

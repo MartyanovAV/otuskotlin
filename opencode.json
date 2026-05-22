@@ -5,5 +5,11 @@
   "instructions": [
     ".opencode/AGENTS.md",
     ".opencode/manifest.md"
-  ]
+  ],
+  "mcp": {
+    "drawio": {
+      "type": "remote",
+      "url": "https://mcp.draw.io/mcp"
+    }
+  }
 }

@@ -6,10 +6,10 @@
 
 | Сервис | Назначение | Порт хоста |
 |--------|------------|------------|
-| `app` | Backend API | через Envoy `8080` |
+| `app` | Backend API (Kotlin/Ktor) | через Envoy `8080` |
+| `postgresql` | основное хранилище данных приложения | `5432` |
 | `envoy` | входной proxy и JWT validation для MVP `/v1/*` | `8080` |
 | `keycloak` | Identity Server, импорт realm `fit-bridge` | через Envoy `/admin`, `/realms` |
-| `postgresql` | основное хранилище данных приложения | через app |
 | `opensearch` | хранилище masked logs | `9200`, `9600` |
 | `dashboards` | OpenSearch Dashboards | `5601` |
 | `fluent-bit` | доставка логов контейнеров в OpenSearch | `24224`, `2020` |
@@ -18,7 +18,7 @@
 
 - Docker Desktop или Docker Engine.
 - Docker Compose plugin (`docker compose version`).
-- Свободные порты: `8080`, `5601`, `9200`, `9600`, `2020`, `24224`.
+- Свободные порты: `8080`, `5432`, `5601`, `9200`, `9600`, `2020`, `24224`.
 - Для helper-скриптов `*.sh`: Bash, `curl`, `jq`. На Windows удобно использовать Git Bash или WSL.
 
 ## Быстрый запуск
@@ -91,6 +91,7 @@ docker compose logs -f
 
 ```powershell
 docker compose logs -f app
+docker compose logs -f postgresql
 docker compose logs -f envoy
 docker compose logs -f keycloak
 docker compose logs -f opensearch
@@ -165,8 +166,9 @@ docker compose logs -f keycloak envoy
 
 ## Критерии успешного запуска
 
-- `docker compose ps` показывает запущенные `app`, `envoy`, `keycloak`, `postgresql`, `opensearch`, `dashboards`, `fluent-bit`.
+- `docker compose ps` показывает запущенные `app`, `postgresql`, `envoy`, `keycloak`, `opensearch`, `dashboards`, `fluent-bit`.
 - `http://localhost:8080/health` возвращает статус Backend API.
 - `http://localhost:8080/admin/` открывает Keycloak Admin Console.
 - `https://localhost:9200/_cluster/health` возвращает статус `green` или `yellow`.
 - `http://localhost:5601` открывает OpenSearch Dashboards.
+- PostgreSQL доступен на порту `5432` с credentials: `fitbridge` / `fitbridge-password`, база данных `fitbridge`.
