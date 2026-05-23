@@ -19,6 +19,7 @@
 | Traceability | `docs/02-analysis/REQUIREMENTS_TRACEABILITY_MATRIX.md` |
 | Data classification, access/logging/deletion rules | `docs/02-analysis/DATA_CLASSIFICATION_MATRIX.md` |
 | Roadmap и Phase 2/Phase 3 границы | `docs/01-business/PRODUCT_ROADMAP.md` |
+| UI/UX Design Guide, компоненты и стилистика | `docs/04-ui-ux/01-design-guide.md` |
 
 ## Актуальные действия
 

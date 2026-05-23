@@ -8,8 +8,10 @@
   ],
   "mcp": {
     "drawio": {
-      "type": "remote",
-      "url": "https://mcp.draw.io/mcp"
+      "enabled": true
+    },
+    "playwright": {
+      "enabled": true
     }
   }
 }
