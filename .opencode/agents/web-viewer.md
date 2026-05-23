@@ -8,7 +8,7 @@ description: >
 model: google/gemini-3-flash-preview
 temperature: 0.1
 color: "#4f98a3"
-permissions:
+permission:
   read: deny
   edit: deny
   bash: deny

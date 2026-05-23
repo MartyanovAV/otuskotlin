@@ -9,7 +9,10 @@ permission:
   glob: allow
   grep: allow
   task: deny
-  edit: allow
+  edit:
+    "docs/DEPLOYMENT.md": allow
+    "docs/**/*": deny
+    "*": allow
   bash: allow
   websearch: allow
   webfetch: allow

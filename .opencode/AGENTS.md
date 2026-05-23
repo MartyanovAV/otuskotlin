@@ -7,19 +7,23 @@ USER
 ORCHESTRATOR
 ├─ Product Owner   -> бизнес-требования, scope, acceptance criteria
 ├─ Architect       -> техническое решение, C4, ERD, ADR, API contracts
-├─ Executor        -> реализация через TDD
+├─ Executor        -> реализация через TDD (backend, логика)
+├─ Frontend Dev    -> UI, HTML/CSS, React/Vue, визуальные компоненты (может вызывать Web Viewer)
 ├─ Reviewer        -> quality gate, verdict
 └─ Release Agent   -> CI/CD, deploy
+
+QA-утилиты (вызываются субагентами или Оркестратором):
+└─ Web Viewer      -> визуальная проверка верстки
 
 ## Три главных правила
 
 1. Только Orchestrator вызывает subagent'ов через task().
-2. Субагенты не вызывают друг друга. Никогда.
+2. Субагенты не вызывают друг друга, за исключением утилитарных QA-агентов (например, web-viewer), которые не меняют код.
 3. Любой конфликт, вопрос или нехватка данных возвращается в Orchestrator.
 
 ## Рабочий поток
 
-PO → Architect → [Gate 1] → Executor → [Gate 2] → Reviewer → [Gate 3] → Release Agent
+PO → Architect → [Gate 1] → Executor / Frontend Dev → [Gate 2] → Reviewer → [Gate 3] → Release Agent
 
 ## Gate'ы
 
@@ -30,8 +34,8 @@ Gate 1 — Strategy Sync
 - Пользователь подтвердил переход
 
 Gate 2 — Solution Proof
-- Executor реализовал задачу
-- TDD цикл соблюдён
+- Executor или Frontend Dev реализовал задачу
+- TDD цикл соблюдён (для бэкенда) / визуальная проверка пройдена (для фронтенда)
 - Тесты проходят
 - Пользователь подтвердил переход
 
@@ -51,7 +55,7 @@ Gate 1 Reject:
 Gate 2 Reject:
 ├─ Бизнес-изменение -> Product Owner
 ├─ Тех. ошибка      -> Architect
-└─ Ошибка кода      -> Executor
+└─ Ошибка кода      -> Executor / Frontend Dev
 
 Gate 3 Reject:
 └─ К нужному этапу по решению Orchestrator

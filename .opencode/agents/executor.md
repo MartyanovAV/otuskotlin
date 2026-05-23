@@ -8,8 +8,11 @@ permission:
   read: allow
   glob: allow
   grep: allow
+  codesearch: allow
   task: deny
-  edit: allow
+  edit:
+    "docs/**/*": deny
+    "*": allow
   bash: allow
   websearch: deny
   webfetch: deny
