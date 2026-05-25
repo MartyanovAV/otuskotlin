@@ -8,10 +8,10 @@
   ],
   "mcp": {
     "drawio": {
-      "enabled": true
+      "enabled": false
     },
     "playwright": {
-      "enabled": true
+      "enabled": false
     }
   }
 }

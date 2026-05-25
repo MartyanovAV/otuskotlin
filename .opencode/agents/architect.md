@@ -10,9 +10,8 @@ permission:
   glob: allow
   grep: allow
   task: deny
-  edit:
-    "docs/03-architecture/**/*": allow
-    "*": deny
+  edit: allow
+  write: allow
   bash: deny
   websearch: allow
   webfetch: allow

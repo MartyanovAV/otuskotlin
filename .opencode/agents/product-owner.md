@@ -10,10 +10,8 @@ permission:
   glob: allow
   grep: allow
   task: deny
-  edit:
-    "docs/01-business/**/*": allow
-    "docs/02-analytics/**/*": allow
-    "*": deny
+  write: allow
+  edit: allow
   bash: deny
   websearch: allow
   webfetch: allow
