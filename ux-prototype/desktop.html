@@ -1,0 +1,2019 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=1200" />
+  <title>FitBridge · Кабинет тренера (Desktop)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="desktop.css" />
+</head>
+<body>
+
+<div class="app-shell" id="appShell">
+
+  <!-- ============ RAIL ============ -->
+  <aside class="rail">
+    <div class="rail-header">
+      <div class="rail-logo">FB</div>
+      <div>
+        <div class="rail-brand">FitBridge<small>Кабинет тренера</small></div>
+      </div>
+    </div>
+
+    <div class="rail-section">
+      <div class="rail-section-title">Основное</div>
+      <nav class="rail-nav">
+        <a class="rail-link active" data-view="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+          Дашборд
+        </a>
+        <a class="rail-link" data-view="clients">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 4a4 4 0 0 1 0 8M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
+          Клиенты
+          <span class="rail-link-badge">22</span>
+        </a>
+        <a class="rail-link" data-view="programs">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 4v16M3 10h18M3 16h5"/></svg>
+          Программы
+        </a>
+        <a class="rail-link" data-view="analytics">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M7 14l4-4 3 3 5-6"/></svg>
+          Аналитика
+        </a>
+        <a class="rail-link" data-view="billing">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>
+          Тариф и оплаты
+          <span class="rail-link-badge">2</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="rail-section">
+      <div class="rail-section-title">Прочее</div>
+      <nav class="rail-nav">
+        <a class="rail-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          Сообщения
+        </a>
+        <a class="rail-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Настройки
+        </a>
+        <a class="rail-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+          Помощь
+        </a>
+      </nav>
+    </div>
+
+    <div class="rail-footer">
+      <div class="rail-user">
+        <div class="rail-user-avatar">ИС</div>
+        <div class="rail-user-info">Ирина Соколова<small>Тариф Pro · 22/25</small></div>
+      </div>
+      <div class="theme-row" id="themeToggle">
+        <span class="flex-d items-c-d gap-2-d">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="themeIcon"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          Тема
+        </span>
+        <span class="mono-d" id="themeLabel">light</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="app-main">
+
+    <!-- topbar -->
+    <header class="topbar">
+      <div class="crumb" id="crumb">
+        <strong>Дашборд</strong>
+        <span class="crumb-sep">·</span>
+        <span>Среда, 13 мая</span>
+      </div>
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input placeholder="Найти клиента, упражнение, шаблон…" />
+        <span class="search-kbd">⌘K</span>
+      </div>
+      <div class="topbar-actions">
+        <div class="mode-switch" title="Тип устройства">
+          <a href="index.html">Mobile</a>
+          <a class="active">Desktop</a>
+        </div>
+        <button class="icon-btn-d" title="Уведомления">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          <span class="dot"></span>
+        </button>
+        <button class="icon-btn-d" title="Календарь">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        </button>
+        <button class="btn-d primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Новый клиент
+        </button>
+      </div>
+    </header>
+
+    <div class="views" id="views">
+      <!-- ============ DASHBOARD ============ -->
+      <section class="view active" data-view="dashboard">
+        <div class="view-head">
+          <div>
+            <h1 class="view-title">Доброе утро, Ирина</h1>
+            <div class="view-subtitle">Сегодня 5 тренировок, 2 клиента нуждаются во внимании, и 1 оплата под угрозой просрочки.</div>
+          </div>
+          <div class="view-actions">
+            <button class="btn-d ghost">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              Экспорт CSV
+            </button>
+            <button class="btn-d">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+              Запланировать тренировку
+            </button>
+            <button class="btn-d primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+              Новая программа
+            </button>
+          </div>
+        </div>
+
+        <div class="banner">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+          <div><strong>Алексей Карпов</strong> — оплата просрочена 3 дня (₽6 000). Без оплаты — программа на паузе с 20 мая.</div>
+          <div class="banner-actions">
+            <button class="btn-d ghost" style="color:inherit">Открыть карточку</button>
+            <button class="btn-d primary">Напомнить</button>
+          </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+              Активные клиенты
+            </div>
+            <div class="kpi-value">22<small>/ 25</small></div>
+            <div class="kpi-delta up">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M7 17l5-5 5 5M7 7l5-5 5 5"/></svg>
+              +3 за месяц
+            </div>
+            <svg class="kpi-sparkline" viewBox="0 0 80 28" preserveAspectRatio="none">
+              <polyline fill="none" stroke="var(--primary)" stroke-width="2" points="0,22 8,20 16,18 24,19 32,15 40,14 48,12 56,11 64,8 72,6 80,4"/>
+            </svg>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Adherence (7 дней)
+            </div>
+            <div class="kpi-value">81<small>%</small></div>
+            <div class="kpi-delta up">+4 пп к прошлой неделе</div>
+            <svg class="kpi-sparkline" viewBox="0 0 80 28" preserveAspectRatio="none">
+              <polyline fill="none" stroke="var(--success)" stroke-width="2" points="0,18 10,16 20,17 30,14 40,12 50,15 60,10 70,8 80,6"/>
+            </svg>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+              MRR · май
+            </div>
+            <div class="kpi-value">₽142<small>тыс</small></div>
+            <div class="kpi-delta up">+₽8к vs апрель</div>
+            <svg class="kpi-sparkline" viewBox="0 0 80 28" preserveAspectRatio="none">
+              <polyline fill="none" stroke="var(--warning)" stroke-width="2" points="0,20 10,19 20,16 30,17 40,14 50,12 60,11 70,9 80,7"/>
+            </svg>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              Среднее время ответа
+            </div>
+            <div class="kpi-value">2.1<small>ч</small></div>
+            <div class="kpi-delta down"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M7 7l5 5 5-5"/></svg> −18 мин</div>
+            <svg class="kpi-sparkline" viewBox="0 0 80 28" preserveAspectRatio="none">
+              <polyline fill="none" stroke="var(--info)" stroke-width="2" points="0,8 10,10 20,12 30,11 40,14 50,16 60,18 70,20 80,22"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="cols-2">
+          <!-- Сегодняшние тренировки -->
+          <div class="card-d">
+            <div class="card-d-head">
+              <div>
+                <div class="card-d-title">Сегодня · 13 мая</div>
+                <div class="card-d-subtitle">5 запланированных тренировок · 1 завершена</div>
+              </div>
+              <button class="btn-d ghost">Открыть календарь →</button>
+            </div>
+            <div class="card-d-body flush">
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th>Клиент</th>
+                    <th>Тренировка</th>
+                    <th>Время</th>
+                    <th>Статус</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div class="tbl-name"><div class="avt">МИ</div><div class="tbl-name-meta">Мария Иванова<small>Pro · 4 нед программы</small></div></div>
+                    </td>
+                    <td><div class="fw-7-d">Низ тела · split</div><div class="fs-12-d muted-d">5 упр · 52 мин</div></td>
+                    <td><div class="fw-7-d">08:00</div><div class="fs-12-d muted-d">дома</div></td>
+                    <td><span class="pill-d success"><span class="pdot"></span>Завершена</span></td>
+                    <td class="right-d"><button class="btn-d ghost">Смотреть →</button></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="tbl-name"><div class="avt alt-1">АК</div><div class="tbl-name-meta">Алексей Карпов<small>Pro · оплата просрочена</small></div></div>
+                    </td>
+                    <td><div class="fw-7-d">Грудь + трицепс</div><div class="fs-12-d muted-d">6 упр · 60 мин</div></td>
+                    <td><div class="fw-7-d">11:30</div><div class="fs-12-d muted-d">FitClub</div></td>
+                    <td><span class="pill-d warn"><span class="pdot"></span>На паузе</span></td>
+                    <td class="right-d"><button class="btn-d">Снять паузу</button></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="tbl-name"><div class="avt alt-2">ЕС</div><div class="tbl-name-meta">Елена Соловьёва<small>Pro · 2 нед программы</small></div></div>
+                    </td>
+                    <td><div class="fw-7-d">Жиросжигание · HIIT</div><div class="fs-12-d muted-d">8 интервалов · 40 мин</div></td>
+                    <td><div class="fw-7-d">14:00</div><div class="fs-12-d muted-d">парк</div></td>
+                    <td><span class="pill-d info"><span class="pdot"></span>В работе</span></td>
+                    <td class="right-d"><button class="btn-d ghost">Подсказка →</button></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="tbl-name"><div class="avt alt-3">ДВ</div><div class="tbl-name-meta">Дарья Власова<small>Pro · 1 нед программы</small></div></div>
+                    </td>
+                    <td><div class="fw-7-d">Верх тела · push</div><div class="fs-12-d muted-d">5 упр · 50 мин</div></td>
+                    <td><div class="fw-7-d">17:30</div><div class="fs-12-d muted-d">FitClub</div></td>
+                    <td><span class="pill-d"><span class="pdot"></span>Запланирована</span></td>
+                    <td class="right-d"><button class="btn-d ghost">Открыть →</button></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="tbl-name"><div class="avt alt-4">СМ</div><div class="tbl-name-meta">Сергей Минин<small>Pro · 6 нед программы</small></div></div>
+                    </td>
+                    <td><div class="fw-7-d">Силовая · ноги</div><div class="fs-12-d muted-d">4 упр · 65 мин</div></td>
+                    <td><div class="fw-7-d">19:00</div><div class="fs-12-d muted-d">FitClub</div></td>
+                    <td><span class="pill-d"><span class="pdot"></span>Запланирована</span></td>
+                    <td class="right-d"><button class="btn-d ghost">Открыть →</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Активность + квик-экшены -->
+          <div style="display:flex;flex-direction:column;gap:20px">
+            <div class="card-d">
+              <div class="card-d-head">
+                <div>
+                  <div class="card-d-title">Требует внимания</div>
+                  <div class="card-d-subtitle">3 события · обновлено только что</div>
+                </div>
+              </div>
+              <div class="card-d-body" style="padding:6px 20px">
+                <div class="act-row">
+                  <div class="act-icon d"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v5M12 16h.01"/><circle cx="12" cy="12" r="10"/></svg></div>
+                  <div class="act-body">
+                    <div class="act-title">Алексей Карпов · просрочка ₽6 000</div>
+                    <div class="act-meta">3 дня · последний контакт 8 мая</div>
+                  </div>
+                  <button class="btn-d ghost">Действие</button>
+                </div>
+                <div class="act-row">
+                  <div class="act-icon w"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg></div>
+                  <div class="act-body">
+                    <div class="act-title">Наталья Жукова пропустила 2 тренировки подряд</div>
+                    <div class="act-meta">Adherence упал 100% → 64%</div>
+                  </div>
+                  <button class="btn-d ghost">Написать</button>
+                </div>
+                <div class="act-row">
+                  <div class="act-icon i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div>
+                  <div class="act-body">
+                    <div class="act-title">Дарья Власова прислала фото прогресса</div>
+                    <div class="act-meta">2 фото · нужна реакция</div>
+                  </div>
+                  <button class="btn-d ghost">Открыть</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-d">
+              <div class="card-d-head">
+                <div>
+                  <div class="card-d-title">Прирост по клиентам</div>
+                  <div class="card-d-subtitle">Топ-3 · 1ПМ за 30 дней</div>
+                </div>
+              </div>
+              <div class="card-d-body" style="padding:12px 20px">
+                <div class="act-row">
+                  <div class="avt">МИ</div>
+                  <div class="act-body">
+                    <div class="act-title">Мария Иванова · присед</div>
+                    <div class="act-meta">42 → 49 кг · +7 кг</div>
+                  </div>
+                  <div class="fw-7-d" style="color:var(--success);font-size:14px">+17%</div>
+                </div>
+                <div class="act-row">
+                  <div class="avt alt-4">СМ</div>
+                  <div class="act-body">
+                    <div class="act-title">Сергей Минин · становая</div>
+                    <div class="act-meta">110 → 120 кг · +10 кг</div>
+                  </div>
+                  <div class="fw-7-d" style="color:var(--success);font-size:14px">+9%</div>
+                </div>
+                <div class="act-row">
+                  <div class="avt alt-2">ЕС</div>
+                  <div class="act-body">
+                    <div class="act-title">Елена Соловьёва · −2.2% жира</div>
+                    <div class="act-meta">24.6 → 22.4 · 90 дней</div>
+                  </div>
+                  <div class="fw-7-d" style="color:var(--success);font-size:14px">−9%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- График adherence -->
+        <div class="card-d" style="margin-top:20px">
+          <div class="card-d-head">
+            <div>
+              <div class="card-d-title">Adherence клиентов · 30 дней</div>
+              <div class="card-d-subtitle">Доля выполненных тренировок от запланированных</div>
+            </div>
+            <div class="filter-bar" style="margin:0">
+              <span class="chip-d active">30 дней</span>
+              <span class="chip-d">90 дней</span>
+              <span class="chip-d">Год</span>
+            </div>
+          </div>
+          <div class="card-d-body">
+            <svg class="chart-mock lg" viewBox="0 0 880 260" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="gradA" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#3b3df3" stop-opacity="0.32"/>
+                  <stop offset="1" stop-color="#3b3df3" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="gradB" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#c8ff3a" stop-opacity="0.45"/>
+                  <stop offset="1" stop-color="#c8ff3a" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- grid -->
+              <g stroke="var(--divider)" stroke-width="1">
+                <line x1="40" y1="40" x2="860" y2="40"/>
+                <line x1="40" y1="100" x2="860" y2="100"/>
+                <line x1="40" y1="160" x2="860" y2="160"/>
+                <line x1="40" y1="220" x2="860" y2="220"/>
+              </g>
+              <!-- axis labels -->
+              <g fill="var(--text-faint)" font-size="10" font-family="JetBrains Mono">
+                <text x="0" y="44">100%</text>
+                <text x="0" y="104">75%</text>
+                <text x="0" y="164">50%</text>
+                <text x="0" y="224">25%</text>
+                <text x="40"  y="245">15 апр</text>
+                <text x="220" y="245">22 апр</text>
+                <text x="400" y="245">29 апр</text>
+                <text x="580" y="245">6 мая</text>
+                <text x="760" y="245">13 мая</text>
+              </g>
+              <!-- target area -->
+              <path d="M40,120 L860,120 L860,80 L40,80 Z" fill="var(--accent)" fill-opacity="0.18"/>
+              <text x="850" y="76" text-anchor="end" font-size="10" fill="var(--accent-text)" font-family="JetBrains Mono" font-weight="700" opacity="0.7">target 75-85%</text>
+              <!-- primary series (this month) -->
+              <path d="M40,140 L120,118 L200,124 L280,108 L360,96 L440,100 L520,85 L600,88 L680,72 L760,68 L860,60 L860,220 L40,220 Z" fill="url(#gradA)"/>
+              <polyline points="40,140 120,118 200,124 280,108 360,96 440,100 520,85 600,88 680,72 760,68 860,60" fill="none" stroke="#3b3df3" stroke-width="2.5"/>
+              <!-- previous series -->
+              <polyline points="40,160 120,154 200,140 280,148 360,130 440,138 520,120 600,128 680,112 760,118 860,108" fill="none" stroke="var(--text-faint)" stroke-width="2" stroke-dasharray="4 4"/>
+              <!-- points -->
+              <g fill="#3b3df3">
+                <circle cx="760" cy="68" r="4"/>
+                <circle cx="860" cy="60" r="4"/>
+              </g>
+            </svg>
+            <div class="chart-legend">
+              <span><span class="legend-dot" style="background:#3b3df3"></span>Этот период · 81%</span>
+              <span><span class="legend-dot" style="background:var(--text-faint)"></span>Прошлый период · 73%</span>
+              <span><span class="legend-dot" style="background:var(--accent)"></span>Целевой коридор 75–85%</span>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- ============ CLIENTS LIST ============ -->
+      <section class="view" data-view="clients">
+        <div class="view-head">
+          <div>
+            <h1 class="view-title">Клиенты</h1>
+            <div class="view-subtitle">22 из 25 активных слотов. Управляй программами, статусом и оплатами в одном окне.</div>
+          </div>
+          <div class="view-actions">
+            <button class="btn-d ghost">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              Экспорт
+            </button>
+            <button class="btn-d">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+              Пригласить по ссылке
+            </button>
+            <button class="btn-d primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M8.5 3.5a4 4 0 1 1 0 8 4 4 0 0 1 0-8zM20 8v6M23 11h-6"/></svg>
+              Новый клиент
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <span class="chip-d active">Все · 22</span>
+          <span class="chip-d"><span class="dot" style="background:var(--success)"></span>Активные · 18</span>
+          <span class="chip-d"><span class="dot" style="background:var(--warning)"></span>Просрочка · 2</span>
+          <span class="chip-d"><span class="dot" style="background:var(--text-faint)"></span>Архив · 2</span>
+          <span class="chip-d">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            Программа
+          </span>
+          <span class="chip-d">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            Adherence
+          </span>
+          <span class="chip-d">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            Поиск
+          </span>
+        </div>
+
+        <div class="card-d">
+          <div class="card-d-body flush">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th style="width:36px"><input type="checkbox"/></th>
+                  <th>Клиент</th>
+                  <th>Программа</th>
+                  <th>Adherence</th>
+                  <th>Последний контакт</th>
+                  <th>Оплата</th>
+                  <th>Статус</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><input type="checkbox"/></td>
+                  <td><div class="tbl-name"><div class="avt">МИ</div><div class="tbl-name-meta">Мария Иванова<small>m.ivanova@mail.ru · 34</small></div></div></td>
+                  <td><div class="fw-7-d">Гипертрофия · split 4</div><div class="fs-12-d muted-d">нед 4 из 8</div></td>
+                  <td><div class="fw-7-d" style="color:var(--success)">92%</div><div class="bar-d" style="width:120px;margin-top:6px"><span class="s" style="width:92%"></span></div></td>
+                  <td><div class="fs-13-d">Сегодня · 08:14</div><div class="fs-12-d muted-d">тренировка завершена</div></td>
+                  <td><span class="pay-status" style="color:var(--success)">₽8 000</span><div class="fs-12-d muted-d">до 1 июня</div></td>
+                  <td><span class="pill-d success"><span class="pdot"></span>Активна</span></td>
+                  <td class="right-d"><button class="btn-d ghost">Открыть →</button></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox"/></td>
+                  <td><div class="tbl-name"><div class="avt alt-1">АК</div><div class="tbl-name-meta">Алексей Карпов<small>karpov@gmail.com · 41</small></div></div></td>
+                  <td><div class="fw-7-d">Силовая · push/pull</div><div class="fs-12-d muted-d">нед 6 из 12 · ⏸ пауза</div></td>
+                  <td><div class="fw-7-d" style="color:var(--warning)">68%</div><div class="bar-d" style="width:120px;margin-top:6px"><span class="w" style="width:68%"></span></div></td>
+                  <td><div class="fs-13-d">8 мая</div><div class="fs-12-d muted-d">просьба о переносе</div></td>
+                  <td><span class="pay-status" style="color:var(--danger)">−3 дня</span><div class="fs-12-d muted-d">₽6 000 не оплачено</div></td>
+                  <td><span class="pill-d danger"><span class="pdot"></span>Просрочка</span></td>
+                  <td class="right-d"><button class="btn-d">Напомнить</button></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox"/></td>
+                  <td><div class="tbl-name"><div class="avt alt-2">ЕС</div><div class="tbl-name-meta">Елена Соловьёва<small>e.solovieva@mail.ru · 29</small></div></div></td>
+                  <td><div class="fw-7-d">Жиросжигание · 3/нед</div><div class="fs-12-d muted-d">нед 2 из 12</div></td>
+                  <td><div class="fw-7-d" style="color:var(--success)">88%</div><div class="bar-d" style="width:120px;margin-top:6px"><span class="s" style="width:88%"></span></div></td>
+                  <td><div class="fs-13-d">Вчера · 21:02</div><div class="fs-12-d muted-d">фото прогресса</div></td>
+                  <td><span class="pay-status" style="color:var(--success)">₽8 000</span><div class="fs-12-d muted-d">до 4 июня</div></td>
+                  <td><span class="pill-d success"><span class="pdot"></span>Активна</span></td>
+                  <td class="right-d"><button class="btn-d ghost">Открыть →</button></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox"/></td>
+                  <td><div class="tbl-name"><div class="avt alt-3">ДВ</div><div class="tbl-name-meta">Дарья Власова<small>vlasova@mail.ru · 26</small></div></div></td>
+                  <td><div class="fw-7-d">Адаптация · 2/нед</div><div class="fs-12-d muted-d">нед 1 из 4</div></td>
+                  <td><div class="fw-7-d" style="color:var(--success)">100%</div><div class="bar-d" style="width:120px;margin-top:6px"><span class="s" style="width:100%"></span></div></td>
+                  <td><div class="fs-13-d">Сегодня · 09:40</div><div class="fs-12-d muted-d">вопрос про разминку</div></td>
+                  <td><span class="pay-status" style="color:var(--success)">₽6 000</span><div class="fs-12-d muted-d">до 10 июня</div></td>
+                  <td><span class="pill-d success"><span class="pdot"></span>Активна</span></td>
+                  <td class="right-d"><button class="btn-d ghost">Открыть →</button></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox"/></td>
+                  <td><div class="tbl-name"><div class="avt alt-4">СМ</div><div class="tbl-name-meta">Сергей Минин<small>minin@mail.ru · 38</small></div></div></td>
+                  <td><div class="fw-7-d">Сила · split 5</div><div class="fs-12-d muted-d">нед 6 из 16</div></td>
+                  <td><div class="fw-7-d" style="color:var(--success)">95%</div><div class="bar-d" style="width:120px;margin-top:6px"><span class="s" style="width:95%"></span></div></td>
+                  <td><div class="fs-13-d">11 мая</div><div class="fs-12-d muted-d">PR — становая 120 кг</div></td>
+                  <td><span class="pay-status" style="color:var(--success)">₽10 000</span><div class="fs-12-d muted-d">до 8 июня</div></td>
+                  <td><span class="pill-d success"><span class="pdot"></span>Активна</span></td>
+                  <td class="right-d"><button class="btn-d ghost">Открыть →</button></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox"/></td>
+                  <td><div class="tbl-name"><div class="avt alt-5">НЖ</div><div class="tbl-name-meta">Наталья Жукова<small>zhukova@mail.ru · 32</small></div></div></td>
+                  <td><div class="fw-7-d">Жиросжигание · 3/нед</div><div class="fs-12-d muted-d">нед 5 из 12</div></td>
+                  <td><div class="fw-7-d" style="color:var(--danger)">64%</div><div class="bar-d" style="width:120px;margin-top:6px"><span class="d" style="width:64%"></span></div></td>
+                  <td><div class="fs-13-d">9 мая</div><div class="fs-12-d muted-d">пропуск 2 тренировки</div></td>
+                  <td><span class="pay-status" style="color:var(--warning)">через 4 дня</span><div class="fs-12-d muted-d">₽8 000 · авто</div></td>
+                  <td><span class="pill-d warn"><span class="pdot"></span>Внимание</span></td>
+                  <td class="right-d"><button class="btn-d">Чат</button></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox"/></td>
+                  <td><div class="tbl-name"><div class="avt alt-6">ПО</div><div class="tbl-name-meta">Павел Орехов<small>orehov@mail.ru · 44</small></div></div></td>
+                  <td><div class="fw-7-d">Реабилитация · 2/нед</div><div class="fs-12-d muted-d">нед 3 из 8</div></td>
+                  <td><div class="fw-7-d" style="color:var(--success)">83%</div><div class="bar-d" style="width:120px;margin-top:6px"><span class="s" style="width:83%"></span></div></td>
+                  <td><div class="fs-13-d">10 мая</div><div class="fs-12-d muted-d">отчёт от реабилитолога</div></td>
+                  <td><span class="pay-status" style="color:var(--warning)">−1 день</span><div class="fs-12-d muted-d">₽6 000 · ждём</div></td>
+                  <td><span class="pill-d warn"><span class="pdot"></span>Просрочка</span></td>
+                  <td class="right-d"><button class="btn-d">Напомнить</button></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox"/></td>
+                  <td><div class="tbl-name"><div class="avt">АН</div><div class="tbl-name-meta">Анна Никитина<small>nikitina@mail.ru · 28</small></div></div></td>
+                  <td><div class="fw-7-d">Гипертрофия · split 3</div><div class="fs-12-d muted-d">нед 8 из 12</div></td>
+                  <td><div class="fw-7-d" style="color:var(--success)">91%</div><div class="bar-d" style="width:120px;margin-top:6px"><span class="s" style="width:91%"></span></div></td>
+                  <td><div class="fs-13-d">12 мая</div><div class="fs-12-d muted-d">отметила тренировку</div></td>
+                  <td><span class="pay-status" style="color:var(--success)">₽8 000</span><div class="fs-12-d muted-d">до 12 июня</div></td>
+                  <td><span class="pill-d success"><span class="pdot"></span>Активна</span></td>
+                  <td class="right-d"><button class="btn-d ghost">Открыть →</button></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox"/></td>
+                  <td><div class="tbl-name"><div class="avt alt-2">ВТ</div><div class="tbl-name-meta">Виктор Тимохин<small>timokhin@mail.ru · 36</small></div></div></td>
+                  <td><div class="fw-7-d">Сила · upper/lower</div><div class="fs-12-d muted-d">нед 2 из 12</div></td>
+                  <td><div class="fw-7-d" style="color:var(--success)">85%</div><div class="bar-d" style="width:120px;margin-top:6px"><span class="s" style="width:85%"></span></div></td>
+                  <td><div class="fs-13-d">11 мая</div><div class="fs-12-d muted-d">вопрос про подходы</div></td>
+                  <td><span class="pay-status" style="color:var(--success)">₽10 000</span><div class="fs-12-d muted-d">до 11 июня</div></td>
+                  <td><span class="pill-d success"><span class="pdot"></span>Активна</span></td>
+                  <td class="right-d"><button class="btn-d ghost">Открыть →</button></td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox"/></td>
+                  <td><div class="tbl-name"><div class="avt alt-3">ОК</div><div class="tbl-name-meta">Ольга Кирсанова<small>kirsanova@mail.ru · 31</small></div></div></td>
+                  <td><div class="fw-7-d">Жиросжигание · 4/нед</div><div class="fs-12-d muted-d">нед 7 из 12</div></td>
+                  <td><div class="fw-7-d" style="color:var(--success)">79%</div><div class="bar-d" style="width:120px;margin-top:6px"><span class="s" style="width:79%"></span></div></td>
+                  <td><div class="fs-13-d">Сегодня · 10:21</div><div class="fs-12-d muted-d">фото замеров</div></td>
+                  <td><span class="pay-status" style="color:var(--success)">₽8 000</span><div class="fs-12-d muted-d">до 5 июня</div></td>
+                  <td><span class="pill-d success"><span class="pdot"></span>Активна</span></td>
+                  <td class="right-d"><button class="btn-d ghost">Открыть →</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--divider);font-size:12px;color:var(--text-muted)">
+            <div>Показано 10 из 22</div>
+            <div class="flex-d items-c-d gap-2-d">
+              <button class="btn-d ghost">← Назад</button>
+              <span class="mono-d">1 / 3</span>
+              <button class="btn-d ghost">Вперёд →</button>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- ============ CLIENT DETAIL ============ -->
+      <section class="view" data-view="client-detail">
+        <div class="view-head" style="margin-bottom:14px">
+          <div>
+            <div class="crumb" style="margin-bottom:10px">
+              <a class="muted-d" data-view-link="clients" style="cursor:pointer">← Клиенты</a>
+              <span class="crumb-sep">/</span>
+              <strong>Мария Иванова</strong>
+            </div>
+            <div class="client-hero">
+              <div class="avt lg">МИ</div>
+              <div>
+                <div class="client-hero-title">Мария Иванова</div>
+                <div class="client-hero-meta">
+                  <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 34 года · занимается 6 нед</span>
+                  <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> +7 925 412-89-71</span>
+                  <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> m.ivanova@mail.ru</span>
+                  <span><span class="pdot" style="background:var(--success);width:6px;height:6px;border-radius:999px;display:inline-block;margin-right:4px"></span>Активна с 1 апреля</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="view-actions">
+            <button class="btn-d ghost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Чат</button>
+            <button class="btn-d"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Отчёт PDF</button>
+            <button class="btn-d primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Редактировать программу</button>
+          </div>
+        </div>
+
+        <div class="mini-stats">
+          <div class="mini-stat">
+            <div class="mini-stat-label">Adherence · 30д</div>
+            <div class="mini-stat-value">92%</div>
+            <div class="mini-stat-delta">+8 пп к прошлому</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat-label">Тренировок</div>
+            <div class="mini-stat-value">22<span style="font-size:14px;color:var(--text-muted)"> / 24</span></div>
+            <div class="mini-stat-delta flat">по плану · 4/нед</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat-label">1ПМ · присед</div>
+            <div class="mini-stat-value">49 кг</div>
+            <div class="mini-stat-delta">+7 кг · 60 дней</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat-label">Вес</div>
+            <div class="mini-stat-value">66.5 кг</div>
+            <div class="mini-stat-delta">−2.1 кг · 60 дней</div>
+          </div>
+        </div>
+
+        <div class="tabs-d">
+          <div class="tab-d active">Обзор</div>
+          <div class="tab-d">Программа</div>
+          <div class="tab-d">Дневник <span class="pill-d primary" style="margin-left:6px">22</span></div>
+          <div class="tab-d">Замеры</div>
+          <div class="tab-d">Доступы</div>
+          <div class="tab-d">Оплаты</div>
+        </div>
+
+        <div class="cols-8-4">
+          <!-- Left: programs and history -->
+          <div style="display:flex;flex-direction:column;gap:20px">
+            <div class="card-d">
+              <div class="card-d-head">
+                <div>
+                  <div class="card-d-title">Активная программа</div>
+                  <div class="card-d-subtitle">Гипертрофия · split 4 дня · нед 4 из 8</div>
+                </div>
+                <div class="view-actions" style="margin:0">
+                  <button class="btn-d ghost">Пауза</button>
+                  <button class="btn-d">Редактировать</button>
+                </div>
+              </div>
+              <div class="card-d-body">
+                <div class="bar-d" style="height:10px"><span style="width:50%"></span></div>
+                <div class="flex-d between-d items-c-d mt-3-d fs-12-d muted-d">
+                  <span>Старт · 15 апр</span>
+                  <span>Финиш · 10 июня</span>
+                </div>
+                <div class="cols-3" style="margin-top:18px">
+                  <div style="padding:14px;background:var(--surface-2);border-radius:var(--r-md)">
+                    <div class="fs-12-d muted-d">ПН · Низ тела</div>
+                    <div class="fw-7-d mt-3-d">Присед 4×8 · 42 кг</div>
+                    <div class="fs-12-d muted-d">+ ягодичный мост, болгарские, RDL</div>
+                  </div>
+                  <div style="padding:14px;background:var(--surface-2);border-radius:var(--r-md)">
+                    <div class="fs-12-d muted-d">СР · Верх тела</div>
+                    <div class="fw-7-d mt-3-d">Жим лёжа 4×8 · 32 кг</div>
+                    <div class="fs-12-d muted-d">+ тяга, разводки, тяга к лицу</div>
+                  </div>
+                  <div style="padding:14px;background:var(--surface-2);border-radius:var(--r-md)">
+                    <div class="fs-12-d muted-d">ПТ · Низ тела</div>
+                    <div class="fw-7-d mt-3-d">Становая 4×6 · 60 кг</div>
+                    <div class="fs-12-d muted-d">+ выпады, сгибания, икры</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-d">
+              <div class="card-d-head">
+                <div>
+                  <div class="card-d-title">Прогресс 1ПМ · 90 дней</div>
+                  <div class="card-d-subtitle">Расчётный максимум по формуле Эпли</div>
+                </div>
+                <div class="filter-bar" style="margin:0">
+                  <span class="chip-d active">Присед</span>
+                  <span class="chip-d">Жим</span>
+                  <span class="chip-d">Становая</span>
+                </div>
+              </div>
+              <div class="card-d-body">
+                <svg class="chart-mock" viewBox="0 0 700 220" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="gradC" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stop-color="#c8ff3a" stop-opacity="0.5"/>
+                      <stop offset="1" stop-color="#c8ff3a" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <g stroke="var(--divider)">
+                    <line x1="40" y1="30" x2="690" y2="30"/>
+                    <line x1="40" y1="80" x2="690" y2="80"/>
+                    <line x1="40" y1="130" x2="690" y2="130"/>
+                    <line x1="40" y1="180" x2="690" y2="180"/>
+                  </g>
+                  <g fill="var(--text-faint)" font-size="10" font-family="JetBrains Mono">
+                    <text x="0" y="34">55</text>
+                    <text x="0" y="84">50</text>
+                    <text x="0" y="134">45</text>
+                    <text x="0" y="184">40</text>
+                  </g>
+                  <path d="M40,180 L130,170 L220,160 L310,140 L400,130 L490,110 L580,90 L690,55 L690,200 L40,200 Z" fill="url(#gradC)"/>
+                  <polyline points="40,180 130,170 220,160 310,140 400,130 490,110 580,90 690,55" fill="none" stroke="#3b3df3" stroke-width="2.5"/>
+                  <g fill="#3b3df3">
+                    <circle cx="40" cy="180" r="3"/>
+                    <circle cx="130" cy="170" r="3"/>
+                    <circle cx="220" cy="160" r="3"/>
+                    <circle cx="310" cy="140" r="3"/>
+                    <circle cx="400" cy="130" r="3"/>
+                    <circle cx="490" cy="110" r="3"/>
+                    <circle cx="580" cy="90" r="3"/>
+                    <circle cx="690" cy="55" r="4" fill="var(--accent)" stroke="#3b3df3" stroke-width="2"/>
+                  </g>
+                  <text x="685" y="48" text-anchor="end" font-size="11" font-weight="700" fill="var(--text)">49 кг</text>
+                </svg>
+                <div class="chart-legend">
+                  <span><span class="legend-dot" style="background:#3b3df3"></span>Присед · +7 кг</span>
+                  <span class="muted-d">Базовый 42 кг → текущий 49 кг</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-d">
+              <div class="card-d-head">
+                <div>
+                  <div class="card-d-title">История тренировок</div>
+                  <div class="card-d-subtitle">22 завершено · 2 пропущено · средний RPE 7.4</div>
+                </div>
+                <button class="btn-d ghost">Все →</button>
+              </div>
+              <div class="card-d-body">
+                <div class="timeline">
+                  <div class="tl-item done">
+                    <div class="tl-title">Низ тела · 5 упр · 52 мин</div>
+                    <div class="tl-meta">Сегодня · 08:14 · RPE 7 · присед +1ПМ</div>
+                  </div>
+                  <div class="tl-item done">
+                    <div class="tl-title">Верх тела · 5 упр · 48 мин</div>
+                    <div class="tl-meta">12 мая · RPE 8 · жим лёжа 32 кг</div>
+                  </div>
+                  <div class="tl-item done">
+                    <div class="tl-title">Низ тела · 5 упр · 55 мин</div>
+                    <div class="tl-meta">11 мая · RPE 7 · становая 60 кг</div>
+                  </div>
+                  <div class="tl-item miss">
+                    <div class="tl-title">Пропуск тренировки</div>
+                    <div class="tl-meta">10 мая · «болела голова»</div>
+                  </div>
+                  <div class="tl-item done">
+                    <div class="tl-title">Верх тела · 5 упр · 50 мин</div>
+                    <div class="tl-meta">9 мая · RPE 7</div>
+                  </div>
+                  <div class="tl-item done">
+                    <div class="tl-title">Низ тела · 5 упр · 53 мин</div>
+                    <div class="tl-meta">7 мая · RPE 8</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: side panel -->
+          <div style="display:flex;flex-direction:column;gap:20px">
+            <div class="card-d">
+              <div class="card-d-head">
+                <div class="card-d-title">Доступы клиента</div>
+              </div>
+              <div class="card-d-body" style="padding:10px 20px">
+                <div class="act-row">
+                  <div class="avt" style="width:34px;height:34px;font-size:11px">ИС</div>
+                  <div class="act-body">
+                    <div class="act-title">Ирина Соколова · ты</div>
+                    <div class="act-meta">Тренировки, замеры, программа · полный доступ</div>
+                  </div>
+                </div>
+                <div class="act-row">
+                  <div class="avt alt-2" style="width:34px;height:34px;font-size:11px">ОП</div>
+                  <div class="act-body">
+                    <div class="act-title">Ольга Петрова · нутрициолог</div>
+                    <div class="act-meta">Только замеры · до 1 июня</div>
+                  </div>
+                </div>
+                <button class="btn-d ghost w-full-d mt-3-d">+ Запросить доступ</button>
+              </div>
+            </div>
+
+            <div class="card-d">
+              <div class="card-d-head">
+                <div class="card-d-title">Профиль</div>
+              </div>
+              <div class="card-d-body">
+                <dl class="info-pair">
+                  <dt>Цель</dt><dd>−4 кг до 1 сентября</dd>
+                  <dt>Рост</dt><dd>168 см</dd>
+                  <dt>Вес</dt><dd>66.5 кг <span class="fs-12-d" style="color:var(--success)">−2.1</span></dd>
+                  <dt>Опыт</dt><dd>Любитель · 6 мес</dd>
+                  <dt>Травмы</dt><dd>Нет</dd>
+                  <dt>Локация</dt><dd>Москва · FitClub Кутузовский</dd>
+                  <dt>Тип</dt><dd>Pro · ₽8 000/мес</dd>
+                  <dt>Сл. оплата</dt><dd>1 июня · авто-списание</dd>
+                </dl>
+              </div>
+            </div>
+
+            <div class="card-d">
+              <div class="card-d-head">
+                <div class="card-d-title">Замеры тела</div>
+              </div>
+              <div class="card-d-body">
+                <dl class="info-pair">
+                  <dt>Талия</dt><dd>71 см <span class="fs-12-d" style="color:var(--success)">−3</span></dd>
+                  <dt>Бёдра</dt><dd>94 см <span class="fs-12-d" style="color:var(--success)">−2</span></dd>
+                  <dt>% жира</dt><dd>22.4% <span class="fs-12-d" style="color:var(--success)">−2.2</span></dd>
+                  <dt>Грудь</dt><dd>88 см</dd>
+                  <dt>Бицепс</dt><dd>27 см <span class="fs-12-d" style="color:var(--success)">+0.5</span></dd>
+                </dl>
+                <button class="btn-d ghost w-full-d mt-3-d">Запросить замеры →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- ============ PROGRAMS BUILDER ============ -->
+      <section class="view" data-view="programs">
+        <div class="view-head" style="margin-bottom:14px">
+          <div>
+            <div class="crumb" style="margin-bottom:8px">
+              <a class="muted-d">Программы</a>
+              <span class="crumb-sep">/</span>
+              <strong>Гипертрофия · split 4 дня</strong>
+              <span class="crumb-sep">·</span>
+              <span class="muted-d">Неделя 1 из 8</span>
+            </div>
+            <h1 class="view-title">Конструктор программы</h1>
+            <div class="view-subtitle">Шаблон «Гипертрофия 4д» назначен Марии Ивановой. Меняй упражнения, подходы и RPE — клиент увидит изменения сразу.</div>
+          </div>
+          <div class="view-actions">
+            <button class="btn-d ghost">Сохранить как шаблон</button>
+            <button class="btn-d">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+              Дублировать неделю
+            </button>
+            <button class="btn-d primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Опубликовать
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-bar" style="margin-bottom:16px">
+          <span class="muted-d fs-12-d fw-7-d" style="margin-right:6px">Назначено:</span>
+          <span class="pill-d primary"><span class="pdot"></span>Мария Иванова</span>
+          <button class="chip-d">+ Добавить клиента</button>
+          <span style="flex:1"></span>
+          <span class="muted-d fs-12-d fw-7-d">Неделя:</span>
+          <span class="chip-d active">1</span>
+          <span class="chip-d">2</span>
+          <span class="chip-d">3</span>
+          <span class="chip-d">4</span>
+          <span class="chip-d">5</span>
+          <span class="chip-d">6</span>
+          <span class="chip-d">7</span>
+          <span class="chip-d">8</span>
+        </div>
+
+        <div class="builder-grid">
+          <!-- Week grid -->
+          <div class="card-d">
+            <div class="card-d-head">
+              <div>
+                <div class="card-d-title">Неделя 1 · 20–26 мая</div>
+                <div class="card-d-subtitle">4 тренировки · 3 дня отдыха · сложность 6/10</div>
+              </div>
+              <div class="filter-bar" style="margin:0">
+                <span class="chip-d active">Список</span>
+                <span class="chip-d">Календарь</span>
+              </div>
+            </div>
+            <div class="card-d-body">
+              <div class="week-grid">
+
+                <div class="day-col">
+                  <div class="day-head">Пн<span class="day-num">20</span></div>
+                  <div class="day-body">
+                    <div class="ex-card muscle">
+                      <div class="ex-name">Низ тела</div>
+                      <div class="ex-meta">5 упр · 52 мин</div>
+                    </div>
+                    <div class="ex-card">
+                      <div class="ex-name">Присед со штангой</div>
+                      <div class="ex-meta">4×8 · 42 кг · RPE 7</div>
+                    </div>
+                    <div class="ex-card">
+                      <div class="ex-name">Болгарский сплит</div>
+                      <div class="ex-meta">3×10 · 12 кг гант</div>
+                    </div>
+                    <div class="ex-card">
+                      <div class="ex-name">Румынская тяга</div>
+                      <div class="ex-meta">3×10 · 40 кг</div>
+                    </div>
+                    <div class="ex-card">
+                      <div class="ex-name">Ягодичный мост</div>
+                      <div class="ex-meta">3×12 · 50 кг</div>
+                    </div>
+                    <div class="ex-card">
+                      <div class="ex-name">Икры стоя</div>
+                      <div class="ex-meta">3×15 · 40 кг</div>
+                    </div>
+                    <button class="day-add">+ Добавить упражнение</button>
+                  </div>
+                </div>
+
+                <div class="day-col">
+                  <div class="day-head">Вт<span class="day-num">21</span></div>
+                  <div class="day-body">
+                    <div class="day-rest">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.6"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                      <div class="mt-3-d fs-12-d">Отдых</div>
+                    </div>
+                    <button class="day-add">+ Добавить</button>
+                  </div>
+                </div>
+
+                <div class="day-col">
+                  <div class="day-head">Ср<span class="day-num">22</span></div>
+                  <div class="day-body">
+                    <div class="ex-card muscle">
+                      <div class="ex-name">Верх тела · push</div>
+                      <div class="ex-meta">5 упр · 50 мин</div>
+                    </div>
+                    <div class="ex-card">
+                      <div class="ex-name">Жим лёжа</div>
+                      <div class="ex-meta">4×8 · 32 кг · RPE 7</div>
+                    </div>
+                    <div class="ex-card">
+                      <div class="ex-name">Жим гантелей сидя</div>
+                      <div class="ex-meta">3×10 · 8 кг</div>
+                    </div>
+                    <div class="ex-card">
+                      <div class="ex-name">Разводки</div>
+                      <div class="ex-meta">3×12 · 6 кг</div>
+                    </div>
+                    <div class="ex-card">
+                      <div class="ex-name">Французский жим</div>
+                      <div class="ex-meta">3×12 · 12 кг</div>
+                    </div>
+                    <button class="day-add">+ Добавить упражнение</button>
+                  </div>
+                </div>
+
+                <div class="day-col">
+                  <div class="day-head">Чт<span class="day-num">23</span></div>
+                  <div class="day-body">
+                    <div class="day-rest">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.6"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                      <div class="mt-3-d fs-12-d">Отдых</div>
+                    </div>
+                    <button class="day-add">+ Добавить</button>
+                  </div>
+                </div>
+
+                <div class="day-col">
+                  <div class="day-head">Пт<span class="day-num">24</span></div>
+                  <div class="day-body">
+                    <div class="ex-card muscle">
+                      <div class="ex-name">Низ тела · тяга</div>
+                      <div class="ex-meta">5 упр · 55 мин</div>
+                    </div>
+                    <div class="ex-card">
+                      <div class="ex-name">Становая тяга</div>
+                      <div class="ex-meta">4×6 · 60 кг · RPE 8</div>
+                    </div>
+                    <div class="ex-card">
+                      <div class="ex-name">Выпады с гантелями</div>
+                      <div class="ex-meta">3×10 · 8 кг</div>
+                    </div>
+                    <div class="ex-card">
+                      <div class="ex-name">Сгибания ног</div>
+                      <div class="ex-meta">3×12 · 30 кг</div>
+                    </div>
+                    <div class="ex-card">
+                      <div class="ex-name">Тяга к лицу</div>
+                      <div class="ex-meta">3×15 · 15 кг</div>
+                    </div>
+                    <button class="day-add">+ Добавить упражнение</button>
+                  </div>
+                </div>
+
+                <div class="day-col">
+                  <div class="day-head">Сб<span class="day-num">25</span></div>
+                  <div class="day-body">
+                    <div class="ex-card muscle">
+                      <div class="ex-name">Верх тела · pull</div>
+                      <div class="ex-meta">5 упр · 48 мин</div>
+                    </div>
+                    <div class="ex-card">
+                      <div class="ex-name">Тяга верт. блока</div>
+                      <div class="ex-meta">4×10 · 30 кг</div>
+                    </div>
+                    <div class="ex-card">
+                      <div class="ex-name">Тяга гантели в наклоне</div>
+                      <div class="ex-meta">3×10 · 10 кг</div>
+                    </div>
+                    <div class="ex-card">
+                      <div class="ex-name">Подъём на бицепс</div>
+                      <div class="ex-meta">3×12 · 7 кг</div>
+                    </div>
+                    <div class="ex-card">
+                      <div class="ex-name">Молотки</div>
+                      <div class="ex-meta">3×12 · 6 кг</div>
+                    </div>
+                    <button class="day-add">+ Добавить упражнение</button>
+                  </div>
+                </div>
+
+                <div class="day-col">
+                  <div class="day-head">Вс<span class="day-num">26</span></div>
+                  <div class="day-body">
+                    <div class="day-rest">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.6"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                      <div class="mt-3-d fs-12-d">Отдых · кардио опц.</div>
+                    </div>
+                    <button class="day-add">+ Добавить</button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Library panel -->
+          <aside class="lib-panel">
+            <div class="lib-head">
+              <div class="card-d-title">Библиотека упражнений</div>
+              <input class="lib-search mt-3-d" placeholder="Жим, тяга, присед…"/>
+            </div>
+            <div class="lib-tags">
+              <span class="chip-d active">Все</span>
+              <span class="chip-d">Ноги</span>
+              <span class="chip-d">Спина</span>
+              <span class="chip-d">Грудь</span>
+              <span class="chip-d">Плечи</span>
+              <span class="chip-d">Руки</span>
+              <span class="chip-d">Кор</span>
+            </div>
+            <div class="lib-list">
+              <div class="lib-item">
+                <div class="lib-thumb a">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L4 6m14-4l2 4M6 6h12M5 6v12a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3V6"/></svg>
+                </div>
+                <div><div class="lib-name">Присед со штангой</div><div class="lib-meta">Квадрицепс · базовое</div></div>
+              </div>
+              <div class="lib-item">
+                <div class="lib-thumb a"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M5 6h14M5 18h14"/></svg></div>
+                <div><div class="lib-name">Жим лёжа со штангой</div><div class="lib-meta">Грудь · базовое</div></div>
+              </div>
+              <div class="lib-item">
+                <div class="lib-thumb b"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M5 6h14M5 18h14"/></svg></div>
+                <div><div class="lib-name">Становая тяга</div><div class="lib-meta">Спина+ноги · базовое</div></div>
+              </div>
+              <div class="lib-item">
+                <div class="lib-thumb c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/></svg></div>
+                <div><div class="lib-name">Подтягивания</div><div class="lib-meta">Спина · вес тела</div></div>
+              </div>
+              <div class="lib-item">
+                <div class="lib-thumb d"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v16M20 4v16"/></svg></div>
+                <div><div class="lib-name">Жим гантелей сидя</div><div class="lib-meta">Плечи · изолирующее</div></div>
+              </div>
+              <div class="lib-item">
+                <div class="lib-thumb a"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 8-8 8-8-8 8-8z"/></svg></div>
+                <div><div class="lib-name">Болгарские выпады</div><div class="lib-meta">Ягодицы · одностор.</div></div>
+              </div>
+              <div class="lib-item">
+                <div class="lib-thumb b"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12l10-10 10 10-10 10z"/></svg></div>
+                <div><div class="lib-name">Румынская тяга</div><div class="lib-meta">Бицепс бедра</div></div>
+              </div>
+              <div class="lib-item">
+                <div class="lib-thumb c"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="9" width="18" height="6" rx="3"/></svg></div>
+                <div><div class="lib-name">Тяга верт. блока</div><div class="lib-meta">Широчайшие</div></div>
+              </div>
+              <div class="lib-item">
+                <div class="lib-thumb d"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h18"/></svg></div>
+                <div><div class="lib-name">Разводки гантелей</div><div class="lib-meta">Дельты</div></div>
+              </div>
+              <div class="lib-item">
+                <div class="lib-thumb a"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18"/></svg></div>
+                <div><div class="lib-name">Ягодичный мост</div><div class="lib-meta">Ягодицы</div></div>
+              </div>
+            </div>
+            <div style="padding:10px 16px;border-top:1px solid var(--divider);font-size:11px;color:var(--text-faint);text-align:center">
+              312 упражнений · перетащи в день
+            </div>
+          </aside>
+        </div>
+      </section>
+      <!-- ============ ANALYTICS ============ -->
+      <section class="view" data-view="analytics">
+        <div class="view-head">
+          <div>
+            <h1 class="view-title">Аналитика практики</h1>
+            <div class="view-subtitle">Срез по всем клиентам · позволяет видеть, какие шаблоны работают, а где клиенты «затухают».</div>
+          </div>
+          <div class="view-actions">
+            <div class="filter-bar" style="margin:0">
+              <span class="chip-d">7 дней</span>
+              <span class="chip-d active">30 дней</span>
+              <span class="chip-d">90 дней</span>
+              <span class="chip-d">Год</span>
+            </div>
+            <button class="btn-d ghost">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              PDF-отчёт
+            </button>
+          </div>
+        </div>
+
+        <!-- top KPI -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Adherence (avg)</div>
+            <div class="kpi-value">81%</div>
+            <div class="kpi-delta up">+4 пп</div>
+            <svg class="kpi-sparkline" viewBox="0 0 80 28" preserveAspectRatio="none"><polyline fill="none" stroke="var(--success)" stroke-width="2" points="0,20 10,16 20,17 30,14 40,12 50,10 60,9 70,7 80,5"/></svg>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Среднее время до 1-й программы</div>
+            <div class="kpi-value">0.6 <small>дн</small></div>
+            <div class="kpi-delta up">быстрее на 22%</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Удержание · 60 дней</div>
+            <div class="kpi-value">73%</div>
+            <div class="kpi-delta up">+6 пп</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Среднее число тренировок/нед</div>
+            <div class="kpi-value">3.4</div>
+            <div class="kpi-delta flat">без изменений</div>
+          </div>
+        </div>
+
+        <div class="cols-2">
+          <!-- Adherence cohort -->
+          <div class="card-d">
+            <div class="card-d-head">
+              <div>
+                <div class="card-d-title">Adherence по когортам · 12 недель</div>
+                <div class="card-d-subtitle">Доля выполнения тренировок от плана</div>
+              </div>
+            </div>
+            <div class="card-d-body">
+              <!-- cohort heatmap -->
+              <div style="display:grid;grid-template-columns:90px repeat(12, 1fr);gap:4px;font-family:var(--font-mono);font-size:10px;color:var(--text-faint)">
+                <div></div>
+                <div>W1</div><div>W2</div><div>W3</div><div>W4</div><div>W5</div><div>W6</div><div>W7</div><div>W8</div><div>W9</div><div>W10</div><div>W11</div><div>W12</div>
+
+                <div style="color:var(--text-muted)">Март</div>
+                <div style="background:#a5e0c2;border-radius:4px;aspect-ratio:1;display:grid;place-items:center;color:#0b3a26;font-weight:700">88</div>
+                <div style="background:#a5e0c2;border-radius:4px;aspect-ratio:1;display:grid;place-items:center;color:#0b3a26;font-weight:700">86</div>
+                <div style="background:#7dcfa6;border-radius:4px;aspect-ratio:1;display:grid;place-items:center;color:#0b3a26;font-weight:700">82</div>
+                <div style="background:#7dcfa6;border-radius:4px;aspect-ratio:1;display:grid;place-items:center;color:#0b3a26;font-weight:700">79</div>
+                <div style="background:#f6c46a;border-radius:4px;aspect-ratio:1;display:grid;place-items:center;color:#5b3b0a;font-weight:700">72</div>
+                <div style="background:#f6c46a;border-radius:4px;aspect-ratio:1;display:grid;place-items:center;color:#5b3b0a;font-weight:700">71</div>
+                <div style="background:#f6a779;border-radius:4px;aspect-ratio:1;display:grid;place-items:center;color:#6e2e10;font-weight:700">65</div>
+                <div style="background:#f6a779;border-radius:4px;aspect-ratio:1;display:grid;place-items:center;color:#6e2e10;font-weight:700">62</div>
+                <div style="background:#e7b9e6;border-radius:4px;aspect-ratio:1;opacity:.3"></div>
+                <div style="background:#e7b9e6;border-radius:4px;aspect-ratio:1;opacity:.2"></div>
+                <div style="background:#e7b9e6;border-radius:4px;aspect-ratio:1;opacity:.15"></div>
+                <div style="background:#e7b9e6;border-radius:4px;aspect-ratio:1;opacity:.15"></div>
+
+                <div style="color:var(--text-muted)">Апрель</div>
+                <div style="background:#a5e0c2;border-radius:4px;aspect-ratio:1;display:grid;place-items:center;color:#0b3a26;font-weight:700">91</div>
+                <div style="background:#a5e0c2;border-radius:4px;aspect-ratio:1;display:grid;place-items:center;color:#0b3a26;font-weight:700">89</div>
+                <div style="background:#a5e0c2;border-radius:4px;aspect-ratio:1;display:grid;place-items:center;color:#0b3a26;font-weight:700">87</div>
+                <div style="background:#7dcfa6;border-radius:4px;aspect-ratio:1;display:grid;place-items:center;color:#0b3a26;font-weight:700">84</div>
+                <div style="background:#7dcfa6;border-radius:4px;aspect-ratio:1;display:grid;place-items:center;color:#0b3a26;font-weight:700">81</div>
+                <div style="background:#7dcfa6;border-radius:4px;aspect-ratio:1;display:grid;place-items:center;color:#0b3a26;font-weight:700">80</div>
+                <div style="background:#f6c46a;border-radius:4px;aspect-ratio:1;display:grid;place-items:center;color:#5b3b0a;font-weight:700">74</div>
+                <div style="background:#f6c46a;border-radius:4px;aspect-ratio:1;display:grid;place-items:center;color:#5b3b0a;font-weight:700">70</div>
+                <div style="background:#f6c46a;border-radius:4px;aspect-ratio:1;display:grid;place-items:center;color:#5b3b0a;font-weight:700">68</div>
+                <div style="background:#e7b9e6;border-radius:4px;aspect-ratio:1;opacity:.3"></div>
+                <div style="background:#e7b9e6;border-radius:4px;aspect-ratio:1;opacity:.2"></div>
+                <div style="background:#e7b9e6;border-radius:4px;aspect-ratio:1;opacity:.15"></div>
+
+                <div style="color:var(--text-muted)">Май</div>
+                <div style="background:#a5e0c2;border-radius:4px;aspect-ratio:1;display:grid;place-items:center;color:#0b3a26;font-weight:700">93</div>
+                <div style="background:#a5e0c2;border-radius:4px;aspect-ratio:1;display:grid;place-items:center;color:#0b3a26;font-weight:700">90</div>
+                <div style="background:#7dcfa6;border-radius:4px;aspect-ratio:1;display:grid;place-items:center;color:#0b3a26;font-weight:700">85</div>
+                <div style="border:1px dashed var(--border);border-radius:4px;aspect-ratio:1"></div>
+                <div style="border:1px dashed var(--border);border-radius:4px;aspect-ratio:1"></div>
+                <div style="border:1px dashed var(--border);border-radius:4px;aspect-ratio:1"></div>
+                <div style="border:1px dashed var(--border);border-radius:4px;aspect-ratio:1"></div>
+                <div style="border:1px dashed var(--border);border-radius:4px;aspect-ratio:1"></div>
+                <div style="border:1px dashed var(--border);border-radius:4px;aspect-ratio:1"></div>
+                <div style="border:1px dashed var(--border);border-radius:4px;aspect-ratio:1"></div>
+                <div style="border:1px dashed var(--border);border-radius:4px;aspect-ratio:1"></div>
+                <div style="border:1px dashed var(--border);border-radius:4px;aspect-ratio:1"></div>
+              </div>
+              <div class="chart-legend mt-4-d">
+                <span><span class="legend-dot" style="background:#a5e0c2"></span>≥85% · норма</span>
+                <span><span class="legend-dot" style="background:#7dcfa6"></span>75–85%</span>
+                <span><span class="legend-dot" style="background:#f6c46a"></span>65–75%</span>
+                <span><span class="legend-dot" style="background:#f6a779"></span>&lt;65% · риск</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Retention funnel -->
+          <div class="card-d">
+            <div class="card-d-head">
+              <div>
+                <div class="card-d-title">Воронка удержания</div>
+                <div class="card-d-subtitle">От активации до 90 дней</div>
+              </div>
+            </div>
+            <div class="card-d-body">
+              <div style="display:flex;flex-direction:column;gap:14px">
+                <div>
+                  <div class="flex-d between-d items-c-d mb-3-d">
+                    <span class="fw-7-d fs-13-d">Приглашены</span>
+                    <span class="fw-7-d">38 чел · 100%</span>
+                  </div>
+                  <div class="bar-d" style="height:18px"><span style="width:100%;background:#3b3df3"></span></div>
+                </div>
+                <div>
+                  <div class="flex-d between-d items-c-d mb-3-d">
+                    <span class="fw-7-d fs-13-d">Активировались (1-я программа)</span>
+                    <span class="fw-7-d">32 чел · 84%</span>
+                  </div>
+                  <div class="bar-d" style="height:18px"><span style="width:84%;background:#5a5dff"></span></div>
+                </div>
+                <div>
+                  <div class="flex-d between-d items-c-d mb-3-d">
+                    <span class="fw-7-d fs-13-d">Прошли 30 дней</span>
+                    <span class="fw-7-d">28 чел · 74%</span>
+                  </div>
+                  <div class="bar-d" style="height:18px"><span style="width:74%;background:#7a7cff"></span></div>
+                </div>
+                <div>
+                  <div class="flex-d between-d items-c-d mb-3-d">
+                    <span class="fw-7-d fs-13-d">Прошли 60 дней</span>
+                    <span class="fw-7-d">22 чел · 58%</span>
+                  </div>
+                  <div class="bar-d" style="height:18px"><span style="width:58%;background:#9b9dff"></span></div>
+                </div>
+                <div>
+                  <div class="flex-d between-d items-c-d mb-3-d">
+                    <span class="fw-7-d fs-13-d">Прошли 90 дней</span>
+                    <span class="fw-7-d">16 чел · 42%</span>
+                  </div>
+                  <div class="bar-d" style="height:18px"><span style="width:42%;background:#bcbeff"></span></div>
+                </div>
+              </div>
+              <div class="banner success mt-4-d" style="margin-bottom:0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <div><strong>Среднее удержание 60 дн</strong> выросло на 6 пп после внедрения еженедельных отчётов.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cols-2" style="margin-top:20px">
+          <!-- Top programs -->
+          <div class="card-d">
+            <div class="card-d-head">
+              <div>
+                <div class="card-d-title">Эффективность шаблонов</div>
+                <div class="card-d-subtitle">Сравнение по adherence и приросту</div>
+              </div>
+              <button class="btn-d ghost">Все →</button>
+            </div>
+            <div class="card-d-body flush">
+              <table class="tbl">
+                <thead>
+                  <tr><th>Шаблон</th><th>Назначен</th><th>Adherence</th><th>Прирост 1ПМ</th><th>Отток</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><div class="fw-7-d">Гипертрофия · split 4</div><div class="fs-12-d muted-d">базовый, 8 недель</div></td>
+                    <td>8 клиентов</td>
+                    <td><span class="fw-7-d" style="color:var(--success)">91%</span></td>
+                    <td><span class="fw-7-d" style="color:var(--success)">+12%</span></td>
+                    <td><span class="fw-7-d">6%</span></td>
+                  </tr>
+                  <tr>
+                    <td><div class="fw-7-d">Жиросжигание · 3/нед</div><div class="fs-12-d muted-d">12 недель</div></td>
+                    <td>6 клиентов</td>
+                    <td><span class="fw-7-d" style="color:var(--success)">84%</span></td>
+                    <td><span class="fw-7-d muted-d">—</span></td>
+                    <td><span class="fw-7-d">12%</span></td>
+                  </tr>
+                  <tr>
+                    <td><div class="fw-7-d">Сила · upper/lower</div><div class="fs-12-d muted-d">12 недель</div></td>
+                    <td>4 клиента</td>
+                    <td><span class="fw-7-d" style="color:var(--success)">87%</span></td>
+                    <td><span class="fw-7-d" style="color:var(--success)">+9%</span></td>
+                    <td><span class="fw-7-d">8%</span></td>
+                  </tr>
+                  <tr>
+                    <td><div class="fw-7-d">Реабилитация колена</div><div class="fs-12-d muted-d">8 недель</div></td>
+                    <td>2 клиента</td>
+                    <td><span class="fw-7-d" style="color:var(--success)">95%</span></td>
+                    <td><span class="fw-7-d muted-d">—</span></td>
+                    <td><span class="fw-7-d">0%</span></td>
+                  </tr>
+                  <tr>
+                    <td><div class="fw-7-d">Адаптация · 2/нед</div><div class="fs-12-d muted-d">4 недели</div></td>
+                    <td>2 клиента</td>
+                    <td><span class="fw-7-d" style="color:var(--warning)">72%</span></td>
+                    <td><span class="fw-7-d muted-d">—</span></td>
+                    <td><span class="fw-7-d" style="color:var(--warning)">18%</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 1ПМ leaderboard -->
+          <div class="card-d">
+            <div class="card-d-head">
+              <div>
+                <div class="card-d-title">Лидерборд клиентов · 1ПМ за 90 дней</div>
+                <div class="card-d-subtitle">Усреднённый прирост по трём базовым</div>
+              </div>
+            </div>
+            <div class="card-d-body" style="padding:8px 20px">
+              <div class="act-row">
+                <div class="avt alt-4">СМ</div>
+                <div class="act-body">
+                  <div class="act-title">Сергей Минин</div>
+                  <div class="act-meta">присед +12% · жим +8% · становая +9%</div>
+                </div>
+                <div class="fw-7-d" style="color:var(--success);font-size:14px">+10%</div>
+              </div>
+              <div class="act-row">
+                <div class="avt">МИ</div>
+                <div class="act-body">
+                  <div class="act-title">Мария Иванова</div>
+                  <div class="act-meta">присед +17% · тяга +12% · жим +4%</div>
+                </div>
+                <div class="fw-7-d" style="color:var(--success);font-size:14px">+11%</div>
+              </div>
+              <div class="act-row">
+                <div class="avt">АН</div>
+                <div class="act-body">
+                  <div class="act-title">Анна Никитина</div>
+                  <div class="act-meta">присед +10% · тяга +8% · жим +6%</div>
+                </div>
+                <div class="fw-7-d" style="color:var(--success);font-size:14px">+8%</div>
+              </div>
+              <div class="act-row">
+                <div class="avt alt-2">ВТ</div>
+                <div class="act-body">
+                  <div class="act-title">Виктор Тимохин</div>
+                  <div class="act-meta">присед +6% · тяга +9% · жим +4%</div>
+                </div>
+                <div class="fw-7-d" style="color:var(--success);font-size:14px">+6%</div>
+              </div>
+              <div class="act-row">
+                <div class="avt alt-6">ПО</div>
+                <div class="act-body">
+                  <div class="act-title">Павел Орехов</div>
+                  <div class="act-meta">реабилитация · мобильность +14%</div>
+                </div>
+                <div class="fw-7-d muted-d" style="font-size:14px">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- ============ BILLING ============ -->
+      <section class="view" data-view="billing">
+        <div class="view-head">
+          <div>
+            <h1 class="view-title">Тариф и оплаты</h1>
+            <div class="view-subtitle">Управляй своим тарифом FitBridge и следи за платежами клиентов в одном месте.</div>
+          </div>
+          <div class="view-actions">
+            <button class="btn-d ghost">Скачать акт</button>
+            <button class="btn-d">Сменить способ оплаты</button>
+          </div>
+        </div>
+
+        <div class="banner primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <div><strong>Ты используешь 22 из 25 клиентов.</strong> Перейди на Studio — получи лимит 60 клиентов, multi-specialist и PDF-брендинг. До конца месяца минус 20%.</div>
+          <div class="banner-actions">
+            <button class="btn-d ghost" style="color:inherit">Сравнить тарифы</button>
+            <button class="btn-d primary">Перейти на Studio</button>
+          </div>
+        </div>
+
+        <div class="cols-2">
+          <!-- Tariff -->
+          <div class="card-d">
+            <div class="card-d-head">
+              <div>
+                <div class="card-d-title">Твой тариф</div>
+                <div class="card-d-subtitle">Pro · ₽2 490/мес · следующее списание 1 июня</div>
+              </div>
+              <span class="pill-d success"><span class="pdot"></span>Активен</span>
+            </div>
+            <div class="card-d-body">
+              <div class="cols-3">
+                <div style="padding:18px;border:1px solid var(--border);border-radius:var(--r-md)">
+                  <div class="fs-12-d muted-d">Free</div>
+                  <div style="font-family:var(--font-display);font-size:22px;font-weight:800;margin-top:6px">₽0</div>
+                  <div class="fs-12-d muted-d">до 3 клиентов</div>
+                  <ul style="font-size:12px;color:var(--text-muted);margin-top:14px;padding-left:18px;line-height:1.7">
+                    <li>Базовый дневник</li>
+                    <li>Программы из шаблона</li>
+                    <li>Email-уведомления</li>
+                  </ul>
+                </div>
+                <div style="padding:18px;border:2px solid var(--primary);border-radius:var(--r-md);background:var(--primary-soft);position:relative">
+                  <span style="position:absolute;top:-10px;left:14px;background:var(--primary);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;letter-spacing:.05em">ТЕКУЩИЙ</span>
+                  <div class="fs-12-d" style="color:var(--primary-soft-text)">Pro</div>
+                  <div style="font-family:var(--font-display);font-size:22px;font-weight:800;margin-top:6px;color:var(--primary-soft-text)">₽2 490</div>
+                  <div class="fs-12-d" style="color:var(--primary-soft-text)">до 25 клиентов</div>
+                  <ul style="font-size:12px;color:var(--primary-soft-text);margin-top:14px;padding-left:18px;line-height:1.7">
+                    <li>Аналитика и отчёты</li>
+                    <li>Конструктор программ</li>
+                    <li>Замеры, фото, push</li>
+                  </ul>
+                </div>
+                <div style="padding:18px;border:1px solid var(--border);border-radius:var(--r-md);position:relative">
+                  <span style="position:absolute;top:-10px;left:14px;background:var(--accent);color:var(--accent-text);font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;letter-spacing:.05em">РЕКОМЕНДУЕТСЯ</span>
+                  <div class="fs-12-d muted-d">Studio</div>
+                  <div style="font-family:var(--font-display);font-size:22px;font-weight:800;margin-top:6px">₽4 990</div>
+                  <div class="fs-12-d muted-d">до 60 клиентов</div>
+                  <ul style="font-size:12px;color:var(--text-muted);margin-top:14px;padding-left:18px;line-height:1.7">
+                    <li>Multi-specialist</li>
+                    <li>PDF-брендинг</li>
+                    <li>Приоритет поддержки</li>
+                  </ul>
+                  <button class="btn-d primary w-full-d mt-3-d" style="margin-top:16px">Перейти на Studio</button>
+                </div>
+              </div>
+
+              <div class="info-pair mt-4-d" style="margin-top:20px;grid-template-columns:160px 1fr;font-size:13px">
+                <dt>Метод оплаты</dt><dd>Visa **** 4421 · до 09/27</dd>
+                <dt>Следующее списание</dt><dd>1 июня 2026 · ₽2 490</dd>
+                <dt>Период</dt><dd>Помесячно · автопродление включено</dd>
+                <dt>Промокод</dt><dd>FB-LAUNCH-20 · −20% до 31 июля</dd>
+              </div>
+            </div>
+          </div>
+
+          <!-- Usage -->
+          <div class="card-d">
+            <div class="card-d-head">
+              <div>
+                <div class="card-d-title">Лимиты и нагрузка</div>
+                <div class="card-d-subtitle">Май 2026 · обновляется каждый час</div>
+              </div>
+            </div>
+            <div class="card-d-body">
+              <div style="margin-bottom:18px">
+                <div class="flex-d between-d items-c-d mb-3-d"><span class="fs-13-d fw-7-d">Активные клиенты</span><span class="fw-7-d">22 / 25</span></div>
+                <div class="bar-d" style="height:10px"><span style="width:88%;background:var(--warning)"></span></div>
+                <div class="fs-12-d muted-d mt-3-d">≥ 90% — лимит. Перейди на Studio до того, как добавишь нового клиента.</div>
+              </div>
+              <div style="margin-bottom:18px">
+                <div class="flex-d between-d items-c-d mb-3-d"><span class="fs-13-d fw-7-d">Активные программы</span><span class="fw-7-d">18 / 50</span></div>
+                <div class="bar-d" style="height:10px"><span style="width:36%"></span></div>
+              </div>
+              <div style="margin-bottom:18px">
+                <div class="flex-d between-d items-c-d mb-3-d"><span class="fs-13-d fw-7-d">Хранилище фото и медиа</span><span class="fw-7-d">1.2 ГБ / 5 ГБ</span></div>
+                <div class="bar-d" style="height:10px"><span style="width:24%;background:var(--success)"></span></div>
+              </div>
+              <div>
+                <div class="flex-d between-d items-c-d mb-3-d"><span class="fs-13-d fw-7-d">PDF-отчётов в месяц</span><span class="fw-7-d">14 / ∞</span></div>
+                <div class="bar-d" style="height:10px"><span style="width:14%;background:var(--info)"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Client payments -->
+        <div class="card-d" style="margin-top:20px">
+          <div class="card-d-head">
+            <div>
+              <div class="card-d-title">Оплаты клиентов · май 2026</div>
+              <div class="card-d-subtitle">Поступило ₽142 000 · ожидается ₽38 000 · просрочено ₽12 000</div>
+            </div>
+            <div class="filter-bar" style="margin:0">
+              <span class="chip-d active">Все</span>
+              <span class="chip-d"><span class="dot" style="background:var(--warning)"></span>Ждём · 3</span>
+              <span class="chip-d"><span class="dot" style="background:var(--danger)"></span>Просрочено · 2</span>
+              <span class="chip-d"><span class="dot" style="background:var(--success)"></span>Оплачено · 19</span>
+            </div>
+          </div>
+          <div class="card-d-body flush">
+            <table class="tbl">
+              <thead>
+                <tr><th>Клиент</th><th>План</th><th>Сумма</th><th>Срок</th><th>Метод</th><th>Статус</th><th></th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div class="tbl-name"><div class="avt alt-1">АК</div><div class="tbl-name-meta">Алексей Карпов<small>с 1 марта 2026</small></div></div></td>
+                  <td><div class="fw-7-d">Месяц</div><div class="fs-12-d muted-d">Силовая · push/pull</div></td>
+                  <td><div class="fw-7-d">₽6 000</div></td>
+                  <td><div class="fw-7-d" style="color:var(--danger)">−3 дня</div><div class="fs-12-d muted-d">срок 14 мая</div></td>
+                  <td>Карта · ручная</td>
+                  <td><span class="pill-d danger"><span class="pdot"></span>Просрочка</span></td>
+                  <td class="right-d"><button class="btn-d">Напомнить</button></td>
+                </tr>
+                <tr>
+                  <td><div class="tbl-name"><div class="avt alt-6">ПО</div><div class="tbl-name-meta">Павел Орехов<small>с 1 февраля 2026</small></div></div></td>
+                  <td><div class="fw-7-d">Месяц</div><div class="fs-12-d muted-d">Реабилитация · 2/нед</div></td>
+                  <td><div class="fw-7-d">₽6 000</div></td>
+                  <td><div class="fw-7-d" style="color:var(--danger)">−1 день</div><div class="fs-12-d muted-d">срок 16 мая</div></td>
+                  <td>Карта · ручная</td>
+                  <td><span class="pill-d danger"><span class="pdot"></span>Просрочка</span></td>
+                  <td class="right-d"><button class="btn-d">Напомнить</button></td>
+                </tr>
+                <tr>
+                  <td><div class="tbl-name"><div class="avt alt-5">НЖ</div><div class="tbl-name-meta">Наталья Жукова<small>с 1 января 2026</small></div></div></td>
+                  <td><div class="fw-7-d">Месяц</div><div class="fs-12-d muted-d">Жиросжигание</div></td>
+                  <td><div class="fw-7-d">₽8 000</div></td>
+                  <td><div class="fw-7-d" style="color:var(--warning)">через 4 дня</div><div class="fs-12-d muted-d">срок 21 мая</div></td>
+                  <td>Карта · авто</td>
+                  <td><span class="pill-d warn"><span class="pdot"></span>Ждём</span></td>
+                  <td class="right-d"><button class="btn-d ghost">Отменить авто</button></td>
+                </tr>
+                <tr>
+                  <td><div class="tbl-name"><div class="avt">МИ</div><div class="tbl-name-meta">Мария Иванова<small>с 1 апреля 2026</small></div></div></td>
+                  <td><div class="fw-7-d">Месяц</div><div class="fs-12-d muted-d">Гипертрофия</div></td>
+                  <td><div class="fw-7-d">₽8 000</div></td>
+                  <td><div class="fw-7-d">12 мая</div><div class="fs-12-d muted-d">оплачено</div></td>
+                  <td>Карта · авто</td>
+                  <td><span class="pill-d success"><span class="pdot"></span>Оплачено</span></td>
+                  <td class="right-d"><button class="btn-d ghost">Чек</button></td>
+                </tr>
+                <tr>
+                  <td><div class="tbl-name"><div class="avt alt-3">ДВ</div><div class="tbl-name-meta">Дарья Власова<small>с 5 мая 2026</small></div></div></td>
+                  <td><div class="fw-7-d">Месяц</div><div class="fs-12-d muted-d">Адаптация · 2/нед</div></td>
+                  <td><div class="fw-7-d">₽6 000</div></td>
+                  <td><div class="fw-7-d">10 мая</div><div class="fs-12-d muted-d">оплачено</div></td>
+                  <td>СБП</td>
+                  <td><span class="pill-d success"><span class="pdot"></span>Оплачено</span></td>
+                  <td class="right-d"><button class="btn-d ghost">Чек</button></td>
+                </tr>
+                <tr>
+                  <td><div class="tbl-name"><div class="avt alt-4">СМ</div><div class="tbl-name-meta">Сергей Минин<small>с 1 декабря 2025</small></div></div></td>
+                  <td><div class="fw-7-d">3 месяца</div><div class="fs-12-d muted-d">Сила · split 5</div></td>
+                  <td><div class="fw-7-d">₽10 000</div></td>
+                  <td><div class="fw-7-d">8 мая</div><div class="fs-12-d muted-d">оплачено</div></td>
+                  <td>Карта · авто</td>
+                  <td><span class="pill-d success"><span class="pdot"></span>Оплачено</span></td>
+                  <td class="right-d"><button class="btn-d ghost">Чек</button></td>
+                </tr>
+                <tr>
+                  <td><div class="tbl-name"><div class="avt alt-2">ЕС</div><div class="tbl-name-meta">Елена Соловьёва<small>с 4 апреля 2026</small></div></div></td>
+                  <td><div class="fw-7-d">Месяц</div><div class="fs-12-d muted-d">Жиросжигание</div></td>
+                  <td><div class="fw-7-d">₽8 000</div></td>
+                  <td><div class="fw-7-d">4 мая</div><div class="fs-12-d muted-d">оплачено</div></td>
+                  <td>Карта · авто</td>
+                  <td><span class="pill-d success"><span class="pdot"></span>Оплачено</span></td>
+                  <td class="right-d"><button class="btn-d ghost">Чек</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div><!-- /.views -->
+  </div><!-- /.app-main -->
+</div><!-- /.app-shell -->
+
+<script>
+  // ===== Theme toggle =====
+  (function () {
+    const root = document.documentElement;
+    const btn = document.getElementById('themeToggle');
+    const label = document.getElementById('themeLabel');
+    const icon = document.getElementById('themeIcon');
+    const sun = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+    const moon = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+    // In-memory theme state (preview sandbox blocks storage APIs)
+    btn.addEventListener('click', () => {
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      label.textContent = next;
+      icon.innerHTML = next === 'dark' ? moon : sun;
+    });
+  })();
+
+  // ===== View routing =====
+  (function () {
+    const views = document.querySelectorAll('.view');
+    const links = document.querySelectorAll('.rail-link[data-view]');
+    const crumb = document.getElementById('crumb');
+    const titles = {
+      dashboard: 'Дашборд',
+      clients: 'Клиенты',
+      'client-detail': 'Клиенты / Мария Иванова',
+      programs: 'Программы',
+      analytics: 'Аналитика',
+      billing: 'Тариф и оплаты'
+    };
+
+    function show(name) {
+      views.forEach(v => v.classList.toggle('active', v.dataset.view === name));
+      // client-detail belongs to clients section in nav
+      const activeNav = name === 'client-detail' ? 'clients' : name;
+      links.forEach(l => l.classList.toggle('active', l.dataset.view === activeNav));
+      const today = ' · ' + new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+      crumb.innerHTML = '<strong>' + (titles[name] || 'Дашборд') + '</strong><span class="crumb-sep">·</span><span>' + new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' }) + '</span>';
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+
+    links.forEach(l => l.addEventListener('click', e => {
+      e.preventDefault();
+      show(l.dataset.view);
+    }));
+
+    // Cross-view links (e.g. crumb back to clients, "open client" buttons)
+    document.querySelectorAll('[data-view-link]').forEach(el => {
+      el.addEventListener('click', e => {
+        e.preventDefault();
+        show(el.dataset.viewLink);
+      });
+    });
+
+    // Make every "Открыть →" button on clients table jump to client detail
+    document.querySelectorAll('.view[data-view="clients"] tbody tr').forEach(row => {
+      row.addEventListener('click', e => {
+        if (e.target.closest('input,button')) return;
+        show('client-detail');
+      });
+      row.style.cursor = 'pointer';
+    });
+    document.querySelectorAll('.view[data-view="clients"] tbody .btn-d.ghost').forEach(b => {
+      if (b.textContent.includes('Открыть')) {
+        b.addEventListener('click', e => { e.stopPropagation(); show('client-detail'); });
+      }
+    });
+
+    // Dashboard "Смотреть/Открыть/Снять паузу" → client detail
+    document.querySelectorAll('.view[data-view="dashboard"] tbody .btn-d').forEach(b => {
+      const t = b.textContent.trim();
+      if (t.startsWith('Смотреть') || t.startsWith('Открыть') || t.startsWith('Снять') || t.startsWith('Подсказка')) {
+        b.addEventListener('click', () => show('client-detail'));
+      }
+    });
+
+    // Hint buttons that open programs
+    document.querySelectorAll('button.btn-d.primary').forEach(b => {
+      if (b.textContent.trim() === 'Новая программа' || b.textContent.trim() === 'Редактировать программа') {
+        b.addEventListener('click', () => show('programs'));
+      }
+    });
+
+    // Initial state from hash
+    const initial = location.hash.replace('#', '');
+    if (initial && titles[initial]) show(initial);
+  })();
+
+  // ===== Update sidebar user date on load =====
+  (function () {
+    const now = new Date();
+    const fmt = now.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+    // No-op for now; placeholder if needed.
+  })();
+</script>
+
+<script data-pplx-inline-edit>
+(function () {
+  if (window === window.top) return;
+
+  const allowedParentOrigins = ["https://www.perplexity.ai","https://perplexity.ai","https://testing.perplexity.ai","https://staging.perplexity.ai","https://*.preview.i.perplexity.ai","http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"];
+  const MAX_FONT_BYTES = 500 * 1024;
+  const MAX_TOTAL_FONT_BYTES = 2 * 1024 * 1024;
+  let scrollForwarding = false;
+  let scrollRaf = 0;
+  let trustedTopOrigin = null;
+
+  // Allow entries like "https://*.preview.i.perplexity.ai" — the wildcard
+  // matches a single DNS label (no dots), so "https://*.foo" cannot stretch
+  // across multiple labels.
+  function matchesAllowedOrigin(origin) {
+    if (!origin) return false;
+    for (const entry of allowedParentOrigins) {
+      if (!entry.includes("*")) {
+        if (entry === origin) return true;
+        continue;
+      }
+      const pattern = new RegExp(
+        "^" +
+          entry.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^.]+") +
+          "$",
+      );
+      if (pattern.test(origin)) return true;
+    }
+    return false;
+  }
+
+  // Trust decision: when the sender is same-origin-visible (event.origin is a
+  // real origin like https://www.perplexity.ai) we trust event.origin directly.
+  // When event.origin is "null" (opaque broker srcdoc), we fall back to the
+  // broker's stamped `parentOrigin` to identify the top window. The fallback
+  // is claim-only — we rely on the browser's native `targetOrigin` enforcement
+  // on the response path (see postToTrustedTop) to ensure replies can't be
+  // delivered to anyone but the actual top window of that claimed origin.
+  function getTrustedParentOrigin(event) {
+    const forwardedParentOrigin =
+      typeof event.data.parentOrigin === "string" ? event.data.parentOrigin : null;
+    const parentOrigin = event.origin === "null" ? forwardedParentOrigin : event.origin;
+    return matchesAllowedOrigin(parentOrigin) ? parentOrigin : null;
+  }
+
+  // All responses go to window.top with targetOrigin = the allowlisted origin.
+  // An attacker that iframes us inside their own null-origin broker can claim
+  // any parentOrigin they like, but the browser will drop the reply whenever
+  // the real top's origin doesn't match — so the screenshot never leaves.
+  function postToTrustedTop(message) {
+    if (!trustedTopOrigin) return;
+    try {
+      window.top.postMessage(message, trustedTopOrigin);
+    } catch (_error) {}
+  }
+
+  function inlineAll(original, clone) {
+    if (original.nodeType !== 1 || clone.nodeType !== 1) return;
+
+    try {
+      const computedStyle = getComputedStyle(original);
+      // cssText on a computed style is the serialized declaration in modern
+      // Chromium/Safari — a single read beats enumerating ~400 longhand
+      // properties. Firefox returns "" here, so we fall back on empty.
+      const serialized = computedStyle.cssText;
+      if (serialized) {
+        clone.style.cssText = serialized;
+      } else {
+        const parts = new Array(computedStyle.length);
+        for (let index = 0; index < computedStyle.length; index += 1) {
+          const property = computedStyle[index];
+          parts[index] = `${property}:${computedStyle.getPropertyValue(property)};`;
+        }
+        clone.style.cssText = parts.join("");
+      }
+    } catch (_error) {}
+
+    const originalChildren = original.children;
+    const clonedChildren = clone.children;
+    for (
+      let index = 0;
+      index < originalChildren.length && index < clonedChildren.length;
+      index += 1
+    ) {
+      inlineAll(originalChildren[index], clonedChildren[index]);
+    }
+  }
+
+  function extractFontUrl(srcValue) {
+    const matches = [
+      ...srcValue.matchAll(
+        /url\(["']?([^"')]+)["']?\)(?:\s*format\(["']?([^"')]+)["']?\))?/gi,
+      ),
+    ];
+    if (matches.length === 0) return null;
+    const woff2 = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff2"));
+    if (woff2) return woff2[1];
+    const woff = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff"));
+    if (woff) return woff[1];
+    return matches[0][1];
+  }
+
+  // Cache resolved font URL -> data URI across captures. Fonts on a page
+  // essentially never change, and a batch run emits multiple captures back to
+  // back — without this we'd refetch + re-base64 every time.
+  const fontDataUriCache = new Map();
+  const SRC_DECLARATION_RE = /src\s*:\s*[^;}]+/i;
+
+  async function fetchAsDataUri(url) {
+    if (fontDataUriCache.has(url)) return fontDataUriCache.get(url);
+    let dataUri = null;
+    try {
+      const response = await fetch(url, { mode: "cors", credentials: "omit" });
+      if (response.ok) {
+        const blob = await response.blob();
+        if (blob.size <= MAX_FONT_BYTES) {
+          dataUri = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () =>
+              resolve(typeof reader.result === "string" ? reader.result : null);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+          });
+        }
+      }
+    } catch (_error) {
+      dataUri = null;
+    }
+    fontDataUriCache.set(url, dataUri);
+    return dataUri;
+  }
+
+  function collectFontFaceRuleTexts() {
+    const rules = [];
+    for (const sheet of document.styleSheets) {
+      let cssRules;
+      try {
+        cssRules = sheet.cssRules;
+      } catch (_error) {
+        continue;
+      }
+      if (!cssRules) continue;
+      for (const rule of cssRules) {
+        const cssText = rule.cssText || "";
+        if (cssText.startsWith("@font-face")) rules.push(cssText);
+      }
+    }
+    return rules;
+  }
+
+  async function buildInlinedFontCss() {
+    const ruleTexts = collectFontFaceRuleTexts();
+    if (ruleTexts.length === 0) return null;
+
+    const resolved = ruleTexts.map((cssText) => {
+      if (!SRC_DECLARATION_RE.test(cssText)) return null;
+      const srcMatch = cssText.match(/src\s*:\s*([^;}]+)[;}]/i);
+      if (!srcMatch) return null;
+      const url = extractFontUrl(srcMatch[1]);
+      if (!url) return null;
+      try {
+        return { cssText, url: new URL(url, document.baseURI).href };
+      } catch (_error) {
+        return null;
+      }
+    });
+
+    const dataUris = await Promise.all(
+      resolved.map((entry) => (entry ? fetchAsDataUri(entry.url) : Promise.resolve(null))),
+    );
+
+    const inlined = [];
+    let totalBytes = 0;
+    for (let index = 0; index < resolved.length; index += 1) {
+      const entry = resolved[index];
+      const dataUri = dataUris[index];
+      if (!entry || !dataUri) continue;
+      const approxBytes = dataUri.length * 0.75;
+      if (totalBytes + approxBytes > MAX_TOTAL_FONT_BYTES) break;
+      totalBytes += approxBytes;
+      inlined.push(entry.cssText.replace(SRC_DECLARATION_RE, `src: url("${dataUri}")`));
+    }
+    return inlined.length > 0 ? inlined.join("\n") : null;
+  }
+
+  function stripExternal(clone) {
+    const images = clone.querySelectorAll("img");
+    for (let index = 0; index < images.length; index += 1) {
+      const src = images[index].getAttribute("src");
+      if (src && !src.startsWith("data:")) images[index].removeAttribute("src");
+    }
+
+    const elements = clone.querySelectorAll("*");
+    for (let index = 0; index < elements.length; index += 1) {
+      const style = elements[index].style.cssText;
+      if (style && style.includes("url(")) {
+        elements[index].style.cssText = style.replace(
+          /url\(["']?(?!data:)[^)"']*["']?\)/gi,
+          "none",
+        );
+      }
+    }
+  }
+
+  function emitScroll() {
+    scrollRaf = 0;
+    if (!scrollForwarding) return;
+    postToTrustedTop({
+      type: "INLINE_EDIT_SCROLL",
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
+    });
+  }
+
+  window.addEventListener(
+    "scroll",
+    function () {
+      if (!scrollForwarding || scrollRaf) return;
+      scrollRaf = requestAnimationFrame(emitScroll);
+    },
+    { passive: true, capture: true },
+  );
+
+  async function handleCaptureRequest(event) {
+    const requestId = event.data.requestId;
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    function postResult(dataUrl) {
+      postToTrustedTop({
+        type: "INLINE_EDIT_SCREENSHOT_RESULT",
+        requestId,
+        dataUrl,
+        scrollX,
+        scrollY,
+      });
+    }
+
+    try {
+      // Wait for any pending web fonts to resolve so both inline metrics and
+      // the @font-face inlining below see the same loaded faces.
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (_error) {}
+      }
+
+      const clone = document.documentElement.cloneNode(true);
+      inlineAll(document.documentElement, clone);
+
+      const removedNodes = clone.querySelectorAll("script,link[rel=\"stylesheet\"],style");
+      for (let index = 0; index < removedNodes.length; index += 1) {
+        removedNodes[index].remove();
+      }
+
+      stripExternal(clone);
+
+      // Re-embed web fonts as data-URI @font-face rules so the SVG rasterizer
+      // can resolve them — external font URLs aren't fetched during
+      // foreignObject rendering, which would otherwise force a fallback face
+      // and change text metrics.
+      const inlinedFontCss = await buildInlinedFontCss();
+      if (inlinedFontCss) {
+        const styleEl = document.createElement("style");
+        styleEl.textContent = inlinedFontCss;
+        const head = clone.querySelector("head");
+        if (head) head.appendChild(styleEl);
+        else clone.insertBefore(styleEl, clone.firstChild);
+      }
+
+      const html = new XMLSerializer().serializeToString(clone);
+      const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
+        '<foreignObject width="100%" height="100%">' +
+        `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;overflow:hidden">` +
+        `<div style="transform:translate(-${scrollX}px,-${scrollY}px);transform-origin:top left">` +
+        html +
+        "</div></div></foreignObject></svg>";
+      const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      const image = new Image();
+      image.onload = function () {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(image, 0, 0);
+        postResult(canvas.toDataURL("image/png"));
+      };
+      image.onerror = function () {
+        postResult(null);
+      };
+      image.src = svgUrl;
+    } catch (_error) {
+      postResult(null);
+    }
+  }
+
+  window.addEventListener("message", function (event) {
+    if (!event.data) return;
+    // Only accept messages from the direct parent frame. Blocks sibling /
+    // unrelated-window postMessage senders that could otherwise reach us.
+    if (event.source !== window.parent) return;
+
+    const trustedParentOrigin = getTrustedParentOrigin(event);
+    if (!trustedParentOrigin) return;
+    trustedTopOrigin = trustedParentOrigin;
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_START") {
+      scrollForwarding = true;
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_STOP") {
+      scrollForwarding = false;
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
+      scrollRaf = 0;
+      return;
+    }
+
+    if (event.data.type !== "INLINE_EDIT_CAPTURE_REQUEST") return;
+
+    handleCaptureRequest(event);
+  });
+})();
+
+
+</script></body>
+</html>

@@ -1,0 +1,156 @@
+# Минимальная инфраструктура FitBridge:
+# PostgreSQL, OpenSearch, OpenSearch Dashboards, Fluent Bit, Envoy, Keycloak.
+
+services:
+  postgresql:
+    image: postgres:16-alpine
+    container_name: postgresql
+    environment:
+      POSTGRES_DB: fitbridge
+      POSTGRES_USER: fitbridge
+      POSTGRES_PASSWORD: fitbridge-password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgresql-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fitbridge -d fitbridge"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - fitbridge-network
+
+  app:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.backend
+    image: fitbridge-backend:local
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      fluent-bit:
+        condition: service_started
+      envoy:
+        condition: service_started
+    environment:
+      DB_HOST: postgresql
+      DB_PORT: 5432
+      DB_NAME: fitbridge
+      DB_USER: fitbridge
+      DB_PASSWORD: fitbridge-password
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: fluent-bit:24224
+        tag: app.logs
+    networks:
+      - fitbridge-network
+
+  fluent-bit:
+    container_name: fluent-bit
+    image: fluent/fluent-bit
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+      - "2020:2020"
+    environment:
+      - opensearch_host=opensearch
+      - opensearch_user=admin
+      - opensearch_pass=adm-Password123!
+    volumes:
+      - ./volumes/fluent-bit-etc/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+      - ./volumes/fluent-bit-etc/parsers.conf:/fluent-bit/etc/parsers.conf
+    networks:
+      - fitbridge-network
+
+  opensearch:
+    container_name: opensearch
+    image: opensearchproject/opensearch:latest
+    environment:
+      - discovery.type=single-node
+      - http.port=9200
+      - bootstrap.memory_lock=true
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=adm-Password123!
+    ports:
+      - '9200:9200'
+      - '9600:9600'
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -ku admin:adm-Password123! https://localhost:9200/_cluster/health?pretty | grep status | grep -q '\\(green\\|yellow\\)'" ]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    networks:
+      - fitbridge-network
+
+  dashboards:
+    image: opensearchproject/opensearch-dashboards:latest
+    container_name: opensearch-dashboards
+    ports:
+      - 5601:5601
+    expose:
+      - "5601"
+    environment:
+      OPENSEARCH_HOSTS: '["https://opensearch:9200"]'
+    depends_on:
+      opensearch:
+        condition: service_healthy
+    networks:
+      - fitbridge-network
+
+  envoy:
+    image: envoyproxy/envoy:v1.29.0
+    volumes:
+      - ./volumes/envoy/envoy.yaml:/etc/envoy/envoy.yaml
+    ports:
+      - "8080:8080"
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    networks:
+      - fitbridge-network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1.0
+    volumes:
+      - ./volumes/keycloak/import:/opt/keycloak/data/import
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: "true"
+    healthcheck:
+      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000;echo -e 'HEAD /health/ready HTTP/1.1\r\nHost: localhost:9000\r\nConnection: close\r\n\r\n' >&3;cat <&3" ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+    command:
+      - start-dev
+      - --import-realm
+      - --hostname-strict
+      - "false"
+      - --hostname
+      - "http://localhost:8080/"
+      - --proxy-headers
+      - forwarded
+      - --hostname-backchannel-dynamic
+      - "true"
+    networks:
+      - fitbridge-network
+
+volumes:
+  opensearch-data:
+  postgresql-data:
+
+networks:
+  fitbridge-network:
+    driver: bridge

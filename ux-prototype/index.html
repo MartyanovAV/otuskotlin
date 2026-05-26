@@ -1,0 +1,2764 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FitBridge · Прототипы интерфейса</title>
+<meta name="description" content="Интерактивные прототипы мобильного приложения FitBridge — вертикальная CRM для тренеров и клиентов" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v16M18 4v16M6 12h12M3 8h3M3 16h3M18 8h3M18 16h3"/></svg>
+      </div>
+      <div>
+        <div class="brand-name">FitBridge</div>
+        <div class="brand-sub">UI Prototype · v0.1</div>
+      </div>
+    </div>
+
+    <div class="role-switcher">
+      <button class="active" data-role="client" onclick="switchRole('client')">Клиент</button>
+      <button data-role="trainer" onclick="switchRole('trainer')">Тренер</button>
+    </div>
+
+    <!-- Client nav -->
+    <nav class="nav-section" data-nav="client">
+      <div class="nav-label">Сценарии клиента</div>
+      <button class="nav-item active" onclick="scrollToFlow('client-onboarding')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m19 8 2 2-4 4"/></svg>
+        Старт и подключение
+      </button>
+      <button class="nav-item" onclick="scrollToFlow('client-diary')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Дневник тренировок
+        <span class="badge">MVP</span>
+      </button>
+      <button class="nav-item" onclick="scrollToFlow('client-progress')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        Прогресс и замеры
+      </button>
+      <button class="nav-item" onclick="scrollToFlow('client-access')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Доступы и приватность
+      </button>
+      <button class="nav-item" onclick="scrollToFlow('client-program')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Программа от тренера
+      </button>
+    </nav>
+
+    <!-- Trainer nav -->
+    <nav class="nav-section" data-nav="trainer" style="display:none">
+      <div class="nav-label">Сценарии тренера</div>
+      <button class="nav-item active" onclick="scrollToFlow('trainer-onboarding')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        Онбординг и приглашение
+      </button>
+      <button class="nav-item" onclick="scrollToFlow('trainer-dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        Рабочий дашборд
+      </button>
+      <button class="nav-item" onclick="scrollToFlow('trainer-client')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Карточка клиента
+      </button>
+      <button class="nav-item" onclick="scrollToFlow('trainer-builder')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+        Конструктор программ
+        <span class="badge">MVP</span>
+      </button>
+      <button class="nav-item" onclick="scrollToFlow('trainer-billing')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        Тариф и оплаты
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="avatar sm">FB</div>
+      <div style="font-size:12px">
+        <div style="font-weight:600">Прототип</div>
+        <div style="color:var(--text-muted)">MVP Gate 1</div>
+      </div>
+      <button class="theme-toggle" aria-label="Сменить тему" data-theme-toggle>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <main class="canvas">
+
+    <!-- ===================== INTRO ===================== -->
+    <div class="page-intro" id="intro">
+      <span class="annot"><span class="dot-mini"></span>Прототип · версия для презентации</span>
+      <h2>Прототипы интерфейсов FitBridge</h2>
+      <p>Интерактивный набор экранов мобильного приложения, охватывающий MVP-сценарии из BR-001, BR-002, BR-004, BR-005, BR-006 и BR-007. Используйте переключатель ролей слева, чтобы посмотреть путь клиента или путь тренера.</p>
+      <div class="meta-row">
+        <span class="chip primary"><span class="dot-mini"></span>Mobile-first</span>
+        <span class="chip success">MVP scope</span>
+        <span class="chip">Light + Dark</span>
+        <span class="chip info">iOS / Android shell</span>
+      </div>
+      <div class="persona-mini">
+        <div class="avatar">М</div>
+        <div class="meta">
+          <strong>Мария · 34 · клиент</strong>
+          <small>Хочет видеть прогресс и контролировать, кто имеет доступ к данным</small>
+        </div>
+        <div style="width:1px;height:32px;background:var(--divider);margin:0 var(--s-3)"></div>
+        <div class="avatar alt-1">И</div>
+        <div class="meta">
+          <strong>Ирина · 31 · тренер</strong>
+          <small>18–25 клиентов, хочет убрать рутину и видеть статус каждого</small>
+        </div>
+      </div>
+
+      <a href="desktop.html" style="display:flex;align-items:center;gap:18px;padding:18px 20px;margin-top:var(--s-5);background:linear-gradient(135deg,#1d1f6a,#3b3df3);color:#fff;border-radius:var(--r-lg);text-decoration:none;box-shadow:var(--shadow-md);transition:transform 150ms,box-shadow 150ms" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform='none';this.style.boxShadow='var(--shadow-md)'">
+        <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,.14);display:grid;place-items:center;flex-shrink:0">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c8ff3a" stroke-width="2"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M2 20h20M9 14h6"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-family:var(--font-display);font-weight:800;font-size:16px;letter-spacing:-0.01em">Веб-кабинет тренера · Desktop</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.78);margin-top:3px">Дашборд, таблица клиентов, конструктор программ на 7-дневной сетке, аналитика когорт и оплаты — открыть в новом окне рекомендуется на экране ≥ 1200 px.</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;background:#c8ff3a;color:#1f2a06;font-weight:700;font-size:13px;padding:10px 16px;border-radius:10px;white-space:nowrap">
+          Открыть
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </div>
+      </a>
+    </div>
+    <!-- ============================================================
+         CLIENT SCREENS
+         ============================================================ -->
+    <div id="role-client">
+
+      <!-- ===== Flow C1: Onboarding ===== -->
+      <div class="canvas-header" id="client-onboarding">
+        <div class="canvas-title">
+          <h1>C1 · Старт и подключение тренера</h1>
+          <p>Welcome → выбор роли → онбординг → ввод QR/кода от тренера → подтверждение доступа. Сценарий BR-002 и BR-006.</p>
+        </div>
+        <div class="canvas-meta">
+          <span class="flow-badge">BR-001</span>
+          <span class="flow-badge">BR-002</span>
+          <span class="flow-badge">AC-R002-U001-001</span>
+        </div>
+      </div>
+
+      <div class="screens-grid">
+
+        <!-- C1.1 Welcome -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 22h20v-2H2zM4 18h2V8H4zM8 18h2V4H8zM12 18h2V10h-2zM16 18h2V6h-2zM20 18h2v-8h-2z"/></svg><svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8 3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4 2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="18" height="12" rx="2"/><rect x="4" y="8" width="14" height="8" fill="currentColor"/><line x1="22" y1="11" x2="22" y2="13"/></svg></span></div>
+              <div class="welcome">
+                <div class="welcome-logo">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v16M18 4v16M6 12h12M3 8h3M3 16h3M18 8h3M18 16h3"/></svg>
+                </div>
+                <h1 class="welcome-title">Твой<br>тренировочный<br>дневник</h1>
+                <p class="welcome-text">Веди записи, отслеживай прогресс и подключай тренеров — данные остаются с тобой.</p>
+                <div class="welcome-actions">
+                  <button class="btn accent block" style="margin-bottom:var(--s-3)">Начать бесплатно</button>
+                  <div style="text-align:center;font-size:13px;opacity:.85">Уже есть аккаунт? <strong style="text-decoration:underline">Войти</strong></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>C1.1 Welcome</strong>
+            Первый запуск приложения · бесплатный вход без тренера
+          </div>
+        </div>
+
+        <!-- C1.2 Role choice -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 22h20v-2H2zM4 18h2V8H4zM8 18h2V4H8zM12 18h2V10h-2zM16 18h2V6h-2zM20 18h2v-8h-2z"/></svg></span></div>
+              <div class="welcome" style="background:var(--surface);color:var(--text)">
+                <div style="position:relative">
+                  <button class="icon-btn" style="background:var(--surface-2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+                </div>
+                <div style="margin-top:var(--s-6);position:relative">
+                  <h1 class="welcome-title" style="color:var(--text);font-size:24px">Кто ты в FitBridge?</h1>
+                  <p class="welcome-text" style="color:var(--text-muted);text-align:left;margin-left:0">Выбери роль — это поможет настроить интерфейс под твои задачи.</p>
+                </div>
+                <div style="margin-top:var(--s-6);position:relative">
+                  <div class="role-card" style="background:var(--primary-soft);border-color:var(--primary);color:var(--text)">
+                    <div class="role-icon" style="background:var(--primary);color:#fff">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                    <div class="role-info">
+                      <strong style="color:var(--text)">Я тренируюсь</strong>
+                      <small style="color:var(--text-muted)">Дневник, прогресс, тренеры по приглашению</small>
+                    </div>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
+                  <div class="role-card" style="background:var(--surface-2);border-color:var(--border);color:var(--text)">
+                    <div class="role-icon" style="background:var(--surface-3);color:var(--text)">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11h-6M19 8v6"/></svg>
+                    </div>
+                    <div class="role-info">
+                      <strong style="color:var(--text)">Я тренер</strong>
+                      <small style="color:var(--text-muted)">Клиенты, программы, аналитика и подписка</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="welcome-actions">
+                  <button class="btn primary block">Продолжить</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>C1.2 Выбор роли</strong>
+            Развилка PLG-воронки · клиент идёт по бесплатному треку
+          </div>
+        </div>
+
+        <!-- C1.3 Onboarding slide -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="onb-screen">
+                <div class="app-bar" style="padding:0;margin-bottom:var(--s-4)">
+                  <button style="font-size:13px;color:var(--text-muted);font-weight:600">Пропустить</button>
+                </div>
+                <div class="onb-illustration">
+                  <div class="onb-blob">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1.5" fill="currentColor"/></svg>
+                  </div>
+                </div>
+                <h2 class="onb-title">Данные принадлежат тебе</h2>
+                <p class="onb-text">Ты сам решаешь, кто из тренеров и специалистов видит твою историю — и в любой момент можешь отозвать доступ.</p>
+                <div class="onb-dots">
+                  <div class="onb-dot"></div>
+                  <div class="onb-dot active"></div>
+                  <div class="onb-dot"></div>
+                </div>
+                <button class="btn primary block">Дальше</button>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>C1.3 Онбординг — слайд 2/3</strong>
+            Подсветка ключевого value proposition: client-owned data
+          </div>
+        </div>
+
+        <!-- C1.4 Accept invite -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+                <div class="app-bar-title">Приглашение от тренера</div>
+                <div style="width:36px"></div>
+              </div>
+              <div class="app-content" style="text-align:center;gap:var(--s-5)">
+                <div class="avatar lg alt-1" style="margin:var(--s-3) auto 0">И</div>
+                <div>
+                  <h2 style="font-family:var(--font-display);font-size:18px;font-weight:700;margin-bottom:4px">Ирина Соколова</h2>
+                  <small style="color:var(--text-muted);font-size:12px">Персональный тренер · Москва · 5 лет опыта</small>
+                </div>
+                <div class="card" style="text-align:left">
+                  <div style="font-size:12px;color:var(--text-muted);margin-bottom:var(--s-3);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Запрашиваемый доступ</div>
+                  <div style="display:flex;flex-direction:column;gap:var(--s-3)">
+                    <div style="display:flex;gap:var(--s-3);align-items:flex-start">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5" style="margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>
+                      <div>
+                        <strong style="font-size:13px;display:block">Тренировки и подходы</strong>
+                        <small style="font-size:11px;color:var(--text-muted)">Просмотр и назначение программ</small>
+                      </div>
+                    </div>
+                    <div style="display:flex;gap:var(--s-3);align-items:flex-start">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5" style="margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>
+                      <div>
+                        <strong style="font-size:13px;display:block">Замеры тела</strong>
+                        <small style="font-size:11px;color:var(--text-muted)">Только просмотр, без редактирования</small>
+                      </div>
+                    </div>
+                    <div style="display:flex;gap:var(--s-3);align-items:flex-start;opacity:.5">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-top:2px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      <div>
+                        <strong style="font-size:13px;display:block">Фото прогресса</strong>
+                        <small style="font-size:11px;color:var(--text-muted)">Не запрашивается</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:var(--s-2);margin-top:auto;text-align:left">
+                  <button class="btn primary block">Разрешить доступ</button>
+                  <button class="btn secondary block">Отклонить</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>C1.4 Подтверждение доступа</strong>
+            Прозрачные scope-ы перед выдачей · AC-R002-U001-001
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Flow C2: Diary ===== -->
+      <div class="canvas-header" id="client-diary" style="margin-top:var(--s-12)">
+        <div class="canvas-title">
+          <h1>C2 · Тренировочный дневник</h1>
+          <p>Главный экран клиента, быстрая запись тренировки (Smart Log), детальная карточка упражнения, история. Сценарий BR-001.</p>
+        </div>
+        <div class="canvas-meta">
+          <span class="flow-badge">BR-001</span>
+          <span class="flow-badge">AC-R001-U001-002</span>
+          <span class="flow-badge">D30 retention ≥ 35%</span>
+        </div>
+      </div>
+
+      <div class="screens-grid">
+        <!-- C2.1 Home (Today) -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 22h20v-2H2zM4 18h2V8H4zM8 18h2V4H8zM12 18h2V10h-2zM16 18h2V6h-2zM20 18h2v-8h-2z"/></svg></span></div>
+              <div class="app-bar">
+                <div class="greeting">
+                  <small>Воскресенье, 17 мая</small>
+                  <h2>Привет, Мария</h2>
+                </div>
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="dot"></span></button>
+              </div>
+              <div class="app-content">
+                <div class="hero-card">
+                  <span class="chip accent" style="margin-bottom:var(--s-3)">Сегодня · по плану</span>
+                  <h3>Низ тела · сила</h3>
+                  <p>5 упражнений · ~55 мин</p>
+                  <div class="hero-stats">
+                    <div class="hero-stat"><strong>5</strong><span>упражнений</span></div>
+                    <div class="hero-stat"><strong>~55</strong><span>минут</span></div>
+                    <div class="hero-stat"><strong>RPE 7</strong><span>интенсивн.</span></div>
+                  </div>
+                  <button class="hero-cta">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Начать тренировку
+                  </button>
+                </div>
+                <div class="stat-grid">
+                  <div class="stat-card">
+                    <div class="label">Этот месяц</div>
+                    <div class="value">14</div>
+                    <div class="delta up">↑ 3 vs апрель</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="label">Объём</div>
+                    <div class="value">28.4т</div>
+                    <div class="delta up">↑ 12%</div>
+                  </div>
+                </div>
+                <div class="section-title"><h4>Недавние тренировки</h4><a>Все</a></div>
+                <div class="workout-card">
+                  <div class="workout-head">
+                    <div>
+                      <h5>Верх тела · тяга</h5>
+                      <small>Пятница, 15 мая · 48 мин</small>
+                    </div>
+                    <span class="chip success"><span class="dot-mini"></span>Завершено</span>
+                  </div>
+                  <div class="workout-body">
+                    <div class="metric"><strong>4</strong> упр.</div>
+                    <div class="metric"><strong>18</strong> подх.</div>
+                    <div class="metric">объём <strong>6.2т</strong></div>
+                  </div>
+                </div>
+                <div class="workout-card">
+                  <div class="workout-head">
+                    <div>
+                      <h5>Кардио — бег</h5>
+                      <small>Среда, 13 мая · 32 мин</small>
+                    </div>
+                    <span class="chip success"><span class="dot-mini"></span>Завершено</span>
+                  </div>
+                  <div class="workout-body">
+                    <div class="metric"><strong>5.4</strong> км</div>
+                    <div class="metric"><strong>5:55</strong>/км</div>
+                    <div class="metric">пульс <strong>148</strong></div>
+                  </div>
+                </div>
+              </div>
+              <div class="tab-bar">
+                <button class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Главная</span></button>
+                <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>План</span></button>
+                <button class="cta-tab"><div class="cta-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div></button>
+                <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg><span>Прогресс</span></button>
+                <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg><span>Профиль</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>C2.1 Главная</strong>
+            Сегодняшний план · последние тренировки · быстрый старт
+          </div>
+        </div>
+
+        <!-- C2.2 Smart Log (active workout) -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                <div class="app-bar-title" style="text-align:center">Низ тела<small>00:24:18 · упр. 2 из 5</small></div>
+                <button class="icon-btn" style="background:var(--accent);color:var(--accent-text)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
+              </div>
+              <div class="app-content" style="gap:var(--s-4)">
+                <div class="exercise">
+                  <div class="exercise-head">
+                    <div>
+                      <h5>Приседания со штангой</h5>
+                      <small>Цель: 4 × 8 · RPE 8</small>
+                    </div>
+                    <span class="chip success"><span class="dot-mini"></span>В процессе</span>
+                  </div>
+                  <div class="set-list">
+                    <div class="set-row head"><span>#</span><span>Вес, кг</span><span>Повторы</span><span></span></div>
+                    <div class="set-row"><span class="num">1</span><span class="set-input">60</span><span class="set-input">8</span><div class="check done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+                    <div class="set-row"><span class="num">2</span><span class="set-input">65</span><span class="set-input">8</span><div class="check done"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+                    <div class="set-row"><span class="num">3</span><span class="set-input" style="border-color:var(--primary);background:var(--primary-soft);color:var(--primary-soft-text)">70</span><span class="set-input" style="border-color:var(--primary);background:var(--primary-soft);color:var(--primary-soft-text)">8</span><div class="check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+                    <div class="set-row"><span class="num">4</span><span class="set-input">—</span><span class="set-input">—</span><div class="check"></div></div>
+                  </div>
+                  <div style="margin-top:var(--s-3);display:flex;gap:var(--s-2);align-items:center;font-size:12px;color:var(--text-muted)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Отдых: 02:00 → <strong style="color:var(--text)">01:23</strong>
+                  </div>
+                </div>
+
+                <div class="note-card">
+                  <div class="note-head">
+                    <div class="avatar sm alt-1">И</div>
+                    <strong>Заметка от Ирины</strong>
+                    <small>2 дня назад</small>
+                  </div>
+                  <p>На 3-м подходе фокус на технике — глубина важнее веса. Если тяжело, останься на 65.</p>
+                </div>
+
+                <div class="card" style="opacity:.85">
+                  <div style="display:flex;align-items:center;justify-content:space-between">
+                    <div>
+                      <div style="font-size:13px;font-weight:600">Следующее</div>
+                      <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Румынская тяга · 3 × 10</div>
+                    </div>
+                    <button class="btn secondary sm">Перейти</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>C2.2 Smart Log</strong>
+            Активная тренировка · быстрый ввод подходов · комментарий тренера
+          </div>
+        </div>
+
+        <!-- C2.3 Quick add note -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                <div class="app-bar-title" style="text-align:center">Свободная запись</div>
+                <button style="font-size:13px;color:var(--primary);font-weight:700">Сохранить</button>
+              </div>
+              <div class="app-content">
+                <div class="card">
+                  <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--s-2)">Тип</div>
+                  <div class="tag-row">
+                    <span class="chip primary"><span class="dot-mini"></span>Силовая</span>
+                    <span class="chip">Кардио</span>
+                    <span class="chip">Мобильность</span>
+                    <span class="chip">Йога</span>
+                  </div>
+                </div>
+                <div class="card">
+                  <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--s-2)">Дата и время</div>
+                  <div style="display:flex;gap:var(--s-3);align-items:center">
+                    <div style="background:var(--surface-2);padding:8px 12px;border-radius:8px;font-weight:600;font-size:13px">Сегодня, 18:30</div>
+                    <div style="background:var(--surface-2);padding:8px 12px;border-radius:8px;font-weight:600;font-size:13px">45 мин</div>
+                  </div>
+                </div>
+                <div class="card">
+                  <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--s-2)">Заметки</div>
+                  <div style="font-size:13px;color:var(--text);line-height:1.5;min-height:80px">
+                    Хорошо чувствовала ноги, спина не беспокоила. Сделала дополнительные 3 подхода планки.
+                    <span style="color:var(--primary);font-weight:600">|</span>
+                  </div>
+                </div>
+                <div class="card">
+                  <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--s-2)">Самочувствие</div>
+                  <div style="display:flex;justify-content:space-around;font-size:24px">
+                    <span>😣</span><span>😐</span><span>🙂</span><span style="filter:drop-shadow(0 0 8px var(--accent))">😊</span><span>🤩</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>C2.3 Свободная запись</strong>
+            Самостоятельная тренировка вне программы · AC-R001-U001-002
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Flow C3: Progress ===== -->
+      <div class="canvas-header" id="client-progress" style="margin-top:var(--s-12)">
+        <div class="canvas-title">
+          <h1>C3 · Прогресс и замеры</h1>
+          <p>Графики динамики, расчёт 1ПМ, дневник замеров тела. BR-005 на стороне клиента.</p>
+        </div>
+        <div class="canvas-meta">
+          <span class="flow-badge">BR-001</span>
+          <span class="flow-badge">BR-005</span>
+        </div>
+      </div>
+
+      <div class="screens-grid">
+        <!-- C3.1 Progress dashboard -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <div class="app-bar-title">Прогресс<small>Последние 90 дней</small></div>
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></button>
+              </div>
+              <div class="app-content">
+                <div class="stat-grid">
+                  <div class="stat-card">
+                    <div class="label">Тренировок</div>
+                    <div class="value">36</div>
+                    <div class="delta up">↑ 24%</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="label">Adherence</div>
+                    <div class="value">82%</div>
+                    <div class="delta up">↑ 8 п.п.</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="label">Объём</div>
+                    <div class="value">84т</div>
+                    <div class="delta up">↑ 12%</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="label">1ПМ присед</div>
+                    <div class="value">95<span style="font-size:13px;color:var(--text-muted);font-weight:500"> кг</span></div>
+                    <div class="delta up">+7 кг</div>
+                  </div>
+                </div>
+
+                <div class="chart">
+                  <div class="chart-head">
+                    <h5>Объём по неделям</h5>
+                    <span class="period">90 дней</span>
+                  </div>
+                  <svg class="chart-svg" viewBox="0 0 280 110" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="ga1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--primary)" stop-opacity=".3"/><stop offset="100%" stop-color="var(--primary)" stop-opacity="0"/></linearGradient>
+                    </defs>
+                    <path d="M0,80 L25,72 L50,78 L75,60 L100,65 L125,48 L150,52 L175,38 L200,42 L225,28 L250,32 L280,18 L280,110 L0,110 Z" fill="url(#ga1)"/>
+                    <path d="M0,80 L25,72 L50,78 L75,60 L100,65 L125,48 L150,52 L175,38 L200,42 L225,28 L250,32 L280,18" stroke="var(--primary)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="280" cy="18" r="4" fill="var(--primary)"/>
+                    <circle cx="280" cy="18" r="8" fill="var(--primary)" opacity=".2"/>
+                  </svg>
+                </div>
+
+                <div class="chart">
+                  <div class="chart-head">
+                    <h5>Лучшие подъёмы (1ПМ)</h5>
+                    <span class="period">кг</span>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:var(--s-2)">
+                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px">
+                      <span style="color:var(--text-muted)">Приседания</span>
+                      <span style="display:flex;align-items:center;gap:var(--s-2)"><span style="font-family:var(--font-display);font-weight:700;font-size:14px">95 кг</span><span class="chip success" style="font-size:10px">+7</span></span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-bar-fill" style="width:85%"></div></div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-top:var(--s-1)">
+                      <span style="color:var(--text-muted)">Жим лёжа</span>
+                      <span style="display:flex;align-items:center;gap:var(--s-2)"><span style="font-family:var(--font-display);font-weight:700;font-size:14px">52 кг</span><span class="chip success" style="font-size:10px">+4</span></span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-bar-fill success" style="width:55%"></div></div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-top:var(--s-1)">
+                      <span style="color:var(--text-muted)">Становая тяга</span>
+                      <span style="display:flex;align-items:center;gap:var(--s-2)"><span style="font-family:var(--font-display);font-weight:700;font-size:14px">110 кг</span><span class="chip success" style="font-size:10px">+10</span></span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-bar-fill" style="width:95%"></div></div>
+                  </div>
+                </div>
+              </div>
+              <div class="tab-bar">
+                <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Главная</span></button>
+                <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/></svg><span>План</span></button>
+                <button class="cta-tab"><div class="cta-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div></button>
+                <button class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg><span>Прогресс</span></button>
+                <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg><span>Профиль</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>C3.1 Прогресс</strong>
+            Графики объёма, 1ПМ, adherence · удержание через визуальный прогресс
+          </div>
+        </div>
+
+        <!-- C3.2 Measurements -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+                <div class="app-bar-title">Замеры тела</div>
+                <button class="icon-btn" style="background:var(--primary);color:#fff"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+              </div>
+              <div class="app-content">
+                <div class="card">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s-3)">
+                    <div>
+                      <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600">Последний замер</div>
+                      <div style="font-size:13px;font-weight:600">12 мая 2026</div>
+                    </div>
+                    <span class="chip success">↓ 2.1 кг за месяц</span>
+                  </div>
+                  <div class="measurement-row">
+                    <span class="label">Вес</span>
+                    <span class="value">64.2<span class="unit">кг</span><span class="change" style="color:var(--success)">−0.6</span></span>
+                  </div>
+                  <div class="measurement-row">
+                    <span class="label">Талия</span>
+                    <span class="value">71<span class="unit">см</span><span class="change" style="color:var(--success)">−1</span></span>
+                  </div>
+                  <div class="measurement-row">
+                    <span class="label">Бедра</span>
+                    <span class="value">96<span class="unit">см</span><span class="change" style="color:var(--text-muted)">0</span></span>
+                  </div>
+                  <div class="measurement-row">
+                    <span class="label">% жира</span>
+                    <span class="value">22.4<span class="unit">%</span><span class="change" style="color:var(--success)">−0.8</span></span>
+                  </div>
+                </div>
+                <div class="chart">
+                  <div class="chart-head">
+                    <h5>Динамика веса</h5>
+                    <span class="period">90 дней</span>
+                  </div>
+                  <svg class="chart-svg" viewBox="0 0 280 110" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="ga2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--success)" stop-opacity=".25"/><stop offset="100%" stop-color="var(--success)" stop-opacity="0"/></linearGradient>
+                    </defs>
+                    <path d="M0,20 L40,28 L80,22 L120,38 L160,42 L200,56 L240,64 L280,78 L280,110 L0,110 Z" fill="url(#ga2)"/>
+                    <path d="M0,20 L40,28 L80,22 L120,38 L160,42 L200,56 L240,64 L280,78" stroke="var(--success)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="280" cy="78" r="4" fill="var(--success)"/>
+                  </svg>
+                  <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-faint);margin-top:6px"><span>фев</span><span>мар</span><span>апр</span><span>май</span></div>
+                </div>
+                <div class="section-title"><h4>Фото прогресса</h4><a>+ добавить</a></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+                  <div style="aspect-ratio:1;background:linear-gradient(135deg,#a78bfa,#ec4899);border-radius:10px;display:grid;place-items:flex-end;padding:6px;color:#fff;font-size:10px;font-weight:700">фев</div>
+                  <div style="aspect-ratio:1;background:linear-gradient(135deg,#60a5fa,#7c3aed);border-radius:10px;display:grid;place-items:flex-end;padding:6px;color:#fff;font-size:10px;font-weight:700">апр</div>
+                  <div style="aspect-ratio:1;background:linear-gradient(135deg,#34d399,#0891b2);border-radius:10px;display:grid;place-items:flex-end;padding:6px;color:#fff;font-size:10px;font-weight:700">май</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>C3.2 Замеры</strong>
+            Дневник антропометрии · приватность фото только у клиента
+          </div>
+        </div>
+
+        <!-- C3.3 Exercise detail -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+                <div class="app-bar-title" style="text-align:center">Приседания со штангой</div>
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+              </div>
+              <div class="app-content">
+                <div class="stat-grid">
+                  <div class="stat-card">
+                    <div class="label">Текущий 1ПМ</div>
+                    <div class="value">95 кг</div>
+                    <div class="delta up">+7 за 90 дн</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="label">Лучший подход</div>
+                    <div class="value">85×6</div>
+                    <div class="delta flat">12 мая</div>
+                  </div>
+                </div>
+                <div class="chart">
+                  <div class="chart-head">
+                    <h5>Рабочие веса</h5>
+                    <span class="period">12 нед.</span>
+                  </div>
+                  <svg class="chart-svg" viewBox="0 0 280 110" preserveAspectRatio="none">
+                    <line x1="0" y1="40" x2="280" y2="40" stroke="var(--border)" stroke-dasharray="3 3"/>
+                    <g fill="var(--primary)">
+                      <rect x="6" y="78" width="14" height="32" rx="3"/>
+                      <rect x="30" y="72" width="14" height="38" rx="3"/>
+                      <rect x="54" y="68" width="14" height="42" rx="3"/>
+                      <rect x="78" y="60" width="14" height="50" rx="3"/>
+                      <rect x="102" y="62" width="14" height="48" rx="3"/>
+                      <rect x="126" y="52" width="14" height="58" rx="3"/>
+                      <rect x="150" y="48" width="14" height="62" rx="3"/>
+                      <rect x="174" y="40" width="14" height="70" rx="3"/>
+                      <rect x="198" y="44" width="14" height="66" rx="3"/>
+                      <rect x="222" y="32" width="14" height="78" rx="3"/>
+                      <rect x="246" y="28" width="14" height="82" rx="3"/>
+                    </g>
+                  </svg>
+                </div>
+                <div class="section-title"><h4>История подходов</h4><a>Все</a></div>
+                <div class="card">
+                  <div class="card-row">
+                    <div style="width:36px;height:36px;border-radius:10px;background:var(--accent);display:grid;place-items:center;color:var(--accent-text);font-weight:800;font-size:11px">12<br>мая</div>
+                    <div class="meta">
+                      <strong>85 кг × 6, 6, 5</strong>
+                      <small>Объём: 1.36т · RPE 9</small>
+                    </div>
+                  </div>
+                  <div class="card-row">
+                    <div style="width:36px;height:36px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center;color:var(--text);font-weight:700;font-size:11px">5<br>мая</div>
+                    <div class="meta">
+                      <strong>80 кг × 6, 6, 6, 5</strong>
+                      <small>Объём: 1.68т · RPE 8</small>
+                    </div>
+                  </div>
+                  <div class="card-row">
+                    <div style="width:36px;height:36px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center;color:var(--text);font-weight:700;font-size:11px">28<br>апр</div>
+                    <div class="meta">
+                      <strong>75 кг × 8, 8, 7</strong>
+                      <small>Объём: 1.73т · RPE 8</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>C3.3 Карточка упражнения</strong>
+            История подходов, расчёт 1ПМ · BR-001 «расчёт 1ПМ и объёма»
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Flow C4: Access ===== -->
+      <div class="canvas-header" id="client-access" style="margin-top:var(--s-12)">
+        <div class="canvas-title">
+          <h1>C4 · Доступы и приватность</h1>
+          <p>Управление списком тренеров, отзыв доступа, передача нового — без потери истории. BR-002.</p>
+        </div>
+        <div class="canvas-meta">
+          <span class="flow-badge">BR-002</span>
+          <span class="flow-badge">AC-R002-U002-001</span>
+          <span class="flow-badge">100% сохранение истории</span>
+        </div>
+      </div>
+
+      <div class="screens-grid">
+        <!-- C4.1 Access list -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+                <div class="app-bar-title">Доступы</div>
+                <button class="icon-btn" style="background:var(--primary);color:#fff"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+              </div>
+              <div class="app-content">
+                <div class="banner" style="background:var(--primary-soft);border-color:var(--primary);color:var(--primary-soft-text)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <div>
+                    <strong>Твои данные — только твои</strong>
+                    Тренер видит то, что ты разрешаешь. Отозвать доступ можно в любой момент.
+                  </div>
+                </div>
+
+                <div class="card">
+                  <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--s-2)">Активные доступы · 2</div>
+                  <div class="access-row">
+                    <div class="avatar alt-1">И</div>
+                    <div class="meta">
+                      <strong>Ирина Соколова</strong>
+                      <small>Персональный тренер · с 14 марта</small>
+                      <div class="scope-list">
+                        <span class="chip">тренировки</span>
+                        <span class="chip">программы</span>
+                        <span class="chip">замеры</span>
+                      </div>
+                    </div>
+                    <div class="toggle on"></div>
+                  </div>
+                  <div class="access-row">
+                    <div class="avatar alt-2">О</div>
+                    <div class="meta">
+                      <strong>Ольга Петрова</strong>
+                      <small>Нутрициолог · с 28 апреля</small>
+                      <div class="scope-list">
+                        <span class="chip">замеры</span>
+                        <span class="chip">привычки</span>
+                      </div>
+                    </div>
+                    <div class="toggle on"></div>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--s-2)">Архив · 1</div>
+                  <div class="access-row">
+                    <div class="avatar alt-3">Д</div>
+                    <div class="meta">
+                      <strong style="opacity:.65">Дмитрий Орлов</strong>
+                      <small>Доступ отозван 10 марта · история сохранена</small>
+                    </div>
+                    <button class="btn secondary sm">Восстановить</button>
+                  </div>
+                </div>
+
+                <button class="btn primary block">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Добавить специалиста
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>C4.1 Список доступов</strong>
+            Multi-specialist case · нутрициолог + тренер одновременно
+          </div>
+        </div>
+
+        <!-- C4.2 Confirm revoke -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen" style="background:var(--bg)">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+                <div class="app-bar-title">Доступы</div>
+                <div style="width:36px"></div>
+              </div>
+              <div class="app-content" style="opacity:.4">
+                <div class="card">
+                  <div class="access-row">
+                    <div class="avatar alt-1">И</div>
+                    <div class="meta">
+                      <strong>Ирина Соколова</strong>
+                      <small>Персональный тренер</small>
+                    </div>
+                    <div class="toggle on"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="bottom-sheet">
+                <div class="handle"></div>
+                <div style="display:flex;align-items:center;gap:var(--s-3);margin-bottom:var(--s-3)">
+                  <div class="avatar alt-1">И</div>
+                  <div>
+                    <strong style="font-size:14px;display:block">Отозвать доступ Ирины?</strong>
+                    <small style="font-size:12px;color:var(--text-muted)">Тренер потеряет возможность видеть и редактировать данные</small>
+                  </div>
+                </div>
+                <div style="background:var(--success-soft);color:var(--success);padding:10px 12px;border-radius:8px;font-size:12px;display:flex;gap:8px;align-items:center;margin-bottom:var(--s-3)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Твоя история тренировок останется с тобой
+                </div>
+                <p style="font-size:12px;color:var(--text-muted);margin-bottom:var(--s-4)">Программу от Ирины можно скрыть или сохранить как личный шаблон.</p>
+                <button class="btn block" style="background:var(--danger);color:#fff;margin-bottom:var(--s-2)">Отозвать доступ</button>
+                <button class="btn secondary block">Отмена</button>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>C4.2 Отзыв доступа</strong>
+            Wow-момент: гарантия сохранения истории при смене тренера
+          </div>
+        </div>
+
+        <!-- C4.3 Invite via QR -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+                <div class="app-bar-title">Подключить тренера</div>
+                <div style="width:36px"></div>
+              </div>
+              <div class="app-content">
+                <div class="qr-card">
+                  <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700;margin-bottom:var(--s-2)">Покажи тренеру</div>
+                  <h3 style="font-family:var(--font-display);font-size:16px;font-weight:700">QR-код приглашения</h3>
+                  <div class="qr-img">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                      <rect width="100" height="100" fill="white"/>
+                      <g fill="#15181d">
+                        <rect x="5" y="5" width="20" height="20" rx="2"/>
+                        <rect x="9" y="9" width="12" height="12" rx="1" fill="white"/>
+                        <rect x="13" y="13" width="4" height="4"/>
+                        <rect x="75" y="5" width="20" height="20" rx="2"/>
+                        <rect x="79" y="9" width="12" height="12" rx="1" fill="white"/>
+                        <rect x="83" y="13" width="4" height="4"/>
+                        <rect x="5" y="75" width="20" height="20" rx="2"/>
+                        <rect x="9" y="79" width="12" height="12" rx="1" fill="white"/>
+                        <rect x="13" y="83" width="4" height="4"/>
+                        <rect x="30" y="10" width="4" height="4"/><rect x="38" y="10" width="4" height="4"/>
+                        <rect x="46" y="10" width="4" height="8"/><rect x="54" y="10" width="8" height="4"/>
+                        <rect x="62" y="14" width="4" height="4"/><rect x="68" y="10" width="4" height="4"/>
+                        <rect x="30" y="22" width="8" height="4"/><rect x="42" y="22" width="4" height="4"/>
+                        <rect x="50" y="22" width="4" height="8"/><rect x="58" y="22" width="4" height="4"/>
+                        <rect x="66" y="22" width="4" height="4"/>
+                        <rect x="10" y="30" width="4" height="4"/><rect x="18" y="30" width="8" height="4"/>
+                        <rect x="30" y="30" width="4" height="8"/><rect x="38" y="34" width="4" height="4"/>
+                        <rect x="46" y="30" width="4" height="4"/><rect x="58" y="30" width="4" height="8"/>
+                        <rect x="66" y="30" width="4" height="4"/><rect x="74" y="30" width="4" height="4"/>
+                        <rect x="82" y="34" width="4" height="4"/><rect x="90" y="30" width="4" height="4"/>
+                        <rect x="14" y="42" width="4" height="4"/><rect x="22" y="42" width="4" height="4"/>
+                        <rect x="34" y="42" width="8" height="4"/><rect x="46" y="42" width="4" height="8"/>
+                        <rect x="54" y="42" width="4" height="4"/><rect x="62" y="46" width="4" height="4"/>
+                        <rect x="70" y="42" width="4" height="4"/><rect x="78" y="42" width="8" height="4"/>
+                        <rect x="10" y="50" width="8" height="4"/><rect x="22" y="50" width="4" height="8"/>
+                        <rect x="30" y="50" width="4" height="4"/><rect x="38" y="50" width="4" height="4"/>
+                        <rect x="50" y="54" width="4" height="4"/><rect x="58" y="50" width="8" height="4"/>
+                        <rect x="70" y="50" width="4" height="8"/><rect x="82" y="50" width="4" height="4"/>
+                        <rect x="14" y="62" width="4" height="4"/><rect x="26" y="62" width="4" height="8"/>
+                        <rect x="34" y="62" width="8" height="4"/><rect x="46" y="62" width="4" height="4"/>
+                        <rect x="54" y="62" width="4" height="8"/><rect x="62" y="62" width="4" height="4"/>
+                        <rect x="74" y="62" width="4" height="4"/><rect x="86" y="62" width="4" height="4"/>
+                        <rect x="30" y="78" width="4" height="4"/><rect x="38" y="82" width="8" height="4"/>
+                        <rect x="50" y="78" width="4" height="8"/><rect x="58" y="78" width="4" height="4"/>
+                        <rect x="66" y="82" width="4" height="4"/><rect x="74" y="78" width="4" height="4"/>
+                        <rect x="86" y="78" width="4" height="8"/>
+                        <rect x="34" y="90" width="4" height="4"/><rect x="46" y="90" width="4" height="4"/>
+                        <rect x="58" y="90" width="8" height="4"/><rect x="70" y="90" width="4" height="4"/>
+                        <rect x="82" y="90" width="4" height="4"/>
+                      </g>
+                    </svg>
+                  </div>
+                  <div class="qr-code-text">FB-MARIA-7K2P</div>
+                  <p style="font-size:12px;color:var(--text-muted);margin-top:var(--s-3)">Тренер увидит твоё имя и сможет запросить нужные данные. Доступ выдаётся только с твоего подтверждения.</p>
+                </div>
+                <button class="btn secondary block">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                  Поделиться ссылкой
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>C4.3 Приглашение</strong>
+            QR + короткий код · AC-R002-U001-001 · invite acceptance ≥ 45%
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Flow C5: Program ===== -->
+      <div class="canvas-header" id="client-program" style="margin-top:var(--s-12)">
+        <div class="canvas-title">
+          <h1>C5 · Программа от тренера</h1>
+          <p>Просмотр недельного плана, заметки тренера, отметка выполнения тренировки. BR-004 на стороне клиента.</p>
+        </div>
+        <div class="canvas-meta">
+          <span class="flow-badge">BR-004</span>
+          <span class="flow-badge">AC-R004-U001-002</span>
+        </div>
+      </div>
+
+      <div class="screens-grid">
+        <!-- C5.1 Program week -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <div class="app-bar-title">Программа<small>Неделя 4 из 8 · Гипертрофия</small></div>
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+              </div>
+              <div class="app-content">
+                <div class="card" style="background:var(--primary-soft);border-color:var(--primary)">
+                  <div style="display:flex;align-items:center;gap:var(--s-3)">
+                    <div class="avatar alt-1">И</div>
+                    <div style="flex:1">
+                      <strong style="font-size:13px;display:block;color:var(--primary-soft-text)">Ирина Соколова</strong>
+                      <small style="font-size:11px;color:var(--text-muted)">Назначила 30 апреля · 8 недель</small>
+                    </div>
+                    <span class="chip primary">Неделя 4</span>
+                  </div>
+                  <div class="progress-bar" style="margin-top:var(--s-3)">
+                    <div class="progress-bar-fill" style="width:48%"></div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-top:6px">
+                    <span>48% выполнено</span>
+                    <span>12 из 25 тренировок</span>
+                  </div>
+                </div>
+
+                <div class="day-tabs">
+                  <div class="day-tab"><small>пн</small><div class="day-num">11</div></div>
+                  <div class="day-tab"><small>вт</small><div class="day-num">12</div></div>
+                  <div class="day-tab"><small>ср</small><div class="day-num">13</div></div>
+                  <div class="day-tab rest"><small>чт</small><div class="day-num">14</div></div>
+                  <div class="day-tab"><small>пт</small><div class="day-num">15</div></div>
+                  <div class="day-tab rest"><small>сб</small><div class="day-num">16</div></div>
+                  <div class="day-tab active"><small>вс</small><div class="day-num">17</div></div>
+                </div>
+
+                <div class="section-title">
+                  <h4>Вс, 17 мая · Низ тела</h4>
+                  <span class="chip primary">по плану</span>
+                </div>
+
+                <div class="card">
+                  <div class="card-row">
+                    <div style="width:36px;height:36px;border-radius:10px;background:var(--primary-soft);color:var(--primary-soft-text);display:grid;place-items:center;font-weight:800">1</div>
+                    <div class="meta">
+                      <strong>Приседания со штангой</strong>
+                      <small>4 × 8 · RPE 8 · отдых 2 мин</small>
+                    </div>
+                  </div>
+                  <div class="card-row">
+                    <div style="width:36px;height:36px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center;font-weight:800">2</div>
+                    <div class="meta">
+                      <strong>Румынская тяга</strong>
+                      <small>3 × 10 · RPE 7</small>
+                    </div>
+                  </div>
+                  <div class="card-row">
+                    <div style="width:36px;height:36px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center;font-weight:800">3</div>
+                    <div class="meta">
+                      <strong>Жим ногами</strong>
+                      <small>3 × 12 · RPE 7</small>
+                    </div>
+                  </div>
+                  <div class="card-row">
+                    <div style="width:36px;height:36px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center;font-weight:800">4</div>
+                    <div class="meta">
+                      <strong>Выпады с гантелями</strong>
+                      <small>3 × 10/нога</small>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="note-card">
+                  <div class="note-head">
+                    <div class="avatar sm alt-1">И</div>
+                    <strong>Заметка к неделе</strong>
+                    <small>3 дня назад</small>
+                  </div>
+                  <p>Это deload-вариант перед тестовой неделей. Не гонись за весом — фокус на технике и подконтрольном эксцентрике.</p>
+                </div>
+
+                <button class="btn primary block">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  Начать тренировку
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>C5.1 Программа</strong>
+            Недельный план · текущая тренировка · комментарий тренера
+          </div>
+        </div>
+
+        <!-- C5.2 Completion summary -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="onb-screen" style="background:linear-gradient(180deg,var(--primary-soft) 0%,var(--surface) 100%);padding-top:var(--s-4)">
+                <div class="app-bar" style="padding:0;margin-bottom:var(--s-4)">
+                  <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                  <div style="font-size:12px;color:var(--text-muted);font-weight:600">Тренировка завершена</div>
+                  <div style="width:36px"></div>
+                </div>
+                <div class="onb-illustration" style="margin-top:var(--s-3)">
+                  <div class="onb-blob" style="background:var(--accent);color:var(--accent-text)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
+                </div>
+                <h2 class="onb-title">Отлично, Мария</h2>
+                <p class="onb-text">Низ тела × сила завершена за 52 минуты. Данные ушли в твой дневник.</p>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--s-2);margin-top:var(--s-5);text-align:center">
+                  <div class="card" style="padding:var(--s-3)">
+                    <div style="font-family:var(--font-display);font-size:20px;font-weight:700">52</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;font-weight:600">минут</div>
+                  </div>
+                  <div class="card" style="padding:var(--s-3)">
+                    <div style="font-family:var(--font-display);font-size:20px;font-weight:700">14</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;font-weight:600">подходов</div>
+                  </div>
+                  <div class="card" style="padding:var(--s-3)">
+                    <div style="font-family:var(--font-display);font-size:20px;font-weight:700">4.8т</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;font-weight:600">объём</div>
+                  </div>
+                </div>
+                <div style="margin-top:var(--s-4);font-size:12px;color:var(--text-muted);text-align:left;padding:var(--s-3);background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border);display:flex;gap:var(--s-3);align-items:center">
+                  <div class="avatar sm alt-1">И</div>
+                  <div>Уведомление отправлено <strong style="color:var(--text)">Ирине</strong></div>
+                </div>
+                <button class="btn primary block" style="margin-top:var(--s-4)">Готово</button>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>C5.2 Завершение</strong>
+            Sync-loop · тренер получает статус · AC-R004-U001-003
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ============================================================
+         TRAINER SCREENS
+         ============================================================ -->
+    <div id="role-trainer" style="display:none">
+
+      <!-- ===== Flow T1: Onboarding ===== -->
+      <div class="canvas-header" id="trainer-onboarding">
+        <div class="canvas-title">
+          <h1>T1 · Онбординг и приглашение клиента</h1>
+          <p>Регистрация → мастер первого клиента → отправка приглашения по QR/ссылке/email. BR-006, time-to-first-client ≤ 1 день.</p>
+        </div>
+        <div class="canvas-meta">
+          <span class="flow-badge">BR-006</span>
+          <span class="flow-badge">AC-R006-U001-001</span>
+          <span class="flow-badge">Activation ≥ 55%</span>
+        </div>
+      </div>
+
+      <div class="screens-grid">
+        <!-- T1.1 Sign up -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+                <div class="app-bar-title" style="text-align:center">Регистрация тренера</div>
+                <div style="width:36px"></div>
+              </div>
+              <div class="app-content">
+                <h2 style="font-family:var(--font-display);font-size:22px;font-weight:700;letter-spacing:-0.02em">Создай рабочий кабинет</h2>
+                <p style="color:var(--text-muted);font-size:13px;margin-top:-8px">Первые 14 дней — все функции бесплатно, до 3 активных клиентов.</p>
+
+                <div style="display:flex;flex-direction:column;gap:var(--s-3)">
+                  <div>
+                    <label style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Имя</label>
+                    <div class="set-input" style="text-align:left;padding:12px 14px;font-weight:500;background:var(--surface);margin-top:4px">Ирина Соколова</div>
+                  </div>
+                  <div>
+                    <label style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Email</label>
+                    <div class="set-input" style="text-align:left;padding:12px 14px;font-weight:500;background:var(--surface);margin-top:4px">irina.sokolova@mail.ru</div>
+                  </div>
+                  <div>
+                    <label style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Специализация</label>
+                    <div class="tag-row" style="margin-top:6px">
+                      <span class="chip primary"><span class="dot-mini"></span>Силовая</span>
+                      <span class="chip primary"><span class="dot-mini"></span>Жиросжигание</span>
+                      <span class="chip">Реабилит.</span>
+                      <span class="chip">Йога</span>
+                      <span class="chip">Бег</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Сколько клиентов сейчас?</label>
+                    <div class="tag-row" style="margin-top:6px">
+                      <span class="chip">1–5</span>
+                      <span class="chip">6–15</span>
+                      <span class="chip primary"><span class="dot-mini"></span>16–25</span>
+                      <span class="chip">25+</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="background:var(--accent);color:var(--accent-text);padding:var(--s-3) var(--s-4);border-radius:var(--r-md);font-size:12px;display:flex;gap:var(--s-2);align-items:center;font-weight:600">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Стартовая настройка займёт ~3 минуты
+                </div>
+
+                <button class="btn primary block">Продолжить</button>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>T1.1 Регистрация</strong>
+            Короткая форма + сегментация · setup < 15 мин по CJM
+          </div>
+        </div>
+
+        <!-- T1.2 First client wizard -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+                <div class="app-bar-title" style="text-align:center">Первый клиент<small>Шаг 2 из 3</small></div>
+                <button style="font-size:13px;color:var(--text-muted);font-weight:600">Позже</button>
+              </div>
+              <div class="app-content">
+                <div style="display:flex;gap:4px;margin-bottom:var(--s-2)">
+                  <div style="flex:1;height:4px;background:var(--primary);border-radius:2px"></div>
+                  <div style="flex:1;height:4px;background:var(--primary);border-radius:2px"></div>
+                  <div style="flex:1;height:4px;background:var(--surface-3);border-radius:2px"></div>
+                </div>
+                <h2 style="font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:-0.02em">Пригласи клиента</h2>
+                <p style="color:var(--text-muted);font-size:13px;margin-top:-6px">Отправь ссылку или покажи QR — клиент подключится за минуту.</p>
+
+                <div class="card">
+                  <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--s-2)">Имя клиента</div>
+                  <div class="set-input" style="text-align:left;padding:12px 14px;font-weight:600;background:var(--surface)">Мария Иванова</div>
+                </div>
+
+                <div class="card">
+                  <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--s-3)">Способ приглашения</div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--s-2);text-align:center">
+                    <button class="btn secondary" style="flex-direction:column;padding:14px 8px;background:var(--primary-soft);color:var(--primary-soft-text);border-color:var(--primary)">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><rect x="7" y="7" width="4" height="4"/><rect x="13" y="7" width="4" height="4"/><rect x="7" y="13" width="4" height="4"/><rect x="13" y="13" width="4" height="4"/></svg>
+                      <span style="font-size:11px;margin-top:4px">QR-код</span>
+                    </button>
+                    <button class="btn secondary" style="flex-direction:column;padding:14px 8px">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                      <span style="font-size:11px;margin-top:4px">Ссылка</span>
+                    </button>
+                    <button class="btn secondary" style="flex-direction:column;padding:14px 8px">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2 6 12 13 22 6"/></svg>
+                      <span style="font-size:11px;margin-top:4px">Email</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--s-3)">Запросить доступ к данным</div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0">
+                    <span style="font-size:13px;font-weight:500">Тренировки</span>
+                    <div class="toggle on"></div>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0">
+                    <span style="font-size:13px;font-weight:500">Замеры</span>
+                    <div class="toggle on"></div>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0">
+                    <span style="font-size:13px;font-weight:500">Фото прогресса</span>
+                    <div class="toggle"></div>
+                  </div>
+                </div>
+
+                <button class="btn primary block">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                  Отправить приглашение
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>T1.2 Мастер первого клиента</strong>
+            Прозрачный scope доступа · 3 способа приглашения
+          </div>
+        </div>
+
+        <!-- T1.3 Empty trainer dash -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <div class="greeting">
+                  <small>Среда, 13 мая</small>
+                  <h2>Доброе утро, Ирина</h2>
+                </div>
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg></button>
+              </div>
+              <div class="app-content">
+                <div class="hero-card">
+                  <span class="chip accent" style="margin-bottom:var(--s-3)">Trial · осталось 13 дней</span>
+                  <h3>Приглашение отправлено</h3>
+                  <p>Ждём, пока Мария подтвердит доступ</p>
+                  <div style="display:flex;align-items:center;gap:var(--s-3);margin-top:var(--s-4);padding:var(--s-3);background:rgba(255,255,255,0.15);border-radius:var(--r-md);position:relative">
+                    <div class="avatar" style="background:rgba(255,255,255,0.25)">М</div>
+                    <div style="flex:1">
+                      <strong style="font-size:13px">Мария Иванова</strong>
+                      <small style="font-size:11px;opacity:.85;display:block">отправлено 2 минуты назад</small>
+                    </div>
+                    <span class="chip" style="background:var(--accent);color:var(--accent-text)">ждём</span>
+                  </div>
+                </div>
+
+                <div class="section-title"><h4>Следующие шаги</h4></div>
+
+                <div class="card" style="display:flex;align-items:center;gap:var(--s-3)">
+                  <div style="width:36px;height:36px;border-radius:10px;background:var(--success-soft);color:var(--success);display:grid;place-items:center">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
+                  <div style="flex:1">
+                    <strong style="font-size:13px;display:block">Аккаунт создан</strong>
+                    <small style="font-size:11px;color:var(--text-muted)">Профиль и специализация</small>
+                  </div>
+                </div>
+
+                <div class="card" style="display:flex;align-items:center;gap:var(--s-3)">
+                  <div style="width:36px;height:36px;border-radius:10px;background:var(--success-soft);color:var(--success);display:grid;place-items:center">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
+                  <div style="flex:1">
+                    <strong style="font-size:13px;display:block">Приглашение отправлено</strong>
+                    <small style="font-size:11px;color:var(--text-muted)">Мария Иванова</small>
+                  </div>
+                </div>
+
+                <div class="card" style="display:flex;align-items:center;gap:var(--s-3);border-color:var(--primary)">
+                  <div style="width:36px;height:36px;border-radius:10px;background:var(--primary);color:#fff;display:grid;place-items:center">
+                    <span style="font-weight:800;font-size:14px">3</span>
+                  </div>
+                  <div style="flex:1">
+                    <strong style="font-size:13px;display:block">Создай первую программу</strong>
+                    <small style="font-size:11px;color:var(--text-muted)">Шаблон или с нуля · 5 минут</small>
+                  </div>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+
+                <div class="card" style="display:flex;align-items:center;gap:var(--s-3);opacity:.55">
+                  <div style="width:36px;height:36px;border-radius:10px;background:var(--surface-2);color:var(--text-muted);display:grid;place-items:center">
+                    <span style="font-weight:800;font-size:14px">4</span>
+                  </div>
+                  <div style="flex:1">
+                    <strong style="font-size:13px;display:block">Настрой автонапоминания</strong>
+                    <small style="font-size:11px;color:var(--text-muted)">Об оплатах и тренировках</small>
+                  </div>
+                </div>
+              </div>
+              <div class="tab-bar">
+                <button class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg><span>Дашборд</span></button>
+                <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Клиенты</span></button>
+                <button class="cta-tab"><div class="cta-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div></button>
+                <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/></svg><span>Программы</span></button>
+                <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg><span>Профиль</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>T1.3 Чек-лист онбординга</strong>
+            После приглашения · подсказывает следующий шаг · TTV ≤ 1 день
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Flow T2: Dashboard ===== -->
+      <div class="canvas-header" id="trainer-dashboard" style="margin-top:var(--s-12)">
+        <div class="canvas-title">
+          <h1>T2 · Рабочий дашборд</h1>
+          <p>Главный экран тренера с активными клиентами, alert-ами и быстрыми действиями. BR-006 + BR-005.</p>
+        </div>
+        <div class="canvas-meta">
+          <span class="flow-badge">BR-006</span>
+          <span class="flow-badge">AC-R006-U002-002</span>
+        </div>
+      </div>
+
+      <div class="screens-grid">
+        <!-- T2.1 Daily dashboard -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <div class="greeting">
+                  <small>Воскресенье, 17 мая</small>
+                  <h2>22 клиента активно</h2>
+                </div>
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg><span class="dot"></span></button>
+              </div>
+              <div class="app-content">
+
+                <div class="trainer-kpi">
+                  <div class="stat-card">
+                    <div class="label">Adherence</div>
+                    <div class="value">78%</div>
+                    <div class="delta up">↑ 4 п.п.</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="label">MRR</div>
+                    <div class="value">₽142к</div>
+                    <div class="delta up">↑ ₽8к</div>
+                  </div>
+                </div>
+
+                <div class="banner">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  <div>
+                    <strong>3 клиента требуют внимания</strong>
+                    Пропустили 2+ тренировок подряд
+                  </div>
+                </div>
+
+                <div class="section-title"><h4>Нужна реакция</h4><a>Все</a></div>
+
+                <div class="client-card">
+                  <div class="avatar alt-3">А</div>
+                  <div class="client-progress">
+                    <strong>Алексей К.</strong>
+                    <small>Пропустил 3 тренировки · последняя 8 мая</small>
+                    <div class="progress-bar"><div class="progress-bar-fill danger" style="width:25%"></div></div>
+                  </div>
+                  <span class="chip danger">25%</span>
+                </div>
+
+                <div class="client-card">
+                  <div class="avatar alt-4">Е</div>
+                  <div class="client-progress">
+                    <strong>Елена С.</strong>
+                    <small>Прогресс остановился · 2 нед.</small>
+                    <div class="progress-bar"><div class="progress-bar-fill warning" style="width:42%"></div></div>
+                  </div>
+                  <span class="chip warning">42%</span>
+                </div>
+
+                <div class="section-title"><h4>На сегодня</h4><a>Все</a></div>
+
+                <div class="client-card">
+                  <div class="avatar">М</div>
+                  <div class="client-progress">
+                    <strong>Мария И.</strong>
+                    <small>Низ тела · в 19:00</small>
+                    <div class="progress-bar"><div class="progress-bar-fill success" style="width:88%"></div></div>
+                  </div>
+                  <span class="chip success">88%</span>
+                </div>
+
+                <div class="client-card">
+                  <div class="avatar alt-2">Д</div>
+                  <div class="client-progress">
+                    <strong>Дарья В.</strong>
+                    <small>Кардио · в 20:30</small>
+                    <div class="progress-bar"><div class="progress-bar-fill" style="width:72%"></div></div>
+                  </div>
+                  <span class="chip primary">72%</span>
+                </div>
+              </div>
+              <div class="tab-bar">
+                <button class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg><span>Дашборд</span></button>
+                <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Клиенты</span></button>
+                <button class="cta-tab"><div class="cta-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div></button>
+                <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/></svg><span>Программы</span></button>
+                <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg><span>Профиль</span></button>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>T2.1 Дашборд</strong>
+            KPI · alert-ы по пропускам · клиенты на сегодня
+          </div>
+        </div>
+
+        <!-- T2.2 Clients list -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <div class="app-bar-title">Клиенты<small>22 активных · 3 паузы</small></div>
+                <button class="icon-btn" style="background:var(--primary);color:#fff"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+              </div>
+              <div class="app-content">
+                <div class="search-bar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  Поиск клиента
+                </div>
+
+                <div class="tag-row">
+                  <span class="chip primary"><span class="dot-mini"></span>Все · 22</span>
+                  <span class="chip">Активные · 19</span>
+                  <span class="chip danger">Внимание · 3</span>
+                  <span class="chip">На паузе · 3</span>
+                </div>
+
+                <div class="card" style="padding:0">
+                  <div class="card-row" style="padding:var(--s-3) var(--s-4)">
+                    <div class="avatar alt-3">А</div>
+                    <div class="meta">
+                      <strong>Алексей Карпов</strong>
+                      <small style="color:var(--danger)">● пропуск 9 дней</small>
+                    </div>
+                    <span class="chip danger">25%</span>
+                  </div>
+                  <div class="card-row" style="padding:var(--s-3) var(--s-4)">
+                    <div class="avatar alt-4">Е</div>
+                    <div class="meta">
+                      <strong>Елена Соловьёва</strong>
+                      <small style="color:var(--warning)">● плато 2 нед</small>
+                    </div>
+                    <span class="chip warning">42%</span>
+                  </div>
+                  <div class="card-row" style="padding:var(--s-3) var(--s-4)">
+                    <div class="avatar">М</div>
+                    <div class="meta">
+                      <strong>Мария Иванова</strong>
+                      <small>тренировка сегодня 19:00</small>
+                    </div>
+                    <span class="chip success">88%</span>
+                  </div>
+                  <div class="card-row" style="padding:var(--s-3) var(--s-4)">
+                    <div class="avatar alt-2">Д</div>
+                    <div class="meta">
+                      <strong>Дарья Власова</strong>
+                      <small>3 тренировки на этой неделе</small>
+                    </div>
+                    <span class="chip primary">72%</span>
+                  </div>
+                  <div class="card-row" style="padding:var(--s-3) var(--s-4)">
+                    <div class="avatar alt-5">С</div>
+                    <div class="meta">
+                      <strong>Сергей Минин</strong>
+                      <small>программа: верх/низ split</small>
+                    </div>
+                    <span class="chip success">94%</span>
+                  </div>
+                  <div class="card-row" style="padding:var(--s-3) var(--s-4)">
+                    <div class="avatar alt-6">Н</div>
+                    <div class="meta">
+                      <strong>Наталья Жукова</strong>
+                      <small>программа: жиросжигание</small>
+                    </div>
+                    <span class="chip success">81%</span>
+                  </div>
+                  <div class="card-row" style="padding:var(--s-3) var(--s-4)">
+                    <div class="avatar alt-1">П</div>
+                    <div class="meta">
+                      <strong>Павел Орехов</strong>
+                      <small>оплата до 22 мая</small>
+                    </div>
+                    <span class="chip warning"><span class="dot-mini"></span>оплата</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>T2.2 Список клиентов</strong>
+            Сортировка по статусу · цветовая индикация adherence
+          </div>
+        </div>
+
+        <!-- T2.3 Notifications -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+                <div class="app-bar-title">Уведомления</div>
+                <button style="font-size:13px;color:var(--primary);font-weight:600">Прочесть всё</button>
+              </div>
+              <div class="app-content">
+                <div style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:0 var(--s-1)">Сегодня</div>
+
+                <div class="card" style="border-left:3px solid var(--danger);background:var(--danger-soft)">
+                  <div style="display:flex;gap:var(--s-3);align-items:flex-start">
+                    <div style="width:32px;height:32px;border-radius:8px;background:var(--danger);color:#fff;display:grid;place-items:center;flex-shrink:0">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+                    </div>
+                    <div style="flex:1">
+                      <strong style="font-size:13px;display:block">Алексей К. пропустил тренировку</strong>
+                      <small style="font-size:12px;color:var(--text-muted);display:block;margin:2px 0 var(--s-2)">3-й пропуск подряд · 2 часа назад</small>
+                      <button class="btn sm" style="background:var(--danger);color:#fff">Связаться</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card" style="border-left:3px solid var(--success)">
+                  <div style="display:flex;gap:var(--s-3);align-items:flex-start">
+                    <div class="avatar sm">М</div>
+                    <div style="flex:1">
+                      <strong style="font-size:13px;display:block">Мария завершила тренировку</strong>
+                      <small style="font-size:12px;color:var(--text-muted);display:block;margin:2px 0">Низ тела · 52 мин · 4 часа назад</small>
+                    </div>
+                    <span class="chip success">+1ПМ</span>
+                  </div>
+                </div>
+
+                <div class="card" style="border-left:3px solid var(--primary)">
+                  <div style="display:flex;gap:var(--s-3);align-items:flex-start">
+                    <div style="width:32px;height:32px;border-radius:8px;background:var(--primary-soft);color:var(--primary-soft-text);display:grid;place-items:center;flex-shrink:0">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                    </div>
+                    <div style="flex:1">
+                      <strong style="font-size:13px;display:block">Новый клиент подключился</strong>
+                      <small style="font-size:12px;color:var(--text-muted);display:block;margin:2px 0">Алина Кузнецова приняла приглашение</small>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:0 var(--s-1);margin-top:var(--s-3)">Вчера</div>
+
+                <div class="card">
+                  <div style="display:flex;gap:var(--s-3);align-items:flex-start">
+                    <div style="width:32px;height:32px;border-radius:8px;background:var(--warning-soft);color:var(--warning);display:grid;place-items:center;flex-shrink:0">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/></svg>
+                    </div>
+                    <div style="flex:1">
+                      <strong style="font-size:13px;display:block">Скоро лимит тарифа</strong>
+                      <small style="font-size:12px;color:var(--text-muted);display:block;margin:2px 0">Осталось 3 слота из 25</small>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <div style="display:flex;gap:var(--s-3);align-items:flex-start">
+                    <div class="avatar sm alt-3">А</div>
+                    <div style="flex:1">
+                      <strong style="font-size:13px;display:block">Андрей оплатил месяц</strong>
+                      <small style="font-size:12px;color:var(--text-muted);display:block;margin:2px 0">₽6 000 · 19 часов назад</small>
+                    </div>
+                    <span class="chip success">оплачено</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>T2.3 Уведомления</strong>
+            Smart Analytics · alert-ы по пропускам, оплатам, новым клиентам
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Flow T3-4: Client card + analytics ===== -->
+      <div class="canvas-header" id="trainer-client" style="margin-top:var(--s-12)">
+        <div class="canvas-title">
+          <h1>T3 · Карточка клиента и аналитика</h1>
+          <p>Профиль клиента, история тренировок, графики прогресса, отчёт за период, заметка тренера. BR-005.</p>
+        </div>
+        <div class="canvas-meta">
+          <span class="flow-badge">BR-005</span>
+          <span class="flow-badge">AC-R005-U001-001</span>
+        </div>
+      </div>
+
+      <div class="screens-grid">
+        <!-- T3.1 Client overview -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+                <div class="app-bar-title" style="text-align:center">Карточка</div>
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+              </div>
+              <div class="app-content">
+                <div style="display:flex;gap:var(--s-3);align-items:center">
+                  <div class="avatar lg">М</div>
+                  <div style="flex:1">
+                    <h2 style="font-family:var(--font-display);font-size:18px;font-weight:700">Мария Иванова</h2>
+                    <small style="font-size:12px;color:var(--text-muted);display:block">34 года · клиент с 14 марта</small>
+                    <div style="margin-top:6px;display:flex;gap:6px">
+                      <span class="chip success">●Активна</span>
+                      <span class="chip">Гипертрофия</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="trainer-kpi">
+                  <div class="stat-card">
+                    <div class="label">Adherence</div>
+                    <div class="value">88%</div>
+                    <div class="delta up">↑ 6 п.п.</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="label">Тренировок</div>
+                    <div class="value">22</div>
+                    <div class="delta up">из 25</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="label">Объём</div>
+                    <div class="value">84т</div>
+                    <div class="delta up">↑ 12%</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="label">Оплата до</div>
+                    <div class="value" style="font-size:16px">12 июн</div>
+                    <div class="delta flat">через 26 дн</div>
+                  </div>
+                </div>
+
+                <div class="section-title"><h4>Программа</h4><a>Редактировать</a></div>
+                <div class="card">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--s-2)">
+                    <div>
+                      <strong style="font-size:13px;display:block">Гипертрофия · split 4 дня</strong>
+                      <small style="font-size:11px;color:var(--text-muted)">Неделя 4 из 8</small>
+                    </div>
+                    <span class="chip primary">активна</span>
+                  </div>
+                  <div class="progress-bar"><div class="progress-bar-fill" style="width:48%"></div></div>
+                </div>
+
+                <div class="section-title"><h4>История</h4><a>Все</a></div>
+                <div class="card">
+                  <div class="card-row">
+                    <div style="width:36px;height:36px;border-radius:10px;background:var(--success-soft);color:var(--success);display:grid;place-items:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    <div class="meta"><strong>Низ тела</strong><small>17 мая · 52 мин · 4.8т</small></div>
+                    <span class="chip success">+1ПМ</span>
+                  </div>
+                  <div class="card-row">
+                    <div style="width:36px;height:36px;border-radius:10px;background:var(--success-soft);color:var(--success);display:grid;place-items:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    <div class="meta"><strong>Верх тела · тяга</strong><small>15 мая · 48 мин · 6.2т</small></div>
+                  </div>
+                  <div class="card-row">
+                    <div style="width:36px;height:36px;border-radius:10px;background:var(--success-soft);color:var(--success);display:grid;place-items:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    <div class="meta"><strong>Кардио</strong><small>13 мая · 32 мин · 5.4 км</small></div>
+                  </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--s-3)">
+                  <button class="btn secondary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Заметка
+                  </button>
+                  <button class="btn primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                    Отчёт
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>T3.1 Карточка клиента</strong>
+            Единое окно: KPI · программа · история · действия
+          </div>
+        </div>
+
+        <!-- T3.2 Analytics report -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+                <div class="app-bar-title" style="text-align:center">Отчёт · Мария<small>1 фев – 17 мая</small></div>
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg></button>
+              </div>
+              <div class="app-content">
+                <div class="tag-row">
+                  <span class="chip">7 дн</span>
+                  <span class="chip">30 дн</span>
+                  <span class="chip primary"><span class="dot-mini"></span>90 дн</span>
+                  <span class="chip">Год</span>
+                </div>
+
+                <div class="chart">
+                  <div class="chart-head">
+                    <h5>Adherence по неделям</h5>
+                    <span class="period" style="color:var(--success);font-weight:700">88%</span>
+                  </div>
+                  <svg class="chart-svg" viewBox="0 0 280 110" preserveAspectRatio="none">
+                    <line x1="0" y1="22" x2="280" y2="22" stroke="var(--success)" stroke-dasharray="3 3" stroke-opacity=".5"/>
+                    <g fill="var(--primary)">
+                      <rect x="6" y="34" width="18" height="76" rx="3"/>
+                      <rect x="30" y="44" width="18" height="66" rx="3"/>
+                      <rect x="54" y="22" width="18" height="88" rx="3"/>
+                      <rect x="78" y="32" width="18" height="78" rx="3"/>
+                      <rect x="102" y="48" width="18" height="62" rx="3"/>
+                      <rect x="126" y="28" width="18" height="82" rx="3"/>
+                      <rect x="150" y="22" width="18" height="88" rx="3"/>
+                      <rect x="174" y="38" width="18" height="72" rx="3"/>
+                      <rect x="198" y="22" width="18" height="88" rx="3"/>
+                      <rect x="222" y="22" width="18" height="88" rx="3" fill="var(--success)"/>
+                      <rect x="246" y="14" width="18" height="96" rx="3" fill="var(--success)"/>
+                    </g>
+                  </svg>
+                </div>
+
+                <div class="chart">
+                  <div class="chart-head"><h5>Замеры тела</h5><span class="period">кг / см</span></div>
+                  <div class="measurement-row">
+                    <span class="label">Вес</span>
+                    <span class="value" style="font-size:14px">66.3 → 64.2<span class="change" style="color:var(--success)">−2.1</span></span>
+                  </div>
+                  <div class="measurement-row">
+                    <span class="label">Талия</span>
+                    <span class="value" style="font-size:14px">74 → 71<span class="change" style="color:var(--success)">−3</span></span>
+                  </div>
+                  <div class="measurement-row">
+                    <span class="label">% жира</span>
+                    <span class="value" style="font-size:14px">24.6 → 22.4<span class="change" style="color:var(--success)">−2.2</span></span>
+                  </div>
+                </div>
+
+                <div class="chart">
+                  <div class="chart-head"><h5>Прирост 1ПМ</h5><span class="period">кг за 90 дн</span></div>
+                  <div style="display:flex;justify-content:space-around;text-align:center">
+                    <div>
+                      <div style="font-family:var(--font-display);font-weight:700;font-size:20px;color:var(--success)">+7</div>
+                      <div style="font-size:11px;color:var(--text-muted)">присед</div>
+                    </div>
+                    <div>
+                      <div style="font-family:var(--font-display);font-weight:700;font-size:20px;color:var(--success)">+4</div>
+                      <div style="font-size:11px;color:var(--text-muted)">жим</div>
+                    </div>
+                    <div>
+                      <div style="font-family:var(--font-display);font-weight:700;font-size:20px;color:var(--success)">+10</div>
+                      <div style="font-size:11px;color:var(--text-muted)">тяга</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="note-card">
+                  <div class="note-head">
+                    <strong>Вывод за период</strong>
+                    <small>авто-аналитика</small>
+                  </div>
+                  <p>Adherence выше среднего, прирост по всем базовым. На последних 2 неделях зафиксирован спад веса — самое время поднимать нагрузку.</p>
+                </div>
+
+                <button class="btn primary block">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/></svg>
+                  Экспортировать PDF
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>T3.2 Отчёт за период</strong>
+            Adherence · замеры · 1ПМ · авто-вывод · экспорт
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Flow T4: Program Builder ===== -->
+      <div class="canvas-header" id="trainer-builder" style="margin-top:var(--s-12)">
+        <div class="canvas-title">
+          <h1>T4 · Конструктор программ</h1>
+          <p>Создание программы из шаблона или с нуля, недельный календарь, упражнения с подходами. BR-004, median TTFP ≤ 1 день.</p>
+        </div>
+        <div class="canvas-meta">
+          <span class="flow-badge">BR-004</span>
+          <span class="flow-badge">AC-R004-U001-001</span>
+        </div>
+      </div>
+
+      <div class="screens-grid">
+        <!-- T4.1 Templates -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+                <div class="app-bar-title" style="text-align:center">Новая программа</div>
+                <div style="width:36px"></div>
+              </div>
+              <div class="app-content">
+                <p style="color:var(--text-muted);font-size:13px">Начни с готового шаблона — потом можно адаптировать под клиента.</p>
+
+                <div class="search-bar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  Поиск шаблона
+                </div>
+
+                <div class="tag-row">
+                  <span class="chip primary"><span class="dot-mini"></span>Все</span>
+                  <span class="chip">Сила</span>
+                  <span class="chip">Гипертрофия</span>
+                  <span class="chip">Жиросж.</span>
+                  <span class="chip">Реабил.</span>
+                </div>
+
+                <div class="card" style="border-color:var(--primary)">
+                  <div style="display:flex;align-items:center;gap:var(--s-3);margin-bottom:var(--s-3)">
+                    <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#3b3df3,#7a7cff);color:#fff;display:grid;place-items:center;font-family:var(--font-display);font-weight:800;font-size:14px">H8</div>
+                    <div style="flex:1">
+                      <strong style="font-size:14px;display:block">Гипертрофия · 8 недель</strong>
+                      <small style="font-size:11px;color:var(--text-muted)">Split 4 дня · средний уровень</small>
+                    </div>
+                    <span class="chip accent">×7</span>
+                  </div>
+                  <div style="display:flex;gap:var(--s-2);font-size:11px;color:var(--text-muted);flex-wrap:wrap">
+                    <span class="chip">8 нед</span>
+                    <span class="chip">4×/нед</span>
+                    <span class="chip">~60 мин</span>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <div style="display:flex;align-items:center;gap:var(--s-3);margin-bottom:var(--s-3)">
+                    <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#14a76c,#0ea063);color:#fff;display:grid;place-items:center;font-family:var(--font-display);font-weight:800;font-size:14px">L6</div>
+                    <div style="flex:1">
+                      <strong style="font-size:14px;display:block">Жиросжигание · 6 недель</strong>
+                      <small style="font-size:11px;color:var(--text-muted)">3 силовых + 2 кардио</small>
+                    </div>
+                    <span class="chip">×3</span>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <div style="display:flex;align-items:center;gap:var(--s-3);margin-bottom:var(--s-3)">
+                    <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#f5a623,#ff7a00);color:#fff;display:grid;place-items:center;font-family:var(--font-display);font-weight:800;font-size:14px">S12</div>
+                    <div style="flex:1">
+                      <strong style="font-size:14px;display:block">Сила · 12 недель</strong>
+                      <small style="font-size:11px;color:var(--text-muted)">5×5 · progressive overload</small>
+                    </div>
+                    <span class="chip">×5</span>
+                  </div>
+                </div>
+
+                <button class="btn secondary block" style="border:1px dashed var(--border)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Создать с нуля
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>T4.1 Библиотека шаблонов</strong>
+            Time-to-first-program ≤ 1 день · готовые BR-004 шаблоны
+          </div>
+        </div>
+
+        <!-- T4.2 Week editor -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+                <div class="app-bar-title" style="text-align:center">Гипертрофия<small>Неделя 1 из 8</small></div>
+                <button style="font-size:13px;color:var(--primary);font-weight:700">Готово</button>
+              </div>
+              <div class="app-content">
+                <div class="card" style="padding:var(--s-3) var(--s-4)">
+                  <div style="display:flex;align-items:center;justify-content:space-between">
+                    <div>
+                      <small style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Назначить</small>
+                      <div style="display:flex;align-items:center;gap:var(--s-2);margin-top:4px">
+                        <div class="avatar sm">М</div>
+                        <strong style="font-size:13px">Мария Иванова</strong>
+                      </div>
+                    </div>
+                    <button class="btn sm secondary">Изменить</button>
+                  </div>
+                </div>
+
+                <div class="day-tabs">
+                  <div class="day-tab active"><small>пн</small><div class="day-num">1</div></div>
+                  <div class="day-tab"><small>вт</small><div class="day-num">2</div></div>
+                  <div class="day-tab"><small>ср</small><div class="day-num">3</div></div>
+                  <div class="day-tab rest"><small>чт</small><div class="day-num">4</div></div>
+                  <div class="day-tab"><small>пт</small><div class="day-num">5</div></div>
+                  <div class="day-tab rest"><small>сб</small><div class="day-num">6</div></div>
+                  <div class="day-tab rest"><small>вс</small><div class="day-num">7</div></div>
+                </div>
+
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <h4 style="font-family:var(--font-display);font-size:14px;font-weight:700">Пн · Низ тела</h4>
+                  <button class="btn sm ghost">+ упражнение</button>
+                </div>
+
+                <div class="exercise">
+                  <div class="exercise-head">
+                    <div>
+                      <h5>Приседания со штангой</h5>
+                      <small>4 подхода · отдых 2 мин</small>
+                    </div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                  </div>
+                  <div class="set-list">
+                    <div class="set-row head"><span>#</span><span>Повторы</span><span>RPE</span><span></span></div>
+                    <div class="set-row"><span class="num">1</span><span class="set-input">8</span><span class="set-input">7</span><div></div></div>
+                    <div class="set-row"><span class="num">2</span><span class="set-input">8</span><span class="set-input">8</span><div></div></div>
+                    <div class="set-row"><span class="num">3</span><span class="set-input">8</span><span class="set-input">8</span><div></div></div>
+                    <div class="set-row"><span class="num">4</span><span class="set-input">6</span><span class="set-input">9</span><div></div></div>
+                  </div>
+                </div>
+
+                <div class="exercise">
+                  <div class="exercise-head">
+                    <div>
+                      <h5>Румынская тяга</h5>
+                      <small>3 × 10 · RPE 7</small>
+                    </div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                  </div>
+                </div>
+
+                <div class="exercise">
+                  <div class="exercise-head">
+                    <div>
+                      <h5>Жим ногами</h5>
+                      <small>3 × 12 · RPE 7</small>
+                    </div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                  </div>
+                </div>
+
+                <button class="btn primary block">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                  Назначить и синхронизировать
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>T4.2 Конструктор недели</strong>
+            Drag-able упражнения · подходы · RPE · мгновенная синхронизация
+          </div>
+        </div>
+
+        <!-- T4.3 Exercise library -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                <div class="app-bar-title" style="text-align:center">Добавить упражнение</div>
+                <button style="font-size:13px;color:var(--primary);font-weight:700">Готово</button>
+              </div>
+              <div class="app-content">
+                <div class="search-bar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  Жим, тяга, присед...
+                </div>
+                <div class="tag-row">
+                  <span class="chip primary"><span class="dot-mini"></span>Ноги</span>
+                  <span class="chip">Спина</span>
+                  <span class="chip">Грудь</span>
+                  <span class="chip">Плечи</span>
+                  <span class="chip">Руки</span>
+                  <span class="chip">Кор</span>
+                </div>
+
+                <div class="card" style="padding:0">
+                  <div class="card-row" style="padding:var(--s-3) var(--s-4)">
+                    <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#3b3df3,#7a7cff);color:#fff;display:grid;place-items:center">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4h12M6 20h12M9 4v16M15 4v16"/></svg>
+                    </div>
+                    <div class="meta">
+                      <strong>Приседания со штангой</strong>
+                      <small>Базовое · квадрицепс, ягодицы</small>
+                    </div>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
+                  <div class="card-row" style="padding:var(--s-3) var(--s-4)">
+                    <div style="width:40px;height:40px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4h12M6 20h12M9 4v16M15 4v16"/></svg>
+                    </div>
+                    <div class="meta">
+                      <strong>Жим ногами</strong>
+                      <small>Базовое · квадрицепс</small>
+                    </div>
+                    <button class="btn sm secondary">+</button>
+                  </div>
+                  <div class="card-row" style="padding:var(--s-3) var(--s-4)">
+                    <div style="width:40px;height:40px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="12" r="3"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+                    </div>
+                    <div class="meta">
+                      <strong>Румынская тяга</strong>
+                      <small>Базовое · бицепс бедра</small>
+                    </div>
+                    <button class="btn sm secondary">+</button>
+                  </div>
+                  <div class="card-row" style="padding:var(--s-3) var(--s-4)">
+                    <div style="width:40px;height:40px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                    </div>
+                    <div class="meta">
+                      <strong>Выпады с гантелями</strong>
+                      <small>Изолирующее · ягодицы</small>
+                    </div>
+                    <button class="btn sm secondary">+</button>
+                  </div>
+                  <div class="card-row" style="padding:var(--s-3) var(--s-4)">
+                    <div style="width:40px;height:40px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="9" width="16" height="6" rx="2"/></svg>
+                    </div>
+                    <div class="meta">
+                      <strong>Сгибания ног лёжа</strong>
+                      <small>Изолирующее · бицепс бедра</small>
+                    </div>
+                    <button class="btn sm secondary">+</button>
+                  </div>
+                  <div class="card-row" style="padding:var(--s-3) var(--s-4)">
+                    <div style="width:40px;height:40px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg>
+                    </div>
+                    <div class="meta">
+                      <strong>Икры стоя</strong>
+                      <small>Изолирующее · икры</small>
+                    </div>
+                    <button class="btn sm secondary">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>T4.3 Библиотека упражнений</strong>
+            Каталог по группам мышц · быстрое добавление в программу
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Flow T5: Billing ===== -->
+      <div class="canvas-header" id="trainer-billing" style="margin-top:var(--s-12)">
+        <div class="canvas-title">
+          <h1>T5 · Тариф, оплаты и апгрейд</h1>
+          <p>Прозрачные лимиты, value-based upgrade prompt при приближении к лимиту, статусы оплат клиентов. BR-007.</p>
+        </div>
+        <div class="canvas-meta">
+          <span class="flow-badge">BR-007</span>
+          <span class="flow-badge">AC-R007-U001-001</span>
+          <span class="flow-badge">limit awareness ≥ 95%</span>
+        </div>
+      </div>
+
+      <div class="screens-grid">
+        <!-- T5.1 Plan & usage -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+                <div class="app-bar-title">Тариф и оплаты</div>
+                <div style="width:36px"></div>
+              </div>
+              <div class="app-content">
+                <div class="plan-card">
+                  <div class="plan-label">Текущий тариф</div>
+                  <div class="plan-name">Pro</div>
+                  <div class="plan-price"><strong>₽2 490</strong>/ месяц · след. списание 1 июня</div>
+                  <div class="usage-bar">
+                    <div class="track"><div class="fill" style="width:88%"></div></div>
+                    <div class="labels">
+                      <span><strong style="color:var(--accent)">22</strong> из 25 активных</span>
+                      <span>осталось 3 слота</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="banner">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <div>
+                    <strong>Приближаешься к лимиту</strong>
+                    Чтобы взять новых клиентов, перейди на Studio. До конца месяца — −20%.
+                  </div>
+                </div>
+
+                <div class="card" style="border:2px solid var(--primary);position:relative">
+                  <span class="chip primary" style="position:absolute;top:-10px;left:var(--s-4);font-weight:700">Рекомендуется</span>
+                  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-top:6px;margin-bottom:var(--s-3)">
+                    <div>
+                      <strong style="font-family:var(--font-display);font-size:18px;display:block">Studio</strong>
+                      <small style="font-size:12px;color:var(--text-muted)">для растущей практики</small>
+                    </div>
+                    <div style="text-align:right">
+                      <div style="font-family:var(--font-display);font-size:20px;font-weight:700">₽4 990</div>
+                      <small style="font-size:11px;color:var(--text-muted)">/мес</small>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:var(--s-2);font-size:13px">
+                    <div style="display:flex;align-items:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>До 60 активных клиентов</div>
+                    <div style="display:flex;align-items:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Multi-specialist коллаборация</div>
+                    <div style="display:flex;align-items:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>PDF-отчёты и брендинг</div>
+                  </div>
+                  <button class="btn primary block" style="margin-top:var(--s-4)">Перейти на Studio</button>
+                </div>
+
+                <div class="section-title"><h4>История платежей</h4></div>
+                <div class="card">
+                  <div class="card-row">
+                    <div style="width:36px;height:36px;border-radius:10px;background:var(--success-soft);color:var(--success);display:grid;place-items:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    <div class="meta"><strong>Pro · май 2026</strong><small>1 мая · Visa **4421</small></div>
+                    <strong style="font-size:13px">₽2 490</strong>
+                  </div>
+                  <div class="card-row">
+                    <div style="width:36px;height:36px;border-radius:10px;background:var(--success-soft);color:var(--success);display:grid;place-items:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    <div class="meta"><strong>Pro · апрель</strong><small>1 апр · Visa **4421</small></div>
+                    <strong style="font-size:13px">₽2 490</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>T5.1 Тариф и лимиты</strong>
+            Лимит 22/25 · value-based upgrade prompt · AC-R007-U001-001
+          </div>
+        </div>
+
+        <!-- T5.2 Client payments -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+                <div class="app-bar-title">Оплаты клиентов</div>
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></button>
+              </div>
+              <div class="app-content">
+                <div class="trainer-kpi">
+                  <div class="stat-card">
+                    <div class="label">Май, поступило</div>
+                    <div class="value">₽142к</div>
+                    <div class="delta up">↑ ₽8к</div>
+                  </div>
+                  <div class="stat-card">
+                    <div class="label">Просрочено</div>
+                    <div class="value" style="color:var(--danger)">₽12к</div>
+                    <div class="delta down">2 клиента</div>
+                  </div>
+                </div>
+
+                <div style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:0 var(--s-1)">Требует напоминания</div>
+
+                <div class="card" style="border-left:3px solid var(--danger)">
+                  <div class="card-row">
+                    <div class="avatar alt-3">А</div>
+                    <div class="meta">
+                      <strong>Алексей Карпов</strong>
+                      <small style="color:var(--danger)">Просрочено 3 дня · ₽6 000</small>
+                    </div>
+                    <button class="btn sm primary">Напомнить</button>
+                  </div>
+                </div>
+
+                <div class="card" style="border-left:3px solid var(--warning)">
+                  <div class="card-row">
+                    <div class="avatar alt-1">П</div>
+                    <div class="meta">
+                      <strong>Павел Орехов</strong>
+                      <small style="color:var(--warning)">Срок до 22 мая · ₽6 000</small>
+                    </div>
+                    <button class="btn sm secondary">Напомнить</button>
+                  </div>
+                </div>
+
+                <div style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:0 var(--s-1);margin-top:var(--s-2)">Поступления за май</div>
+
+                <div class="card">
+                  <div class="card-row">
+                    <div class="avatar">М</div>
+                    <div class="meta"><strong>Мария Иванова</strong><small>12 мая · месяц</small></div>
+                    <strong style="font-size:13px;color:var(--success)">+₽8 000</strong>
+                  </div>
+                  <div class="card-row">
+                    <div class="avatar alt-2">Д</div>
+                    <div class="meta"><strong>Дарья Власова</strong><small>10 мая · 4 занятия</small></div>
+                    <strong style="font-size:13px;color:var(--success)">+₽6 000</strong>
+                  </div>
+                  <div class="card-row">
+                    <div class="avatar alt-5">С</div>
+                    <div class="meta"><strong>Сергей Минин</strong><small>5 мая · месяц</small></div>
+                    <strong style="font-size:13px;color:var(--success)">+₽10 000</strong>
+                  </div>
+                  <div class="card-row">
+                    <div class="avatar alt-6">Н</div>
+                    <div class="meta"><strong>Наталья Жукова</strong><small>3 мая · месяц</small></div>
+                    <strong style="font-size:13px;color:var(--success)">+₽8 000</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>T5.2 Клиентские оплаты</strong>
+            Просрочки · напоминания · история · BR-007 «контроль оплат»
+          </div>
+        </div>
+
+        <!-- T5.3 Upgrade gate -->
+        <div class="phone-wrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="phone-screen" style="background:var(--bg)">
+              <div class="status-bar"><span>9:41</span><span class="icons"></span></div>
+              <div class="app-bar">
+                <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+                <div class="app-bar-title">Multi-specialist</div>
+                <div style="width:36px"></div>
+              </div>
+              <div class="app-content" style="opacity:.35">
+                <div class="card">
+                  <div style="height:80px;background:var(--surface-2);border-radius:8px"></div>
+                </div>
+                <div class="card">
+                  <div style="height:120px;background:var(--surface-2);border-radius:8px"></div>
+                </div>
+              </div>
+              <div class="bottom-sheet" style="padding-bottom:var(--s-6)">
+                <div class="handle"></div>
+                <div style="text-align:center;margin-bottom:var(--s-4)">
+                  <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#3b3df3,#7a7cff);color:#fff;display:grid;place-items:center;margin:0 auto var(--s-3)">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><circle cx="17" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M21 21v-2a4 4 0 0 0-3-3.87"/></svg>
+                  </div>
+                  <h4 style="font-family:var(--font-display);font-size:18px;font-weight:700">Подключи смежного специалиста</h4>
+                  <p style="font-size:13px;color:var(--text-muted);margin-top:var(--s-2);max-width:32ch;margin-left:auto;margin-right:auto">Multi-specialist доступен на тарифе Studio. Работайте над клиентом вместе с нутрициологом, реабилитологом или вторым тренером.</p>
+                </div>
+                <div style="background:var(--primary-soft);color:var(--primary-soft-text);padding:var(--s-3) var(--s-4);border-radius:var(--r-md);font-size:12px;font-weight:600;display:flex;gap:8px;align-items:center;margin-bottom:var(--s-3)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Pro → Studio · доплата ₽2 500/мес
+                </div>
+                <button class="btn primary block" style="margin-bottom:var(--s-2)">Перейти на Studio</button>
+                <button class="btn secondary block">Узнать подробнее</button>
+              </div>
+            </div>
+          </div>
+          <div class="phone-caption">
+            <strong>T5.3 Upgrade gate</strong>
+            Value-based prompt при попытке использовать BR-003 · AC-R007-U001-002
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  // Theme toggle
+  (function () {
+    const t = document.querySelector('[data-theme-toggle]'),
+      r = document.documentElement;
+    let d = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+    r.setAttribute('data-theme', d);
+    t && t.addEventListener('click', () => {
+      d = d === 'dark' ? 'light' : 'dark';
+      r.setAttribute('data-theme', d);
+      t.innerHTML = d === 'dark'
+        ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+        : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    });
+  })();
+
+  // Role switching
+  function switchRole(role) {
+    document.querySelectorAll('.role-switcher button').forEach(b => {
+      b.classList.toggle('active', b.dataset.role === role);
+    });
+    document.querySelectorAll('[data-nav]').forEach(n => {
+      n.style.display = n.dataset.nav === role ? '' : 'none';
+    });
+    document.getElementById('role-client').style.display = role === 'client' ? '' : 'none';
+    document.getElementById('role-trainer').style.display = role === 'trainer' ? '' : 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function scrollToFlow(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    // Auto-switch role if hidden
+    const isClient = id.startsWith('client-');
+    switchRole(isClient ? 'client' : 'trainer');
+    setTimeout(() => {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // highlight nav item
+      const navs = document.querySelectorAll('.nav-item');
+      navs.forEach(n => n.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => {
+        if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + id + "'")) {
+          n.classList.add('active');
+        }
+      });
+    }, 80);
+  }
+
+  // Update active nav on scroll
+  const sections = Array.from(document.querySelectorAll('[id^="client-"], [id^="trainer-"]'));
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        document.querySelectorAll('.nav-item').forEach(n => {
+          const onclick = n.getAttribute('onclick') || '';
+          n.classList.toggle('active', onclick.includes("'" + id + "'"));
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+
+<script data-pplx-inline-edit>
+(function () {
+  if (window === window.top) return;
+
+  const allowedParentOrigins = ["https://www.perplexity.ai","https://perplexity.ai","https://testing.perplexity.ai","https://staging.perplexity.ai","https://*.preview.i.perplexity.ai","http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"];
+  const MAX_FONT_BYTES = 500 * 1024;
+  const MAX_TOTAL_FONT_BYTES = 2 * 1024 * 1024;
+  let scrollForwarding = false;
+  let scrollRaf = 0;
+  let trustedTopOrigin = null;
+
+  // Allow entries like "https://*.preview.i.perplexity.ai" — the wildcard
+  // matches a single DNS label (no dots), so "https://*.foo" cannot stretch
+  // across multiple labels.
+  function matchesAllowedOrigin(origin) {
+    if (!origin) return false;
+    for (const entry of allowedParentOrigins) {
+      if (!entry.includes("*")) {
+        if (entry === origin) return true;
+        continue;
+      }
+      const pattern = new RegExp(
+        "^" +
+          entry.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^.]+") +
+          "$",
+      );
+      if (pattern.test(origin)) return true;
+    }
+    return false;
+  }
+
+  // Trust decision: when the sender is same-origin-visible (event.origin is a
+  // real origin like https://www.perplexity.ai) we trust event.origin directly.
+  // When event.origin is "null" (opaque broker srcdoc), we fall back to the
+  // broker's stamped `parentOrigin` to identify the top window. The fallback
+  // is claim-only — we rely on the browser's native `targetOrigin` enforcement
+  // on the response path (see postToTrustedTop) to ensure replies can't be
+  // delivered to anyone but the actual top window of that claimed origin.
+  function getTrustedParentOrigin(event) {
+    const forwardedParentOrigin =
+      typeof event.data.parentOrigin === "string" ? event.data.parentOrigin : null;
+    const parentOrigin = event.origin === "null" ? forwardedParentOrigin : event.origin;
+    return matchesAllowedOrigin(parentOrigin) ? parentOrigin : null;
+  }
+
+  // All responses go to window.top with targetOrigin = the allowlisted origin.
+  // An attacker that iframes us inside their own null-origin broker can claim
+  // any parentOrigin they like, but the browser will drop the reply whenever
+  // the real top's origin doesn't match — so the screenshot never leaves.
+  function postToTrustedTop(message) {
+    if (!trustedTopOrigin) return;
+    try {
+      window.top.postMessage(message, trustedTopOrigin);
+    } catch (_error) {}
+  }
+
+  function inlineAll(original, clone) {
+    if (original.nodeType !== 1 || clone.nodeType !== 1) return;
+
+    try {
+      const computedStyle = getComputedStyle(original);
+      // cssText on a computed style is the serialized declaration in modern
+      // Chromium/Safari — a single read beats enumerating ~400 longhand
+      // properties. Firefox returns "" here, so we fall back on empty.
+      const serialized = computedStyle.cssText;
+      if (serialized) {
+        clone.style.cssText = serialized;
+      } else {
+        const parts = new Array(computedStyle.length);
+        for (let index = 0; index < computedStyle.length; index += 1) {
+          const property = computedStyle[index];
+          parts[index] = `${property}:${computedStyle.getPropertyValue(property)};`;
+        }
+        clone.style.cssText = parts.join("");
+      }
+    } catch (_error) {}
+
+    const originalChildren = original.children;
+    const clonedChildren = clone.children;
+    for (
+      let index = 0;
+      index < originalChildren.length && index < clonedChildren.length;
+      index += 1
+    ) {
+      inlineAll(originalChildren[index], clonedChildren[index]);
+    }
+  }
+
+  function extractFontUrl(srcValue) {
+    const matches = [
+      ...srcValue.matchAll(
+        /url\(["']?([^"')]+)["']?\)(?:\s*format\(["']?([^"')]+)["']?\))?/gi,
+      ),
+    ];
+    if (matches.length === 0) return null;
+    const woff2 = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff2"));
+    if (woff2) return woff2[1];
+    const woff = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff"));
+    if (woff) return woff[1];
+    return matches[0][1];
+  }
+
+  // Cache resolved font URL -> data URI across captures. Fonts on a page
+  // essentially never change, and a batch run emits multiple captures back to
+  // back — without this we'd refetch + re-base64 every time.
+  const fontDataUriCache = new Map();
+  const SRC_DECLARATION_RE = /src\s*:\s*[^;}]+/i;
+
+  async function fetchAsDataUri(url) {
+    if (fontDataUriCache.has(url)) return fontDataUriCache.get(url);
+    let dataUri = null;
+    try {
+      const response = await fetch(url, { mode: "cors", credentials: "omit" });
+      if (response.ok) {
+        const blob = await response.blob();
+        if (blob.size <= MAX_FONT_BYTES) {
+          dataUri = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () =>
+              resolve(typeof reader.result === "string" ? reader.result : null);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+          });
+        }
+      }
+    } catch (_error) {
+      dataUri = null;
+    }
+    fontDataUriCache.set(url, dataUri);
+    return dataUri;
+  }
+
+  function collectFontFaceRuleTexts() {
+    const rules = [];
+    for (const sheet of document.styleSheets) {
+      let cssRules;
+      try {
+        cssRules = sheet.cssRules;
+      } catch (_error) {
+        continue;
+      }
+      if (!cssRules) continue;
+      for (const rule of cssRules) {
+        const cssText = rule.cssText || "";
+        if (cssText.startsWith("@font-face")) rules.push(cssText);
+      }
+    }
+    return rules;
+  }
+
+  async function buildInlinedFontCss() {
+    const ruleTexts = collectFontFaceRuleTexts();
+    if (ruleTexts.length === 0) return null;
+
+    const resolved = ruleTexts.map((cssText) => {
+      if (!SRC_DECLARATION_RE.test(cssText)) return null;
+      const srcMatch = cssText.match(/src\s*:\s*([^;}]+)[;}]/i);
+      if (!srcMatch) return null;
+      const url = extractFontUrl(srcMatch[1]);
+      if (!url) return null;
+      try {
+        return { cssText, url: new URL(url, document.baseURI).href };
+      } catch (_error) {
+        return null;
+      }
+    });
+
+    const dataUris = await Promise.all(
+      resolved.map((entry) => (entry ? fetchAsDataUri(entry.url) : Promise.resolve(null))),
+    );
+
+    const inlined = [];
+    let totalBytes = 0;
+    for (let index = 0; index < resolved.length; index += 1) {
+      const entry = resolved[index];
+      const dataUri = dataUris[index];
+      if (!entry || !dataUri) continue;
+      const approxBytes = dataUri.length * 0.75;
+      if (totalBytes + approxBytes > MAX_TOTAL_FONT_BYTES) break;
+      totalBytes += approxBytes;
+      inlined.push(entry.cssText.replace(SRC_DECLARATION_RE, `src: url("${dataUri}")`));
+    }
+    return inlined.length > 0 ? inlined.join("\n") : null;
+  }
+
+  function stripExternal(clone) {
+    const images = clone.querySelectorAll("img");
+    for (let index = 0; index < images.length; index += 1) {
+      const src = images[index].getAttribute("src");
+      if (src && !src.startsWith("data:")) images[index].removeAttribute("src");
+    }
+
+    const elements = clone.querySelectorAll("*");
+    for (let index = 0; index < elements.length; index += 1) {
+      const style = elements[index].style.cssText;
+      if (style && style.includes("url(")) {
+        elements[index].style.cssText = style.replace(
+          /url\(["']?(?!data:)[^)"']*["']?\)/gi,
+          "none",
+        );
+      }
+    }
+  }
+
+  function emitScroll() {
+    scrollRaf = 0;
+    if (!scrollForwarding) return;
+    postToTrustedTop({
+      type: "INLINE_EDIT_SCROLL",
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
+    });
+  }
+
+  window.addEventListener(
+    "scroll",
+    function () {
+      if (!scrollForwarding || scrollRaf) return;
+      scrollRaf = requestAnimationFrame(emitScroll);
+    },
+    { passive: true, capture: true },
+  );
+
+  async function handleCaptureRequest(event) {
+    const requestId = event.data.requestId;
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    function postResult(dataUrl) {
+      postToTrustedTop({
+        type: "INLINE_EDIT_SCREENSHOT_RESULT",
+        requestId,
+        dataUrl,
+        scrollX,
+        scrollY,
+      });
+    }
+
+    try {
+      // Wait for any pending web fonts to resolve so both inline metrics and
+      // the @font-face inlining below see the same loaded faces.
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (_error) {}
+      }
+
+      const clone = document.documentElement.cloneNode(true);
+      inlineAll(document.documentElement, clone);
+
+      const removedNodes = clone.querySelectorAll("script,link[rel=\"stylesheet\"],style");
+      for (let index = 0; index < removedNodes.length; index += 1) {
+        removedNodes[index].remove();
+      }
+
+      stripExternal(clone);
+
+      // Re-embed web fonts as data-URI @font-face rules so the SVG rasterizer
+      // can resolve them — external font URLs aren't fetched during
+      // foreignObject rendering, which would otherwise force a fallback face
+      // and change text metrics.
+      const inlinedFontCss = await buildInlinedFontCss();
+      if (inlinedFontCss) {
+        const styleEl = document.createElement("style");
+        styleEl.textContent = inlinedFontCss;
+        const head = clone.querySelector("head");
+        if (head) head.appendChild(styleEl);
+        else clone.insertBefore(styleEl, clone.firstChild);
+      }
+
+      const html = new XMLSerializer().serializeToString(clone);
+      const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
+        '<foreignObject width="100%" height="100%">' +
+        `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;overflow:hidden">` +
+        `<div style="transform:translate(-${scrollX}px,-${scrollY}px);transform-origin:top left">` +
+        html +
+        "</div></div></foreignObject></svg>";
+      const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      const image = new Image();
+      image.onload = function () {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(image, 0, 0);
+        postResult(canvas.toDataURL("image/png"));
+      };
+      image.onerror = function () {
+        postResult(null);
+      };
+      image.src = svgUrl;
+    } catch (_error) {
+      postResult(null);
+    }
+  }
+
+  window.addEventListener("message", function (event) {
+    if (!event.data) return;
+    // Only accept messages from the direct parent frame. Blocks sibling /
+    // unrelated-window postMessage senders that could otherwise reach us.
+    if (event.source !== window.parent) return;
+
+    const trustedParentOrigin = getTrustedParentOrigin(event);
+    if (!trustedParentOrigin) return;
+    trustedTopOrigin = trustedParentOrigin;
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_START") {
+      scrollForwarding = true;
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_STOP") {
+      scrollForwarding = false;
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
+      scrollRaf = 0;
+      return;
+    }
+
+    if (event.data.type !== "INLINE_EDIT_CAPTURE_REQUEST") return;
+
+    handleCaptureRequest(event);
+  });
+})();
+
+
+</script></body>
+</html>

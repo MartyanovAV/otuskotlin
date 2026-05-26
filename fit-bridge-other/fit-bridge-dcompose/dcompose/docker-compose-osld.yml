@@ -1,0 +1,56 @@
+# Минимальная версия инфраструктуры на базе OpenSearch, Dashboards, Kafka и Logstash.
+services:
+  app:
+    image: bitnamilegacy/kafka:latest
+    depends_on:
+      - kafka
+    volumes:
+      - ./volumes/app-kafka/send-jsons.sh:/send-jsons.sh
+    entrypoint: /send-jsons.sh
+
+  zookeeper:
+    image: 'bitnamilegacy/zookeeper:latest'
+    ports:
+      - '2181:2181'
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+
+  kafka:
+    image: bitnamilegacy/kafka:latest
+    ports:
+      - '9092:9092'
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://0.0.0.0:9092,OUTSIDE://0.0.0.0:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,OUTSIDE://localhost:9094
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,OUTSIDE:PLAINTEXT
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - ALLOW_PLAINTEXT_LISTENER=yes
+
+  logstash:
+    container_name: logstash
+    image: opensearchproject/logstash-oss-with-opensearch-output-plugin:latest
+    depends_on:
+      - kafka
+      - opensearch
+    ports:
+      - "5044:5044"
+      - "1111:1111"
+    environment:
+      BOOTSTRAP_SERVERS: "kafka:9092"
+    volumes:
+      - ./volumes/logstash/10-mp-logs.conf:/usr/share/logstash/pipeline/10-mp-logs.conf
+
+  opensearch:
+    extends:
+      file: open-search-base.yml
+      service: opensearch-base
+
+  dashboards:
+    extends:
+      file: dashboards-base.yml
+      service: dashboards-base
+
+volumes:
+  opensearch-data:

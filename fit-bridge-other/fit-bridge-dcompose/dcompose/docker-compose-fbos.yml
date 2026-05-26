@@ -1,0 +1,26 @@
+# Минимальная версия инфраструктуры на базе OpenSearch, Dashboards и Fluent Bit.
+services:
+  app:
+    extends:
+      file: app-base.yml
+      service: app-base
+    depends_on:
+      - fluent-bit
+
+  fluent-bit:
+    extends:
+      file: fluent-bit-base.yml
+      service: fluent-bit-base
+
+  opensearch:
+    extends:
+      file: open-search-base.yml
+      service: opensearch-base
+
+  dashboards:
+    extends:
+      file: dashboards-base.yml
+      service: dashboards-base
+
+volumes:
+  opensearch-data:
