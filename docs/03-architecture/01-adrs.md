@@ -6,3 +6,4 @@
 4. [ADR-004: Использовать Kotlin как основной язык](ADR/ADR-004-kotlin.md)
 5. [ADR-005: Использовать PostgreSQL как основное хранилище приложения](ADR/ADR-005-use-postgresql.md)
 6. [ADR-006: Использовать OpenSearch, OpenSearch Dashboards и Fluent Bit для observability MVP](ADR/ADR-006-use-opensearch-fluent-bit-observability.md)
+7. [ADR-007: Зафиксировать MVP с публичной ссылкой на план как capability-token доступ без клиентской регистрации](ADR/ADR-007-public-plan-link-mvp.md)

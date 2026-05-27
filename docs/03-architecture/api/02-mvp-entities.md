@@ -1,141 +1,82 @@
-# API-сущности MVP
+# API-сущности trainer-first MVP с публичной ссылкой
 
-Сущности, которые нужны для Gate 1: профили, доступ, приглашение, дневник, простой план и назначение.
+Сущности Gate 1: тренер, клиентская карточка, простой план, публичный доступ как technical state плана и отметка выполнения. Полная модель данных — [ERD](../ERD.md).
 
-**[MVP] User (учётная запись Keycloak)**
-
-| Поле | Бизнес-описание | Пример значения |
-|------|-----------------|-----------------|
-| id | Глобальный идентификатор пользователя в FitBridge | `usr_01HX7M2A9Q` |
-| keycloakSubject | Идентификатор субъекта в Keycloak; является источником аутентификации | `3f8d9f3a-7b2b-4f0b-9e2b-8b4d` |
-| phone | Телефон для восстановления доступа | `+79991234567` |
-| displayName | Отображаемое имя пользователя | `Анна Иванова` |
-| roles | Роли продукта MVP: `CLIENT`, `TRAINER`; in-product `ADMIN`/support роль отсутствует | `["CLIENT", "TRAINER"]` |
-| status | Состояние учётной записи: `ACTIVE`, `PENDING_EMAIL`, `BLOCKED`, `DELETED`; `BLOCKED` может быть результатом controlled support-operation через Keycloak/runbook | `ACTIVE` |
-| locale | Предпочитаемый язык интерфейса | `ru-RU` |
-| timezone | Часовой пояс пользователя | `Europe/Moscow` |
-| createdAt | Дата регистрации | `2026-05-19T10:00:00Z` |
-| lastLoginAt | Последний успешный вход | `2026-05-19T12:30:00Z` |
-
-> В MVP не добавляются admin/support сущности и роли для domain API. Операционное сопровождение пилота выполняется вне продукта через Keycloak + controlled runbook/provisioning и не даёт чтение `ClientProfile`, дневника, тренировочной истории или health-adjacent данных.
-
-**[MVP] ClientProfile (клиентский профиль)**
+## [MVP] TrainerUser
 
 | Поле | Бизнес-описание | Пример значения |
 |------|-----------------|-----------------|
-| id | Идентификатор профиля клиента | `clp_01HX7M3B1K` |
-| userId | Владелец профиля; только он управляет доступом | `usr_01HX7M2A9Q` |
-| fullName | Имя клиента для тренерского интерфейса | `Анна Иванова` |
-| gender | MVP optional/nullable: самоопределённый пол или `NOT_SPECIFIED`; отсутствие значения не блокирует onboarding | `FEMALE` |
-| goals | MVP optional/nullable: цели клиента для контекста планирования; отсутствие значения не блокирует onboarding | `["снижение веса", "выносливость"]` |
-| visibility | Видимость профиля: `PRIVATE`, `GRANTED_ONLY` | `GRANTED_ONLY` |
-| activeTrainerIds | Тренеры с действующим доступом | `["trp_01HX7M4C2L"]` |
-| createdAt | Дата создания профиля | `2026-05-19T10:05:00Z` |
-| updatedAt | Дата последнего изменения | `2026-05-19T11:00:00Z` |
+| id | Внутренний идентификатор тренера в FitBridge | `usr_01HX7M2A9Q` |
+| keycloakSubject | Идентификатор субъекта в Keycloak | `3f8d9f3a-7b2b-4f0b-9e2b-8b4d` |
+| email | Email для входа тренера | `trainer@example.com` |
+| displayName | Отображаемое имя тренера | `Иван Петров` |
+| role | Единственная product role MVP: `TRAINER` | `TRAINER` |
+| status | `ACTIVE`, `BLOCKED`, `DELETED` | `ACTIVE` |
+| createdAt | Дата регистрации | `2026-05-27T10:00:00Z` |
 
-> `gender` и `goals` входят в MVP как добровольные поля клиентского профиля: клиент может создать и использовать профиль без их заполнения, а позднее установить, изменить или очистить значения самостоятельно.
+> Роль/аккаунт `CLIENT` не требуется в MVP публичного доступа к плану. Клиент открывает публичную ссылку без регистрации.
 
-> `heightCm` не является активным MVP-полем `ClientProfile`: рост и связанные body metrics перенесены в Phase 2 / later measurement scope и не должны требоваться, валидироваться или передаваться как supported поле MVP API.
-
-**[MVP] TrainerProfile (профессиональный профиль тренера)**
+## [MVP] TrainerProfile
 
 | Поле | Бизнес-описание | Пример значения |
 |------|-----------------|-----------------|
 | id | Идентификатор профиля тренера | `trp_01HX7M4C2L` |
-| userId | Пользователь, владеющий тренерским профилем | `usr_01HX7M5D3M` |
-| publicName | Имя, отображаемое клиентам в приглашениях | `Иван Петров` |
-| specialization | Специализации тренера | `["силовой тренинг", "реабилитация"]` |
-| bio | Краткое описание опыта | `"8 лет практики"` |
-| certificates | Список сертификатов или ссылок на документы | `["FPA-2025"]` |
-| contactPolicy | Правила показа контактов клиентам | `AFTER_ACCEPT_INVITE` |
-| onboardingStatus | Статус онбординга: `NEW`, `PROFILE_READY`, `FIRST_CLIENT_INVITED`, `COMPLETED` | `FIRST_CLIENT_INVITED` |
-| dashboardCounters | Агрегированные счётчики минимального кабинета | `{ "activeClients": 12, "pendingInvites": 2 }` |
-| createdAt | Дата создания профиля | `2026-05-19T09:00:00Z` |
+| userId | Пользователь-тренер | `usr_01HX7M2A9Q` |
+| publicName | Имя, безопасное для показа клиенту по ссылке | `Иван Петров` |
+| specialization | Короткая специализация | `силовой тренинг` |
+| onboardingStatus | `NEW`, `PROFILE_READY`, `FIRST_LINK_CREATED`, `COMPLETED` | `FIRST_LINK_CREATED` |
 
-**[MVP] AccessGrant (разрешение на доступ к клиентским данным)**
+## [MVP] ClientCard
 
 | Поле | Бизнес-описание | Пример значения |
 |------|-----------------|-----------------|
-| id | Идентификатор разрешения | `agr_01HX7M7F5P` |
-| clientProfileId | Профиль клиента, к которому выдаётся доступ | `clp_01HX7M3B1K` |
-| trainerProfileId | Тренер, получающий доступ | `trp_01HX7M4C2L` |
-| grantedByUserId | Пользователь, выдавший доступ; для MVP всегда клиент | `usr_01HX7M2A9Q` |
-| status | Статус разрешения: `ACTIVE`, `REVOKED`, `EXPIRED` | `ACTIVE` |
-| scopes | MVP: `PROFILE_READ` для разрешённых полей профиля, включая optional `gender`/`goals` при активном доступе, а также scopes дневника и планов; `PROFILE_WRITE` для `ClientProfile` не входит в MVP | `["PROFILE_READ", "DIARY_READ", "PROGRAM_WRITE"]` |
-| grantedAt | Момент активации доступа | `2026-05-19T10:10:00Z` |
-| revokedAt | Момент отзыва доступа | `null` |
-| expiresAt | Дата истечения разрешения, если доступ ограничен по времени | `2026-08-19T10:10:00Z` |
+| id | Идентификатор карточки | `ccd_01HX7M3B1K` |
+| trainerUserId | Тренер-владелец карточки | `usr_01HX7M2A9Q` |
+| displayName | Имя/псевдоним клиента для тренера | `Мария` |
+| note | Внутренняя заметка тренера; не попадает в public payload | `после отпуска начать мягко` |
+| status | `ACTIVE`, `ARCHIVED` | `ACTIVE` |
+| createdAt / updatedAt | Технические timestamps | `2026-05-27T10:05:00Z` |
 
-**[MVP] Invite (приглашение клиента)**
+> `ClientCard` не является `ClientProfile`: у неё нет `userId`, клиентского ownership и личного кабинета.
 
-| Поле | Бизнес-описание | Пример значения |
-|------|-----------------|-----------------|
-| id | Идентификатор приглашения | `inv_01HX7M8G6Q` |
-| type | MVP: `TRAINER_TO_CLIENT` | `TRAINER_TO_CLIENT` |
-| senderUserId | Отправитель приглашения | `usr_01HX7M5D3M` |
-| recipientEmail | Email получателя, если пользователь ещё не зарегистрирован | `client@example.com` |
-| recipientUserId | Идентификатор получателя, если он уже зарегистрирован | `usr_01HX7M2A9Q` |
-| targetClientProfileId | Профиль клиента, к которому относится приглашение | `clp_01HX7M3B1K` |
-| targetTrainerProfileId | Профиль тренера, если приглашение от тренера | `trp_01HX7M4C2L` |
-| proposedScopes | Запрашиваемые области доступа MVP без `PROFILE_WRITE` для клиентского профиля | `["PROFILE_READ", "DIARY_READ", "PROGRAM_READ", "PROGRAM_WRITE"]` |
-| tokenHash | Хэш одноразового токена приглашения | `sha256:...` |
-| status | Статус: `PENDING`, `ACCEPTED`, `DECLINED`, `EXPIRED`, `CANCELLED` | `PENDING` |
-| expiresAt | Дата истечения приглашения | `2026-05-26T10:00:00Z` |
-
-> Модель статусов разделена: жизненный цикл приглашения хранится только в `Invite.status`, а действующее разрешение хранится в `AccessGrant.status`. `PENDING`, `ACCEPTED`, `DECLINED` и `CANCELLED` не используются как статусы `AccessGrant`.
-
-> В MVP `AccessGrant.scopes` и `Invite.proposedScopes` не содержат trainer `PROFILE_WRITE` для `ClientProfile`: тренер читает только разрешённые поля профиля через `PROFILE_READ`, а изменения выполняет в тренировочном домене через `DIARY_WRITE` и `PROGRAM_WRITE`.
-
-**[MVP] TrainingEntry (запись тренировочного дневника)**
+## [MVP] TrainingPlan
 
 | Поле | Бизнес-описание | Пример значения |
 |------|-----------------|-----------------|
-| id | Идентификатор записи дневника | `ten_01HX7M9H7R` |
-| clientProfileId | Владелец записи | `clp_01HX7M3B1K` |
-| authorUserId | Автор: клиент или тренер с правом записи | `usr_01HX7M2A9Q` |
-| type | MVP: `WORKOUT`, `REST_DAY` | `WORKOUT` |
-| occurredAt | Дата и время события | `2026-05-19T07:30:00Z` |
-| title | Краткое название | `Ноги и корпус` |
-| exercises | Упражнения, подходы, повторы, вес, RPE | `[{"name":"присед", "sets":3, "reps":8, "weightKg":60}]` |
-| durationMinutes | Длительность тренировки | `65` |
-| intensity | Субъективная интенсивность 1-10 | `7` |
-| mood | Самочувствие: `GREAT`, `OK`, `TIRED`, `PAIN` | `OK` |
-| notes | Свободный текст клиента или тренера | `"последний подход тяжело"` |
-| source | Источник: `MANUAL`, `PROGRAM_ASSIGNMENT` | `MANUAL` |
-| linkedProgramAssignmentId | Связь с назначенной программой | `pas_01HX7MAJ8S` |
-| visibility | Видимость записи в рамках активных доступов | `GRANTED_TRAINERS` |
-| updatedAt | Дата последнего изменения | `2026-05-19T08:45:00Z` |
+| id | Идентификатор плана | `tpl_01HX7MCLAV` |
+| clientCardId | Карточка клиента, для которой создан план | `ccd_01HX7M3B1K` |
+| trainerUserId | Автор и владелец плана | `usr_01HX7M2A9Q` |
+| title | Название плана | `Стартовая неделя` |
+| planBody | Структура заданий; публично отдаётся только whitelisted subset | `{ "days": [...] }` |
+| status | `DRAFT`, `ACTIVE`, `ARCHIVED` | `ACTIVE` |
+| version | Версия плана | `1` |
+| publicAccessTokenHash | Hash public token, raw token не хранится | `sha256:...` |
+| publicAccessStatus | `NONE`, `ACTIVE`, `REVOKED`, `EXPIRED` | `ACTIVE` |
+| publicAccessExpiresAt | TTL публичной ссылки | `2026-06-10T10:00:00Z` |
+| publicAccessRevokedAt | Момент закрытия ссылки | `null` |
 
-## MVP Plan Entities
+> Публичная ссылка не является отдельной API/product entity. Public-link lifecycle хранится как technical state плана.
 
-**[MVP] Program (простой тренировочный план)**
+## [MVP] CompletionMark
 
 | Поле | Бизнес-описание | Пример значения |
 |------|-----------------|-----------------|
-| id | Идентификатор программы | `prg_01HX7MCLAV` |
-| authorUserId | Владелец программы (клиент или тренер) | `usr_01HX7M2A9Q` |
-| type | MVP: `PERSONAL_PROGRAM` | `PERSONAL_PROGRAM` |
-| title | Название программы | `Старт 4 недели` |
-| goal | Цель программы | `адаптация к силовым тренировкам` |
-| difficulty | Уровень: `BEGINNER`, `INTERMEDIATE`, `ADVANCED` | `BEGINNER` |
-| durationWeeks | Плановая длительность | `4` |
-| workouts | Структура недель, тренировок и упражнений | `[{"week":1,"day":1,"title":"Full body"}]` |
-| status | Статус: `DRAFT`, `ACTIVE`, `ARCHIVED` | `ACTIVE` |
-| version | Версия программы для безопасного назначения | `3` |
-| createdAt | Дата создания | `2026-05-19T09:20:00Z` |
+| id | Идентификатор отметки или вложенного элемента | `cmk_01HX7MAJ8S` |
+| trainingPlanId | План, по которому оставлена отметка | `tpl_01HX7MCLAV` |
+| itemRef | Ссылка на день/упражнение/элемент плана | `week1.day1` |
+| status | `DONE`, `SKIPPED` | `DONE` |
+| completedAt | Когда клиент отметил выполнение | `2026-05-28T19:30:00Z` |
+| clientComment | Короткий необязательный комментарий; raw value не логируется | `тяжело, но сделал` |
 
-**[MVP] ProgramAssignment (назначение плана клиенту)**
+> На MVP `CompletionMark` допустимо хранить как value object внутри `TrainingPlan`; отдельная таблица — техническая оптимизация, а не расширение продуктовой модели.
 
-| Поле | Бизнес-описание | Пример значения |
-|------|-----------------|-----------------|
-| id | Идентификатор назначения | `pas_01HX7MAJ8S` |
-| programId | Назначенная программа | `prg_01HX7MCLAV` |
-| clientProfileId | Клиент-получатель | `clp_01HX7M3B1K` |
-| assignedByUserId | Пользователь, назначивший программу | `usr_01HX7M4C2L` |
-| accessGrantId | Действующий доступ, на основании которого назначена программа (null для Solo-клиентов) | `agr_01HX7M7F5P` |
-| startDate | Дата начала | `2026-05-20` |
-| endDate | Плановая дата окончания | `2026-06-16` |
-| status | Статус: `PLANNED`, `ACTIVE`, `PAUSED`, `COMPLETED`, `CANCELLED` | `ACTIVE` |
-| completionPercent | MVP: простой процент выполнения | `37` |
-| currentWeek | Текущая неделя | `2` |
-| clientFeedback | Последняя обратная связь клиента | `"сложно в день 3"` |
+## API-сущности вне MVP / Phase 2
+
+| Entity | Статус |
+|---|---|
+| `ClientProfile` | Future client-owned profile |
+| `Invite` | Future invite/consent flow |
+| `AccessGrant` | Future granular permissions |
+| `TrainingEntry` | Future client-owned diary/history |
+| `ProgramAssignment` | Future assignment model после отделения plan/program/history |
+| `Notification`, `AuditEvent`, `Subscription` | Phase 2+ продуктовые контуры |

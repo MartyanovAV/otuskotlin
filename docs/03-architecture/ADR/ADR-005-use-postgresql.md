@@ -3,58 +3,58 @@
 **Статус:** Accepted  
 **Дата:** 2026-05-21
 
-## Context
+## Контекст
 
-MVP FitBridge хранит client-owned data: профили клиентов и тренеров, приглашения, разрешения доступа, дневник тренировок, простые программы и назначения программ. Ключевые требования к хранилищу:
+Trainer-first MVP с публичной ссылкой FitBridge хранит trainer-owned рабочий контур: зарегистрированного тренера, клиентские карточки, простые планы, technical public-access state и отметки выполнения по публичной ссылке. Ключевые требования к хранилищу:
 
-- строгие связи между `ClientProfile`, `TrainerProfile`, `AccessGrant`, `Invite`, `TrainingEntry`, `Program` и `ProgramAssignment`;
-- транзакционная корректность операций доступа: принять приглашение, выдать доступ, отозвать доступ, запретить дальнейшие действия тренера;
-- сохранение истории клиента при смене тренера и отзыве доступа;
+- строгие связи между `FITBRIDGE_USER`, `TRAINER_PROFILE`, `CLIENT_CARD`, `TRAINING_PLAN` и `COMPLETION_MARK`;
+- транзакционная корректность public-link lifecycle: создать hash token, выставить TTL, закрыть/revoke ссылку, запретить новые public opens/marks;
+- сохранение отметок выполнения как основы будущей миграции в client-owned историю;
 - поддержка `RPO <= 24h` и восстановления критичных данных;
 - возможность хранить структурированные, но ещё эволюционирующие поля тренировок и программ;
 - хорошая совместимость с Kotlin/JVM и Ktor.
 
-## Comparison
+## Сравнение
 
 | Criteria | PostgreSQL | MongoDB | Cassandra | In-memory storage |
 |---|:---:|:---:|:---:|:---:|
-| Relational integrity for grants, profiles, assignments | ✅ | ⚠️ | ❌ | ❌ |
-| Transactions for invite/access/revoke flows | ✅ | ⚠️ | ❌ | ⚠️ |
+| Relational integrity for trainer/card/plan/completion | ✅ | ⚠️ | ❌ | ❌ |
+| Transactions for public-link generate/close flows | ✅ | ⚠️ | ❌ | ⚠️ |
 | Flexible workout/program payloads | ✅ JSONB | ✅ | ⚠️ | ✅ |
 | Backup, PITR and operational maturity | ✅ | ✅ | ⚠️ | ❌ |
 | Kotlin/JVM ecosystem support | ✅ JDBC/R2DBC/Exposed/jOOQ | ✅ | ⚠️ | ✅ |
 | Fit for MVP complexity | ✅ | ⚠️ | ❌ | ❌ |
 | Future analytics/read models | ✅ | ⚠️ | ✅ | ❌ |
 
-## Decision
+## Решение
 
 Использовать **PostgreSQL** как основное прикладное хранилище FitBridge MVP.
 
 Для MVP PostgreSQL хранит:
 
 - внутреннюю проекцию пользователя Keycloak (`FITBRIDGE_USER`);
-- клиентские и тренерские профили;
-- приглашения и доступы;
-- дневниковые записи;
-- программы и назначения;
+- профиль тренера;
+- клиентские карточки `ClientCard`;
+- планы `TrainingPlan` с hash-only public-access state;
+- отметки выполнения `CompletionMark` или value-object/jsonb представление;
 - soft-delete/archive состояния и технические timestamps.
 
-Поля с ещё нестабильной внутренней структурой, например упражнения, структура недель/тренировок, цели или scopes, допускается хранить в `JSONB` при наличии явных ограничений на размер, валидации на уровне приложения и индексов только под подтверждённые запросы.
+Поля с ещё нестабильной внутренней структурой, например структура недель/тренировок плана и completion marks, допускается хранить в `JSONB` при наличии явных ограничений на размер, валидации на уровне приложения и индексов только под подтверждённые запросы.
 
-## Rationale
+## Обоснование
 
-- Домен MVP реляционный: доступ тренера зависит от пары клиент-тренер, назначения программы зависят от клиента, программы и действующего доступа, а история должна оставаться у клиента независимо от тренера.
-- Операции доступа требуют ACID-транзакций: `acceptInvite` должен атомарно менять статус приглашения и создавать/активировать `AccessGrant`; `revoke` должен немедленно блокировать дальнейшие действия тренера.
-- PostgreSQL покрывает базовые требования к резервному копированию, восстановлению, индексам, уникальным ограничениям и partial indexes для правил вроде “один активный тренер в MVP”.
+- Домен MVP публичного доступа к плану реляционный: карточки принадлежат тренеру, планы принадлежат карточкам, отметки выполнения принадлежат планам, а public-access state должен быть консистентным.
+- Операции public access требуют ACID-транзакций: `generatePublicLink` должен атомарно сохранить hash/TTL/status, а `closePublicLink` должен немедленно блокировать дальнейшие public opens/marks.
+- PostgreSQL покрывает базовые требования к резервному копированию, восстановлению, индексам, уникальным ограничениям и partial indexes для правил public-access lifecycle.
 - `JSONB` даёт достаточную гибкость для простых программ и тренировочных payloads без преждевременного вынесения упражнения/подходов в сложную нормализованную модель.
 - PostgreSQL хорошо поддерживается JVM/Kotlin-экосистемой и не конфликтует с будущей модульной структурой `repo-pgjvm`.
 
-## Consequences
+## Последствия
 
 **Positive:**
 
-- Упрощается обеспечение консистентности client-owned data и access-control правил.
-- Можно реализовать soft delete, уникальные ограничения, foreign keys и transactional revoke без дополнительной инфраструктуры.
+- Упрощается обеспечение консистентности trainer-owned данных и public-link lifecycle.
+- Можно реализовать archive, уникальные ограничения, foreign keys и transactional close/revoke без дополнительной инфраструктуры.
 - Есть понятный путь к backup/PITR и выполнению RPO/RTO требований.
 - Можно начать с одной прикладной БД и позже добавить read models или analytics storage без смены основного хранилища.
 
@@ -69,14 +69,15 @@ MVP FitBridge хранит client-owned data: профили клиентов и
 | Risk | Likelihood | Impact | Mitigation |
 |---|---:|---:|---|
 | JSONB станет “свалкой” без контрактов | Medium | High | Валидировать payloads в API, документировать schema fragments, индексировать только подтверждённые запросы |
-| Ошибки в access-control constraints | Medium | High | Использовать транзакции, foreign keys, partial unique index для активного доступа, негативные тесты на revoke/no-scope |
+| Ошибки в public-link constraints | Medium | High | Использовать транзакции, foreign keys, unique/hash indexes, негативные тесты на expired/revoked token |
 | Backup настроен формально, но восстановление не проверяется | Medium | High | Ввести регулярную проверку восстановления тестового набора данных по NFR `9.3` |
 | PostgreSQL будет перегружен аналитикой Phase 2 | Low | Medium | Выносить тяжёлые отчёты в read model/analytics storage после подтверждения нагрузки |
 
-## Implementation Notes
+## Заметки по реализации
 
 - Для MVP использовать одну прикладную PostgreSQL database/schema для FitBridge domain data.
 - Keycloak остаётся владельцем authentication data; FitBridge хранит только `keycloakSubject` и доменную проекцию пользователя.
-- Для правила “один активный тренер на клиента в MVP” предусмотреть partial unique constraint по `clientProfileId` для `ACCESS_GRANT.status = 'ACTIVE'`.
-- Для soft delete использовать `archivedAt`, `deletedAt`, `cancelledAt` и бизнес-фильтры, а не физическое удаление в пользовательском сценарии.
-- Для `PROGRAM.workoutsJson`, `TRAINING_ENTRY.exercisesJson`, `ACCESS_GRANT.scopes` и похожих полей зафиксировать application-level validation до появления машинно-проверяемых API contracts.
+- Для public access предусмотреть уникальный индекс по `TRAINING_PLAN.publicAccessTokenHash` и обязательные проверки `publicAccessStatus`, `publicAccessExpiresAt`, `publicAccessRevokedAt`.
+- Для archive использовать `archivedAt` и бизнес-фильтры, а не физическое удаление в пользовательском сценарии.
+- Для `TRAINING_PLAN.planBody` и `CompletionMark`/`completionMarksJson` зафиксировать application-level validation до появления машинно-проверяемых API contracts.
+- Future `ClientProfile`, `Invite`, `AccessGrant`, `TrainingEntry`, `ProgramAssignment` остаются Phase 2 и могут использовать PostgreSQL без смены основного хранилища.

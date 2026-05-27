@@ -1,207 +1,148 @@
-# Архитектура безопасности / модель угроз - FitBridge MVP
+# Архитектура безопасности / модель угроз - FitBridge trainer-first MVP с публичной ссылкой
 
-Документ фиксирует архитектуру безопасности и модель угроз для FitBridge MVP. Структура документа адаптирована из `.opencode/templates-docs/ADR-template.md`: контекст, решение, последствия и таблица рисков/угроз сохранены как каркас, но документ не является новым ADR.
+Документ фиксирует security baseline trainer-first MVP с публичной ссылкой на тренировочный план.
 
 ## 1. Статус и область действия
 
 | Параметр | Значение |
 |---|---|
-| Статус | Целевой baseline безопасности MVP |
-| Область | Trainer-led MVP, Solo-client MVP, целевой backend API и observability-контур |
-| Не входит в MVP | In-product `ADMIN`/support роль, личный кабинет администратора, support console, granular operator roles, broad bypass к domain API, продуктовый `AuditEvent` API, отдельный DLP-контур, SSO для корпоративных клиентов, production-grade SIEM |
-| Связанные решения | [ADR-001 Keycloak](./ADR/ADR-001-use-keycloak.md), [ADR-002 POST Full API](./ADR/ADR-002-post-full-api.md), [ADR-005 PostgreSQL](./ADR/ADR-005-use-postgresql.md), [ADR-006 Observability](./ADR/ADR-006-use-opensearch-fluent-bit-observability.md) |
+| Статус | Целевой baseline безопасности MVP публичного доступа к плану |
+| Область | Тренер как единственный зарегистрированный пользователь, `ClientCard`, `TrainingPlan`, public link, `CompletionMark`, закрытие ссылки |
+| Не входит в MVP | Регистрация клиента, клиентский кабинет, `ClientProfile`, `Invite`, `AccessGrant`, granular permissions, multi-specialist, product `AuditEvent`, product `Notification`, in-product `ADMIN`/support UI |
+| Связанные решения | [ADR-001 Keycloak](./ADR/ADR-001-use-keycloak.md), [ADR-002 POST Full API](./ADR/ADR-002-post-full-api.md), [ADR-005 PostgreSQL](./ADR/ADR-005-use-postgresql.md), [ADR-006 Observability](./ADR/ADR-006-use-opensearch-fluent-bit-observability.md), [ADR-007 публичный доступ к плану](./ADR/ADR-007-public-plan-link-mvp.md) |
 
 Security scope MVP покрывает:
 
-- аутентификацию пользователей через Keycloak/OIDC;
-- обязательную JWT validation для всех MVP `/v1/*` endpoints на входном proxy;
-- независимую backend-проверку JWT, user context и доменной policy;
-- доменную авторизацию доступа к клиентским данным;
-- управление согласиями через `Invite` и `AccessGrant`;
-- защиту персональных и health-adjacent данных;
-- маскированные структурированные логи и audit-oriented observability;
-- угрозы критичных MVP-сценариев: приглашение, принятие доступа, отзыв доступа, дневник, программы, удаление/архивация профиля.
+- аутентификацию тренера через Keycloak/OIDC;
+- приватные trainer endpoints с JWT validation и проверкой ownership;
+- публичный token-only endpoint для просмотра плана и отметки выполнения;
+- lifecycle публичной ссылки: generate, hash-only storage, TTL, revoke/close, expired;
+- защиту raw token, минимизацию публичного payload и masked logs;
+- rate limiting публичных операций и безопасные generic errors;
+- audit-oriented infrastructure logging без raw token и sensitive payload.
 
 ## 2. Акторы и модель доверия
 
 | Актор / система | Доверие | Основные действия | Заметки по безопасности |
 |---|---|---|---|
-| `Client` | Внешний пользователь, владелец данных | Регистрация, ведение дневника, принятие/отзыв доступа, запрос удаления профиля | Владелец `ClientProfile`, `TrainingEntry`, истории и согласий |
-| `Trainer` | Внешний пользователь с профессиональным профилем | Создание приглашений, просмотр разрешённых полей профиля клиента, назначение программ и ведение тренировочного процесса | Не владеет клиентскими данными; в MVP не редактирует `ClientProfile` и работает только по активному `AccessGrant` и scopes |
-| `Support/Ops operator` | Операционный актор вне продукта | Controlled runbook/provisioning для пилота, просмотр masked технических логов, блокировка пользователя или отмена edge-case операции без sensitive payload | Не является MVP product role и не вызывает domain API как `ADMIN`; не читает client profile/diary/training history/health-adjacent data |
-| `Keycloak` | Доверенный Identity Provider | Login, OIDC authorization code flow, выдача JWT/refresh token, realm roles | Не принимает доменные решения доступа к клиентским данным |
-| `FitBridge Backend` | Доверенная доменная система | POST Full API, маппинг `sub` на пользователя, access decision, запись доменных данных | Единственный владелец правил owner/grant/scope/consent/deletion |
-| `Envoy Gateway` | Инфраструктурный boundary | Маршрутизация `/v1/*`, проверка JWT/JWKS для всех MVP API endpoints | Не заменяет backend JWT/user-context validation и доменную авторизацию |
-| `PostgreSQL` | Доверенное прикладное хранилище | Профили, доступы, приглашения, дневник, программы | Требует миграций, ограничений и backup/PITR по ADR-005 |
-| `OpenSearch / Dashboards` | Внешний/platform observability-контур с повышенным риском | Поиск логов и audit-oriented событий | Не является частью application boundary FitBridge; должен получать только masked logs без JWT, invite tokens и raw health-adjacent payloads |
+| `Trainer` | Зарегистрированный пользователь продукта | Создаёт `ClientCard`, `TrainingPlan`, генерирует/закрывает публичную ссылку, смотрит статус выполнения | Доступ только к собственным карточкам/планам; JWT + backend ownership check |
+| `Client by public link` | Незарегистрированный внешний пользователь | Открывает публичную ссылку, видит минимальный план, оставляет `CompletionMark` | Нет аккаунта, JWT и `AccessGrant`; авторизация основана только на валидном capability-token |
+| `Support/Ops operator` | Операционный актор вне продукта | Controlled runbook для пилота: допуск/блокировка тренера, расследование технических инцидентов по masked logs | Не product role; не читает raw token, содержимое плана, client notes или health-adjacent payload |
+| `Keycloak` | Доверенный Identity Provider | Login тренера, OIDC/JWT | Не участвует в публичном клиентском доступе и не решает domain ownership |
+| `FitBridge Backend` | Доверенная доменная система | POST Full API, token hash validation, ownership, запись данных | Единственный владелец public-link lifecycle и доменных проверок |
+| `Envoy Gateway` | Инфраструктурный boundary | Маршрутизация приватного и публичного контуров, rate limiting, edge JWT для `/v1/*` | Не заменяет backend-проверки token/ownership |
+| `PostgreSQL` | Доверенное прикладное хранилище | Хранит user/trainer/card/plan/completion и token hash | Raw token не хранится |
+| `OpenSearch / Dashboards` | Внешний observability-контур | Поиск masked logs | Не является application boundary; не получает raw token, URL с token, request body, план/комментарии |
 
-## 3. Поток аутентификации и токенов
+## 3. Контуры доступа
 
-Целевой поток основан на OIDC/OAuth2 и решении [ADR-001](./ADR/ADR-001-use-keycloak.md):
+### 3.1. Приватный trainer API
 
-1. `Client` или `Trainer` открывает Web UI.
-2. Web UI перенаправляет пользователя в Keycloak для входа.
-3. Keycloak выполняет аутентификацию и выдаёт OIDC/JWT-токены.
-4. Web UI вызывает FitBridge API через Envoy с `Authorization: Bearer <access_token>`.
-5. Envoy проверяет `iss`, подпись и срок действия JWT через JWKS Keycloak для каждого MVP `/v1/*` endpoint и пробрасывает запрос в backend только после успешной edge validation.
-6. FitBridge Backend независимо валидирует JWT/claims и user context, маппит `sub` на `FITBRIDGE_USER.keycloakSubject`, проверяет внутренний статус пользователя и выполняет доменную авторизацию.
-7. Refresh token остаётся на стороне клиента/Keycloak-flow и не должен попадать в backend logs или OpenSearch.
+1. Тренер входит через Keycloak.
+2. Web UI вызывает приватные `/v1/*` endpoints с `Authorization: Bearer <access_token>`.
+3. Envoy проверяет JWT/JWKS на edge.
+4. Backend независимо валидирует JWT/claims, находит `FITBRIDGE_USER`, проверяет `role=TRAINER`, `status=ACTIVE`.
+5. Для каждой операции backend проверяет ownership: `ClientCard.trainerUserId == caller.id`, `TrainingPlan.trainerUserId == caller.id`.
+6. Операции support/admin не получают broad bypass к domain API.
 
-Минимальные проверки backend для каждого MVP `/v1/*` POST Full endpoint:
+Минимальные проверки backend для каждого приватного `/v1/*` POST Full endpoint:
 
-- `iss` соответствует realm `fit-bridge`;
-- `aud`/client соответствует ожидаемому client id FitBridge API;
-- `exp`, `nbf`, `iat` валидны с ограниченным clock skew;
-- `sub` присутствует и связан с внутренним `FITBRIDGE_USER`;
-- пользователь не `BLOCKED` и не `DELETED`;
-- role/claim достаточен только как coarse-grained признак, после чего выполняется доменная проверка owner/grant/scope.
+- `iss`, `aud`, `exp`, `nbf`, `iat` валидны;
+- `sub` присутствует и связан с активным `FITBRIDGE_USER`;
+- пользователь имеет trainer capability/profile;
+- target resource принадлежит тренеру;
+- raw payload не логируется.
+
+### 3.2. Публичный API по ссылке
+
+Публичный endpoint не требует JWT, но обязан быть token-only и deny-by-default:
+
+1. Клиент открывает public URL с raw token.
+2. Gateway применяет rate limiting до backend.
+3. Backend не логирует URL/query/body с token.
+4. Backend вычисляет hash token и ищет `TrainingPlan.publicAccessTokenHash`.
+5. Backend проверяет `TrainingPlan.status=ACTIVE`, `publicAccessStatus=ACTIVE`, `publicAccessExpiresAt > now`, `publicAccessRevokedAt is null`.
+6. Backend возвращает минимальный публичный payload без внутренних id и лишних данных карточки.
+7. Для `CompletionMark` backend повторяет token validation, проверяет idempotency/rate limits и записывает отметку.
+
+Запрещено для public endpoint:
+
+- принимать `clientId`, `clientCardId`, `planId`, `trainerId` как параметры авторизации;
+- возвращать внутренние id, заметки тренера, PII сверх минимального отображаемого имени/контекста;
+- логировать raw token, полный URL, request body, комментарии клиента или содержимое плана.
 
 ## 4. Роли и claims
 
-### 4.1. Роли
-
 | Роль | Статус MVP | Назначение | Требование к policy |
 |---|---|---|---|
-| `CLIENT` | MVP product role | Владелец клиентского профиля, дневника, согласий и доступов | Роль должна попадать в JWT через scope `roles`; backend дополнительно проверяет профиль клиента |
-| `TRAINER` | MVP product role | Владелец тренерского профиля, инициатор приглашения и получатель доступа | Backend требует активный профиль тренера и не полагается только на role claim |
-| `ADMIN` / `SUPPORT` | Product role вне MVP | Полноценный product admin/support UI, support console и granular operator roles | Не используется в MVP domain API; если такая роль появится в Keycloak для эксплуатации, backend не должен давать ей доступ к client-owned domain data без отдельного Phase 2 решения |
+| `TRAINER` | Единственная зарегистрированная product role MVP | Создание карточек, планов, ссылок и просмотр статусов | Роль из JWT — только предварительное условие; backend проверяет ownership ресурсов |
+| `CLIENT` | Phase 2 / future | Клиентский аккаунт, client-owned профиль, управление доступами | Не требуется и не используется в MVP публичного доступа к плану |
+| `ADMIN` / `SUPPORT` | Product role вне MVP | Полноценный product admin/support UI | Не используется в MVP domain API; эксплуатационные действия только через runbook без чтения sensitive payload |
 
-Совмещение ролей `CLIENT` и `TRAINER` должно быть явно разрешено или запрещено security policy и покрыто тестами доступа. Domain API MVP остаётся `CLIENT`/`TRAINER` only; любые support/operator действия выполняются вне пользовательского продукта по controlled runbook.
-
-### 4.2. Claims
-
-| Claim | Источник | Использование FitBridge |
-|---|---|---|
-| `sub` | Keycloak | Стабильная связка с `FITBRIDGE_USER.keycloakSubject` |
-| `realm_access.roles` / roles scope | Keycloak | Coarse-grained role check только для MVP product roles `CLIENT`, `TRAINER`; `ADMIN`/`SUPPORT` не являются разрешением на domain API |
-| `iss` | Keycloak | Проверка доверенного issuer |
-| `aud` | Keycloak client | Проверка назначения токена для FitBridge API |
-| `exp`, `iat`, `nbf` | Keycloak | Проверка срока действия и replay window |
-| `jti` | Keycloak | Потенциальная основа для deny-list/anti-replay в критичных future-сценариях |
-| `email`, `preferred_username` | Keycloak | Не использовать для авторизации; не писать в логи без маскирования |
-| `scope` | Keycloak/OIDC | Только OIDC/API scopes; доменные scopes доступа клиента хранятся в `ACCESS_GRANT.scopes` |
-
-## 5. Границы ответственности Keycloak и FitBridge Backend
+## 5. Границы Keycloak и FitBridge Backend
 
 | Область | Keycloak | FitBridge Backend |
 |---|---|---|
-| Регистрация и вход | Аутентифицирует пользователя, управляет паролями/session/refresh | Создаёт или связывает внутреннюю проекцию пользователя |
-| Токены | Выпускает и подписывает JWT | Независимо валидирует claims для каждого `/v1/*` endpoint и не хранит raw token |
-| Realm roles | Хранит `CLIENT`, `TRAINER`; возможные эксплуатационные роли Keycloak не являются product roles MVP | Использует роли как предварительное условие, но не как единственный фактор доступа; domain access остаётся owner/grant/scope |
-| Доменные профили | Не владеет | Хранит `ClientProfile`, `TrainerProfile`, статусы и ownership |
-| Доступ к клиентским данным | Не решает | Проверяет owner access, active `AccessGrant`, scopes, статусы удаления/архивации |
-| Согласие и отзыв | Не владеет | Реализует `Invite`, `AccessGrant`, `revoke`, consent/deletion impact |
-| Аудит | Может логировать IAM-события | Логирует masked business/security events по ADR-006 |
+| Регистрация и вход | Аутентифицирует тренера | Создаёт/связывает внутреннего trainer user |
+| Клиент по ссылке | Не участвует | Проверяет capability-token hash/status/TTL/revoke |
+| Токены тренера | Выпускает и подписывает JWT | Независимо валидирует claims для `/v1/*` |
+| Public link token | Не владеет | Генерирует raw token, хранит hash, закрывает/истекает доступ |
+| Доменные ресурсы | Не владеет | Хранит `ClientCard`, `TrainingPlan`, `CompletionMark` |
+| Аудит | IAM-события тренера | Masked business/security events по ADR-006 |
 
-## 5.1. MVP Support Operations Model
-
-В MVP нет in-product `ADMIN` роли, личного кабинета администратора или support console. Операционное сопровождение пилота отделено от пользовательского продукта и не расширяет domain API.
-
-| Область | Целевая MVP-модель |
-|---|---|
-| Канал выполнения | Keycloak + controlled operational runbook/provisioning вне product UI и вне обычных `domain.action` методов |
-| Разрешённые действия пилота | Допуск или отзыв пилотного тренера, перевод `FITBRIDGE_USER.status` в `BLOCKED`, отмена invite/access edge case, сопровождение privacy/deletion action |
-| Запрещённый доступ | Чтение `ClientProfile`, дневника, training history, health-adjacent payload, raw invite token, JWT и raw request/response payload |
-| Access policy | Broad bypass отсутствует: owner/grant/scope policy применяется всегда для domain API; support/operator не становится владельцем и не получает `AccessGrant` |
-| Аудит | Каждое действие фиксируется как masked operational/security event: internal ids, actor/operator id, action, result, requestId/ticketId, timestamp; sensitive payload запрещён |
-| Резерв Phase 2 | Full admin UI, support console, granular operator roles и отдельная support-policy проектируются отдельно и не входят в MVP |
-
-Поддерживаемые эффекты операционных действий должны выражаться существующими MVP-состояниями (`FITBRIDGE_USER.status = BLOCKED`, `Invite.status = CANCELLED`, `AccessGrant.status = REVOKED/EXPIRED`, `ProgramAssignment.status = CANCELLED`) без добавления новых admin/support сущностей в модель данных MVP.
-
-## 6. Модель принятия решений о доступе
-
-Все бизнес-операции FitBridge API используют `deny by default`. Разрешение выдаётся только если выполнено одно из явных правил.
-
-### 6.1. Общий алгоритм
-
-1. Проверить JWT/claims и внутреннего пользователя в backend независимо от Envoy.
-2. Проверить, что endpoint/action известен и имеет policy.
-3. Проверить статус пользователя: `ACTIVE` обязателен.
-4. Проверить статус целевого ресурса: профиль/дневник/программа не должны быть `DELETED` или недоступны из-за `archivedAt/deletedAt`.
-5. Если пользователь владелец ресурса — разрешить только действия владельца.
-6. Если пользователь тренер — найти его `TrainerProfile`, затем активный `AccessGrant` для целевого `ClientProfile`.
-7. Проверить `AccessGrant.status = ACTIVE`, `revokedAt is null`, `expiresAt` не истёк и `scopes` содержит нужный scope.
-8. Если запрос пытается использовать `ADMIN`/`SUPPORT` или любую эксплуатационную роль как основание чтения/изменения client-owned domain data — отказать; MVP domain API допускает только явные правила `CLIENT`/`TRAINER` + owner/grant/scope.
-9. Все отказы по scope/owner/grant/support-bypass логировать как masked `access.validateScope` с `DENIED` по [ADR-006](./ADR/ADR-006-use-opensearch-fluent-bit-observability.md).
-
-### 6.2. Scopes MVP
-
-| Scope | Разрешает | Не разрешает |
-|---|---|---|
-| `PROFILE_READ` | Читать разрешённые поля клиентского профиля через активный `AccessGrant`, включая optional `gender` и `goals` | Читать скрытые поля, контакты вне политики, данные удалённого профиля или Phase 2 body metrics |
-| `DIARY_READ` | Читать дневник клиента в рамках активного доступа | Читать дневник после `revoke` или после удаления профиля |
-| `DIARY_WRITE` | Создавать/изменять разрешённые записи от имени тренера | Физически удалять историю клиента |
-| `PROGRAM_READ` | Читать назначенные или разрешённые программы | Читать private drafts клиента или других тренеров |
-| `PROGRAM_WRITE` | Назначать/изменять план в рамках активного доступа | Назначать программу без активного grant или после revoke |
-
-`PROFILE_WRITE` для клиентского профиля не входит в минимальные MVP scopes. Тренер в MVP получает только `PROFILE_READ` на разрешённые поля `ClientProfile`; любые write-действия тренера ограничены тренировочным доменом (`DIARY_WRITE`, `PROGRAM_WRITE`) и не меняют `ClientProfile`. Возможный trainer `PROFILE_WRITE` для клиентского профиля рассматривается только как Phase 2 / out of MVP и не должен попадать в `Invite.proposedScopes` или `AccessGrant.scopes` MVP.
-
-### 6.3. Field-level privacy для optional profile fields MVP
-
-`ClientProfile.gender` и `ClientProfile.goals` входят в MVP как добровольные nullable поля профиля. Они не являются onboarding blockers и не требуют заполнения для создания рабочего профиля, trainer-led сценария или solo-client пути.
-
-| Поле | Статус MVP | Owner `CLIENT` | `TRAINER` с `AccessGrant` + `PROFILE_READ` | Trainer write | Support/Ops | Логирование |
-|---|---|---|---|---|---|---|
-| `gender` | Optional/nullable profile field | Может читать, устанавливать, изменять и очищать своё значение | Может читать только при `AccessGrant.status = ACTIVE` и scope `PROFILE_READ` | Запрещён; trainer `PROFILE_WRITE` отсутствует в MVP | Не может читать значение через domain API, runbook или observability | Raw value не логируется; допустимы только field name/action/result/internal ids |
-| `goals` | Optional/nullable profile field; может быть health-adjacent | Может читать, устанавливать, изменять и очищать своё значение | Может читать только при `AccessGrant.status = ACTIVE` и scope `PROFILE_READ` | Запрещён; trainer `PROFILE_WRITE` отсутствует в MVP | Не может читать значение через domain API, runbook или observability | Raw value и текст целей не логируются; допустимы только field name/action/result/internal ids |
-
-`ClientProfile.heightCm` не входит в supported profile fields MVP. Рост и связанные body metrics относятся к Phase 2 / later measurement scope и не должны становиться доступными через `PROFILE_READ` до отдельного решения по consent, retention и field-level access.
-
-## 7. Consent, deletion и влияние на access grants
+## 6. Lifecycle публичной ссылки и security effects
 
 | Событие | Security effect | Данные / доступы |
 |---|---|---|
-| `access.createInvite` | Не создаёт доступ | Хранится `Invite` с `tokenHash`, proposed scopes и сроком действия |
-| `access.acceptInvite` | Явное согласие клиента на scopes | В транзакции переводит `Invite.status` в `ACCEPTED` и создаёт/активирует `AccessGrant.status = ACTIVE`; pending invite больше не может использоваться повторно |
-| `access.revoke` | Немедленный отзыв согласия | `AccessGrant.status = REVOKED`, `revokedAt` заполнен; дальнейшие trainer-запросы получают отказ |
-| Истечение invite | Не даёт доступ | `Invite.status = EXPIRED`; новый доступ возможен только через новое приглашение/подтверждение |
-| Запрос удаления/архивации client profile | Блокирует новые операции над профилем | Активные grants переводятся в `REVOKED` или `EXPIRED`; активные assignments переводятся в `CANCELLED` согласно API docs |
-| Удаление/архивация trainer profile | Блокирует действия тренера | Нельзя архивировать тренера при активных клиентах без отзыва доступов |
+| `publicLink.generate` | Создаёт новый capability-token | Raw token возвращается тренеру один раз; в БД только hash, status, TTL |
+| `publicPlan.open` | Проверяет capability-token | При успехе возвращает минимальный payload плана; при отказе generic unavailable/expired response |
+| `publicPlan.markCompletion` | Проверяет token и записывает отметку | Создаёт `CompletionMark`; не создаёт клиентский аккаунт или grant |
+| `publicLink.close` | Немедленно закрывает публичный доступ | `publicAccessStatus=REVOKED`, `publicAccessRevokedAt` заполнен; новые opens/marks запрещены |
+| Истечение TTL | Закрывает публичный доступ по времени | `publicAccessStatus=EXPIRED` может выставляться lazy/job, но check обязан работать по timestamp |
+| Архивация плана/карточки | Блокирует публичный доступ | Public endpoint не показывает архивные/удалённые ресурсы |
 
-Модель статусов разделена: `Invite.status` принимает `PENDING`, `ACCEPTED`, `DECLINED`, `EXPIRED`, `CANCELLED`; `AccessGrant.status` принимает только `ACTIVE`, `REVOKED`, `EXPIRED`. Ключевое правило: удаление/архивация профиля и отзыв согласия должны влиять на access decision немедленно, а не только на UI. Backend обязан проверять статус grant/resource на каждый запрос.
+## 7. Минимизация данных и public payload
 
-## 8. 152-ФЗ и health-adjacent controls
-
-FitBridge MVP обрабатывает персональные данные и health-adjacent данные: `gender`, цели, интенсивность, настроение, заметки, упражнения, вес/RPE. Рост (`heightCm`) и связанные body metrics не входят в supported profile fields MVP и переносятся в Phase 2 / later measurement scope. Полноценная юридическая модель требует отдельной матрицы типов данных, оснований обработки и сроков хранения, но MVP baseline должен включать следующие controls.
-
-| Control | MVP правило |
+| Область | MVP правило |
 |---|---|
-| Минимизация данных | Не собирать замеры, `heightCm` и расширенные health metrics в MVP; `Measurement` остаётся Phase 2 |
-| Purpose limitation | Использовать данные только для дневника, плана, прогресса и явно выданного тренеру доступа |
-| Явное согласие | Trainer access появляется только после `acceptInvite` и подтверждения scopes клиентом |
-| Отзыв согласия | `revoke` немедленно закрывает доступ тренера независимо от UI/session |
-| Разграничение доступа | Owner/grant/scope checks на каждый запрос; no shared trainer visibility без grant |
-| Маскирование логов | Не логировать ФИО, email, телефон, JWT, invite token, raw `gender`/`goals`/notes/exercises/mood/RPE |
-| Retention | Для профилей, soft-deleted записей, invites, grants и логов задаётся retention policy по типу данных и окружению |
-| Доступ к observability | OpenSearch/Dashboards доступны только ограниченному support/ops контуру для masked logs; этот доступ не является domain API access и не раскрывает sensitive payload |
-| Transport security | Все внешние контуры production должны использовать HTTPS; исключения допустимы только для изолированных dev/test окружений |
-| Storage security | PostgreSQL хранит доменные данные с FK/constraints; backup/PITR и проверка восстановления нужны по ADR-005 |
+| `ClientCard` | Минимум: отображаемое имя/псевдоним и технические статусы; без медданных, фото/видео, body metrics |
+| `TrainingPlan` | Публично показывать только плановые задания, необходимые для выполнения; скрывать внутренние заметки и id |
+| `CompletionMark` | Минимальный статус выполнения/пропуска, дата, опциональный короткий комментарий; raw comment не логируется |
+| Token | Длинный random token; hash-only storage; raw token не писать в БД, логи, analytics, error traces |
+| Errors | Generic messages: ссылка недоступна/истекла/закрыта; не раскрывать существование plan/card |
+
+## 8. Rate limiting и abuse controls
+
+| Контур | Минимальное правило MVP |
+|---|---|
+| Public open by token | Ограничение по IP/fingerprint и token hash; повышенные задержки/429 при подозрительном переборе |
+| Public mark completion | Лимит частоты отметок по token hash и fingerprint; idempotency для повторного submit |
+| Generate link | Лимит на trainer user, чтобы исключить массовую генерацию и случайные утечки |
+| Close link | Низкий latency target; закрытие применяется на следующем запросе без кэша разрешения |
 
 ## 9. Audit и observability
 
 Security events связаны с [ADR-006](./ADR/ADR-006-use-opensearch-fluent-bit-observability.md). В MVP используется infrastructure audit-oriented logging, а не продуктовый `AuditEvent` API.
 
-Обязательные security-события:
+Обязательные события MVP публичного доступа к плану:
 
-- `access.acceptInvite`;
-- `access.declineInvite`;
-- `access.grant`;
-- `access.revoke`;
-- `access.validateScope` с `DENIED`;
-- `profile.deleteOrArchiveRequested`;
-- `ops.blockUser` / `ops.cancelInvite` / `ops.revokePilotAccess` как controlled support-operation без sensitive payload;
-- `program.assign` / `program.updateAssignment` / `program.cancelAssignment`;
-- `diary.createEntry` / `diary.updateEntry` / `diary.deleteEntry`.
+- `trainer.login` / `trainer.authFailed` на уровне IAM/edge без sensitive payload;
+- `clientCard.create`, `clientCard.update`, `clientCard.archive`;
+- `trainingPlan.create`, `trainingPlan.update`, `trainingPlan.archive`;
+- `publicLink.generate`, `publicLink.close`, `publicLink.expired`;
+- `publicPlan.open` только агрегированно/masked; raw token и payload запрещены;
+- `completionMark.create` без raw comment/plan content;
+- `publicAccess.denied` с reason code (`EXPIRED`, `REVOKED`, `NOT_FOUND`, `RATE_LIMITED`) без token.
 
-Минимальные поля: `timestamp`, `level`, `service`, `environment`, `requestId`, `userId` или `keycloakSubject`, `action`, `entityType`, `entityId`, `result`, `durationMs`, `errorCode`. Raw payload и секреты запрещены.
+Минимальные поля: `timestamp`, `level`, `service`, `environment`, `requestId`, `actorType`, `trainerUserId` если есть, `action`, `entityType`, `entityId` или безопасный hash/id, `result`, `reasonCode`, `durationMs`. Raw payload и секреты запрещены.
 
-## 10. Критичный поток: принятие trainer-led приглашения / выдача доступа / проверка API-доступа
+## 10. Критичный поток: создание ссылки, открытие и закрытие
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Trainer as Тренер
-    actor Client as Клиент
+    actor Client as Клиент без регистрации
     participant UI as Web UI
     participant KC as Keycloak
     participant GW as Envoy Gateway
@@ -210,93 +151,85 @@ sequenceDiagram
     participant LOG as Fluent Bit / OpenSearch
 
     Trainer->>KC: Login
-    KC-->>Trainer: JWT с role TRAINER
-    Trainer->>UI: Создать приглашение клиента
-    UI->>GW: POST /v1/access.createInvite + Bearer JWT + proposedScopes
-    GW->>GW: Edge JWT validation для /v1/*
-    GW->>API: Проксировать валидированный запрос
-    API->>API: Backend JWT/user-context validation, role TRAINER, TrainerProfile
-    API->>DB: Сохранить Invite(tokenHash, PENDING, expiresAt, proposedScopes)
-    API->>LOG: access.createInvite SUCCESS без raw token/email
-    API-->>UI: inviteLink с одноразовым raw token
+    KC-->>Trainer: JWT role TRAINER
+    Trainer->>UI: Создать ClientCard и TrainingPlan
+    UI->>GW: POST /v1/trainingPlan.create + JWT
+    GW->>GW: Edge JWT validation
+    GW->>API: Проксировать запрос
+    API->>API: Backend JWT + trainer ownership
+    API->>DB: Сохранить ClientCard/TrainingPlan
+    API->>LOG: trainingPlan.create SUCCESS masked
 
-    Client->>UI: Открыть inviteLink
-    Client->>KC: Login / registration
-    KC-->>Client: JWT с role CLIENT
-    UI->>GW: POST /v1/access.readInvite + Bearer JWT + raw token
-    GW->>GW: Edge JWT validation для /v1/*
-    GW->>API: Проксировать валидированный запрос
-    API->>API: Backend JWT/user-context validation, role CLIENT
-    API->>DB: Найти Invite по hash(token), проверить PENDING/expiresAt
-    API-->>UI: Публичные данные тренера + requested scopes
+    Trainer->>UI: Запросить публичную ссылку
+    UI->>GW: POST /v1/trainingPlan.generatePublicLink + JWT
+    API->>API: Generate raw token, hash(token)
+    API->>DB: Сохранить tokenHash, ACTIVE, expiresAt
+    API->>LOG: publicLink.generate SUCCESS без raw token
+    API-->>UI: Public URL с raw token (показать один раз)
 
-    Client->>UI: Принять scopes
-    UI->>GW: POST /v1/access.acceptInvite + Bearer JWT + raw token + acceptedScopes
-    GW->>GW: Edge JWT validation для /v1/*
-    GW->>API: Проксировать валидированный запрос
-    API->>API: Backend JWT/user-context validation, role CLIENT, owner/client profile, token hash
-    API->>DB: Transaction: mark Invite ACCEPTED, create AccessGrant ACTIVE, revoke/close conflicting active grant if policy requires
-    API->>LOG: access.acceptInvite SUCCESS; access.grant SUCCESS
-    API-->>UI: AccessGrant id/status ACTIVE
+    Client->>GW: Открыть public URL token-only
+    GW->>GW: Rate limit public route
+    GW->>API: POST /public/v1/plan.open token
+    API->>API: hash(token), TTL/status/revoke checks
+    API->>DB: Найти активный TrainingPlan по hash
+    API-->>Client: Минимальный payload плана
 
-    Trainer->>UI: Открыть карточку клиента
-    UI->>GW: POST /v1/profile.readClientProfile + Bearer JWT + clientProfileId
-    GW->>GW: Edge JWT validation для /v1/*
-    GW->>API: Проксировать валидированный запрос
-    API->>API: Backend JWT/user-context validation, role TRAINER, user ACTIVE
-    API->>DB: Проверить TrainerProfile и AccessGrant ACTIVE + PROFILE_READ scope + client not deleted
-    alt grant valid
-        API->>LOG: access.validateScope SUCCESS masked
-        API-->>UI: Разрешённые поля client profile
-    else grant revoked/expired/no scope
-        API->>LOG: access.validateScope DENIED masked
-        API-->>UI: 403 ACCESS_DENIED
-    end
+    Client->>GW: Отметить выполнение token-only
+    GW->>API: POST /public/v1/plan.markCompletion token + minimal mark
+    API->>API: Повторная проверка token + idempotency
+    API->>DB: Добавить CompletionMark
+    API->>LOG: completionMark.create SUCCESS masked
+    API-->>Client: Статус отметки
+
+    Trainer->>UI: Закрыть ссылку
+    UI->>GW: POST /v1/trainingPlan.closePublicLink + JWT
+    API->>API: Trainer ownership check
+    API->>DB: publicAccessStatus=REVOKED, revokedAt=now
+    API->>LOG: publicLink.close SUCCESS masked
 ```
 
 ## 11. Модель угроз
 
 | Угроза | Затронутые активы | Вероятность | Влияние | Митигация |
 |---|---|---:|---:|---|
-| Утечка JWT/access token через браузер, логи или proxy headers | Аккаунт пользователя, клиентские данные, grants | Medium | High | HTTPS в production, короткий TTL access token, refresh token только в безопасном клиентском flow, запрет логирования `Authorization`, маскирование headers, CSP/XSS controls для UI |
-| Broken access control в backend policy | ClientProfile, TrainingEntry, ProgramAssignment | Medium | High | Централизованный `access.validateScope`, deny by default, policy tests для owner/grant/scope и запрета support/admin bypass, ревью всех POST Full endpoints |
-| IDOR: trainer подставляет чужой `clientProfileId` | Client-owned data другого клиента | Medium | High | Никогда не доверять id из запроса без проверки `AccessGrant`; фильтровать все read/list по caller ownership/grant; negative acceptance tests |
-| Stale access после `revoke` | Дневник, программы, профиль клиента | Medium | High | Проверять `AccessGrant.status/revokedAt/expiresAt` на каждый запрос; не кэшировать разрешение дольше одного запроса; transactional revoke в PostgreSQL |
-| Abuse invite token: перебор, повторное принятие, пересылка ссылки | Invite, AccessGrant, consent | Medium | High | Длинный random token, хранить только hash, TTL 1-30 дней, single-use status transition, rate limit create/read/accept, не логировать raw token |
-| Excessive logging sensitive data | PII, health-adjacent fields, optional profile fields `gender`/`goals`, JWT, invite token | Medium | High | Sensitive data rules из ADR-006, deny-list полей, structured logs без raw payload, ревью log statements, test fixtures на отсутствие секретов в логах |
-| Privilege escalation: CLIENT/TRAINER получает `ADMIN`/`SUPPORT` или чужую роль | Админские операции, чужие данные | Low/Medium | High | Backend не использует `ADMIN`/`SUPPORT` как разрешение на domain data; domain API остаётся `CLIENT`/`TRAINER` only; роли из token сверять с внутренним статусом и профилем; realm config review |
-| Replay/double POST для `acceptInvite`, `grantAccess`, `assignProgram` | Дубли grants/assignments, неконсистентность consent | Medium | Medium/High | Idempotency keys для критичных POST по ADR-002, unique constraints/transactions, status machine, optimistic locking/version для programs |
-| Profile deletion bypass: доступ после архивации/удаления профиля | ClientProfile, diary, assignments, grants | Medium | High | Access decision проверяет `archivedAt/deletedAt`; delete/archive транзакционно отзывает grants и отменяет assignments; negative tests profile deleted + active token |
-| OpenSearch exposure через слабые dev/test credentials или открытый порт | Логи, user ids, operational data | Medium | High | Не переносить dev/test credentials в production, закрыть Dashboards/VPC/VPN, auth для Dashboards, retention/index lifecycle, не хранить sensitive payloads в логах |
-| Keycloak realm misconfiguration: roles не попадают в JWT или неверный issuer/audience | Все защищённые endpoints | Medium | High | Realm/client config as code, smoke-test OIDC flow, проверка `iss/aud/roles`, мониторинг 401/403 spikes, явное правило: support/ops роли не дают domain API access |
-| PostgreSQL constraint risk для одного active trainer | Grants, trainer-led ownership | Medium | Medium/High | Partial unique index на active grant по `clientProfileId`, транзакции `acceptInvite/revoke`, миграционные тесты по ADR-005 |
-| Consent mismatch: accepted scopes отличаются от proposed scopes | Согласие клиента, legal/privacy posture | Low/Medium | High | UI показывает requested scopes; backend разрешает только subset/equal proposed scopes; сохраняет accepted scopes в grant; логирует grant без payload |
+| Утечка raw public token через логи, analytics или referer | План клиента, отметки выполнения | Medium | High | Не логировать URL/query/body, hash-only storage, referrer-policy, masked logs |
+| Brute force public token | Публичные планы | Low/Medium | High | Длинный random token, rate limiting, generic errors, мониторинг denied spikes |
+| IDOR через подстановку `planId`/`clientId` | Чужие планы/карточки | Medium | High | Public endpoint token-only; приватные endpoints с ownership check |
+| Ссылка остаётся доступной после revoke | План клиента | Medium | High | Проверять `publicAccessStatus`/`revokedAt` на каждый запрос; не кэшировать allow decision |
+| Excessive public payload | PII/health-adjacent данные | Medium | High | Whitelist полей публичного ответа, запрет заметок/медданных/внутренних id |
+| Duplicate completion submit | Искажённый статус выполнения | Medium | Medium | Idempotency key/fingerprint + ограничение повторов по token |
+| Broken trainer ownership | Доступ тренера к чужой карточке/плану | Medium | High | Централизованный ownership guard, negative tests, фильтрация list/read по trainerUserId |
+| Support/operator bypass | Раскрытие данных пилота | Low/Medium | High | Нет support domain API; runbook без чтения sensitive payload; masked logs only |
+| OpenSearch exposure | Логи, технические id | Medium | High | Network isolation, auth, retention, запрет sensitive payload в логах |
 
 ## 12. Целевые требования безопасности MVP
 
 | Требование | Риск, который закрывается | Целевое правило MVP |
 |---|---|---|
-| Единое JWT-покрытие `/v1/*` | Бизнес endpoint без edge validation | Все MVP `/v1/*` endpoints проходят JWT validation в Envoy; backend дополнительно выполняет JWT/user-context validation и доменную access policy |
-| Support operations access | Небезопасный support-доступ | Нет in-product `ADMIN`/support роли и support domain API в MVP; операции пилота выполняются через Keycloak/runbook, не читают sensitive client data и не обходят owner/grant/scope |
-| Data classification / retention | Несоответствие 152-ФЗ и избыточное хранение | Типы данных, основания обработки, сроки хранения и удаления фиксируются в data classification / retention matrix |
-| Idempotency для критичных POST | Replay/double submit | Критичные операции используют idempotency keys/error model по ADR-002 |
-| Secret management для Keycloak/OpenSearch/PostgreSQL | Компрометация окружения | Secrets, rotation и network isolation задаются deployment architecture/release plan |
-| Централизованная backend policy | Расхождение поведения handlers и security-модели | Policy tests покрывают owner/grant/scope/deny by default для бизнес-операций |
+| JWT для `/v1/*` | Неавторизованные trainer operations | Все приватные trainer endpoints проходят edge и backend JWT validation |
+| Token-only public API | IDOR и enumeration | Публичный контур принимает только raw token и не использует client/plan ids из запроса |
+| Hash-only token storage | Утечка БД/логов | Raw token не хранится; в БД только hash и lifecycle metadata |
+| TTL + revoke | Бессрочный доступ | Каждая ссылка имеет срок жизни и может быть закрыта тренером |
+| Rate limiting | Перебор/abuse | Public open/mark ограничены по IP/fingerprint/token hash |
+| Minimal payload | Утечка PII/health данных | Public response whitelist; no meddata/media/body metrics |
+| Masked logs | Утечка через observability | No raw token, no plan body, no comment, no request body |
+| Future isolation | Неверная модель прав | `AccessGrant`/client-owned concepts не смешиваются с public token MVP |
 
 ## 13. Последствия
 
 **Positive:**
 
-- Уточнена граница Keycloak vs FitBridge Backend.
-- Зафиксирован единый access decision model для owner access, active `AccessGrant`, scopes и deny by default.
-- Security baseline связан с ADR-001, ADR-002, ADR-005 и ADR-006.
+- Security baseline согласован с trainer-first MVP с публичной ссылкой и не требует клиентской регистрации.
+- Capability-token модель явно ограничена техническим public access к плану.
+- Guardrails raw token/hash/TTL/revoke/rate limit зафиксированы до реализации.
 
 **Negative:**
 
-- Backend обязан выполнять доменную авторизацию на каждый запрос; простой role-based access недостаточен.
-- Целевой MVP требует согласованной конфигурации realm, Envoy, secrets, retention и data classification.
+- Public endpoint становится отдельным high-risk контуром и требует тщательных негативных тестов.
+- Полноценный client-owned контроль и `AccessGrant` сознательно откладываются после MVP.
 
 **Risks:**
 
-- Если security checks будут реализованы точечно в каждом handler, появится риск IDOR и broken access control.
-- Если OpenSearch будет использоваться для debugging raw payloads, observability станет каналом утечки чувствительных данных.
+- Если реализация начнёт передавать `planId` или `clientId` в публичный endpoint, появится IDOR-риск.
+- Если логи будут использоваться для debugging raw payload, observability станет каналом утечки.
+- Если TTL/revoke не будут проверяться на каждый public request, закрытие ссылки станет ненадёжным.

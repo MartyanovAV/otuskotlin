@@ -3,9 +3,9 @@
 **Статус:** Accepted  
 **Дата:** 2026-05-21
 
-## Context
+## Контекст
 
-MVP FitBridge должен быть проверяемым в пилоте: команда должна видеть доступность MVP-контура, ошибки API, критичные пользовательские события и нарушения performance targets. Нефункциональные требования фиксируют необходимость мониторинга доступности и производительности, логирования событий приглашений, принятия доступа, отзыва доступа, назначения планов и выполнения тренировок.
+Trainer-first MVP с публичной ссылкой FitBridge должен быть проверяемым в пилоте: команда должна видеть доступность MVP-контура, ошибки API, критичные пользовательские события и нарушения performance targets. Нефункциональные требования фиксируют необходимость мониторинга доступности и производительности, логирования событий создания клиентских карточек, планов, генерации/закрытия публичных ссылок и отметок выполнения.
 
 Целевой observability-контур MVP включает:
 
@@ -15,7 +15,7 @@ MVP FitBridge должен быть проверяемым в пилоте: ко
 - masked JSON-события от backend API и инфраструктурных контейнеров;
 - индексы логов с retention и lifecycle policy, определёнными для окружения.
 
-## Comparison
+## Сравнение
 
 | Criteria | OpenSearch + Dashboards + Fluent Bit | Loki + Grafana + Promtail | ELK / Elastic Cloud | Docker logs only |
 |---|:---:|:---:|:---:|:---:|
@@ -26,7 +26,7 @@ MVP FitBridge должен быть проверяемым в пилоте: ко
 | Операционная простота для MVP | ✅ | ⚠️ | ❌ | ✅ |
 | Достаточность для MVP audit-oriented logs | ✅ | ⚠️ | ✅ | ❌ |
 
-## Decision
+## Решение
 
 Использовать **OpenSearch + OpenSearch Dashboards + Fluent Bit** как observability-стек MVP.
 
@@ -36,7 +36,7 @@ MVP FitBridge должен быть проверяемым в пилоте: ко
 - доставку логов через Fluent Bit в OpenSearch;
 - просмотр и поиск логов через OpenSearch Dashboards;
 - health endpoint Fluent Bit на `:2020`;
-- инфраструктурное логирование критичных событий доступа, дневника, программ и онбординга;
+- инфраструктурное логирование критичных событий тренерского онбординга, клиентских карточек, планов, public-link lifecycle и completion marks;
 - correlation/request id в логах backend API.
 
 Расширенный продуктовый `AuditEvent` API не входит в MVP. Для MVP audit-oriented события фиксируются как masked structured logs без раскрытия лишних персональных и health-adjacent данных.
@@ -47,30 +47,27 @@ MVP-аудит в рамках этого ADR — это infrastructure audit-or
 
 | Event action | Когда логируется | Минимальный результат |
 |---|---|---|
-| `access.acceptInvite` | Клиент принимает приглашение | `SUCCESS` или ожидаемый `ERROR` |
-| `access.declineInvite` | Клиент отклоняет приглашение | `SUCCESS` или ожидаемый `ERROR` |
-| `access.grant` | Доступ тренеру выдан или активирован | `SUCCESS` |
-| `access.revoke` | Клиент отзывает доступ тренера | `SUCCESS` |
-| `profile.deleteOrArchiveRequested` | Пользователь запрашивает удаление или архивацию профиля | `SUCCESS` или `VALIDATION_ERROR` |
-| `diary.createEntry` | Создана запись дневника | `SUCCESS` |
-| `diary.updateEntry` | Изменена запись дневника | `SUCCESS` или `VALIDATION_ERROR` |
-| `diary.deleteEntry` | Запись дневника удалена/soft-deleted | `SUCCESS` |
-| `program.assign` | Программа назначена клиенту | `SUCCESS` |
-| `program.updateAssignment` | Назначение программы изменено | `SUCCESS` или `VALIDATION_ERROR` |
-| `program.cancelAssignment` | Назначение программы отменено | `SUCCESS` |
-| `program.completeWorkout` | Клиент отметил тренировку выполненной | `SUCCESS` |
-| `access.validateScope` | Проверка scope завершилась отказом | `DENIED` |
+| `clientCard.create` | Тренер создал клиентскую карточку | `SUCCESS` или ожидаемый `ERROR` |
+| `clientCard.update` | Тренер изменил карточку | `SUCCESS` или `VALIDATION_ERROR` |
+| `clientCard.archive` | Тренер архивировал карточку | `SUCCESS` |
+| `trainingPlan.create` | Тренер создал план | `SUCCESS` или `VALIDATION_ERROR` |
+| `trainingPlan.update` | Тренер изменил план | `SUCCESS` или `VALIDATION_ERROR` |
+| `trainingPlan.archive` | План архивирован | `SUCCESS` |
+| `publicLink.generate` | Сгенерирована публичная ссылка | `SUCCESS` без raw token |
+| `publicLink.close` | Тренер закрыл публичную ссылку | `SUCCESS` |
+| `publicAccess.denied` | Публичный доступ отказан | `DENIED` + reason code без raw token |
+| `completionMark.create` | Клиент по ссылке оставил отметку выполнения | `SUCCESS` или expected `ERROR` без raw comment |
 
 Phase 2 может добавить продуктовый `AuditEvent` API, отдельную audit entity/table, пользовательский или админский просмотр audit trail и расширенную retention/legal-модель. Эти элементы не входят в MVP.
 
-## Rationale
+## Обоснование
 
 - OpenSearch подходит для поиска по событиям доступа, ошибкам API и техническим диагностическим данным.
 - Fluent Bit лёгкий и достаточный для MVP-контура доставки логов в OpenSearch.
 - Dashboards дают быстрый UI для поддержки пилотов без необходимости разрабатывать отдельную админку.
 - Отделение infrastructure logs от будущего `AuditEvent` API сохраняет MVP scope и не смешивает технические логи с продуктовой аудиторской моделью.
 
-## Required Log Fields
+## Обязательные поля логов
 
 Application logs должны быть структурированными JSON-событиями с минимальным набором полей:
 
@@ -83,29 +80,29 @@ Application logs должны быть структурированными JSON
 | `requestId` | ✅ | Correlation id одного HTTP-запроса |
 | `userId` | ⚠️ | Только внутренний id; не `phone`, не email |
 | `keycloakSubject` | ⚠️ | Допустимо для auth-debug, если не раскрывает PII |
-| `action` | ✅ | `access.acceptInvite`, `access.revoke`, `diary.createEntry` и т.п. |
-| `entityType` | ⚠️ | `AccessGrant`, `TrainingEntry`, `ProgramAssignment` |
+| `action` | ✅ | `publicLink.generate`, `publicLink.close`, `completionMark.create` и т.п. |
+| `entityType` | ⚠️ | `ClientCard`, `TrainingPlan`, `CompletionMark` |
 | `entityId` | ⚠️ | Внутренний id сущности без payload данных |
 | `result` | ✅ | `SUCCESS`, `DENIED`, `VALIDATION_ERROR`, `ERROR` |
 | `durationMs` | ✅ | Длительность операции |
 | `errorCode` | ⚠️ | Стабильный код ошибки без stacktrace для expected ошибок |
 
-## Sensitive Data Rules
+## Правила для чувствительных данных
 
 | Data | Rule |
 |---|---|
 | Телефон, email, ФИО | Не писать в логи; использовать internal ids |
-| `notes`, `goals`, `mood`, упражнения/вес/RPE | Не писать raw payload в логи |
+| Заметки тренера, содержимое плана, комментарии клиента | Не писать raw payload в логи |
 | JWT/access token/refresh token | Никогда не писать в логи |
-| Invite token | В БД и логах только hash/token id, не raw token |
+| Public link raw token | В БД и логах только hash/token id, не raw token |
 | Ошибки валидации | Писать field name и error code, не исходное значение чувствительного поля |
 
-## Consequences
+## Последствия
 
 **Positive:**
 
 - MVP получает единый путь для сбора и просмотра логов.
-- Поддержка может расследовать ошибки приглашений, доступов, дневника и программ без прямого доступа к БД.
+- Поддержка может расследовать ошибки карточек, планов, публичных ссылок и отметок выполнения без прямого доступа к БД и без raw token.
 - Решение не требует внешних SaaS для базового observability MVP.
 - Structured logs создают основу для будущих метрик и алертов.
 
@@ -127,7 +124,7 @@ Application logs должны быть структурированными JSON
 
 ## Архитектурные требования к логированию
 
-- Для MVP backend должен логировать critical events из `RTM-013`: принятие/отклонение приглашения, выдача/отзыв доступа, запрос удаления/архивации профиля, создание/изменение/удаление дневника, назначение/изменение/отмена программы, выполнение тренировки и отказ доступа из-за scope.
+- Для MVP публичного доступа к плану backend должен логировать critical events: создание/изменение/архивация карточки, создание/изменение/архивация плана, генерация/закрытие публичной ссылки, отказ публичного доступа и создание отметки выполнения.
 - Performance targets из NFR должны попадать в логи через `durationMs`; отдельная metrics-система может быть добавлена позже.
 - Alerting не входит в MVP, но нарушение порогов latency/error rate должно быть возможно найти через OpenSearch queries.
 - Для production потребуется отдельное решение по retention, index lifecycle, secrets и resource limits.

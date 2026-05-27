@@ -2,8 +2,8 @@
 description: Analyzes business requirements, defines product strategy and vision
 mode: subagent
 model: openai/gpt-5.5
-reasoningEffort: medium
-temperature: 0.1
+reasoningEffort: high
+temperature: 0.2
 steps: 50
 permission:
   read: allow

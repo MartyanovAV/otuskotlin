@@ -1,45 +1,32 @@
-# ERD - FitBridge MVP
+# ERD - FitBridge trainer-first MVP с публичной ссылкой
 
-Документ фиксирует целевую модель данных MVP FitBridge для двух полноценных путей: `Trainer-led` и `Solo-client (PLG)`. ERD основан на MVP scope, API entities и traceability matrix.
+Документ фиксирует модель данных trainer-first MVP с публичной ссылкой на тренировочный план. Источники scope: [BR-010](../01-business/BR/BR-010-public-plan-link-mvp.md), [MVP_SCOPE_SUMMARY](../01-business/MVP_SCOPE_SUMMARY.md), [GLOSSARY](../01-business/GLOSSARY.md).
 
 ## Статус
 
 | Параметр | Значение |
 |---|---|
-| Статус | Approved for MVP / Reference — структура согласована для MVP; детали (типы, индексы, constraints) могут уточняться при детализации схемы |
-| Область | MVP / Gate 1 |
-| Источники | `docs/01-business/MVP_SCOPE_SUMMARY.md`, `docs/03-architecture/api/02-mvp-entities.md`, `docs/02-analysis/REQUIREMENTS_TRACEABILITY_MATRIX.md` |
+| Статус | Approved for trainer-first MVP с публичной ссылкой / Gate 1 |
+| Область | Trainer-first public-link сценарий без регистрации клиента |
 | DBMS | PostgreSQL |
+| Связанные решения | [ADR-007 публичный доступ к плану](./ADR/ADR-007-public-plan-link-mvp.md), [SECURITY_ARCHITECTURE](./SECURITY_ARCHITECTURE.md) |
 
 ## ERD
 
 ```mermaid
 erDiagram
-    FITBRIDGE_USER ||--o| CLIENT_PROFILE : owns
     FITBRIDGE_USER ||--o| TRAINER_PROFILE : owns
-    FITBRIDGE_USER ||--o{ TRAINING_ENTRY : authors
-    FITBRIDGE_USER ||--o{ PROGRAM : authors
-
-    CLIENT_PROFILE ||--o{ ACCESS_GRANT : grants
-    TRAINER_PROFILE ||--o{ ACCESS_GRANT : receives
-
-    FITBRIDGE_USER ||--o{ INVITE : sends
-    FITBRIDGE_USER ||--o{ INVITE : receives
-    CLIENT_PROFILE ||--o{ INVITE : targets_client
-    TRAINER_PROFILE ||--o{ INVITE : targets_trainer
-
-    CLIENT_PROFILE ||--o{ TRAINING_ENTRY : owns
-    CLIENT_PROFILE ||--o{ PROGRAM_ASSIGNMENT : receives
-    PROGRAM ||--o{ PROGRAM_ASSIGNMENT : assigned_as
-    ACCESS_GRANT o|--o{ PROGRAM_ASSIGNMENT : authorizes_trainer_assignment
-    PROGRAM_ASSIGNMENT o|--o{ TRAINING_ENTRY : links_completion
+    FITBRIDGE_USER ||--o{ CLIENT_CARD : creates
+    FITBRIDGE_USER ||--o{ TRAINING_PLAN : authors
+    CLIENT_CARD ||--o{ TRAINING_PLAN : receives
+    TRAINING_PLAN ||--o{ COMPLETION_MARK : contains
 
     FITBRIDGE_USER {
         string id PK
         string keycloakSubject UK
-        string phone
+        string email
         string displayName
-        string roles
+        string role
         string status
         string locale
         string timezone
@@ -47,184 +34,142 @@ erDiagram
         datetime lastLoginAt
     }
 
-    CLIENT_PROFILE {
-        string id PK
-        string userId FK
-        string fullName
-        string gender
-        string goals
-        string visibility
-        string[] activeTrainerIds
-        datetime createdAt
-        datetime updatedAt
-        datetime archivedAt
-    }
-
     TRAINER_PROFILE {
         string id PK
         string userId FK
         string publicName
         string specialization
-        string bio
-        string certificates
-        string contactPolicy
         string onboardingStatus
-        jsonb dashboardCounters
         datetime createdAt
         datetime archivedAt
     }
 
-    ACCESS_GRANT {
+    CLIENT_CARD {
         string id PK
-        string clientProfileId FK
-        string trainerProfileId FK
-        string grantedByUserId FK
+        string trainerUserId FK
+        string displayName
+        string note
         string status
-        string scopes
-        datetime grantedAt
-        datetime revokedAt
-        datetime expiresAt
-    }
-
-    INVITE {
-        string id PK
-        string type
-        string senderUserId FK
-        string recipientUserId FK
-        string recipientEmail
-        string targetClientProfileId FK
-        string targetTrainerProfileId FK
-        string proposedScopes
-        string tokenHash
-        string status
-        datetime createdAt
-        datetime expiresAt
-    }
-
-    TRAINING_ENTRY {
-        string id PK
-        string clientProfileId FK
-        string authorUserId FK
-        string linkedProgramAssignmentId FK
-        string type
-        datetime occurredAt
-        string title
-        string exercisesJson
-        int durationMinutes
-        int intensity
-        string mood
-        string notes
-        string source
-        string visibility
         datetime createdAt
         datetime updatedAt
-        datetime deletedAt
+        datetime archivedAt
     }
 
-    PROGRAM {
+    TRAINING_PLAN {
         string id PK
-        string authorUserId FK
-        string type
+        string clientCardId FK
+        string trainerUserId FK
         string title
-        string goal
-        string difficulty
-        int durationWeeks
-        string workoutsJson
+        jsonb planBody
         string status
         int version
+        string publicAccessTokenHash
+        string publicAccessStatus
+        datetime publicAccessCreatedAt
+        datetime publicAccessExpiresAt
+        datetime publicAccessRevokedAt
         datetime createdAt
+        datetime updatedAt
         datetime archivedAt
     }
 
-    PROGRAM_ASSIGNMENT {
+    COMPLETION_MARK {
         string id PK
-        string programId FK
-        string clientProfileId FK
-        string assignedByUserId FK
-        string accessGrantId FK
-        date startDate
-        date endDate
+        string trainingPlanId FK
+        string itemRef
         string status
-        int completionPercent
-        int currentWeek
-        string clientFeedback
+        datetime completedAt
+        string clientComment
+        string requestFingerprintHash
         datetime createdAt
-        datetime updatedAt
-        datetime cancelledAt
     }
 ```
 
 ## Ответственность сущностей
 
-| Сущность | Назначение | Владение |
+| Сущность | Назначение | Владение / доступ |
 |---|---|---|
-| `FITBRIDGE_USER` | Локальная проекция пользователя Keycloak и базовых доменных ролей | Связана с `keycloakSubject`; аутентификация остаётся в Keycloak |
-| `CLIENT_PROFILE` | Клиентский профиль, владелец дневника, истории, доступов и назначений | Принадлежит клиенту через `userId` |
-| `TRAINER_PROFILE` | Профессиональный профиль тренера и состояние минимального онбординга | Принадлежит пользователю-тренеру через `userId` |
-| `ACCESS_GRANT` | Разрешение тренеру читать разрешённые поля профиля и работать с тренировочным процессом клиента | Создаётся только после явного подтверждения клиента; в MVP не содержит trainer `PROFILE_WRITE` для `ClientProfile` |
-| `INVITE` | Одноразовое приглашение клиента тренером | Не является доступом до `acceptInvite` |
-| `TRAINING_ENTRY` | Запись дневника клиента или факт выполнения тренировки | Всегда принадлежит `CLIENT_PROFILE`; автором может быть клиент или тренер со scope |
-| `PROGRAM` | Простой тренировочный план | Автором может быть тренер или solo-клиент |
-| `PROGRAM_ASSIGNMENT` | Назначение программы клиенту на период | Для trainer-led связано с `ACCESS_GRANT`; для solo-client `accessGrantId = null` |
+| `FITBRIDGE_USER` | Локальная проекция зарегистрированного пользователя Keycloak | В MVP только тренер; клиентская регистрация отсутствует |
+| `TRAINER_PROFILE` | Минимальный профиль/онбординг тренера | Принадлежит `FITBRIDGE_USER`; используется для trainer dashboard |
+| `CLIENT_CARD` | Минимальная карточка клиента, созданная тренером | Владеет тренер; не является `ClientProfile` и не создаёт клиентский аккаунт |
+| `TRAINING_PLAN` | Простой план для карточки клиента | Владеет тренер; содержит technical public-access state для публичной ссылки |
+| `COMPLETION_MARK` | Отметка выполнения клиентом по публичной ссылке | Дочерний объект `TrainingPlan`; на MVP допустимо хранить как value object/jsonb, отдельная таблица — техническая оптимизация |
+
+## Почему публичная ссылка не выделена в ERD как product entity
+
+Публичная ссылка в MVP — это не самостоятельная продуктовая сущность, а capability-token/public-access функция конкретного `TrainingPlan`.
+
+Архитектурное правило:
+
+- raw token генерируется и показывается тренеру только как часть public URL;
+- в БД хранится только `publicAccessTokenHash` и технические поля lifecycle;
+- публичный endpoint принимает только token, вычисляет hash и находит активный `TrainingPlan`;
+- `clientId`, `clientCardId`, `planId` не передаются в публичном URL/API;
+- закрытие ссылки меняет `publicAccessStatus`/`publicAccessRevokedAt`, а не создаёт/удаляет продуктовую сущность.
 
 ## Модели статусов
 
-| Сущность | Значения статуса | Правило |
+| Сущность / поле | Значения MVP | Правило |
 |---|---|---|
-| `INVITE` | `PENDING`, `ACCEPTED`, `DECLINED`, `EXPIRED`, `CANCELLED` | Описывает жизненный цикл одноразового приглашения; pending invite не даёт доступа |
-| `ACCESS_GRANT` | `ACTIVE`, `REVOKED`, `EXPIRED` | Описывает действующее или историческое разрешение доступа; только `ACTIVE` может проходить owner/grant/scope policy |
-| `FITBRIDGE_USER` | `ACTIVE`, `PENDING_EMAIL`, `BLOCKED`, `DELETED` | `BLOCKED` блокирует пользовательские операции и может быть эффектом controlled support-operation через Keycloak/runbook без добавления admin/support сущностей в MVP |
+| `FITBRIDGE_USER.status` | `ACTIVE`, `BLOCKED`, `DELETED` | Только `ACTIVE` может вызывать приватные trainer endpoints |
+| `TRAINER_PROFILE.onboardingStatus` | `NEW`, `PROFILE_READY`, `FIRST_LINK_CREATED`, `COMPLETED` | Gate-to-value: первая карточка + план + public link |
+| `CLIENT_CARD.status` | `ACTIVE`, `ARCHIVED` | Архивированная карточка не получает новые планы/ссылки |
+| `TRAINING_PLAN.status` | `DRAFT`, `ACTIVE`, `ARCHIVED` | Публично показывается только активный план с активным public access |
+| `TRAINING_PLAN.publicAccessStatus` | `NONE`, `ACTIVE`, `REVOKED`, `EXPIRED` | `REVOKED`/`EXPIRED` немедленно закрывает публичный просмотр и отметки |
+| `COMPLETION_MARK.status` | `DONE`, `SKIPPED` | MVP хранит факт выполнения/пропуска без полноценного дневника |
 
 ## Ключевые ограничения
 
 | Ограничение | Правило |
 |---|---|
-| Один клиентский профиль MVP | `FITBRIDGE_USER` имеет не более одного основного `CLIENT_PROFILE` |
-| Один тренерский профиль MVP | `FITBRIDGE_USER` имеет не более одного основного `TRAINER_PROFILE` |
-| Optional профильные поля MVP | `CLIENT_PROFILE.gender` и `CLIENT_PROFILE.goals` nullable/optional; отсутствие значений не блокирует onboarding, создание профиля или базовое использование |
-| Body metrics вне MVP | `heightCm` не моделируется как активное поле `CLIENT_PROFILE` в MVP; рост и связанные body metrics относятся к Phase 2 / later measurement scope |
-| Один активный тренер MVP | У `CLIENT_PROFILE` не более одного `ACCESS_GRANT` в статусе `ACTIVE` |
-| Приглашение не равно доступу | `INVITE.status = ACCEPTED` создаёт или активирует `ACCESS_GRANT.status = ACTIVE`; pending invite не даёт доступа |
-| Deny by default | Все операции с клиентскими данными требуют владельца или активный `ACCESS_GRANT` с нужным scope |
-| Нет trainer profile-write в MVP | `ACCESS_GRANT.scopes` MVP допускает `PROFILE_READ` для разрешённых полей профиля и training-domain scopes, но не trainer `PROFILE_WRITE` для `ClientProfile` |
-| Нет admin/support сущностей MVP | Операционное сопровождение пилота не добавляет таблицы, роли или связи для admin/support; block/revoke/cancel invite effects фиксируются существующими статусами и masked logs |
-| Solo-client assignment | `PROGRAM_ASSIGNMENT.accessGrantId` может быть `null`, если клиент назначил свою программу сам себе |
-| Версионирование программ | Активное назначение должно ссылаться на фиксированную версию программы или snapshot структуры `workoutsJson` |
-| Soft delete | Профили, дневниковые записи, программы и назначения архивируются/помечаются, а не удаляются физически в пользовательском сценарии |
+| Только тренер зарегистрирован | `FITBRIDGE_USER.role = TRAINER`; роль/аккаунт `CLIENT` не требуются в MVP |
+| Карточка не профиль | `CLIENT_CARD` не имеет `userId`, не является client-owned профилем и не даёт клиенту личный кабинет |
+| Минимальный payload карточки | Не хранить медданные, фото/видео, body metrics, расширенные цели и чувствительные health-adjacent поля |
+| Один public access на план | Для MVP у `TRAINING_PLAN` один активный token lifecycle; повторная генерация должна инвалидировать прежний token либо явно фиксировать rotation policy |
+| Token hash only | Raw token запрещено хранить в БД, логах, analytics и error traces |
+| TTL обязателен | `publicAccessExpiresAt` должен быть заполнен; бессрочные публичные ссылки не допускаются для production/pilot baseline |
+| Revoke обязателен | Тренер может закрыть ссылку; после revoke публичный endpoint возвращает только безопасную ошибку/сообщение |
+| CompletionMark как value object | На MVP допустимо хранить отметки внутри `TrainingPlan.planBody`/`completionMarksJson`; отдельная таблица допустима для индексов, но не меняет продуктовую модель |
+| Нет `AccessGrant` в MVP | Полноценные права, клиентское подтверждение и отзыв клиентом переносятся в Phase 2 |
+| Нет `Invite` в MVP | Публичная ссылка заменяет invite-flow до появления клиентской регистрации |
 
 ## Sensitive Data Notes
 
 | Area | Notes |
 |---|---|
-| Optional profile fields MVP | `gender` и `goals` входят в MVP как добровольные поля `CLIENT_PROFILE`; клиент-владелец может читать/изменять/очищать их, тренер читает только через активный `ACCESS_GRANT` + `PROFILE_READ`, значения не логируются |
-| Health-adjacent fields MVP | `goals`, `intensity`, `mood`, `notes`, упражнения/вес/RPE требуют отдельной классификации данных и маскирования в логах |
-| Body metrics Phase 2 | `heightCm` и связанные body metrics не входят в MVP ERD; добавление требует отдельного Phase 2 решения по consent, retention и доступам |
-| Audit | В MVP `AuditEvent` API и отдельная audit entity/table не моделируются; критичные события логируются инфраструктурно через ADR-006 |
-| Logs | Персональные и health-adjacent данные не должны попадать в логи без маскирования |
-| Deletion | Полноценная модель consent/privacy/deletion требует отдельного `BR-009-consent-privacy-deletion.md` |
-
-## Scope аудита и уведомлений MVP
-
-| Контур | MVP модель данных | Phase 2 |
-|---|---|---|
-| Аудит | Нет таблицы `AuditEvent`; обязательные события пишутся как masked structured logs: accept/decline invite, grant/revoke access, profile delete/archive request, diary create/update/delete, program assign/update/cancel, complete workout, access denied for scope | Отдельная audit entity/API, продуктовый audit trail, расширенная retention/legal модель |
-| Уведомления | Нет таблицы `Notification`; UI читает статусы приглашений, доступов, назначений и выполнения через MVP read endpoints/dashboard | Отдельный `Notification` API/provider, push/email/in-app notification center и lifecycle communications |
+| Public payload | Возвращать только минимум: название плана, актуальные задания, безопасный текст тренера/сервиса, состояние доступности ссылки |
+| ClientCard | `displayName` может быть псевдонимом; свободные заметки тренера не должны попадать в публичный payload без отдельного решения |
+| CompletionMark | Свободный комментарий клиента ограничить по длине и не логировать raw value |
+| Logs | Не логировать raw token, ФИО, email, текст заметок, содержимое плана, комментарии и request body |
+| Data classification | Медданные, фото/видео, body metrics, rich-media и расширенная история не входят в MVP публичного доступа к плану |
 
 ## Phase 2 / Out Of Scope Entities
 
 | Entity | Reason |
 |---|---|
-| `Measurement` | Замеры и графики прогресса вынесены после MVP |
-| `Report` | Отдельный отчётный модуль и экспорт отчётов не входят в MVP |
-| `Subscription` | Встроенный биллинг, лимиты и автоплатежи не входят в MVP |
-| `Notification` | Отдельный push/email `Notification` API/provider не входит в MVP; используется pull-model UI |
-| `AuditEvent` | Продуктовый audit API и отдельная audit entity перенесены в Phase 2; MVP покрыт infrastructure audit-oriented logging |
+| `ClientProfile` | Будущая client-owned модель после проверки метрик публичной ссылки |
+| `AccessGrant` | Гранулярные права, подтверждение и отзыв клиентом — Phase 2 |
+| `Invite` | Подключение клиента с аккаунтом и consent-flow — Phase 2 |
+| `TrainingEntry` / дневник | Полноценная история клиента не входит в MVP публичного доступа к плану |
+| `ProgramAssignment` | В MVP план напрямую связан с `ClientCard`; отдельное назначение нужно при multi-plan/history модели |
+| `Measurement`, `Report` | Замеры, аналитика и отчёты вынесены после MVP |
+| `Notification`, `AuditEvent` | Product notification/audit API не входят; используются pull-model статусы и masked infrastructure logs |
+| `Subscription` | Биллинг и тарифные лимиты вне продукта MVP |
 | `Team`, `Studio`, `SpecialistRole` | Командный и multi-specialist production-сценарии вынесены за MVP |
-| `ClientProfile.heightCm` / body metrics | Рост и показатели тела перенесены в Phase 2 / later measurement scope; в MVP не являются supported profile fields |
+
+## Evolution path к client-owned/access-grant модели
+
+| MVP объект | Future объект | Правило миграции |
+|---|---|---|
+| `CLIENT_CARD` | `ClientProfile` | После регистрации клиента карточка может быть привязана или преобразована в профиль только с явным решением по consent |
+| `TRAINING_PLAN` | `Program` / `ProgramAssignment` | План можно мигрировать в программу и назначение, сохранив snapshot/version |
+| `COMPLETION_MARK` | `TrainingEntry` / completion event | Отметки могут стать исходными событиями истории клиента после принятия клиентом ownership-модели |
+| `publicAccessTokenHash` | `Invite` / `AccessGrant` | Техническая ссылка не мигрирует в grant напрямую; future grant создаётся только через client-owned flow |
 
 ## Открытые решения
 
 | Decision | Impact |
 |---|---|
-| Snapshot vs version link for assigned programs | Нужно решить, хранить ли полную копию программы в назначении или ссылку на версию |
-| Retention policy | Нужны сроки хранения для профилей, soft-deleted записей, invites, access grants и инфраструктурных логов |
+| Конкретный TTL публичной ссылки | Влияет на UX пилота и риск несанкционированного доступа |
+| Rotation policy при повторной генерации ссылки | Нужно решить: инвалидировать предыдущую ссылку автоматически или показывать явное состояние |
+| Value object vs отдельная таблица `COMPLETION_MARK` | Влияет на простоту MVP и будущую аналитику |
