@@ -1,35 +1,34 @@
+// В проекте :fit-bridge-specs
 plugins {
-    base
+    id("build-jvm")
     id("maven-publish")
 }
 
-val resourcesZip = tasks.register<Zip>("resourcesZip") {
-    description = "Упаковка ресурсов в Zip-архив"
-    archiveClassifier.set("resources")
+val specsZip = tasks.register<Zip>("specsZip") {
+    description = "Упаковка спецификаций в Zip-архив"
+    archiveClassifier.set("spec")
     archiveExtension.set("zip")
-    from("dcompose")
+    from("specs")
 }
 
 // Добавляем артефакт в стандартную конфигурацию runtime,
 // чтобы includeBuild мог его сопоставить при поиске зависимости
 configurations {
-    create("runtimeElements") {
-        isCanBeResolved = false
-        isCanBeConsumed = true
-        outgoing.artifact(resourcesZip)
+    runtimeElements {
+        outgoing.artifact(specsZip)
     }
 }
 
-// Публикация
 publishing {
     publications {
         create<MavenPublication>("maven") {
+            // Эти данные ДОЛЖНЫ совпадать с тем, что ты запрашиваешь в другом проекте
             groupId = project.group.toString()
             artifactId = project.name
             version = project.version.toString()
 
-            artifact(resourcesZip) {
-                classifier = "resources"
+            artifact(specsZip) {
+                classifier = "spec"
                 extension = "zip"
             }
         }

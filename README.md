@@ -116,3 +116,11 @@ ADR:
 - Fluent Bit, OpenSearch и OpenSearch Dashboards для logs-first observability.
 
 Подробности контейнеров и границ ответственности зафиксированы в [C4 Container source](docs/03-architecture/c4/C4_CONTAINER.drawio), [C4 Component source](docs/03-architecture/c4/C4_COMPONENT.drawio) и [Security Architecture / Threat Model](docs/03-architecture/SECURITY_ARCHITECTURE.md).
+
+### Транспортные модели, API
+
+1. [specs](fit-bridge-other/fit-bridge-specs) - описание API в форме OpenAPI-спецификаций
+2. [fit-bridge-api-v1-jackson](fit-bridge-be/fit-bridge-api-v1-jackson) - Генерация первой версии
+   транспортных моделей с Jackson
+3. [fit-bridge-api-v2-kmp](fit-bridge-be/fit-bridge-api-v2-kmp) - Генерация второй версии транспортных
+   моделей с KMP

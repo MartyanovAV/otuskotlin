@@ -1,0 +1,774 @@
+openapi: 3.0.3
+info:
+  title: FitBridge
+  description: Trainer-first MVP API с публичной ссылкой на тренировочный план
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/v1
+tags:
+  - name: trainerProfile
+    description: Профиль зарегистрированного тренера
+  - name: clientCard
+    description: Минимальная клиентская карточка тренера
+  - name: trainingPlan
+    description: Простой тренировочный план и lifecycle публичной ссылки
+  - name: dashboard
+    description: Сводка кабинета тренера
+  - name: publicPlan
+    description: Публичный token-only доступ к плану без JWT
+
+paths:
+  /trainerProfile/createOrUpdate:
+    post:
+      tags: [trainerProfile]
+      summary: Создать или обновить профиль тренера
+      operationId: trainerProfileCreateOrUpdate
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/TrainerProfileCreateOrUpdateRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/TrainerProfileCreateOrUpdateResponseBody'
+  /trainerProfile/readOwn:
+    post:
+      tags: [trainerProfile]
+      summary: Получить собственный профиль тренера
+      operationId: trainerProfileReadOwn
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/TrainerProfileReadOwnRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/TrainerProfileReadOwnResponseBody'
+
+  /clientCard/create:
+    post:
+      tags: [clientCard]
+      summary: Создать клиентскую карточку
+      operationId: clientCardCreate
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/ClientCardCreateRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/ClientCardCreateResponseBody'
+  /clientCard/read:
+    post:
+      tags: [clientCard]
+      summary: Прочитать клиентскую карточку
+      operationId: clientCardRead
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/ClientCardReadRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/ClientCardReadResponseBody'
+  /clientCard/update:
+    post:
+      tags: [clientCard]
+      summary: Обновить клиентскую карточку
+      operationId: clientCardUpdate
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/ClientCardUpdateRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/ClientCardUpdateResponseBody'
+  /clientCard/archive:
+    post:
+      tags: [clientCard]
+      summary: Архивировать клиентскую карточку
+      operationId: clientCardArchive
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/ClientCardArchiveRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/ClientCardArchiveResponseBody'
+  /clientCard/list:
+    post:
+      tags: [clientCard]
+      summary: Получить список карточек тренера
+      operationId: clientCardList
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/ClientCardListRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/ClientCardListResponseBody'
+
+  /trainingPlan/create:
+    post:
+      tags: [trainingPlan]
+      summary: Создать тренировочный план
+      operationId: trainingPlanCreate
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/TrainingPlanCreateRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/TrainingPlanCreateResponseBody'
+  /trainingPlan/read:
+    post:
+      tags: [trainingPlan]
+      summary: Прочитать тренировочный план
+      operationId: trainingPlanRead
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/TrainingPlanReadRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/TrainingPlanReadResponseBody'
+  /trainingPlan/update:
+    post:
+      tags: [trainingPlan]
+      summary: Обновить тренировочный план
+      operationId: trainingPlanUpdate
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/TrainingPlanUpdateRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/TrainingPlanUpdateResponseBody'
+  /trainingPlan/archive:
+    post:
+      tags: [trainingPlan]
+      summary: Архивировать тренировочный план
+      operationId: trainingPlanArchive
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/TrainingPlanArchiveRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/TrainingPlanArchiveResponseBody'
+  /trainingPlan/generatePublicLink:
+    post:
+      tags: [trainingPlan]
+      summary: Сгенерировать публичную ссылку на план
+      operationId: trainingPlanGeneratePublicLink
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/TrainingPlanGeneratePublicLinkRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/TrainingPlanGeneratePublicLinkResponseBody'
+  /trainingPlan/closePublicLink:
+    post:
+      tags: [trainingPlan]
+      summary: Закрыть публичную ссылку на план
+      operationId: trainingPlanClosePublicLink
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/TrainingPlanClosePublicLinkRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/TrainingPlanClosePublicLinkResponseBody'
+  /trainingPlan/readCompletionStatus:
+    post:
+      tags: [trainingPlan]
+      summary: Получить статус выполнения плана
+      operationId: trainingPlanReadCompletionStatus
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/TrainingPlanReadCompletionStatusRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/TrainingPlanReadCompletionStatusResponseBody'
+
+  /dashboard/getTrainerSummary:
+    post:
+      tags: [dashboard]
+      summary: Получить сводку кабинета тренера
+      operationId: dashboardGetTrainerSummary
+      security:
+        - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/DashboardGetTrainerSummaryRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/DashboardGetTrainerSummaryResponseBody'
+
+  /public/v1/plan/open:
+    post:
+      tags: [publicPlan]
+      summary: Открыть план по публичному token
+      operationId: publicPlanOpenByToken
+      servers:
+        - url: http://localhost:8080
+      security: []
+      requestBody:
+        $ref: '#/components/requestBodies/PublicPlanOpenByTokenRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/PublicPlanOpenByTokenResponseBody'
+  /public/v1/plan/markCompletion:
+    post:
+      tags: [publicPlan]
+      summary: Отметить выполнение элемента плана по публичному token
+      operationId: publicPlanMarkCompletion
+      servers:
+        - url: http://localhost:8080
+      security: []
+      requestBody:
+        $ref: '#/components/requestBodies/PublicPlanMarkCompletionRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/PublicPlanMarkCompletionResponseBody'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  requestBodies:
+    TrainerProfileCreateOrUpdateRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/TrainerProfileCreateOrUpdateRequest'}}}}
+    TrainerProfileReadOwnRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/TrainerProfileReadOwnRequest'}}}}
+    ClientCardCreateRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/ClientCardCreateRequest'}}}}
+    ClientCardReadRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/ClientCardReadRequest'}}}}
+    ClientCardUpdateRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/ClientCardUpdateRequest'}}}}
+    ClientCardArchiveRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/ClientCardArchiveRequest'}}}}
+    ClientCardListRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/ClientCardListRequest'}}}}
+    TrainingPlanCreateRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanCreateRequest'}}}}
+    TrainingPlanReadRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanReadRequest'}}}}
+    TrainingPlanUpdateRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanUpdateRequest'}}}}
+    TrainingPlanArchiveRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanArchiveRequest'}}}}
+    TrainingPlanGeneratePublicLinkRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanGeneratePublicLinkRequest'}}}}
+    TrainingPlanClosePublicLinkRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanClosePublicLinkRequest'}}}}
+    TrainingPlanReadCompletionStatusRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanReadCompletionStatusRequest'}}}}
+    DashboardGetTrainerSummaryRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/DashboardGetTrainerSummaryRequest'}}}}
+    PublicPlanOpenByTokenRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/PublicPlanOpenByTokenRequest'}}}}
+    PublicPlanMarkCompletionRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/PublicPlanMarkCompletionRequest'}}}}
+
+  responses:
+    TrainerProfileCreateOrUpdateResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/TrainerProfileCreateOrUpdateResponse'}}}}
+    TrainerProfileReadOwnResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/TrainerProfileReadOwnResponse'}}}}
+    ClientCardCreateResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/ClientCardCreateResponse'}}}}
+    ClientCardReadResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/ClientCardReadResponse'}}}}
+    ClientCardUpdateResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/ClientCardUpdateResponse'}}}}
+    ClientCardArchiveResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/ClientCardArchiveResponse'}}}}
+    ClientCardListResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/ClientCardListResponse'}}}}
+    TrainingPlanCreateResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanCreateResponse'}}}}
+    TrainingPlanReadResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanReadResponse'}}}}
+    TrainingPlanUpdateResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanUpdateResponse'}}}}
+    TrainingPlanArchiveResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanArchiveResponse'}}}}
+    TrainingPlanGeneratePublicLinkResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanGeneratePublicLinkResponse'}}}}
+    TrainingPlanClosePublicLinkResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanClosePublicLinkResponse'}}}}
+    TrainingPlanReadCompletionStatusResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanReadCompletionStatusResponse'}}}}
+    DashboardGetTrainerSummaryResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/DashboardGetTrainerSummaryResponse'}}}}
+    PublicPlanOpenByTokenResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/PublicPlanOpenByTokenResponse'}}}}
+    PublicPlanMarkCompletionResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/PublicPlanMarkCompletionResponse'}}}}
+
+  schemas:
+    IRequest:
+      type: object
+      description: Базовый интерфейс для всех запросов FitBridge POST Full API
+      required: [requestType]
+      properties:
+        requestType:
+          type: string
+          description: Поле-дискриминатор для вычисления типа запроса
+          example: trainerProfile.createOrUpdate
+        requestId:
+          $ref: '#/components/schemas/RequestId'
+      discriminator:
+        propertyName: requestType
+        mapping:
+          trainerProfile.createOrUpdate: '#/components/schemas/TrainerProfileCreateOrUpdateRequest'
+          trainerProfile.readOwn: '#/components/schemas/TrainerProfileReadOwnRequest'
+          clientCard.create: '#/components/schemas/ClientCardCreateRequest'
+          clientCard.read: '#/components/schemas/ClientCardReadRequest'
+          clientCard.update: '#/components/schemas/ClientCardUpdateRequest'
+          clientCard.archive: '#/components/schemas/ClientCardArchiveRequest'
+          clientCard.list: '#/components/schemas/ClientCardListRequest'
+          trainingPlan.create: '#/components/schemas/TrainingPlanCreateRequest'
+          trainingPlan.read: '#/components/schemas/TrainingPlanReadRequest'
+          trainingPlan.update: '#/components/schemas/TrainingPlanUpdateRequest'
+          trainingPlan.archive: '#/components/schemas/TrainingPlanArchiveRequest'
+          trainingPlan.generatePublicLink: '#/components/schemas/TrainingPlanGeneratePublicLinkRequest'
+          trainingPlan.closePublicLink: '#/components/schemas/TrainingPlanClosePublicLinkRequest'
+          trainingPlan.readCompletionStatus: '#/components/schemas/TrainingPlanReadCompletionStatusRequest'
+          dashboard.getTrainerSummary: '#/components/schemas/DashboardGetTrainerSummaryRequest'
+          publicPlan.openByToken: '#/components/schemas/PublicPlanOpenByTokenRequest'
+          publicPlan.markCompletion: '#/components/schemas/PublicPlanMarkCompletionRequest'
+
+    IResponse:
+      type: object
+      description: Базовый интерфейс для всех ответов FitBridge POST Full API
+      required: [responseType, result]
+      properties:
+        responseType:
+          type: string
+          description: Поле-дискриминатор для вычисления типа ответа
+          example: trainerProfile.createOrUpdate
+        requestId:
+          $ref: '#/components/schemas/RequestId'
+        result:
+          $ref: '#/components/schemas/ResponseResult'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      discriminator:
+        propertyName: responseType
+        mapping:
+          init: '#/components/schemas/FitBridgeInitResponse'
+          trainerProfile.createOrUpdate: '#/components/schemas/TrainerProfileCreateOrUpdateResponse'
+          trainerProfile.readOwn: '#/components/schemas/TrainerProfileReadOwnResponse'
+          clientCard.create: '#/components/schemas/ClientCardCreateResponse'
+          clientCard.read: '#/components/schemas/ClientCardReadResponse'
+          clientCard.update: '#/components/schemas/ClientCardUpdateResponse'
+          clientCard.archive: '#/components/schemas/ClientCardArchiveResponse'
+          clientCard.list: '#/components/schemas/ClientCardListResponse'
+          trainingPlan.create: '#/components/schemas/TrainingPlanCreateResponse'
+          trainingPlan.read: '#/components/schemas/TrainingPlanReadResponse'
+          trainingPlan.update: '#/components/schemas/TrainingPlanUpdateResponse'
+          trainingPlan.archive: '#/components/schemas/TrainingPlanArchiveResponse'
+          trainingPlan.generatePublicLink: '#/components/schemas/TrainingPlanGeneratePublicLinkResponse'
+          trainingPlan.closePublicLink: '#/components/schemas/TrainingPlanClosePublicLinkResponse'
+          trainingPlan.readCompletionStatus: '#/components/schemas/TrainingPlanReadCompletionStatusResponse'
+          dashboard.getTrainerSummary: '#/components/schemas/DashboardGetTrainerSummaryResponse'
+          publicPlan.openByToken: '#/components/schemas/PublicPlanOpenByTokenResponse'
+          publicPlan.markCompletion: '#/components/schemas/PublicPlanMarkCompletionResponse'
+
+    Error:
+      type: object
+      properties:
+        code: {type: string, example: validation-error}
+        group: {type: string, example: validation}
+        field: {type: string, example: trainingPlan.title}
+        message: {type: string, example: Поле заполнено некорректно}
+    ResponseResult:
+      type: string
+      enum: [success, error]
+    RequestId:
+      type: string
+      description: Идентификатор запроса для трассировки без sensitive payload
+    Timestamp:
+      type: string
+      format: date-time
+    UserId: {type: string, description: Внутренний идентификатор зарегистрированного тренера}
+    TrainerProfileId: {type: string, description: Идентификатор профиля тренера}
+    ClientCardId: {type: string, description: Идентификатор клиентской карточки}
+    TrainingPlanId: {type: string, description: Идентификатор тренировочного плана}
+    CompletionMarkId: {type: string, description: Идентификатор отметки выполнения}
+    FitBridgeLock: {type: string, description: Версия оптимистичной блокировки}
+    PublicToken: {type: string, description: Raw public token; не хранится и не логируется}
+    PublicUrl: {type: string, format: uri, description: Публичная ссылка для передачи клиенту}
+
+    TrainerRole:
+      type: string
+      enum: [TRAINER]
+    TrainerUserStatus:
+      type: string
+      enum: [ACTIVE, BLOCKED, DELETED]
+    TrainerProfileOnboardingStatus:
+      type: string
+      enum: [NEW, PROFILE_READY, FIRST_LINK_CREATED, COMPLETED]
+    ClientCardStatus:
+      type: string
+      enum: [ACTIVE, ARCHIVED]
+    TrainingPlanStatus:
+      type: string
+      enum: [DRAFT, ACTIVE, ARCHIVED]
+    PublicAccessStatus:
+      type: string
+      enum: [NONE, ACTIVE, REVOKED, EXPIRED]
+    CompletionStatus:
+      type: string
+      enum: [DONE, SKIPPED]
+    CompletionAggregateStatus:
+      type: string
+      enum: [NOT_STARTED, IN_PROGRESS, COMPLETED, SKIPPED, MIXED]
+    TrainerPermission:
+      type: string
+      enum: [read, update, archive, generatePublicLink, closePublicLink, readCompletionStatus]
+
+    TrainerProfileBase:
+      type: object
+      properties:
+        publicName:
+          type: string
+          minLength: 2
+          maxLength: 80
+          description: Имя тренера, безопасное для публичного показа клиенту
+        specialization:
+          type: string
+          maxLength: 120
+    TrainerProfileCreateOrUpdateObject:
+      allOf:
+        - $ref: '#/components/schemas/TrainerProfileBase'
+    TrainerProfileResponseObject:
+      allOf:
+        - $ref: '#/components/schemas/TrainerProfileBase'
+        - type: object
+          properties:
+            id: {$ref: '#/components/schemas/TrainerProfileId'}
+            userId: {$ref: '#/components/schemas/UserId'}
+            role: {$ref: '#/components/schemas/TrainerRole'}
+            userStatus: {$ref: '#/components/schemas/TrainerUserStatus'}
+            onboardingStatus: {$ref: '#/components/schemas/TrainerProfileOnboardingStatus'}
+            lock: {$ref: '#/components/schemas/FitBridgeLock'}
+
+    ClientCardBase:
+      type: object
+      properties:
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 120
+          description: Имя или псевдоним клиента для тренера
+        note:
+          type: string
+          maxLength: 1000
+          description: Внутренняя заметка тренера; не попадает в public payload
+    ClientCardCreateObject:
+      allOf:
+        - $ref: '#/components/schemas/ClientCardBase'
+    ClientCardReadObject:
+      type: object
+      properties:
+        id: {$ref: '#/components/schemas/ClientCardId'}
+    ClientCardUpdateObject:
+      allOf:
+        - $ref: '#/components/schemas/ClientCardBase'
+        - type: object
+          properties:
+            id: {$ref: '#/components/schemas/ClientCardId'}
+            lock: {$ref: '#/components/schemas/FitBridgeLock'}
+    ClientCardArchiveObject:
+      type: object
+      properties:
+        id: {$ref: '#/components/schemas/ClientCardId'}
+        lock: {$ref: '#/components/schemas/FitBridgeLock'}
+    ClientCardListFilter:
+      type: object
+      properties:
+        searchString: {type: string, maxLength: 120}
+        status: {$ref: '#/components/schemas/ClientCardStatus'}
+        pageSize: {type: integer, minimum: 1, maximum: 100}
+        pageToken: {type: string}
+    ClientCardResponseObject:
+      allOf:
+        - $ref: '#/components/schemas/ClientCardBase'
+        - type: object
+          properties:
+            id: {$ref: '#/components/schemas/ClientCardId'}
+            status: {$ref: '#/components/schemas/ClientCardStatus'}
+            lastPlanStatus: {$ref: '#/components/schemas/TrainingPlanStatus'}
+            lastCompletionStatus: {$ref: '#/components/schemas/CompletionAggregateStatus'}
+            createdAt: {$ref: '#/components/schemas/Timestamp'}
+            updatedAt: {$ref: '#/components/schemas/Timestamp'}
+            lock: {$ref: '#/components/schemas/FitBridgeLock'}
+
+    PlanItem:
+      type: object
+      required: [itemRef, title]
+      properties:
+        itemRef: {type: string, maxLength: 120, example: week1.day1}
+        title: {type: string, maxLength: 160, example: День 1}
+        description: {type: string, maxLength: 2000, description: Текст задания без медиа и medical data}
+    TrainingPlanBase:
+      type: object
+      properties:
+        title: {type: string, minLength: 3, maxLength: 120}
+        planItems:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/PlanItem'
+    TrainingPlanCreateObject:
+      allOf:
+        - $ref: '#/components/schemas/TrainingPlanBase'
+        - type: object
+          properties:
+            clientCardId: {$ref: '#/components/schemas/ClientCardId'}
+    TrainingPlanReadObject:
+      type: object
+      properties:
+        id: {$ref: '#/components/schemas/TrainingPlanId'}
+    TrainingPlanUpdateObject:
+      allOf:
+        - $ref: '#/components/schemas/TrainingPlanBase'
+        - type: object
+          properties:
+            id: {$ref: '#/components/schemas/TrainingPlanId'}
+            lock: {$ref: '#/components/schemas/FitBridgeLock'}
+    TrainingPlanArchiveObject:
+      type: object
+      properties:
+        id: {$ref: '#/components/schemas/TrainingPlanId'}
+        lock: {$ref: '#/components/schemas/FitBridgeLock'}
+    TrainingPlanGeneratePublicLinkObject:
+      type: object
+      properties:
+        id: {$ref: '#/components/schemas/TrainingPlanId'}
+        expiresAt: {$ref: '#/components/schemas/Timestamp'}
+    TrainingPlanClosePublicLinkObject:
+      type: object
+      properties:
+        id: {$ref: '#/components/schemas/TrainingPlanId'}
+        lock: {$ref: '#/components/schemas/FitBridgeLock'}
+    TrainingPlanReadCompletionStatusObject:
+      type: object
+      properties:
+        id: {$ref: '#/components/schemas/TrainingPlanId'}
+    CompletionMarkResponseObject:
+      type: object
+      properties:
+        id: {$ref: '#/components/schemas/CompletionMarkId'}
+        itemRef: {type: string}
+        status: {$ref: '#/components/schemas/CompletionStatus'}
+        completedAt: {$ref: '#/components/schemas/Timestamp'}
+        clientComment: {type: string, maxLength: 500}
+    CompletionSummary:
+      type: object
+      properties:
+        aggregateStatus: {$ref: '#/components/schemas/CompletionAggregateStatus'}
+        doneCount: {type: integer, minimum: 0}
+        skippedCount: {type: integer, minimum: 0}
+        totalItems: {type: integer, minimum: 0}
+    TrainingPlanResponseObject:
+      allOf:
+        - $ref: '#/components/schemas/TrainingPlanBase'
+        - type: object
+          properties:
+            id: {$ref: '#/components/schemas/TrainingPlanId'}
+            clientCardId: {$ref: '#/components/schemas/ClientCardId'}
+            status: {$ref: '#/components/schemas/TrainingPlanStatus'}
+            version: {type: integer, minimum: 1}
+            publicAccessStatus: {$ref: '#/components/schemas/PublicAccessStatus'}
+            publicAccessExpiresAt: {$ref: '#/components/schemas/Timestamp'}
+            completionSummary: {$ref: '#/components/schemas/CompletionSummary'}
+            createdAt: {$ref: '#/components/schemas/Timestamp'}
+            updatedAt: {$ref: '#/components/schemas/Timestamp'}
+            lock: {$ref: '#/components/schemas/FitBridgeLock'}
+            permissions:
+              type: array
+              uniqueItems: true
+              items: {$ref: '#/components/schemas/TrainerPermission'}
+    PublicLinkResponseObject:
+      type: object
+      properties:
+        publicUrl: {$ref: '#/components/schemas/PublicUrl'}
+        publicToken: {$ref: '#/components/schemas/PublicToken'}
+        expiresAt: {$ref: '#/components/schemas/Timestamp'}
+        publicAccessStatus: {$ref: '#/components/schemas/PublicAccessStatus'}
+    CompletionStatusResponseObject:
+      type: object
+      properties:
+        trainingPlanId: {$ref: '#/components/schemas/TrainingPlanId'}
+        aggregateStatus: {$ref: '#/components/schemas/CompletionAggregateStatus'}
+        marks:
+          type: array
+          items: {$ref: '#/components/schemas/CompletionMarkResponseObject'}
+
+    DashboardSummaryResponseObject:
+      type: object
+      properties:
+        activeClientCards: {type: integer, minimum: 0}
+        archivedClientCards: {type: integer, minimum: 0}
+        activeTrainingPlans: {type: integer, minimum: 0}
+        activePublicLinks: {type: integer, minimum: 0}
+        recentCompletions:
+          type: array
+          items:
+            type: object
+            properties:
+              clientCardId: {$ref: '#/components/schemas/ClientCardId'}
+              trainingPlanId: {$ref: '#/components/schemas/TrainingPlanId'}
+              clientDisplayName: {type: string}
+              planTitle: {type: string}
+              aggregateStatus: {$ref: '#/components/schemas/CompletionAggregateStatus'}
+              lastCompletedAt: {$ref: '#/components/schemas/Timestamp'}
+
+    PublicPlanItem:
+      type: object
+      required: [itemRef, title]
+      properties:
+        itemRef: {type: string, description: Стабильная ссылка на элемент плана без внутреннего id}
+        title: {type: string}
+        description: {type: string}
+    PublicCompletionState:
+      type: object
+      properties:
+        itemRef: {type: string}
+        status: {$ref: '#/components/schemas/CompletionStatus'}
+        completedAt: {$ref: '#/components/schemas/Timestamp'}
+    PublicPlanView:
+      type: object
+      description: Минимальный public payload без internal ids, raw token/hash, email и заметок тренера
+      properties:
+        trainerPublicName: {type: string}
+        planTitle: {type: string}
+        accessStatus: {$ref: '#/components/schemas/PublicAccessStatus'}
+        expiresAt: {$ref: '#/components/schemas/Timestamp'}
+        planItems:
+          type: array
+          items: {$ref: '#/components/schemas/PublicPlanItem'}
+        completionState:
+          type: array
+          items: {$ref: '#/components/schemas/PublicCompletionState'}
+    PublicPlanMarkCompletionObject:
+      type: object
+      required: [itemRef, status]
+      properties:
+        itemRef: {type: string, maxLength: 120}
+        status: {$ref: '#/components/schemas/CompletionStatus'}
+        completedAt: {$ref: '#/components/schemas/Timestamp'}
+        clientComment: {type: string, maxLength: 500, description: Не логируется в raw виде}
+        idempotencyKey: {type: string, maxLength: 120}
+        requestFingerprint: {type: string, maxLength: 200}
+    PublicCompletionMarkResponseObject:
+      type: object
+      properties:
+        itemRef: {type: string}
+        status: {$ref: '#/components/schemas/CompletionStatus'}
+        acceptedAt: {$ref: '#/components/schemas/Timestamp'}
+        aggregateStatus: {$ref: '#/components/schemas/CompletionAggregateStatus'}
+
+    FitBridgeInitResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+    TrainerProfileCreateOrUpdateRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - $ref: '#/components/schemas/FitBridgeRequestDebug'
+        - type: object
+          properties:
+            trainerProfile: {$ref: '#/components/schemas/TrainerProfileCreateOrUpdateObject'}
+    TrainerProfileReadOwnRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - $ref: '#/components/schemas/FitBridgeRequestDebug'
+    TrainerProfileCreateOrUpdateResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - type: object
+          properties:
+            trainerProfile: {$ref: '#/components/schemas/TrainerProfileResponseObject'}
+    TrainerProfileReadOwnResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - type: object
+          properties:
+            trainerProfile: {$ref: '#/components/schemas/TrainerProfileResponseObject'}
+
+    ClientCardCreateRequest:
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardCreateObject'}}}]
+    ClientCardReadRequest:
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardReadObject'}}}]
+    ClientCardUpdateRequest:
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardUpdateObject'}}}]
+    ClientCardArchiveRequest:
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardArchiveObject'}}}]
+    ClientCardListRequest:
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {clientCardFilter: {$ref: '#/components/schemas/ClientCardListFilter'}}}]
+    ClientCardCreateResponse:
+      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardResponseObject'}}}]
+    ClientCardReadResponse:
+      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardResponseObject'}}}]
+    ClientCardUpdateResponse:
+      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardResponseObject'}}}]
+    ClientCardArchiveResponse:
+      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardResponseObject'}}}]
+    ClientCardListResponse:
+      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {clientCards: {type: array, items: {$ref: '#/components/schemas/ClientCardResponseObject'}}, nextPageToken: {type: string}}}]
+
+    TrainingPlanCreateRequest:
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanCreateObject'}}}]
+    TrainingPlanReadRequest:
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanReadObject'}}}]
+    TrainingPlanUpdateRequest:
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanUpdateObject'}}}]
+    TrainingPlanArchiveRequest:
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanArchiveObject'}}}]
+    TrainingPlanGeneratePublicLinkRequest:
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanGeneratePublicLinkObject'}}}]
+    TrainingPlanClosePublicLinkRequest:
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanClosePublicLinkObject'}}}]
+    TrainingPlanReadCompletionStatusRequest:
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanReadCompletionStatusObject'}}}]
+    TrainingPlanCreateResponse:
+      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanResponseObject'}}}]
+    TrainingPlanReadResponse:
+      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanResponseObject'}}}]
+    TrainingPlanUpdateResponse:
+      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanResponseObject'}}}]
+    TrainingPlanArchiveResponse:
+      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanResponseObject'}}}]
+    TrainingPlanGeneratePublicLinkResponse:
+      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {publicLink: {$ref: '#/components/schemas/PublicLinkResponseObject'}}}]
+    TrainingPlanClosePublicLinkResponse:
+      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanResponseObject'}}}]
+    TrainingPlanReadCompletionStatusResponse:
+      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {completionStatus: {$ref: '#/components/schemas/CompletionStatusResponseObject'}}}]
+
+    DashboardGetTrainerSummaryRequest:
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}]
+    DashboardGetTrainerSummaryResponse:
+      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {summary: {$ref: '#/components/schemas/DashboardSummaryResponseObject'}}}]
+
+    PublicPlanOpenByTokenRequest:
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {token: {$ref: '#/components/schemas/PublicToken'}}}]
+    PublicPlanMarkCompletionRequest:
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {token: {$ref: '#/components/schemas/PublicToken'}, completion: {$ref: '#/components/schemas/PublicPlanMarkCompletionObject'}}}]
+    PublicPlanOpenByTokenResponse:
+      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {publicPlan: {$ref: '#/components/schemas/PublicPlanView'}}}]
+    PublicPlanMarkCompletionResponse:
+      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {completion: {$ref: '#/components/schemas/PublicCompletionMarkResponseObject'}}}]
+
+    FitBridgeRequestDebugMode:
+      type: string
+      enum: [prod, test, stub]
+    FitBridgeRequestDebug:
+      type: object
+      properties:
+        debug:
+          $ref: '#/components/schemas/FitBridgeDebug'
+    FitBridgeDebug:
+      type: object
+      properties:
+        mode:
+          $ref: '#/components/schemas/FitBridgeRequestDebugMode'
+        stub:
+          $ref: '#/components/schemas/FitBridgeRequestDebugStubs'
+    FitBridgeRequestDebugStubs:
+      type: string
+      description: Перечисление стабов для разработки и тестов MVP
+      enum:
+        - success
+        - notFound
+        - badId
+        - badLock
+        - badPublicName
+        - badClientName
+        - badPlanTitle
+        - badPlanBody
+        - badToken
+        - expiredToken
+        - revokedToken
+        - forbidden
+        - rateLimited
+        - validationError
+        - cannotArchive
+        - cannotGenerateLink
+        - duplicateCompletion

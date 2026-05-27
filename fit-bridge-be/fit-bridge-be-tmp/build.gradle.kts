@@ -2,23 +2,25 @@ plugins {
     id("build-jvm")
 }
 
-repositories {
-    maven {
-        name = "LocalRepo"
-        url = uri("${rootProject.projectDir}/../fit-bridge-other/build/repo")
-    }
+// 1. Настраиваем конфигурацию для получения файла из другого проекта
+val resourcesFromLib by configurations.creating {
+    isCanBeResolved = true
+    isCanBeConsumed = false
 }
-
-val resourcesFromLib by configurations.creating
 
 dependencies {
     implementation(libs.kotlinx.datetime)
-    resourcesFromLib("ru.otus.otuskotlin.fitbridge:dcompose:1.0:resources@zip")
+    resourcesFromLib("com.github.martyanovav.otuskotlin.fitbridge:fit-bridge-dcompose:0.1.0:resources@zip")
 }
 
-tasks.register<Copy>("extractLibResources") {
-    from(zipTree(resourcesFromLib.singleFile))
-    into(layout.buildDirectory.dir("dcompose"))
-}
+tasks {
+    val extractLibResources by registering(Copy::class) {
+        description = "Извлекаем ресурсы из zip"
+        from(resourcesFromLib.incoming.files.elements.map {
+            it.map { file -> zipTree(file) }
+        })
+        into(layout.buildDirectory.dir("dcompose"))
+    }
 
-tasks["build"].dependsOn("extractLibResources")
+    val build by getting { dependsOn(extractLibResources) }
+}
