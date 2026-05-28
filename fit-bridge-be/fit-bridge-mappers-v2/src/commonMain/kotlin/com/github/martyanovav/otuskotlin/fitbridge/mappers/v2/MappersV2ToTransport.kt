@@ -1,8 +1,16 @@
 package com.github.martyanovav.otuskotlin.fitbridge.mappers.v2
 
-import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.*
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.Error
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.IResponse
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ResponseResult
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainerProfileCreateOrUpdateResponse
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainerProfileReadOwnResponse
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainerProfileResponseObject
 import com.github.martyanovav.otuskotlin.fitbridge.common.FBContext
-import com.github.martyanovav.otuskotlin.fitbridge.common.models.*
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.FBCommand
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.FBError
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.State
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.TrainerProfile
 
 fun FBContext.toTransport(): IResponse = when (val cmd = command) {
     FBCommand.TRAINER_PROFILE_READ_OWN -> toTransportTrainerProfileReadOwn()

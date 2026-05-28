@@ -1,8 +1,17 @@
 package com.github.martyanovav.otuskotlin.fitbridge.mappers.v1
 
-import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.*
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.Debug
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.IRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.RequestDebugMode
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.RequestDebugStubs
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainerProfileCreateOrUpdateRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainerProfileReadOwnRequest
 import com.github.martyanovav.otuskotlin.fitbridge.common.FBContext
-import com.github.martyanovav.otuskotlin.fitbridge.common.models.*
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.FBCommand
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.RequestId
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.TrainerId
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.TrainerProfile
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.WorkMode
 import com.github.martyanovav.otuskotlin.fitbridge.common.stubs.Stubs
 import com.github.martyanovav.otuskotlin.fitbridge.mappers.v1.exceptions.UnknownRequestClass
 

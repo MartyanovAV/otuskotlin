@@ -1,7 +1,12 @@
 package com.github.martyanovav.otuskotlin.fitbridge.api.v1
 
-import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.*
-import sun.security.util.Debug
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.Debug
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.IRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.PlanItem
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.RequestDebugMode
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.RequestDebugStubs
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanCreateObject
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanCreateRequest
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals

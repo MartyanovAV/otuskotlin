@@ -1,6 +1,10 @@
 package com.github.martyanovav.otuskotlin.fitbridge.api.v1
 
-import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.*
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.IResponse
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.PlanItem
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ResponseResult
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanCreateResponse
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanResponseObject
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals

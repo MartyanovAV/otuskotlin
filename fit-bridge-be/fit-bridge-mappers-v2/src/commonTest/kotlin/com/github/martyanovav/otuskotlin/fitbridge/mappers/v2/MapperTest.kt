@@ -1,9 +1,18 @@
 package com.github.martyanovav.otuskotlin.fitbridge.mappers.v2
 
-import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.*
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.Debug
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.RequestDebugMode
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.RequestDebugStubs
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainerProfileCreateOrUpdateObject
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainerProfileCreateOrUpdateRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainerProfileCreateOrUpdateResponse
 import com.github.martyanovav.otuskotlin.fitbridge.common.FBContext
-import com.github.martyanovav.otuskotlin.fitbridge.common.models.*
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.FBCommand
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.FBError
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.RequestId
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.State
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.TrainerProfile
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.WorkMode
 import com.github.martyanovav.otuskotlin.fitbridge.common.stubs.Stubs
 import kotlin.test.Test
 import kotlin.test.assertEquals
