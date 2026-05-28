@@ -6,4 +6,6 @@ data class TrainingPlan(
     var trainerId: TrainerId = TrainerId.NONE,
     var title: String = "",
     var isArchived: Boolean = false,
+    var lock: String = "",
+    var planItems: MutableList<PlanItem> = mutableListOf(),
 )

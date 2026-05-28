@@ -5,4 +5,6 @@ data class ClientCard(
     var trainerId: TrainerId = TrainerId.NONE,
     var displayName: String = "",
     var isArchived: Boolean = false,
+    var note: String = "",
+    var lock: String = "",
 )

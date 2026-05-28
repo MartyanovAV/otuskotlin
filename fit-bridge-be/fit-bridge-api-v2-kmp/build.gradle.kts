@@ -34,7 +34,16 @@ tasks {
     val openApiGenerateTask: GenerateTask = getByName("openApiGenerate", GenerateTask::class) {
         outputDir.set(layout.buildDirectory.file("generate-resources").get().toString())
         finalizedBy("compileCommonMainKotlinMetadata")
+        configOptions.set(
+            mapOf(
+                "dateLibrary" to "string",
+                "enumPropertyNaming" to "UPPERCASE",
+                "serializationLibrary" to "kotlinx-serialization",
+                "collectionType" to "list"
+            )
+        )
     }
+
     filter { it.name.startsWith("compile") }.forEach {
         it.dependsOn(openApiGenerateTask)
     }
@@ -53,6 +62,7 @@ kotlin {
 
                 implementation(libs.kotlinx.serialization.core)
                 implementation(libs.kotlinx.serialization.json)
+                implementation(libs.kotlinx.datetime)
             }
         }
         commonTest {

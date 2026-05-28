@@ -6,7 +6,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                api("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
+                api(libs.kotlinx.datetime)
             }
         }
         commonTest {
