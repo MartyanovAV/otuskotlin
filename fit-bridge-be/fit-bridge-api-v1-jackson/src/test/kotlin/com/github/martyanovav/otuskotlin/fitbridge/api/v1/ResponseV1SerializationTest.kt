@@ -7,7 +7,6 @@ import kotlin.test.assertEquals
 
 class ResponseV1SerializationTest {
     private val response = TrainingPlanCreateResponse(
-        responseType = "trainingPlan.create",
         result = ResponseResult.SUCCESS,
         trainingPlan = TrainingPlanResponseObject(
             title = "plan title",

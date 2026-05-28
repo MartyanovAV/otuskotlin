@@ -1,6 +1,7 @@
 package com.github.martyanovav.otuskotlin.fitbridge.api.v1
 
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.*
+import sun.security.util.Debug
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -8,9 +9,9 @@ import kotlin.test.assertEquals
 class RequestV1SerializationTest {
     private val request = TrainingPlanCreateRequest(
         requestType = "trainingPlan.create",
-        debug = FitBridgeDebug(
-            mode = FitBridgeRequestDebugMode.STUB,
-            stub = FitBridgeRequestDebugStubs.BAD_PLAN_TITLE,
+        debug = Debug(
+            mode = RequestDebugMode.STUB,
+            stub = RequestDebugStubs.BAD_PLAN_TITLE,
         ),
         trainingPlan = TrainingPlanCreateObject(
             title = "plan title",

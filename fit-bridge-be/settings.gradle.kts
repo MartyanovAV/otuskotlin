@@ -27,3 +27,7 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 //include(":fit-bridge-be-tmp")
 include(":fit-bridge-api-v1-jackson")
 include(":fit-bridge-api-v2-kmp")
+include(":fit-bridge-common")
+include(":fit-bridge-mappers-v1")
+include(":fit-bridge-mappers-v2")
+

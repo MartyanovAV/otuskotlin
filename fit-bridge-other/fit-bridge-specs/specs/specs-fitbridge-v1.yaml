@@ -313,7 +313,7 @@ components:
     IResponse:
       type: object
       description: Базовый интерфейс для всех ответов FitBridge POST Full API
-      required: [responseType, result]
+      required: [result]
       properties:
         responseType:
           type: string
@@ -330,7 +330,7 @@ components:
       discriminator:
         propertyName: responseType
         mapping:
-          init: '#/components/schemas/FitBridgeInitResponse'
+          init: '#/components/schemas/InitResponse'
           trainerProfile.createOrUpdate: '#/components/schemas/TrainerProfileCreateOrUpdateResponse'
           trainerProfile.readOwn: '#/components/schemas/TrainerProfileReadOwnResponse'
           clientCard.create: '#/components/schemas/ClientCardCreateResponse'
@@ -370,7 +370,7 @@ components:
     ClientCardId: {type: string, description: Идентификатор клиентской карточки}
     TrainingPlanId: {type: string, description: Идентификатор тренировочного плана}
     CompletionMarkId: {type: string, description: Идентификатор отметки выполнения}
-    FitBridgeLock: {type: string, description: Версия оптимистичной блокировки}
+    Lock: {type: string, description: Версия оптимистичной блокировки}
     PublicToken: {type: string, description: Raw public token; не хранится и не логируется}
     PublicUrl: {type: string, format: uri, description: Публичная ссылка для передачи клиенту}
 
@@ -426,7 +426,7 @@ components:
             role: {$ref: '#/components/schemas/TrainerRole'}
             userStatus: {$ref: '#/components/schemas/TrainerUserStatus'}
             onboardingStatus: {$ref: '#/components/schemas/TrainerProfileOnboardingStatus'}
-            lock: {$ref: '#/components/schemas/FitBridgeLock'}
+            lock: {$ref: '#/components/schemas/Lock'}
 
     ClientCardBase:
       type: object
@@ -453,12 +453,12 @@ components:
         - type: object
           properties:
             id: {$ref: '#/components/schemas/ClientCardId'}
-            lock: {$ref: '#/components/schemas/FitBridgeLock'}
+            lock: {$ref: '#/components/schemas/Lock'}
     ClientCardArchiveObject:
       type: object
       properties:
         id: {$ref: '#/components/schemas/ClientCardId'}
-        lock: {$ref: '#/components/schemas/FitBridgeLock'}
+        lock: {$ref: '#/components/schemas/Lock'}
     ClientCardListFilter:
       type: object
       properties:
@@ -477,7 +477,7 @@ components:
             lastCompletionStatus: {$ref: '#/components/schemas/CompletionAggregateStatus'}
             createdAt: {$ref: '#/components/schemas/Timestamp'}
             updatedAt: {$ref: '#/components/schemas/Timestamp'}
-            lock: {$ref: '#/components/schemas/FitBridgeLock'}
+            lock: {$ref: '#/components/schemas/Lock'}
 
     PlanItem:
       type: object
@@ -511,12 +511,12 @@ components:
         - type: object
           properties:
             id: {$ref: '#/components/schemas/TrainingPlanId'}
-            lock: {$ref: '#/components/schemas/FitBridgeLock'}
+            lock: {$ref: '#/components/schemas/Lock'}
     TrainingPlanArchiveObject:
       type: object
       properties:
         id: {$ref: '#/components/schemas/TrainingPlanId'}
-        lock: {$ref: '#/components/schemas/FitBridgeLock'}
+        lock: {$ref: '#/components/schemas/Lock'}
     TrainingPlanGeneratePublicLinkObject:
       type: object
       properties:
@@ -526,7 +526,7 @@ components:
       type: object
       properties:
         id: {$ref: '#/components/schemas/TrainingPlanId'}
-        lock: {$ref: '#/components/schemas/FitBridgeLock'}
+        lock: {$ref: '#/components/schemas/Lock'}
     TrainingPlanReadCompletionStatusObject:
       type: object
       properties:
@@ -560,7 +560,7 @@ components:
             completionSummary: {$ref: '#/components/schemas/CompletionSummary'}
             createdAt: {$ref: '#/components/schemas/Timestamp'}
             updatedAt: {$ref: '#/components/schemas/Timestamp'}
-            lock: {$ref: '#/components/schemas/FitBridgeLock'}
+            lock: {$ref: '#/components/schemas/Lock'}
             permissions:
               type: array
               uniqueItems: true
@@ -645,20 +645,20 @@ components:
         acceptedAt: {$ref: '#/components/schemas/Timestamp'}
         aggregateStatus: {$ref: '#/components/schemas/CompletionAggregateStatus'}
 
-    FitBridgeInitResponse:
+    InitResponse:
       allOf:
         - $ref: '#/components/schemas/IResponse'
     TrainerProfileCreateOrUpdateRequest:
       allOf:
         - $ref: '#/components/schemas/IRequest'
-        - $ref: '#/components/schemas/FitBridgeRequestDebug'
+        - $ref: '#/components/schemas/RequestDebug'
         - type: object
           properties:
             trainerProfile: {$ref: '#/components/schemas/TrainerProfileCreateOrUpdateObject'}
     TrainerProfileReadOwnRequest:
       allOf:
         - $ref: '#/components/schemas/IRequest'
-        - $ref: '#/components/schemas/FitBridgeRequestDebug'
+        - $ref: '#/components/schemas/RequestDebug'
     TrainerProfileCreateOrUpdateResponse:
       allOf:
         - $ref: '#/components/schemas/IResponse'
@@ -673,15 +673,15 @@ components:
             trainerProfile: {$ref: '#/components/schemas/TrainerProfileResponseObject'}
 
     ClientCardCreateRequest:
-      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardCreateObject'}}}]
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardCreateObject'}}}]
     ClientCardReadRequest:
-      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardReadObject'}}}]
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardReadObject'}}}]
     ClientCardUpdateRequest:
-      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardUpdateObject'}}}]
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardUpdateObject'}}}]
     ClientCardArchiveRequest:
-      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardArchiveObject'}}}]
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardArchiveObject'}}}]
     ClientCardListRequest:
-      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {clientCardFilter: {$ref: '#/components/schemas/ClientCardListFilter'}}}]
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {clientCardFilter: {$ref: '#/components/schemas/ClientCardListFilter'}}}]
     ClientCardCreateResponse:
       allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardResponseObject'}}}]
     ClientCardReadResponse:
@@ -694,19 +694,19 @@ components:
       allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {clientCards: {type: array, items: {$ref: '#/components/schemas/ClientCardResponseObject'}}, nextPageToken: {type: string}}}]
 
     TrainingPlanCreateRequest:
-      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanCreateObject'}}}]
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanCreateObject'}}}]
     TrainingPlanReadRequest:
-      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanReadObject'}}}]
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanReadObject'}}}]
     TrainingPlanUpdateRequest:
-      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanUpdateObject'}}}]
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanUpdateObject'}}}]
     TrainingPlanArchiveRequest:
-      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanArchiveObject'}}}]
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanArchiveObject'}}}]
     TrainingPlanGeneratePublicLinkRequest:
-      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanGeneratePublicLinkObject'}}}]
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanGeneratePublicLinkObject'}}}]
     TrainingPlanClosePublicLinkRequest:
-      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanClosePublicLinkObject'}}}]
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanClosePublicLinkObject'}}}]
     TrainingPlanReadCompletionStatusRequest:
-      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanReadCompletionStatusObject'}}}]
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanReadCompletionStatusObject'}}}]
     TrainingPlanCreateResponse:
       allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanResponseObject'}}}]
     TrainingPlanReadResponse:
@@ -723,35 +723,35 @@ components:
       allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {completionStatus: {$ref: '#/components/schemas/CompletionStatusResponseObject'}}}]
 
     DashboardGetTrainerSummaryRequest:
-      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}]
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}]
     DashboardGetTrainerSummaryResponse:
       allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {summary: {$ref: '#/components/schemas/DashboardSummaryResponseObject'}}}]
 
     PublicPlanOpenByTokenRequest:
-      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {token: {$ref: '#/components/schemas/PublicToken'}}}]
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {token: {$ref: '#/components/schemas/PublicToken'}}}]
     PublicPlanMarkCompletionRequest:
-      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/FitBridgeRequestDebug'}, {type: object, properties: {token: {$ref: '#/components/schemas/PublicToken'}, completion: {$ref: '#/components/schemas/PublicPlanMarkCompletionObject'}}}]
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {token: {$ref: '#/components/schemas/PublicToken'}, completion: {$ref: '#/components/schemas/PublicPlanMarkCompletionObject'}}}]
     PublicPlanOpenByTokenResponse:
       allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {publicPlan: {$ref: '#/components/schemas/PublicPlanView'}}}]
     PublicPlanMarkCompletionResponse:
       allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {completion: {$ref: '#/components/schemas/PublicCompletionMarkResponseObject'}}}]
 
-    FitBridgeRequestDebugMode:
+    RequestDebugMode:
       type: string
       enum: [prod, test, stub]
-    FitBridgeRequestDebug:
+    RequestDebug:
       type: object
       properties:
         debug:
-          $ref: '#/components/schemas/FitBridgeDebug'
-    FitBridgeDebug:
+          $ref: '#/components/schemas/Debug'
+    Debug:
       type: object
       properties:
         mode:
-          $ref: '#/components/schemas/FitBridgeRequestDebugMode'
+          $ref: '#/components/schemas/RequestDebugMode'
         stub:
-          $ref: '#/components/schemas/FitBridgeRequestDebugStubs'
-    FitBridgeRequestDebugStubs:
+          $ref: '#/components/schemas/RequestDebugStubs'
+    RequestDebugStubs:
       type: string
       description: Перечисление стабов для разработки и тестов MVP
       enum:

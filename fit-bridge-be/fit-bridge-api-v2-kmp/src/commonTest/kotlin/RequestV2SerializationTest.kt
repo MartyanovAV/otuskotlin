@@ -1,21 +1,21 @@
 package com.github.martyanovav.otuskotlin.fitbridge.api.v2
 
-import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.FitBridgeDebug
-import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.FitBridgeRequestDebugMode
-import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.FitBridgeRequestDebugStubs
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.Debug
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.PlanItem
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanCreateObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanCreateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.IRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.RequestDebugMode
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.RequestDebugStubs
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
 class RequestV2SerializationTest {
     private val request: TrainingPlanCreateRequest = TrainingPlanCreateRequest(
-        debug = FitBridgeDebug(
-            mode = FitBridgeRequestDebugMode.STUB,
-            stub = FitBridgeRequestDebugStubs.BAD_PLAN_TITLE,
+        debug = Debug(
+            mode = RequestDebugMode.STUB,
+            stub = RequestDebugStubs.BAD_PLAN_TITLE,
         ),
         trainingPlan = TrainingPlanCreateObject(
             title = "plan title",
