@@ -1,4 +1,4 @@
-package com.github.martyanovav.otuskotlin.fitbridge.common.models
+package com.github.martyanovav.otuskotlin.fitbridge.common.models.trainer
 
 data class TrainerProfile(
     var id: TrainerId = TrainerId.NONE,

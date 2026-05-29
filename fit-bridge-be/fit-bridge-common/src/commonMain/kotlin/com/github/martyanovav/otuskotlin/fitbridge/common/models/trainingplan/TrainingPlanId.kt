@@ -1,4 +1,4 @@
-package com.github.martyanovav.otuskotlin.fitbridge.common.models
+package com.github.martyanovav.otuskotlin.fitbridge.common.models.trainingplan
 
 import kotlin.jvm.JvmInline
 

@@ -6,12 +6,12 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.RequestDebugStu
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainerProfileCreateOrUpdateObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainerProfileCreateOrUpdateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainerProfileCreateOrUpdateResponse
-import com.github.martyanovav.otuskotlin.fitbridge.common.FBContext
-import com.github.martyanovav.otuskotlin.fitbridge.common.models.FBCommand
+import com.github.martyanovav.otuskotlin.fitbridge.common.TrainerProfileContext
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.FBError
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.RequestId
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.State
-import com.github.martyanovav.otuskotlin.fitbridge.common.models.TrainerProfile
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.trainer.TrainerProfile
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.TrainerProfileCommand
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.WorkMode
 import com.github.martyanovav.otuskotlin.fitbridge.common.stubs.Stubs
 import kotlin.test.Test
@@ -33,8 +33,7 @@ class MapperTest {
             )
         )
 
-        val context = FBContext()
-        context.fromTransport(req)
+        val context = req.fromTransport() as TrainerProfileContext
 
         assertEquals(Stubs.SUCCESS, context.stubCase)
         assertEquals(WorkMode.STUB, context.workMode)
@@ -44,9 +43,9 @@ class MapperTest {
 
     @Test
     fun toTransport() {
-        val context = FBContext(
+        val context = TrainerProfileContext(
             requestId = RequestId("1234"),
-            command = FBCommand.TRAINER_PROFILE_CREATE_OR_UPDATE,
+            command = TrainerProfileCommand.CREATE_OR_UPDATE,
             trainerProfileResponse = TrainerProfile(
                 publicName = "Trainer John",
                 specialization = "Yoga"

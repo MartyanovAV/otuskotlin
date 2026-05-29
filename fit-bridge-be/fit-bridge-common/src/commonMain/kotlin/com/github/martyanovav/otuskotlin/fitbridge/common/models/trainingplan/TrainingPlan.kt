@@ -1,4 +1,7 @@
-package com.github.martyanovav.otuskotlin.fitbridge.common.models
+package com.github.martyanovav.otuskotlin.fitbridge.common.models.trainingplan
+
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.clientcard.ClientCardId
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.trainer.TrainerId
 
 data class TrainingPlan(
     var id: TrainingPlanId = TrainingPlanId.NONE,

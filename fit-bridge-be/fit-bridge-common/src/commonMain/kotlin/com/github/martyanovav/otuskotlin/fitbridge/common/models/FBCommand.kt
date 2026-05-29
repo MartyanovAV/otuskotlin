@@ -1,22 +1,42 @@
 package com.github.martyanovav.otuskotlin.fitbridge.common.models
 
-enum class FBCommand {
+interface FBCommand
+
+enum class FBCommandBase : FBCommand { NONE }
+
+enum class TrainerProfileCommand : FBCommand {
     NONE,
-    TRAINER_PROFILE_CREATE_OR_UPDATE,
-    TRAINER_PROFILE_READ_OWN,
-    CLIENT_CARD_CREATE,
-    CLIENT_CARD_READ,
-    CLIENT_CARD_UPDATE,
-    CLIENT_CARD_ARCHIVE,
-    CLIENT_CARD_LIST,
-    TRAINING_PLAN_CREATE,
-    TRAINING_PLAN_READ,
-    TRAINING_PLAN_UPDATE,
-    TRAINING_PLAN_ARCHIVE,
-    TRAINING_PLAN_GENERATE_PUBLIC_LINK,
-    TRAINING_PLAN_CLOSE_PUBLIC_LINK,
-    TRAINING_PLAN_READ_COMPLETION_STATUS,
-    DASHBOARD_GET_TRAINER_SUMMARY,
-    PUBLIC_PLAN_OPEN_BY_TOKEN,
-    PUBLIC_PLAN_MARK_COMPLETION
+    CREATE_OR_UPDATE,
+    READ_OWN
+}
+
+enum class ClientCardCommand : FBCommand {
+    NONE,
+    CREATE,
+    READ,
+    UPDATE,
+    ARCHIVE,
+    LIST
+}
+
+enum class TrainingPlanCommand : FBCommand {
+    NONE,
+    CREATE,
+    READ,
+    UPDATE,
+    ARCHIVE,
+    GENERATE_PUBLIC_LINK,
+    CLOSE_PUBLIC_LINK,
+    READ_COMPLETION_STATUS
+}
+
+enum class DashboardCommand : FBCommand {
+    NONE,
+    GET_TRAINER_SUMMARY
+}
+
+enum class PublicPlanCommand : FBCommand {
+    NONE,
+    OPEN_BY_TOKEN,
+    MARK_COMPLETION
 }

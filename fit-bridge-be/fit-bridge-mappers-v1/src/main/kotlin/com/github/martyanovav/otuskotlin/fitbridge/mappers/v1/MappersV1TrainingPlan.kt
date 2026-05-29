@@ -1,0 +1,183 @@
+package com.github.martyanovav.otuskotlin.fitbridge.mappers.v1
+
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.CompletionStatusResponseObject
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.PublicLinkResponseObject
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ResponseResult
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanArchiveRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanArchiveResponse
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanClosePublicLinkRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanClosePublicLinkResponse
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanCreateRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanCreateResponse
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanGeneratePublicLinkRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanGeneratePublicLinkResponse
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanReadCompletionStatusRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanReadCompletionStatusResponse
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanReadRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanReadResponse
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanResponseObject
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanUpdateRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanUpdateResponse
+import com.github.martyanovav.otuskotlin.fitbridge.common.TrainingPlanContext
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.RequestId
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.trainingplan.CompletionStatusInfo
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.trainingplan.PlanItem
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.trainingplan.PublicLinkInfo
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.State
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.trainingplan.TrainingPlan
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.trainingplan.TrainingPlanId
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.TrainingPlanCommand
+import java.net.URI
+
+// ─── From Transport ──────────────────────────────────────────────────────────
+
+internal fun TrainingPlanContext.fromTransport(request: TrainingPlanCreateRequest) {
+    command = TrainingPlanCommand.CREATE
+    fromTransportBase(request.requestId, request.debug)
+    trainingPlanRequest = TrainingPlan(
+        title = request.trainingPlan?.title.orEmpty(),
+        clientCardId = request.trainingPlan?.clientCardId.toClientCardId(),
+        planItems = request.trainingPlan?.planItems?.map {
+            PlanItem(
+                itemRef = it.itemRef,
+                title = it.title,
+                description = it.description.orEmpty()
+            )
+        }?.toMutableList() ?: mutableListOf()
+    )
+}
+
+internal fun TrainingPlanContext.fromTransport(request: TrainingPlanReadRequest) {
+    command = TrainingPlanCommand.READ
+    fromTransportBase(request.requestId, request.debug)
+    trainingPlanRequest = TrainingPlan(
+        id = request.trainingPlan?.id.toTrainingPlanId()
+    )
+}
+
+internal fun TrainingPlanContext.fromTransport(request: TrainingPlanUpdateRequest) {
+    command = TrainingPlanCommand.UPDATE
+    fromTransportBase(request.requestId, request.debug)
+    trainingPlanRequest = TrainingPlan(
+        id = request.trainingPlan?.id.toTrainingPlanId(),
+        title = request.trainingPlan?.title.orEmpty(),
+        lock = request.trainingPlan?.lock.orEmpty(),
+        planItems = request.trainingPlan?.planItems?.map {
+            PlanItem(
+                itemRef = it.itemRef,
+                title = it.title,
+                description = it.description.orEmpty()
+            )
+        }?.toMutableList() ?: mutableListOf()
+    )
+}
+
+internal fun TrainingPlanContext.fromTransport(request: TrainingPlanArchiveRequest) {
+    command = TrainingPlanCommand.ARCHIVE
+    fromTransportBase(request.requestId, request.debug)
+    trainingPlanRequest = TrainingPlan(
+        id = request.trainingPlan?.id.toTrainingPlanId(),
+        lock = request.trainingPlan?.lock.orEmpty()
+    )
+}
+
+internal fun TrainingPlanContext.fromTransport(request: TrainingPlanGeneratePublicLinkRequest) {
+    command = TrainingPlanCommand.GENERATE_PUBLIC_LINK
+    fromTransportBase(request.requestId, request.debug)
+    trainingPlanRequest = TrainingPlan(
+        id = request.trainingPlan?.id.toTrainingPlanId()
+    )
+    expiresAtRequest = request.trainingPlan?.expiresAt.toInstant()
+}
+
+internal fun TrainingPlanContext.fromTransport(request: TrainingPlanClosePublicLinkRequest) {
+    command = TrainingPlanCommand.CLOSE_PUBLIC_LINK
+    fromTransportBase(request.requestId, request.debug)
+    trainingPlanRequest = TrainingPlan(
+        id = request.trainingPlan?.id.toTrainingPlanId()
+    )
+}
+
+internal fun TrainingPlanContext.fromTransport(request: TrainingPlanReadCompletionStatusRequest) {
+    command = TrainingPlanCommand.READ_COMPLETION_STATUS
+    fromTransportBase(request.requestId, request.debug)
+    trainingPlanRequest = TrainingPlan(
+        id = request.trainingPlan?.id.toTrainingPlanId()
+    )
+}
+
+// ─── To Transport ────────────────────────────────────────────────────────────
+
+internal fun TrainingPlanContext.toTransportTrainingPlanCreate() = TrainingPlanCreateResponse(
+    requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
+    result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+    errors = errors.toTransportErrors(),
+    trainingPlan = trainingPlanResponse.toTransportTrainingPlan()
+)
+
+internal fun TrainingPlanContext.toTransportTrainingPlanRead() = TrainingPlanReadResponse(
+    requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
+    result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+    errors = errors.toTransportErrors(),
+    trainingPlan = trainingPlanResponse.toTransportTrainingPlan()
+)
+
+internal fun TrainingPlanContext.toTransportTrainingPlanUpdate() = TrainingPlanUpdateResponse(
+    requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
+    result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+    errors = errors.toTransportErrors(),
+    trainingPlan = trainingPlanResponse.toTransportTrainingPlan()
+)
+
+internal fun TrainingPlanContext.toTransportTrainingPlanArchive() = TrainingPlanArchiveResponse(
+    requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
+    result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+    errors = errors.toTransportErrors(),
+    trainingPlan = trainingPlanResponse.toTransportTrainingPlan()
+)
+
+internal fun TrainingPlanContext.toTransportTrainingPlanGeneratePublicLink() = TrainingPlanGeneratePublicLinkResponse(
+    requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
+    result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+    errors = errors.toTransportErrors(),
+    publicLink = publicLinkResponse.toTransportPublicLink()
+)
+
+internal fun TrainingPlanContext.toTransportTrainingPlanClosePublicLink() = TrainingPlanClosePublicLinkResponse(
+    requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
+    result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+    errors = errors.toTransportErrors(),
+    trainingPlan = trainingPlanResponse.toTransportTrainingPlan()
+)
+
+internal fun TrainingPlanContext.toTransportTrainingPlanReadCompletionStatus() = TrainingPlanReadCompletionStatusResponse(
+    requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
+    result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+    errors = errors.toTransportErrors(),
+    completionStatus = completionStatusResponse.toTransportCompletionStatus()
+)
+
+internal fun TrainingPlan.toTransportTrainingPlan(): TrainingPlanResponseObject? {
+    if (this == TrainingPlan()) return null
+    return TrainingPlanResponseObject(
+        id = id.takeIf { it != TrainingPlanId.NONE }?.asString(),
+        title = title.takeIf { it.isNotBlank() },
+        clientCardId = clientCardId.asString().takeIf { it.isNotBlank() }
+    )
+}
+
+internal fun PublicLinkInfo.toTransportPublicLink(): PublicLinkResponseObject? {
+    if (this == PublicLinkInfo()) return null
+    return PublicLinkResponseObject(
+        publicUrl = publicUrl.takeIf { it.isNotBlank() }?.let { URI(it) },
+        publicToken = publicToken.takeIf { it.isNotBlank() },
+        expiresAt = expiresAt.takeIf { it != kotlin.time.Instant.DISTANT_PAST }?.toString()
+    )
+}
+
+internal fun CompletionStatusInfo.toTransportCompletionStatus(): CompletionStatusResponseObject? {
+    if (this == CompletionStatusInfo()) return null
+    return CompletionStatusResponseObject(
+        trainingPlanId = trainingPlanId.asString().takeIf { it.isNotBlank() }
+    )
+}
