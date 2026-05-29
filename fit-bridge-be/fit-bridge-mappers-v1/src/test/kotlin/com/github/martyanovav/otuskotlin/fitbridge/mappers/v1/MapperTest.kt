@@ -51,16 +51,17 @@ class MapperTest {
                 publicName = "Trainer John",
                 specialization = "Yoga"
             ),
-            errors = mutableListOf(
+            state = State.RUNNING
+        ).apply {
+            addError(
                 FBError(
                     code = "err",
                     group = "request",
                     field = "publicName",
                     message = "wrong name"
                 )
-            ),
-            state = State.RUNNING
-        )
+            )
+        }
 
         val req = context.toTransport() as TrainerProfileCreateOrUpdateResponse
 

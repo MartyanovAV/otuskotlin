@@ -1,14 +1,18 @@
 package com.github.martyanovav.otuskotlin.fitbridge.mappers.v2
 
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardArchiveObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardArchiveRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardArchiveResponse
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardCreateObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardCreateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardCreateResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardListRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardListResponse
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardReadObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardReadRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardReadResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardResponseObject
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardUpdateObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardUpdateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardUpdateResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ResponseResult
@@ -24,38 +28,25 @@ import com.github.martyanovav.otuskotlin.fitbridge.common.models.State
 internal fun ClientCardContext.fromTransport(request: ClientCardCreateRequest) {
     command = ClientCardCommand.CREATE
     fromTransportBase(request.requestId, request.debug)
-    clientCardRequest = ClientCard(
-        displayName = request.clientCard?.displayName.orEmpty(),
-        note = request.clientCard?.note.orEmpty()
-    )
+    clientCardRequest = request.clientCard.toInternal()
 }
 
 internal fun ClientCardContext.fromTransport(request: ClientCardReadRequest) {
     command = ClientCardCommand.READ
     fromTransportBase(request.requestId, request.debug)
-    clientCardRequest = ClientCard(
-        id = request.clientCard?.id.toClientCardId()
-    )
+    clientCardRequest = request.clientCard.toInternal()
 }
 
 internal fun ClientCardContext.fromTransport(request: ClientCardUpdateRequest) {
     command = ClientCardCommand.UPDATE
     fromTransportBase(request.requestId, request.debug)
-    clientCardRequest = ClientCard(
-        id = request.clientCard?.id.toClientCardId(),
-        displayName = request.clientCard?.displayName.orEmpty(),
-        note = request.clientCard?.note.orEmpty(),
-        lock = request.clientCard?.lock.orEmpty()
-    )
+    clientCardRequest = request.clientCard.toInternal()
 }
 
 internal fun ClientCardContext.fromTransport(request: ClientCardArchiveRequest) {
     command = ClientCardCommand.ARCHIVE
     fromTransportBase(request.requestId, request.debug)
-    clientCardRequest = ClientCard(
-        id = request.clientCard?.id.toClientCardId(),
-        lock = request.clientCard?.lock.orEmpty()
-    )
+    clientCardRequest = request.clientCard.toInternal()
 }
 
 internal fun ClientCardContext.fromTransport(request: ClientCardListRequest) {
@@ -109,3 +100,26 @@ internal fun ClientCard.toTransportClientCard(): ClientCardResponseObject? {
         lock = lock.takeIf { it.isNotBlank() }
     )
 }
+
+// ─── Private: Request DTO to Internal ────────────────────────────────────────
+
+private fun ClientCardCreateObject?.toInternal() = ClientCard(
+    displayName = this?.displayName.orEmpty(),
+    note = this?.note.orEmpty()
+)
+
+private fun ClientCardReadObject?.toInternal() = ClientCard(
+    id = this?.id.toClientCardId()
+)
+
+private fun ClientCardUpdateObject?.toInternal() = ClientCard(
+    id = this?.id.toClientCardId(),
+    displayName = this?.displayName.orEmpty(),
+    note = this?.note.orEmpty(),
+    lock = this?.lock.orEmpty()
+)
+
+private fun ClientCardArchiveObject?.toInternal() = ClientCard(
+    id = this?.id.toClientCardId(),
+    lock = this?.lock.orEmpty()
+)

@@ -11,9 +11,11 @@ import kotlin.time.Instant
 interface IFBContext {
     var command: FBCommand
     var state: State
-    val errors: MutableList<FBError>
+    val errors: List<FBError>
     var workMode: WorkMode
     var stubCase: Stubs
     var requestId: RequestId
     var timeStart: Instant
+
+    fun addError(error: FBError)
 }

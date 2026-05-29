@@ -1,10 +1,11 @@
 package com.github.martyanovav.otuskotlin.fitbridge.mappers.v1
 
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainerProfileCreateOrUpdateObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainerProfileCreateOrUpdateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainerProfileCreateOrUpdateResponse
-import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainerProfileReadOwnResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ResponseResult
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainerProfileReadOwnRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainerProfileReadOwnResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainerProfileResponseObject
 import com.github.martyanovav.otuskotlin.fitbridge.common.TrainerProfileContext
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.RequestId
@@ -23,12 +24,7 @@ internal fun TrainerProfileContext.fromTransport(request: TrainerProfileReadOwnR
 internal fun TrainerProfileContext.fromTransport(request: TrainerProfileCreateOrUpdateRequest) {
     command = TrainerProfileCommand.CREATE_OR_UPDATE
     fromTransportBase(request.requestId, request.debug)
-    trainerProfileRequest = request.trainerProfile?.let {
-        TrainerProfile(
-            publicName = it.publicName.orEmpty(),
-            specialization = it.specialization.orEmpty()
-        )
-    } ?: TrainerProfile()
+    trainerProfileRequest = request.trainerProfile.toInternal()
 }
 
 // ─── To Transport ────────────────────────────────────────────────────────────
@@ -55,3 +51,12 @@ internal fun TrainerProfile.toTransport(): TrainerProfileResponseObject? {
         specialization = specialization.takeIf { it.isNotBlank() }
     )
 }
+
+// ─── Private: Request DTO to Internal ────────────────────────────────────────
+
+private fun TrainerProfileCreateOrUpdateObject?.toInternal() = this?.let {
+    TrainerProfile(
+        publicName = it.publicName.orEmpty(),
+        specialization = it.specialization.orEmpty()
+    )
+} ?: TrainerProfile()

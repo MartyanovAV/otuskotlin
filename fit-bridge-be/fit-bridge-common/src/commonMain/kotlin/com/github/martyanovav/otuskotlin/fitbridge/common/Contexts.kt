@@ -33,7 +33,11 @@ data class TrainerProfileContext(
 
     var trainerProfileRequest: TrainerProfile = TrainerProfile(),
     var trainerProfileResponse: TrainerProfile = TrainerProfile(),
-) : IFBContext
+) : IFBContext {
+    override fun addError(error: FBError) {
+        errors.add(error)
+    }
+}
 
 data class ClientCardContext(
     override var command: FBCommand = ClientCardCommand.NONE,
@@ -47,7 +51,11 @@ data class ClientCardContext(
     var clientCardRequest: ClientCard = ClientCard(),
     var clientCardResponse: ClientCard = ClientCard(),
     var clientCardsResponse: MutableList<ClientCard> = mutableListOf(),
-) : IFBContext
+) : IFBContext {
+    override fun addError(error: FBError) {
+        errors.add(error)
+    }
+}
 
 data class TrainingPlanContext(
     override var command: FBCommand = TrainingPlanCommand.NONE,
@@ -64,7 +72,11 @@ data class TrainingPlanContext(
     var trainingPlanResponse: TrainingPlan = TrainingPlan(),
     var publicLinkResponse: PublicLinkInfo = PublicLinkInfo(),
     var completionStatusResponse: CompletionStatusInfo = CompletionStatusInfo(),
-) : IFBContext
+) : IFBContext {
+    override fun addError(error: FBError) {
+        errors.add(error)
+    }
+}
 
 data class DashboardContext(
     override var command: FBCommand = DashboardCommand.NONE,
@@ -76,7 +88,11 @@ data class DashboardContext(
     override var timeStart: Instant = Instant.DISTANT_PAST,
 
     var dashboardSummaryResponse: DashboardSummary = DashboardSummary(),
-) : IFBContext
+) : IFBContext {
+    override fun addError(error: FBError) {
+        errors.add(error)
+    }
+}
 
 data class PublicPlanContext(
     override var command: FBCommand = PublicPlanCommand.NONE,
@@ -92,4 +108,8 @@ data class PublicPlanContext(
 
     var publicPlanViewResponse: PublicPlanViewInfo = PublicPlanViewInfo(),
     var completionMarkResponse: CompletionMarkInfo = CompletionMarkInfo(),
-) : IFBContext
+) : IFBContext {
+    override fun addError(error: FBError) {
+        errors.add(error)
+    }
+}

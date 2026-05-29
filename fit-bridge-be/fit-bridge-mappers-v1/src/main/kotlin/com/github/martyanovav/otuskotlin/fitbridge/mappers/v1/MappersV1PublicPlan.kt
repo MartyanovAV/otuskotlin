@@ -2,6 +2,7 @@ package com.github.martyanovav.otuskotlin.fitbridge.mappers.v1
 
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.CompletionStatus
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.PublicCompletionMarkResponseObject
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.PublicPlanMarkCompletionObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.PublicPlanMarkCompletionRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.PublicPlanMarkCompletionResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.PublicPlanOpenByTokenRequest
@@ -28,12 +29,7 @@ internal fun PublicPlanContext.fromTransport(request: PublicPlanMarkCompletionRe
     command = PublicPlanCommand.MARK_COMPLETION
     fromTransportBase(request.requestId, request.debug)
     tokenRequest = request.token.orEmpty()
-    completionMarkRequest = CompletionMarkRequest(
-        itemRef = request.completion?.itemRef.orEmpty(),
-        status = request.completion?.status?.name.orEmpty(),
-        completedAt = request.completion?.completedAt.toInstant(),
-        clientComment = request.completion?.clientComment.orEmpty()
-    )
+    completionMarkRequest = request.completion.toInternal()
 }
 
 // ─── To Transport ────────────────────────────────────────────────────────────
@@ -67,3 +63,12 @@ internal fun CompletionMarkInfo.toTransportCompletionMark(): PublicCompletionMar
         status = status.takeIf { it.isNotBlank() }?.let { CompletionStatus.valueOf(it) }
     )
 }
+
+// ─── Private: Request DTO to Internal ────────────────────────────────────────
+
+private fun PublicPlanMarkCompletionObject?.toInternal() = CompletionMarkRequest(
+    itemRef = this?.itemRef.orEmpty(),
+    status = this?.status?.name.orEmpty(),
+    completedAt = this?.completedAt.toInstant(),
+    clientComment = this?.clientComment.orEmpty()
+)
