@@ -254,7 +254,6 @@ private fun CompletionMarkInfo.toTransportCompletionMark(): PublicCompletionMark
 
 private fun List<FBError>.toTransportErrors(): List<Error>? = this
     .map { it.toTransport() }
-    .toList()
     .takeIf { it.isNotEmpty() }
 
 private fun FBError.toTransport() = Error(

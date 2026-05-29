@@ -35,6 +35,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.common.models.TrainingPlanId
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.WorkMode
 import com.github.martyanovav.otuskotlin.fitbridge.common.stubs.Stubs
 import com.github.martyanovav.otuskotlin.fitbridge.mappers.v1.exceptions.UnknownRequestClass
+import kotlin.time.Instant
 
 fun FBContext.fromTransport(request: IRequest) {
     when (request) {
@@ -67,6 +68,8 @@ private fun String?.toTrainingPlanId() = this?.let { TrainingPlanId(it) } ?: Tra
 
 private fun String?.toRequestId() = this?.let { RequestId(it) } ?: RequestId.NONE
 
+private fun String?.toInstant() = this?.let { Instant.parse(it) } ?: Instant.DISTANT_PAST
+
 private fun Debug?.transportToWorkMode(): WorkMode = when (this?.mode) {
     RequestDebugMode.PROD -> WorkMode.PROD
     RequestDebugMode.TEST -> WorkMode.TEST
@@ -85,18 +88,20 @@ private fun Debug?.transportToStubCase(): Stubs = when (this?.stub) {
     else -> Stubs.NONE
 }
 
-fun FBContext.fromTransport(request: TrainerProfileReadOwnRequest) {
-    command = FBCommand.TRAINER_PROFILE_READ_OWN
-    requestId = request.requestId.toRequestId()
-    workMode = request.debug.transportToWorkMode()
-    stubCase = request.debug.transportToStubCase()
+private fun FBContext.fromTransportBase(reqId: String?, debug: Debug?) {
+    requestId = reqId.toRequestId()
+    workMode = debug.transportToWorkMode()
+    stubCase = debug.transportToStubCase()
 }
 
-fun FBContext.fromTransport(request: TrainerProfileCreateOrUpdateRequest) {
+private fun FBContext.fromTransport(request: TrainerProfileReadOwnRequest) {
+    command = FBCommand.TRAINER_PROFILE_READ_OWN
+    fromTransportBase(request.requestId, request.debug)
+}
+
+private fun FBContext.fromTransport(request: TrainerProfileCreateOrUpdateRequest) {
     command = FBCommand.TRAINER_PROFILE_CREATE_OR_UPDATE
-    requestId = request.requestId.toRequestId()
-    workMode = request.debug.transportToWorkMode()
-    stubCase = request.debug.transportToStubCase()
+    fromTransportBase(request.requestId, request.debug)
     trainerProfileRequest = request.trainerProfile?.let {
         TrainerProfile(
             publicName = it.publicName.orEmpty(),
@@ -105,32 +110,26 @@ fun FBContext.fromTransport(request: TrainerProfileCreateOrUpdateRequest) {
     } ?: TrainerProfile()
 }
 
-fun FBContext.fromTransport(request: ClientCardCreateRequest) {
+private fun FBContext.fromTransport(request: ClientCardCreateRequest) {
     command = FBCommand.CLIENT_CARD_CREATE
-    requestId = request.requestId.toRequestId()
-    workMode = request.debug.transportToWorkMode()
-    stubCase = request.debug.transportToStubCase()
+    fromTransportBase(request.requestId, request.debug)
     clientCardRequest = ClientCard(
         displayName = request.clientCard?.displayName.orEmpty(),
         note = request.clientCard?.note.orEmpty()
     )
 }
 
-fun FBContext.fromTransport(request: ClientCardReadRequest) {
+private fun FBContext.fromTransport(request: ClientCardReadRequest) {
     command = FBCommand.CLIENT_CARD_READ
-    requestId = request.requestId.toRequestId()
-    workMode = request.debug.transportToWorkMode()
-    stubCase = request.debug.transportToStubCase()
+    fromTransportBase(request.requestId, request.debug)
     clientCardRequest = ClientCard(
         id = request.clientCard?.id.toClientCardId()
     )
 }
 
-fun FBContext.fromTransport(request: ClientCardUpdateRequest) {
+private fun FBContext.fromTransport(request: ClientCardUpdateRequest) {
     command = FBCommand.CLIENT_CARD_UPDATE
-    requestId = request.requestId.toRequestId()
-    workMode = request.debug.transportToWorkMode()
-    stubCase = request.debug.transportToStubCase()
+    fromTransportBase(request.requestId, request.debug)
     clientCardRequest = ClientCard(
         id = request.clientCard?.id.toClientCardId(),
         displayName = request.clientCard?.displayName.orEmpty(),
@@ -139,29 +138,23 @@ fun FBContext.fromTransport(request: ClientCardUpdateRequest) {
     )
 }
 
-fun FBContext.fromTransport(request: ClientCardArchiveRequest) {
+private fun FBContext.fromTransport(request: ClientCardArchiveRequest) {
     command = FBCommand.CLIENT_CARD_ARCHIVE
-    requestId = request.requestId.toRequestId()
-    workMode = request.debug.transportToWorkMode()
-    stubCase = request.debug.transportToStubCase()
+    fromTransportBase(request.requestId, request.debug)
     clientCardRequest = ClientCard(
         id = request.clientCard?.id.toClientCardId(),
         lock = request.clientCard?.lock.orEmpty()
     )
 }
 
-fun FBContext.fromTransport(request: ClientCardListRequest) {
+private fun FBContext.fromTransport(request: ClientCardListRequest) {
     command = FBCommand.CLIENT_CARD_LIST
-    requestId = request.requestId.toRequestId()
-    workMode = request.debug.transportToWorkMode()
-    stubCase = request.debug.transportToStubCase()
+    fromTransportBase(request.requestId, request.debug)
 }
 
-fun FBContext.fromTransport(request: TrainingPlanCreateRequest) {
+private fun FBContext.fromTransport(request: TrainingPlanCreateRequest) {
     command = FBCommand.TRAINING_PLAN_CREATE
-    requestId = request.requestId.toRequestId()
-    workMode = request.debug.transportToWorkMode()
-    stubCase = request.debug.transportToStubCase()
+    fromTransportBase(request.requestId, request.debug)
     trainingPlanRequest = TrainingPlan(
         title = request.trainingPlan?.title.orEmpty(),
         clientCardId = request.trainingPlan?.clientCardId.toClientCardId(),
@@ -175,21 +168,17 @@ fun FBContext.fromTransport(request: TrainingPlanCreateRequest) {
     )
 }
 
-fun FBContext.fromTransport(request: TrainingPlanReadRequest) {
+private fun FBContext.fromTransport(request: TrainingPlanReadRequest) {
     command = FBCommand.TRAINING_PLAN_READ
-    requestId = request.requestId.toRequestId()
-    workMode = request.debug.transportToWorkMode()
-    stubCase = request.debug.transportToStubCase()
+    fromTransportBase(request.requestId, request.debug)
     trainingPlanRequest = TrainingPlan(
         id = request.trainingPlan?.id.toTrainingPlanId()
     )
 }
 
-fun FBContext.fromTransport(request: TrainingPlanUpdateRequest) {
+private fun FBContext.fromTransport(request: TrainingPlanUpdateRequest) {
     command = FBCommand.TRAINING_PLAN_UPDATE
-    requestId = request.requestId.toRequestId()
-    workMode = request.debug.transportToWorkMode()
-    stubCase = request.debug.transportToStubCase()
+    fromTransportBase(request.requestId, request.debug)
     trainingPlanRequest = TrainingPlan(
         id = request.trainingPlan?.id.toTrainingPlanId(),
         title = request.trainingPlan?.title.orEmpty(),
@@ -204,73 +193,59 @@ fun FBContext.fromTransport(request: TrainingPlanUpdateRequest) {
     )
 }
 
-fun FBContext.fromTransport(request: TrainingPlanArchiveRequest) {
+private fun FBContext.fromTransport(request: TrainingPlanArchiveRequest) {
     command = FBCommand.TRAINING_PLAN_ARCHIVE
-    requestId = request.requestId.toRequestId()
-    workMode = request.debug.transportToWorkMode()
-    stubCase = request.debug.transportToStubCase()
+    fromTransportBase(request.requestId, request.debug)
     trainingPlanRequest = TrainingPlan(
         id = request.trainingPlan?.id.toTrainingPlanId(),
         lock = request.trainingPlan?.lock.orEmpty()
     )
 }
 
-fun FBContext.fromTransport(request: TrainingPlanGeneratePublicLinkRequest) {
+private fun FBContext.fromTransport(request: TrainingPlanGeneratePublicLinkRequest) {
     command = FBCommand.TRAINING_PLAN_GENERATE_PUBLIC_LINK
-    requestId = request.requestId.toRequestId()
-    workMode = request.debug.transportToWorkMode()
-    stubCase = request.debug.transportToStubCase()
+    fromTransportBase(request.requestId, request.debug)
     trainingPlanRequest = TrainingPlan(
         id = request.trainingPlan?.id.toTrainingPlanId()
     )
-    expiresAtRequest = request.trainingPlan?.expiresAt?.let { kotlin.time.Instant.parse(it) } ?: kotlin.time.Instant.DISTANT_PAST
+    expiresAtRequest = request.trainingPlan?.expiresAt.toInstant()
 }
 
-fun FBContext.fromTransport(request: TrainingPlanClosePublicLinkRequest) {
+private fun FBContext.fromTransport(request: TrainingPlanClosePublicLinkRequest) {
     command = FBCommand.TRAINING_PLAN_CLOSE_PUBLIC_LINK
-    requestId = request.requestId.toRequestId()
-    workMode = request.debug.transportToWorkMode()
-    stubCase = request.debug.transportToStubCase()
+    fromTransportBase(request.requestId, request.debug)
     trainingPlanRequest = TrainingPlan(
         id = request.trainingPlan?.id.toTrainingPlanId()
     )
 }
 
-fun FBContext.fromTransport(request: TrainingPlanReadCompletionStatusRequest) {
+private fun FBContext.fromTransport(request: TrainingPlanReadCompletionStatusRequest) {
     command = FBCommand.TRAINING_PLAN_READ_COMPLETION_STATUS
-    requestId = request.requestId.toRequestId()
-    workMode = request.debug.transportToWorkMode()
-    stubCase = request.debug.transportToStubCase()
+    fromTransportBase(request.requestId, request.debug)
     trainingPlanRequest = TrainingPlan(
         id = request.trainingPlan?.id.toTrainingPlanId()
     )
 }
 
-fun FBContext.fromTransport(request: DashboardGetTrainerSummaryRequest) {
+private fun FBContext.fromTransport(request: DashboardGetTrainerSummaryRequest) {
     command = FBCommand.DASHBOARD_GET_TRAINER_SUMMARY
-    requestId = request.requestId.toRequestId()
-    workMode = request.debug.transportToWorkMode()
-    stubCase = request.debug.transportToStubCase()
+    fromTransportBase(request.requestId, request.debug)
 }
 
-fun FBContext.fromTransport(request: PublicPlanOpenByTokenRequest) {
+private fun FBContext.fromTransport(request: PublicPlanOpenByTokenRequest) {
     command = FBCommand.PUBLIC_PLAN_OPEN_BY_TOKEN
-    requestId = request.requestId.toRequestId()
-    workMode = request.debug.transportToWorkMode()
-    stubCase = request.debug.transportToStubCase()
+    fromTransportBase(request.requestId, request.debug)
     tokenRequest = request.token.orEmpty()
 }
 
-fun FBContext.fromTransport(request: PublicPlanMarkCompletionRequest) {
+private fun FBContext.fromTransport(request: PublicPlanMarkCompletionRequest) {
     command = FBCommand.PUBLIC_PLAN_MARK_COMPLETION
-    requestId = request.requestId.toRequestId()
-    workMode = request.debug.transportToWorkMode()
-    stubCase = request.debug.transportToStubCase()
+    fromTransportBase(request.requestId, request.debug)
     tokenRequest = request.token.orEmpty()
     completionMarkRequest = CompletionMarkRequest(
         itemRef = request.completion?.itemRef.orEmpty(),
         status = request.completion?.status?.name.orEmpty(),
-        completedAt = request.completion?.completedAt?.let { kotlin.time.Instant.parse(it) } ?: kotlin.time.Instant.DISTANT_PAST,
+        completedAt = request.completion?.completedAt.toInstant(),
         clientComment = request.completion?.clientComment.orEmpty()
     )
 }
