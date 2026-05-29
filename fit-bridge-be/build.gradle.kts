@@ -19,11 +19,17 @@ subprojects {
 }
 
 tasks {
-    register("build" ) {
+    register("build") {
         description = "Сборка всех подпроектов"
         group = "build"
+        subprojects.forEach { proj ->
+            println("PROJ $proj")
+            proj.getTasksByName("build", false).also {
+                this@register.dependsOn(it)
+            }
+        }
     }
-    register("clean" ) {
+    register("clean") {
         description = "Очистка всех подпроектов"
         group = "build"
         subprojects.forEach { proj ->
@@ -33,7 +39,7 @@ tasks {
             }
         }
     }
-    register("check" ) {
+    register("check") {
         description = "Запуск тестов всех подпроектов"
         group = "verification"
         subprojects.forEach { proj ->

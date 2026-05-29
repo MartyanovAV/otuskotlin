@@ -441,7 +441,7 @@ components:
         searchString: {type: string, maxLength: 120}
         status: {$ref: '#/components/schemas/ClientCardStatus'}
         pageSize: {type: integer, minimum: 1, maximum: 100}
-        pageToken: {type: string}
+        pageNumber: {type: integer, minimum: 1}
     ClientCardResponseObject:
       type: object
       properties:
@@ -658,7 +658,7 @@ components:
     ClientCardArchiveResponse:
       allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardResponseObject'}}}]
     ClientCardListResponse:
-      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {clientCards: {type: array, items: {$ref: '#/components/schemas/ClientCardResponseObject'}}, nextPageToken: {type: string}}}]
+      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {clientCards: {type: array, items: {$ref: '#/components/schemas/ClientCardResponseObject'}}, totalSize: {type: integer, minimum: 0}, pageNumber: {type: integer, minimum: 1}, pageSize: {type: integer, minimum: 1}}}]
 
     TrainingPlanCreateRequest:
       allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanCreateObject'}}}]

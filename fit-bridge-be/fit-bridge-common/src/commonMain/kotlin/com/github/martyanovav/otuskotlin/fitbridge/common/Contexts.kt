@@ -1,6 +1,7 @@
 package com.github.martyanovav.otuskotlin.fitbridge.common
 
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.clientcard.ClientCard
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.clientcard.ClientCardFilter
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.ClientCardCommand
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.trainingplan.CompletionMarkInfo
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.trainingplan.CompletionMarkRequest
@@ -9,6 +10,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.common.models.DashboardComman
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.dashboard.DashboardSummary
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.FBCommand
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.FBError
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.trainingplan.PublicLinkInfo
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.PublicPlanCommand
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.publicplan.PublicPlanViewInfo
@@ -50,7 +52,8 @@ data class ClientCardContext(
 
     var clientCardRequest: ClientCard = ClientCard(),
     var clientCardResponse: ClientCard = ClientCard(),
-    var clientCardsResponse: MutableList<ClientCard> = mutableListOf(),
+    var clientCardsResponse: Page<ClientCard> = Page(),
+    var clientCardFilter: ClientCardFilter = ClientCardFilter(),
 ) : IFBContext {
     override fun addError(error: FBError) {
         errors.add(error)

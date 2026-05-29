@@ -6,6 +6,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardArchi
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardCreateObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardCreateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardCreateResponse
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardListFilter
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardListRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardListResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardReadObject
@@ -18,8 +19,10 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardUpdat
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ResponseResult
 import com.github.martyanovav.otuskotlin.fitbridge.common.ClientCardContext
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.clientcard.ClientCard
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.clientcard.ClientCardFilter
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.clientcard.ClientCardId
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.ClientCardCommand
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.RequestId
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.State
 
@@ -52,7 +55,15 @@ internal fun ClientCardContext.fromTransport(request: ClientCardArchiveRequest) 
 internal fun ClientCardContext.fromTransport(request: ClientCardListRequest) {
     command = ClientCardCommand.LIST
     fromTransportBase(request.requestId, request.debug)
+    clientCardFilter = request.clientCardFilter.toInternal()
+    clientCardsResponse = Page(pageNumber = clientCardFilter.pageNumber, pageSize = clientCardFilter.pageSize)
 }
+
+private fun ClientCardListFilter?.toInternal() = ClientCardFilter(
+    searchString = this?.searchString.orEmpty(),
+    pageNumber = this?.pageNumber ?: 1,
+    pageSize = this?.pageSize ?: 10,
+)
 
 // ─── To Transport ────────────────────────────────────────────────────────────
 
@@ -88,7 +99,10 @@ internal fun ClientCardContext.toTransportClientCardList() = ClientCardListRespo
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
     result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
-    clientCards = clientCardsResponse.mapNotNull { it.toTransportClientCard() }.takeIf { it.isNotEmpty() }
+    clientCards = clientCardsResponse.items.mapNotNull { it.toTransportClientCard() }.takeIf { it.isNotEmpty() },
+    totalSize = clientCardsResponse.totalSize,
+    pageNumber = clientCardsResponse.pageNumber.takeIf { it > 0 },
+    pageSize = clientCardsResponse.pageSize.takeIf { it > 0 },
 )
 
 internal fun ClientCard.toTransportClientCard(): ClientCardResponseObject? {
