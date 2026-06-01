@@ -76,7 +76,7 @@ erDiagram
     COMPLETION_MARK {
         string id PK
         string trainingPlanId FK
-        string itemRef
+        string itemId
         string status
         datetime completedAt
         string clientComment

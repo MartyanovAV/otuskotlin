@@ -13,7 +13,7 @@
 
 ## Поверхность API MVP
 
-### Приватный trainer API (`/v1/*`, требуется JWT)
+### Приватный trainer API (versioned `/v1/*` и `/v2/*`, требуется JWT)
 
 - `trainerProfile.createOrUpdate`, `trainerProfile.readOwn`
 - `clientCard.create`, `clientCard.read`, `clientCard.update`, `clientCard.archive`, `clientCard.list`
@@ -21,17 +21,19 @@
 - `trainingPlan.generatePublicLink`, `trainingPlan.closePublicLink`, `trainingPlan.readCompletionStatus`
 - `dashboard.getTrainerSummary`
 
-### Публичный API по ссылке (`/public/v1/*`, только token)
+### Публичный API по ссылке (versioned `/public/v1/*` и `/public/v2/*`, только token)
 
-- `publicPlan.openByToken`
-- `publicPlan.markCompletion`
+- `POST /public/v1/plan/open`, `POST /public/v1/plan/markCompletion`
+- `POST /public/v2/plan/open`, `POST /public/v2/plan/markCompletion`
 
-Публичные методы принимают только raw token и минимальный payload отметки. `clientId`, `clientCardId`, `planId`, `trainerId` не передаются в публичном URL/API.
+Публичные методы принимают только raw token и минимальный payload отметки (`itemId`, `status`, optional `clientComment`). `clientId`, `clientCardId`, `planId`, `trainerId` не передаются в публичном URL/API.
+
+Для v2 в контракте присутствует поле `apiVersion`, но OpenAPI не помечает его как `required`.
 
 ## Ключевые границы
 
 - Domain API MVP — trainer-private + public token-only; зарегистрированной роли `CLIENT` в MVP нет.
-- Все приватные `/v1/*` endpoints требуют edge JWT validation и независимую backend-проверку trainer ownership.
+- Все приватные versioned endpoints (`/v1/*`, `/v2/*`) требуют edge JWT validation и независимую backend-проверку trainer ownership.
 - Public endpoints требуют hash(token), TTL, revoke/status checks, rate limiting и generic errors.
 - Raw token не хранится и не логируется; в БД только hash.
 - `AccessGrant`, `Invite`, клиентское подтверждение доступа и отзыв доступа клиентом не входят в MVP публичного доступа к плану.

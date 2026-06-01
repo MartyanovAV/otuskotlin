@@ -59,7 +59,7 @@ internal fun PublicPlanViewInfo.toTransportPublicPlanView(): PublicPlanView? {
 internal fun CompletionMarkInfo.toTransportCompletionMark(): PublicCompletionMarkResponseObject? {
     if (this == CompletionMarkInfo()) return null
     return PublicCompletionMarkResponseObject(
-        itemRef = itemRef.takeIf { it.isNotBlank() },
+        itemId = itemId.takeIf { it.isNotBlank() },
         status = status.takeIf { it.isNotBlank() }?.let { CompletionStatus.valueOf(it) }
     )
 }
@@ -67,7 +67,7 @@ internal fun CompletionMarkInfo.toTransportCompletionMark(): PublicCompletionMar
 // ─── Private: Request DTO to Internal ────────────────────────────────────────
 
 private fun PublicPlanMarkCompletionObject?.toInternal() = CompletionMarkRequest(
-    itemRef = this?.itemRef.orEmpty(),
+    itemId = this?.itemId.orEmpty(),
     status = this?.status?.name.orEmpty(),
     completedAt = this?.completedAt.toInstant(),
     clientComment = this?.clientComment.orEmpty()

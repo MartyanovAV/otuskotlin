@@ -1,7 +1,7 @@
 package com.github.martyanovav.otuskotlin.fitbridge.api.v2
 
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.Debug
-import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.PlanItem
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ExerciseItem
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanCreateObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanCreateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.IRequest
@@ -19,7 +19,7 @@ class RequestV2SerializationTest {
         ),
         trainingPlan = TrainingPlanCreateObject(
             title = "plan title",
-            planItems = listOf(PlanItem(itemRef = "week1.day1", title = "Day 1")),
+            planItems = listOf(ExerciseItem(id = "550e8400-e29b-41d4-a716-446655440000", title = "Day 1")),
         ),
     )
 

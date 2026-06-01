@@ -1,3 +1,4 @@
+
 openapi: 3.0.3
 info:
   title: FitBridge
@@ -401,6 +402,9 @@ components:
     TrainerPermission:
       type: string
       enum: [read, update, archive, generatePublicLink, closePublicLink, readCompletionStatus]
+    ItemType:
+      type: string
+      enum: [EXERCISE, CIRCUIT, SUPERSET]
 
     TrainerProfileBase:
       type: object
@@ -481,11 +485,59 @@ components:
 
     PlanItem:
       type: object
-      required: [itemRef, title]
+      discriminator:
+        propertyName: itemType
+        mapping:
+          EXERCISE: '#/components/schemas/ExerciseItem'
+          CIRCUIT: '#/components/schemas/CircuitItem'
+          SUPERSET: '#/components/schemas/SupersetItem'
+      required: [id, title]
       properties:
-        itemRef: {type: string, maxLength: 120, example: week1.day1}
-        title: {type: string, maxLength: 160, example: День 1}
-        description: {type: string, maxLength: 2000, description: Текст задания без медиа и medical data}
+        id: {type: string, format: uuid, description: Уникальный идентификатор элемента}
+        itemType:
+          $ref: '#/components/schemas/ItemType'
+        title: {type: string, maxLength: 160, example: Приседания}
+        description: {type: string, maxLength: 2000, description: Текст задания}
+
+    ExerciseSet:
+      type: object
+      properties:
+        reps: {type: string, example: 10-12}
+        weight: {type: string, example: 20}
+        weightUnit: {type: string, example: KG}
+        durationSeconds: {type: integer, example: 60}
+
+    ExerciseItem:
+      allOf:
+        - $ref: '#/components/schemas/PlanItem'
+        - type: object
+          properties:
+            exerciseId: {type: string, description: Идентификатор словарного упражнения}
+            sets:
+              type: array
+              items: {$ref: '#/components/schemas/ExerciseSet'}
+            restBetweenSetsSeconds: {type: integer}
+
+    CircuitItem:
+      allOf:
+        - $ref: '#/components/schemas/PlanItem'
+        - type: object
+          properties:
+            rounds: {type: integer}
+            items:
+              type: array
+              items: {$ref: '#/components/schemas/PlanItem'}
+            restBetweenRoundsSeconds: {type: integer}
+
+    SupersetItem:
+      allOf:
+        - $ref: '#/components/schemas/PlanItem'
+        - type: object
+          properties:
+            items:
+              type: array
+              items: {$ref: '#/components/schemas/PlanItem'}
+            restBetweenSetsSeconds: {type: integer}
     TrainingPlanBase:
       type: object
       properties:
@@ -535,7 +587,7 @@ components:
       type: object
       properties:
         id: {$ref: '#/components/schemas/CompletionMarkId'}
-        itemRef: {type: string}
+        itemId: {type: string, format: uuid}
         status: {$ref: '#/components/schemas/CompletionStatus'}
         completedAt: {$ref: '#/components/schemas/Timestamp'}
         clientComment: {type: string, maxLength: 500}
@@ -602,15 +654,15 @@ components:
 
     PublicPlanItem:
       type: object
-      required: [itemRef, title]
+      required: [itemId, title]
       properties:
-        itemRef: {type: string, description: Стабильная ссылка на элемент плана без внутреннего id}
+        itemId: {type: string, format: uuid, description: Стабильная ссылка на элемент плана}
         title: {type: string}
         description: {type: string}
     PublicCompletionState:
       type: object
       properties:
-        itemRef: {type: string}
+        itemId: {type: string, format: uuid}
         status: {$ref: '#/components/schemas/CompletionStatus'}
         completedAt: {$ref: '#/components/schemas/Timestamp'}
     PublicPlanView:
@@ -629,9 +681,9 @@ components:
           items: {$ref: '#/components/schemas/PublicCompletionState'}
     PublicPlanMarkCompletionObject:
       type: object
-      required: [itemRef, status]
+      required: [itemId, status]
       properties:
-        itemRef: {type: string, maxLength: 120}
+        itemId: {type: string, format: uuid}
         status: {$ref: '#/components/schemas/CompletionStatus'}
         completedAt: {$ref: '#/components/schemas/Timestamp'}
         clientComment: {type: string, maxLength: 500, description: Не логируется в raw виде}
@@ -640,7 +692,7 @@ components:
     PublicCompletionMarkResponseObject:
       type: object
       properties:
-        itemRef: {type: string}
+        itemId: {type: string, format: uuid}
         status: {$ref: '#/components/schemas/CompletionStatus'}
         acceptedAt: {$ref: '#/components/schemas/Timestamp'}
         aggregateStatus: {$ref: '#/components/schemas/CompletionAggregateStatus'}

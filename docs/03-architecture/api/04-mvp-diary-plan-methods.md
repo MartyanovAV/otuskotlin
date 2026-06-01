@@ -9,7 +9,7 @@
 - `CompletionMark` — минимальный дочерний объект/value object `TrainingPlan`, а не полноценная дневниковая запись клиента.
 - SLO и rate limits: [06-metrics-and-limits.md](./06-metrics-and-limits.md).
 
-## Приватные методы плана (`/v1/*`)
+## Приватные методы плана (versioned `/v1/*` и `/v2/*`)
 
 1. **`trainingPlan.create`** — создать простой план для `ClientCard`.
    - *Бизнес-правило*: план создаёт только тренер-владелец карточки.
@@ -27,18 +27,22 @@
 5. **`trainingPlan.readCompletionStatus`** — получить статус выполнения.
    - *Бизнес-правило*: тренер видит отметки выполнения по собственному плану и агрегированный статус карточки.
 
-## Публичные методы по ссылке (`/public/v1/*`)
+## Публичные методы по ссылке (versioned `/public/v1/*` и `/public/v2/*`)
 
 6. **`publicPlan.openByToken`** — открыть план по публичной ссылке.
+   - *HTTP endpoints*: `POST /public/v1/plan/open` и `POST /public/v2/plan/open`.
    - *Вход*: raw token только в защищённом канале; не принимать `planId`, `clientCardId`, `trainerId`.
    - *Security*: hash(token), TTL/status/revoke checks, rate limiting, generic errors.
    - *Ответ*: минимальный public payload: название плана, задания, безопасное имя тренера/сервиса, состояние доступности ссылки.
 
 7. **`publicPlan.markCompletion`** — оставить отметку выполнения.
-   - *Вход*: raw token + минимальная отметка (`itemRef`, `status`, опциональный короткий комментарий).
+   - *HTTP endpoints*: `POST /public/v1/plan/markCompletion` и `POST /public/v2/plan/markCompletion`.
+   - *Вход*: raw token + минимальная отметка (`itemId`, `status`, опциональный короткий комментарий).
    - *Бизнес-правило*: создаёт `CompletionMark`, не создаёт клиентский аккаунт, дневник, `AccessGrant` или `ClientProfile`.
-   - *Валидация*: token active; `itemRef` существует в публичном snapshot; комментарий ограничен по длине и не логируется.
+   - *Валидация*: token active; `itemId` существует в публичном snapshot; комментарий ограничен по длине и не логируется.
    - *Idempotency*: повтор submit должен быть безопасен через idempotency/fingerprint policy.
+
+Для v2 в базовых request/response-схемах присутствует `apiVersion` как поле контракта; оно не помечено как обязательное (`required`) в OpenAPI.
 
 ## Whitelist публичного payload
 

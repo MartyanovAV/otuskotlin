@@ -1,12 +1,13 @@
 package com.github.martyanovav.otuskotlin.fitbridge.api.v1
 
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.Debug
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ExerciseItem
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.IRequest
-import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.PlanItem
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.RequestDebugMode
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.RequestDebugStubs
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanCreateObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanCreateRequest
+import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -20,7 +21,7 @@ class RequestV1SerializationTest {
         ),
         trainingPlan = TrainingPlanCreateObject(
             title = "plan title",
-            planItems = listOf(PlanItem(itemRef = "week1.day1", title = "Day 1")),
+            planItems = listOf(ExerciseItem(id = UUID.fromString("550e8400-e29b-41d4-a716-446655440000"), title = "Day 1")),
         ),
     )
 

@@ -30,7 +30,17 @@ import com.github.martyanovav.otuskotlin.fitbridge.common.models.RequestId
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.clientcard.ClientCardId
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.trainingplan.CompletionStatusInfo
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.trainingplan.PlanItem
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.trainingplan.ExerciseItem
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.trainingplan.CircuitItem
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.trainingplan.SupersetItem
+import com.github.martyanovav.otuskotlin.fitbridge.common.models.trainingplan.ExerciseSet
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.trainingplan.PublicLinkInfo
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.PlanItem as PlanItemV1
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ExerciseItem as ExerciseItemV1
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.CircuitItem as CircuitItemV1
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.SupersetItem as SupersetItemV1
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ExerciseSet as ExerciseSetV1
+import java.util.UUID
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.State
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.trainingplan.TrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.trainingplan.TrainingPlanId
@@ -144,7 +154,41 @@ internal fun TrainingPlan.toTransportTrainingPlan(): TrainingPlanResponseObject?
     return TrainingPlanResponseObject(
         id = id.takeIf { it != TrainingPlanId.NONE }?.asString(),
         title = title.takeIf { it.isNotBlank() },
-        clientCardId = clientCardId.takeIf { it != ClientCardId.NONE }?.asString()
+        clientCardId = clientCardId.takeIf { it != ClientCardId.NONE }?.asString(),
+        planItems = planItems.map { it.toTransportPlanItem() }
+    )
+}
+
+private fun PlanItem.toTransportPlanItem(): PlanItemV1 = when(this) {
+    is ExerciseItem -> ExerciseItemV1(
+        id = UUID.fromString(this.id),
+        title = this.title,
+        description = this.description.takeIf { it.isNotBlank() },
+        exerciseId = this.exerciseId,
+        sets = this.sets.map {
+            ExerciseSetV1(
+                reps = it.reps,
+                weight = it.weight,
+                weightUnit = it.weightUnit,
+                durationSeconds = it.durationSeconds
+            )
+        },
+        restBetweenSetsSeconds = this.restBetweenSetsSeconds
+    )
+    is CircuitItem -> CircuitItemV1(
+        id = UUID.fromString(this.id),
+        title = this.title,
+        description = this.description.takeIf { it.isNotBlank() },
+        rounds = this.rounds,
+        items = this.items.map { it.toTransportPlanItem() },
+        restBetweenRoundsSeconds = this.restBetweenRoundsSeconds
+    )
+    is SupersetItem -> SupersetItemV1(
+        id = UUID.fromString(this.id),
+        title = this.title,
+        description = this.description.takeIf { it.isNotBlank() },
+        items = this.items.map { it.toTransportPlanItem() },
+        restBetweenSetsSeconds = this.restBetweenSetsSeconds
     )
 }
 
@@ -166,16 +210,44 @@ internal fun CompletionStatusInfo.toTransportCompletionStatus(): CompletionStatu
 
 // ─── Private: Request DTO to Internal ────────────────────────────────────────
 
+private fun PlanItemV1.toInternal(): PlanItem = when(this) {
+    is ExerciseItemV1 -> ExerciseItem(
+        id = this.id.toString(),
+        title = this.title,
+        description = this.description.orEmpty(),
+        exerciseId = this.exerciseId.orEmpty(),
+        sets = this.sets?.map {
+            ExerciseSet(
+                reps = it.reps.orEmpty(),
+                weight = it.weight.orEmpty(),
+                weightUnit = it.weightUnit.orEmpty(),
+                durationSeconds = it.durationSeconds ?: 0
+            )
+        }?.toMutableList() ?: mutableListOf(),
+        restBetweenSetsSeconds = this.restBetweenSetsSeconds ?: 0
+    )
+    is CircuitItemV1 -> CircuitItem(
+        id = this.id.toString(),
+        title = this.title,
+        description = this.description.orEmpty(),
+        rounds = this.rounds ?: 1,
+        items = this.items?.map { it.toInternal() }?.toMutableList() ?: mutableListOf(),
+        restBetweenRoundsSeconds = this.restBetweenRoundsSeconds ?: 0
+    )
+    is SupersetItemV1 -> SupersetItem(
+        id = this.id.toString(),
+        title = this.title,
+        description = this.description.orEmpty(),
+        items = this.items?.map { it.toInternal() }?.toMutableList() ?: mutableListOf(),
+        restBetweenSetsSeconds = this.restBetweenSetsSeconds ?: 0
+    )
+    else -> throw IllegalArgumentException("Unknown plan item type")
+}
+
 private fun TrainingPlanCreateObject?.toInternal() = TrainingPlan(
     title = this?.title.orEmpty(),
     clientCardId = this?.clientCardId.toClientCardId(),
-    planItems = this?.planItems?.map {
-        PlanItem(
-            itemRef = it.itemRef,
-            title = it.title,
-            description = it.description.orEmpty()
-        )
-    }?.toMutableList() ?: mutableListOf()
+    planItems = this?.planItems?.map { it.toInternal() }?.toMutableList() ?: mutableListOf()
 )
 
 private fun TrainingPlanReadObject?.toInternal() = TrainingPlan(
@@ -186,13 +258,7 @@ private fun TrainingPlanUpdateObject?.toInternal() = TrainingPlan(
     id = this?.id.toTrainingPlanId(),
     title = this?.title.orEmpty(),
     lock = this?.lock.orEmpty(),
-    planItems = this?.planItems?.map {
-        PlanItem(
-            itemRef = it.itemRef,
-            title = it.title,
-            description = it.description.orEmpty()
-        )
-    }?.toMutableList() ?: mutableListOf()
+    planItems = this?.planItems?.map { it.toInternal() }?.toMutableList() ?: mutableListOf()
 )
 
 private fun TrainingPlanArchiveObject?.toInternal() = TrainingPlan(

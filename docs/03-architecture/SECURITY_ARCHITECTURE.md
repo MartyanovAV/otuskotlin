@@ -15,7 +15,7 @@ Security scope MVP покрывает:
 
 - аутентификацию тренера через Keycloak/OIDC;
 - приватные trainer endpoints с JWT validation и проверкой ownership;
-- публичный token-only endpoint для просмотра плана и отметки выполнения;
+- публичные token-only endpoints для просмотра плана и отметки выполнения (`/public/v1/*` и `/public/v2/*`);
 - lifecycle публичной ссылки: generate, hash-only storage, TTL, revoke/close, expired;
 - защиту raw token, минимизацию публичного payload и masked logs;
 - rate limiting публичных операций и безопасные generic errors;
@@ -30,7 +30,7 @@ Security scope MVP покрывает:
 | `Support/Ops operator` | Операционный актор вне продукта | Controlled runbook для пилота: допуск/блокировка тренера, расследование технических инцидентов по masked logs | Не product role; не читает raw token, содержимое плана, client notes или health-adjacent payload |
 | `Keycloak` | Доверенный Identity Provider | Login тренера, OIDC/JWT | Не участвует в публичном клиентском доступе и не решает domain ownership |
 | `FitBridge Backend` | Доверенная доменная система | POST Full API, token hash validation, ownership, запись данных | Единственный владелец public-link lifecycle и доменных проверок |
-| `Envoy Gateway` | Инфраструктурный boundary | Маршрутизация приватного и публичного контуров, rate limiting, edge JWT для `/v1/*` | Не заменяет backend-проверки token/ownership |
+| `Envoy Gateway` | Инфраструктурный boundary | Маршрутизация приватного и публичного контуров, rate limiting, edge JWT для versioned private API (`/v1/*`, `/v2/*`) | Не заменяет backend-проверки token/ownership |
 | `PostgreSQL` | Доверенное прикладное хранилище | Хранит user/trainer/card/plan/completion и token hash | Raw token не хранится |
 | `OpenSearch / Dashboards` | Внешний observability-контур | Поиск masked logs | Не является application boundary; не получает raw token, URL с token, request body, план/комментарии |
 
@@ -169,13 +169,13 @@ sequenceDiagram
 
     Client->>GW: Открыть public URL token-only
     GW->>GW: Rate limit public route
-    GW->>API: POST /public/v1/plan.open token
+    GW->>API: POST /public/v1/plan/open (или /public/v2/plan/open) + token
     API->>API: hash(token), TTL/status/revoke checks
     API->>DB: Найти активный TrainingPlan по hash
     API-->>Client: Минимальный payload плана
 
     Client->>GW: Отметить выполнение token-only
-    GW->>API: POST /public/v1/plan.markCompletion token + minimal mark
+    GW->>API: POST /public/v1/plan/markCompletion (или /public/v2/plan/markCompletion) + token + minimal mark
     API->>API: Повторная проверка token + idempotency
     API->>DB: Добавить CompletionMark
     API->>LOG: completionMark.create SUCCESS masked
@@ -206,7 +206,7 @@ sequenceDiagram
 
 | Требование | Риск, который закрывается | Целевое правило MVP |
 |---|---|---|
-| JWT для `/v1/*` | Неавторизованные trainer operations | Все приватные trainer endpoints проходят edge и backend JWT validation |
+| JWT для versioned private API | Неавторизованные trainer operations | Все приватные trainer endpoints (`/v1/*`, `/v2/*`) проходят edge и backend JWT validation |
 | Token-only public API | IDOR и enumeration | Публичный контур принимает только raw token и не использует client/plan ids из запроса |
 | Hash-only token storage | Утечка БД/логов | Raw token не хранится; в БД только hash и lifecycle metadata |
 | TTL + revoke | Бессрочный доступ | Каждая ссылка имеет срок жизни и может быть закрыта тренером |

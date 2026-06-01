@@ -14,6 +14,7 @@
 | Security/access/privacy | [SECURITY_ARCHITECTURE.md](./SECURITY_ARCHITECTURE.md) |
 | API index | [02-api.md](./02-api.md) |
 | API entities/contracts/rules/limits | Файлы каталога `api/`, перечислены в [02-api.md](./02-api.md) |
+| OpenAPI спецификации | [specs-fitbridge-v1.yaml](../../fit-bridge-other/fit-bridge-specs/specs/specs-fitbridge-v1.yaml), [specs-fitbridge-v2.yaml](../../fit-bridge-other/fit-bridge-specs/specs/specs-fitbridge-v2.yaml) |
 | Deployment/run guide | [../../deploy/README.md](../../deploy/README.md) |
 
 ## Карта MVP
@@ -40,7 +41,7 @@ FitBridge — trainer-first SaaS для независимого тренера.
 - **Capability-token вместо `AccessGrant`:** публичная ссылка — технический доступ к конкретному `TrainingPlan`, а не самостоятельная продуктовая сущность и не полноценная модель прав.
 - **Public endpoint by token only:** публичные методы получают только raw token; `clientId`, `planId` и другие прямые идентификаторы в публичном URL/API не передаются.
 - **Token safety:** raw token не хранится и не логируется; в БД хранится только hash, обязательны TTL, revoke/close, rate limiting и минимальный публичный payload.
-- **Deny by default для приватного API:** все тренерские `/v1/*` методы проходят JWT validation и ownership-проверку тренера над `ClientCard`/`TrainingPlan`.
+- **Deny by default для приватного API:** все тренерские `/v1/*` и `/v2/*` методы проходят JWT validation и ownership-проверку тренера над `ClientCard`/`TrainingPlan`.
 - **Per-entity repository rule:** repository ports/implementations находятся внутри соответствующей сущности, общего repo-layer на уровне сервиса нет.
 - **Evolution-ready:** модель не блокирует будущий переход к `ClientProfile`, `Invite`, `AccessGrant` и client-owned истории после проверки метрик публичной ссылки.
 
@@ -50,7 +51,7 @@ FitBridge — trainer-first SaaS для независимого тренера.
 |---|---|---|
 | Backend | Kotlin + Ktor | [ADR-004](./ADR/ADR-004-kotlin.md), [ADR-003](./ADR/ADR-003-ktor.md) |
 | Identity | Keycloak/OIDC/JWT для тренера; публичный клиентский доступ без JWT по capability-token | [ADR-001](./ADR/ADR-001-use-keycloak.md), [ADR-007](./ADR/ADR-007-public-plan-link-mvp.md), [SECURITY](./SECURITY_ARCHITECTURE.md) |
-| API | POST Full, HTTPS/JSON; приватный `/v1/*` и публичный token-only контур | [ADR-002](./ADR/ADR-002-post-full-api.md), [02-api](./02-api.md) |
+| API | POST Full, HTTPS/JSON; приватный `/v1/*` + `/v2/*` и публичный token-only контур `/public/v1/*` + `/public/v2/*` | [ADR-002](./ADR/ADR-002-post-full-api.md), [02-api](./02-api.md), OpenAPI specs |
 | Data | PostgreSQL; hash публичного token внутри `TrainingPlan`/public-access state | [ADR-005](./ADR/ADR-005-use-postgresql.md), [ERD](./ERD.md) |
 | Observability | OpenSearch + Dashboards + Fluent Bit как внешний/platform-контур, masked logs без raw token/payload | [ADR-006](./ADR/ADR-006-use-opensearch-fluent-bit-observability.md) |
 
@@ -67,7 +68,7 @@ FitBridge — trainer-first SaaS для независимого тренера.
 ### C4 Container
 
 - `Web UI` содержит две поверхности: приватный кабинет тренера и публичная страница плана.
-- `Envoy Gateway` разделяет приватный `/v1/*` контур с JWT validation и публичный token-only контур с rate limiting.
+- `Envoy Gateway` разделяет приватные `/v1/*` и `/v2/*` контуры с JWT validation и публичный token-only контур с rate limiting.
 - `FitBridge Backend API` реализует POST Full handlers, ownership checks, public token validation, lifecycle закрытия ссылки и запись `CompletionMark`.
 - `Application DB` хранит `FitBridgeUser/TrainerProfile`, `ClientCard`, `TrainingPlan` и `CompletionMark`/value-object данные.
 
