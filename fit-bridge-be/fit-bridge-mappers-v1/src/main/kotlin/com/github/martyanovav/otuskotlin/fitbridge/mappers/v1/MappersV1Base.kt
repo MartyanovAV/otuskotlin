@@ -2,38 +2,29 @@ package com.github.martyanovav.otuskotlin.fitbridge.mappers.v1
 
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardArchiveRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardCreateRequest
-import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardListRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardSearchRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardReadRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardUpdateRequest
-import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.DashboardGetTrainerSummaryRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.Debug
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.Error
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.IRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.IResponse
-import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.PublicPlanMarkCompletionRequest
-import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.PublicPlanOpenByTokenRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.RequestDebugMode
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.RequestDebugStubs
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainerProfileCreateOrUpdateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainerProfileReadOwnRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanArchiveRequest
-import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanClosePublicLinkRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanCreateRequest
-import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanGeneratePublicLinkRequest
-import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanReadCompletionStatusRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanReadRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanSearchRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanUpdateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.common.ClientCardContext
-import com.github.martyanovav.otuskotlin.fitbridge.common.DashboardContext
 import com.github.martyanovav.otuskotlin.fitbridge.common.IFBContext
-import com.github.martyanovav.otuskotlin.fitbridge.common.PublicPlanContext
 import com.github.martyanovav.otuskotlin.fitbridge.common.TrainerProfileContext
 import com.github.martyanovav.otuskotlin.fitbridge.common.TrainingPlanContext
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.ClientCardCommand
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.clientcard.ClientCardId
-import com.github.martyanovav.otuskotlin.fitbridge.common.models.DashboardCommand
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.FBError
-import com.github.martyanovav.otuskotlin.fitbridge.common.models.PublicPlanCommand
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.RequestId
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.trainer.TrainerId
 import com.github.martyanovav.otuskotlin.fitbridge.common.models.TrainerProfileCommand
@@ -106,17 +97,12 @@ fun IRequest.fromTransport(): IFBContext = when (this) {
     is ClientCardReadRequest -> ClientCardContext().apply { fromTransport(this@fromTransport) }
     is ClientCardUpdateRequest -> ClientCardContext().apply { fromTransport(this@fromTransport) }
     is ClientCardArchiveRequest -> ClientCardContext().apply { fromTransport(this@fromTransport) }
-    is ClientCardListRequest -> ClientCardContext().apply { fromTransport(this@fromTransport) }
+    is ClientCardSearchRequest -> ClientCardContext().apply { fromTransport(this@fromTransport) }
     is TrainingPlanCreateRequest -> TrainingPlanContext().apply { fromTransport(this@fromTransport) }
     is TrainingPlanReadRequest -> TrainingPlanContext().apply { fromTransport(this@fromTransport) }
     is TrainingPlanUpdateRequest -> TrainingPlanContext().apply { fromTransport(this@fromTransport) }
     is TrainingPlanArchiveRequest -> TrainingPlanContext().apply { fromTransport(this@fromTransport) }
-    is TrainingPlanGeneratePublicLinkRequest -> TrainingPlanContext().apply { fromTransport(this@fromTransport) }
-    is TrainingPlanClosePublicLinkRequest -> TrainingPlanContext().apply { fromTransport(this@fromTransport) }
-    is TrainingPlanReadCompletionStatusRequest -> TrainingPlanContext().apply { fromTransport(this@fromTransport) }
-    is DashboardGetTrainerSummaryRequest -> DashboardContext().apply { fromTransport(this@fromTransport) }
-    is PublicPlanOpenByTokenRequest -> PublicPlanContext().apply { fromTransport(this@fromTransport) }
-    is PublicPlanMarkCompletionRequest -> PublicPlanContext().apply { fromTransport(this@fromTransport) }
+    is TrainingPlanSearchRequest -> TrainingPlanContext().apply { fromTransport(this@fromTransport) }
     else -> throw UnknownRequestClass(this.javaClass)
 }
 
@@ -129,16 +115,11 @@ fun IFBContext.toTransport(): IResponse = when (val cmd = command) {
     ClientCardCommand.READ -> (this as ClientCardContext).toTransportClientCardRead()
     ClientCardCommand.UPDATE -> (this as ClientCardContext).toTransportClientCardUpdate()
     ClientCardCommand.ARCHIVE -> (this as ClientCardContext).toTransportClientCardArchive()
-    ClientCardCommand.LIST -> (this as ClientCardContext).toTransportClientCardList()
+    ClientCardCommand.SEARCH -> (this as ClientCardContext).toTransportClientCardSearch()
     TrainingPlanCommand.CREATE -> (this as TrainingPlanContext).toTransportTrainingPlanCreate()
     TrainingPlanCommand.READ -> (this as TrainingPlanContext).toTransportTrainingPlanRead()
     TrainingPlanCommand.UPDATE -> (this as TrainingPlanContext).toTransportTrainingPlanUpdate()
     TrainingPlanCommand.ARCHIVE -> (this as TrainingPlanContext).toTransportTrainingPlanArchive()
-    TrainingPlanCommand.GENERATE_PUBLIC_LINK -> (this as TrainingPlanContext).toTransportTrainingPlanGeneratePublicLink()
-    TrainingPlanCommand.CLOSE_PUBLIC_LINK -> (this as TrainingPlanContext).toTransportTrainingPlanClosePublicLink()
-    TrainingPlanCommand.READ_COMPLETION_STATUS -> (this as TrainingPlanContext).toTransportTrainingPlanReadCompletionStatus()
-    DashboardCommand.GET_TRAINER_SUMMARY -> (this as DashboardContext).toTransportDashboardGetTrainerSummary()
-    PublicPlanCommand.OPEN_BY_TOKEN -> (this as PublicPlanContext).toTransportPublicPlanOpenByToken()
-    PublicPlanCommand.MARK_COMPLETION -> (this as PublicPlanContext).toTransportPublicPlanMarkCompletion()
+    TrainingPlanCommand.SEARCH -> (this as TrainingPlanContext).toTransportTrainingPlanSearch()
     else -> throw IllegalArgumentException("Unsupported command $cmd")
 }

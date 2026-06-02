@@ -1,63 +1,46 @@
-# Методы TrainingPlan и Completion API MVP
+# Методы TrainingPlan API MVP Trainer Diary
 
-Канонические методы Gate 1 для простых планов, публичного просмотра по token и отметок выполнения. Полноценный дневник клиента и `ProgramAssignment` не входят в MVP публичного доступа к плану.
+Канонические методы текущего MVP для простых тренировочных планов: создать план и найти планы тренера. Клиентский просмотр, дневник выполнения, сводные экраны и `ProgramAssignment` не входят в MVP Trainer Diary.
 
 ## Общие правила
 
-- Приватные методы плана доступны только тренеру-владельцу через JWT + ownership check.
-- Публичные методы доступны только по raw token; backend хранит и ищет только hash.
-- `CompletionMark` — минимальный дочерний объект/value object `TrainingPlan`, а не полноценная дневниковая запись клиента.
+- Методы плана доступны только тренеру-владельцу через JWT + ownership check.
+- Поиск планов выполняется через `trainingPlan.search`, а не через отдельную сводку статусов.
+- Отметки выполнения и public endpoints отсутствуют в MVP.
 - SLO и rate limits: [06-metrics-and-limits.md](./06-metrics-and-limits.md).
 
-## Приватные методы плана (versioned `/v1/*` и `/v2/*`)
+## Методы плана (versioned `/v1/*` и `/v2/*`)
 
 1. **`trainingPlan.create`** — создать простой план для `ClientCard`.
-   - *Бизнес-правило*: план создаёт только тренер-владелец карточки.
-   - *Валидация*: название 3-120 символов; план содержит минимум одно задание; медданные/фото/видео/rich-media запрещены.
+    - *Бизнес-правило*: план создаёт только тренер-владелец карточки.
+    - *Валидация*: название 3-120 символов; план содержит минимум одно задание; медданные/фото/видео/rich-media запрещены.
 
-2. **`trainingPlan.read`** — получить план в кабинете тренера.
-   - *Бизнес-правило*: возвращает полный trainer-private view только владельцу.
+2. **`trainingPlan.search`** — найти/вывести планы тренера.
+   - *HTTP endpoints*: `POST /v1/trainingPlan/search` и `POST /v2/trainingPlan/search`.
+   - *Бизнес-правило*: возвращает только планы текущего тренера; фильтр `clientCardId` допустим только для карточки этого же тренера.
+   - *Фильтры*: `clientCardId`, `searchString` по названию плана, `status`, `pageSize`, `pageNumber`.
+   - *Ответ*: список `TrainingPlanResponseObject`, `totalSize`, `pageNumber`, `pageSize`.
 
-3. **`trainingPlan.update`** — изменить план.
-   - *Бизнес-правило*: если public link активна, изменения должны увеличивать `version` или явно обновлять snapshot, чтобы клиент видел актуальную версию.
-
-4. **`trainingPlan.archive`** — архивировать план.
-   - *Бизнес-правило*: архивный план недоступен публично; активная ссылка должна быть закрыта или стать недоступной.
-
-5. **`trainingPlan.readCompletionStatus`** — получить статус выполнения.
-   - *Бизнес-правило*: тренер видит отметки выполнения по собственному плану и агрегированный статус карточки.
-
-## Публичные методы по ссылке (versioned `/public/v1/*` и `/public/v2/*`)
-
-6. **`publicPlan.openByToken`** — открыть план по публичной ссылке.
-   - *HTTP endpoints*: `POST /public/v1/plan/open` и `POST /public/v2/plan/open`.
-   - *Вход*: raw token только в защищённом канале; не принимать `planId`, `clientCardId`, `trainerId`.
-   - *Security*: hash(token), TTL/status/revoke checks, rate limiting, generic errors.
-   - *Ответ*: минимальный public payload: название плана, задания, безопасное имя тренера/сервиса, состояние доступности ссылки.
-
-7. **`publicPlan.markCompletion`** — оставить отметку выполнения.
-   - *HTTP endpoints*: `POST /public/v1/plan/markCompletion` и `POST /public/v2/plan/markCompletion`.
-   - *Вход*: raw token + минимальная отметка (`itemId`, `status`, опциональный короткий комментарий).
-   - *Бизнес-правило*: создаёт `CompletionMark`, не создаёт клиентский аккаунт, дневник, `AccessGrant` или `ClientProfile`.
-   - *Валидация*: token active; `itemId` существует в публичном snapshot; комментарий ограничен по длине и не логируется.
-   - *Idempotency*: повтор submit должен быть безопасен через idempotency/fingerprint policy.
+> В OpenAPI v1/v2 могут сохраняться методы `read/update/archive` как методы управления ресурсом, но строго минимальный MVP-сценарий в текущем scope — `create` и `search`.
 
 Для v2 в базовых request/response-схемах присутствует `apiVersion` как поле контракта; оно не помечено как обязательное (`required`) в OpenAPI.
 
-## Whitelist публичного payload
+## Поля ответа плана в MVP
 
-| Поле | Разрешено публично | Комментарий |
+| Поле | Возвращается тренеру | Комментарий |
 |---|---|---|
-| `planTitle` | ✅ | Без внутренних id |
-| `trainerPublicName` | ✅ | Только безопасное публичное имя |
-| `planItems` | ✅ | Только задания, необходимые клиенту |
-| `completionState` | ✅ | Текущая отметка клиента по ссылке, если нужна UX-логика |
-| `clientCard.note` | ❌ | Внутренняя заметка тренера |
-| Internal ids | ❌ | `clientCardId`, `trainingPlanId`, `trainerUserId` не возвращать |
-| Raw token/hash | ❌ | Не возвращать и не логировать |
+| `id` | ✅ | Идентификатор плана в приватном API |
+| `clientCardId` | ✅ | Связь с клиентской карточкой тренера |
+| `title` | ✅ | Название плана |
+| `planItems` | ✅ | Список заданий плана |
+| `status` | ✅ | `DRAFT`, `ACTIVE`, `ARCHIVED` |
+| `version` | ✅ | Версия плана |
+| `createdAt` / `updatedAt` | ✅ | Технические timestamps |
+| `publicAccess*` | ❌ | Не входит в MVP |
+| `completionSummary` и отметки выполнения | ❌ | Не входит в MVP |
 
 ## Ссылки без дублирования
 
-- Сущности и связи планов/отметок: [ERD](../ERD.md).
-- Public-link guardrails: [Security Architecture](../SECURITY_ARCHITECTURE.md).
+- Сущности и связи планов: [ERD](../ERD.md).
+- Security/ownership guardrails: [Security Architecture](../SECURITY_ARCHITECTURE.md).
 - Общие бизнес-правила API: [05-business-rules.md](./05-business-rules.md).

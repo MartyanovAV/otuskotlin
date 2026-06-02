@@ -1,7 +1,7 @@
 ---
 description: Implements features using TDD (Red-Green-Refactor cycle)
 mode: subagent
-model: openai/gpt-5.3-codex
+model: openai/gpt-5.5
 reasoningEffort: medium
 temperature: 0.1
 steps: 50

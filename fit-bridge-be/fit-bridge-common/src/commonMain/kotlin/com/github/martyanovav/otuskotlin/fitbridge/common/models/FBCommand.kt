@@ -16,7 +16,7 @@ enum class ClientCardCommand : FBCommand {
     READ,
     UPDATE,
     ARCHIVE,
-    LIST
+    SEARCH
 }
 
 enum class TrainingPlanCommand : FBCommand {
@@ -25,18 +25,5 @@ enum class TrainingPlanCommand : FBCommand {
     READ,
     UPDATE,
     ARCHIVE,
-    GENERATE_PUBLIC_LINK,
-    CLOSE_PUBLIC_LINK,
-    READ_COMPLETION_STATUS
-}
-
-enum class DashboardCommand : FBCommand {
-    NONE,
-    GET_TRAINER_SUMMARY
-}
-
-enum class PublicPlanCommand : FBCommand {
-    NONE,
-    OPEN_BY_TOKEN,
-    MARK_COMPLETION
+    SEARCH
 }

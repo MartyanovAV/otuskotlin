@@ -2,7 +2,7 @@
 openapi: 3.0.3
 info:
   title: FitBridge
-  description: Trainer-first MVP API с публичной ссылкой на тренировочный план
+  description: Trainer Diary MVP API для управления клиентской базой и тренировочными планами
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
@@ -15,11 +15,7 @@ tags:
   - name: clientCard
     description: Минимальная клиентская карточка тренера
   - name: trainingPlan
-    description: Простой тренировочный план и lifecycle публичной ссылки
-  - name: dashboard
-    description: Сводка кабинета тренера
-  - name: publicPlan
-    description: Публичный token-only доступ к плану без JWT
+    description: Тренировочные планы тренера
 
 paths:
   /trainerProfile/createOrUpdate:
@@ -95,18 +91,18 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/ClientCardArchiveResponseBody'
-  /clientCard/list:
+  /clientCard/search:
     post:
       tags: [clientCard]
-      summary: Получить список карточек тренера
-      operationId: clientCardList
+      summary: Найти клиентские карточки тренера
+      operationId: clientCardSearch
       security:
         - bearerAuth: []
       requestBody:
-        $ref: '#/components/requestBodies/ClientCardListRequestBody'
+        $ref: '#/components/requestBodies/ClientCardSearchRequestBody'
       responses:
         '200':
-          $ref: '#/components/responses/ClientCardListResponseBody'
+          $ref: '#/components/responses/ClientCardSearchResponseBody'
 
   /trainingPlan/create:
     post:
@@ -156,82 +152,18 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/TrainingPlanArchiveResponseBody'
-  /trainingPlan/generatePublicLink:
+  /trainingPlan/search:
     post:
       tags: [trainingPlan]
-      summary: Сгенерировать публичную ссылку на план
-      operationId: trainingPlanGeneratePublicLink
+      summary: Найти тренировочные планы тренера
+      operationId: trainingPlanSearch
       security:
         - bearerAuth: []
       requestBody:
-        $ref: '#/components/requestBodies/TrainingPlanGeneratePublicLinkRequestBody'
+        $ref: '#/components/requestBodies/TrainingPlanSearchRequestBody'
       responses:
         '200':
-          $ref: '#/components/responses/TrainingPlanGeneratePublicLinkResponseBody'
-  /trainingPlan/closePublicLink:
-    post:
-      tags: [trainingPlan]
-      summary: Закрыть публичную ссылку на план
-      operationId: trainingPlanClosePublicLink
-      security:
-        - bearerAuth: []
-      requestBody:
-        $ref: '#/components/requestBodies/TrainingPlanClosePublicLinkRequestBody'
-      responses:
-        '200':
-          $ref: '#/components/responses/TrainingPlanClosePublicLinkResponseBody'
-  /trainingPlan/readCompletionStatus:
-    post:
-      tags: [trainingPlan]
-      summary: Получить статус выполнения плана
-      operationId: trainingPlanReadCompletionStatus
-      security:
-        - bearerAuth: []
-      requestBody:
-        $ref: '#/components/requestBodies/TrainingPlanReadCompletionStatusRequestBody'
-      responses:
-        '200':
-          $ref: '#/components/responses/TrainingPlanReadCompletionStatusResponseBody'
-
-  /dashboard/getTrainerSummary:
-    post:
-      tags: [dashboard]
-      summary: Получить сводку кабинета тренера
-      operationId: dashboardGetTrainerSummary
-      security:
-        - bearerAuth: []
-      requestBody:
-        $ref: '#/components/requestBodies/DashboardGetTrainerSummaryRequestBody'
-      responses:
-        '200':
-          $ref: '#/components/responses/DashboardGetTrainerSummaryResponseBody'
-
-  /public/v1/plan/open:
-    post:
-      tags: [publicPlan]
-      summary: Открыть план по публичному token
-      operationId: publicPlanOpenByToken
-      servers:
-        - url: http://localhost:8080
-      security: []
-      requestBody:
-        $ref: '#/components/requestBodies/PublicPlanOpenByTokenRequestBody'
-      responses:
-        '200':
-          $ref: '#/components/responses/PublicPlanOpenByTokenResponseBody'
-  /public/v1/plan/markCompletion:
-    post:
-      tags: [publicPlan]
-      summary: Отметить выполнение элемента плана по публичному token
-      operationId: publicPlanMarkCompletion
-      servers:
-        - url: http://localhost:8080
-      security: []
-      requestBody:
-        $ref: '#/components/requestBodies/PublicPlanMarkCompletionRequestBody'
-      responses:
-        '200':
-          $ref: '#/components/responses/PublicPlanMarkCompletionResponseBody'
+          $ref: '#/components/responses/TrainingPlanSearchResponseBody'
 
 components:
   securitySchemes:
@@ -247,17 +179,12 @@ components:
     ClientCardReadRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/ClientCardReadRequest'}}}}
     ClientCardUpdateRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/ClientCardUpdateRequest'}}}}
     ClientCardArchiveRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/ClientCardArchiveRequest'}}}}
-    ClientCardListRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/ClientCardListRequest'}}}}
+    ClientCardSearchRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/ClientCardSearchRequest'}}}}
     TrainingPlanCreateRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanCreateRequest'}}}}
     TrainingPlanReadRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanReadRequest'}}}}
     TrainingPlanUpdateRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanUpdateRequest'}}}}
     TrainingPlanArchiveRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanArchiveRequest'}}}}
-    TrainingPlanGeneratePublicLinkRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanGeneratePublicLinkRequest'}}}}
-    TrainingPlanClosePublicLinkRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanClosePublicLinkRequest'}}}}
-    TrainingPlanReadCompletionStatusRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanReadCompletionStatusRequest'}}}}
-    DashboardGetTrainerSummaryRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/DashboardGetTrainerSummaryRequest'}}}}
-    PublicPlanOpenByTokenRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/PublicPlanOpenByTokenRequest'}}}}
-    PublicPlanMarkCompletionRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/PublicPlanMarkCompletionRequest'}}}}
+    TrainingPlanSearchRequestBody: {description: Request body, required: true, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanSearchRequest'}}}}
 
   responses:
     TrainerProfileCreateOrUpdateResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/TrainerProfileCreateOrUpdateResponse'}}}}
@@ -266,17 +193,12 @@ components:
     ClientCardReadResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/ClientCardReadResponse'}}}}
     ClientCardUpdateResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/ClientCardUpdateResponse'}}}}
     ClientCardArchiveResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/ClientCardArchiveResponse'}}}}
-    ClientCardListResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/ClientCardListResponse'}}}}
+    ClientCardSearchResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/ClientCardSearchResponse'}}}}
     TrainingPlanCreateResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanCreateResponse'}}}}
     TrainingPlanReadResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanReadResponse'}}}}
     TrainingPlanUpdateResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanUpdateResponse'}}}}
     TrainingPlanArchiveResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanArchiveResponse'}}}}
-    TrainingPlanGeneratePublicLinkResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanGeneratePublicLinkResponse'}}}}
-    TrainingPlanClosePublicLinkResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanClosePublicLinkResponse'}}}}
-    TrainingPlanReadCompletionStatusResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanReadCompletionStatusResponse'}}}}
-    DashboardGetTrainerSummaryResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/DashboardGetTrainerSummaryResponse'}}}}
-    PublicPlanOpenByTokenResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/PublicPlanOpenByTokenResponse'}}}}
-    PublicPlanMarkCompletionResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/PublicPlanMarkCompletionResponse'}}}}
+    TrainingPlanSearchResponseBody: {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/TrainingPlanSearchResponse'}}}}
 
   schemas:
     IRequest:
@@ -299,17 +221,12 @@ components:
           clientCard.read: '#/components/schemas/ClientCardReadRequest'
           clientCard.update: '#/components/schemas/ClientCardUpdateRequest'
           clientCard.archive: '#/components/schemas/ClientCardArchiveRequest'
-          clientCard.list: '#/components/schemas/ClientCardListRequest'
+          clientCard.search: '#/components/schemas/ClientCardSearchRequest'
           trainingPlan.create: '#/components/schemas/TrainingPlanCreateRequest'
           trainingPlan.read: '#/components/schemas/TrainingPlanReadRequest'
           trainingPlan.update: '#/components/schemas/TrainingPlanUpdateRequest'
           trainingPlan.archive: '#/components/schemas/TrainingPlanArchiveRequest'
-          trainingPlan.generatePublicLink: '#/components/schemas/TrainingPlanGeneratePublicLinkRequest'
-          trainingPlan.closePublicLink: '#/components/schemas/TrainingPlanClosePublicLinkRequest'
-          trainingPlan.readCompletionStatus: '#/components/schemas/TrainingPlanReadCompletionStatusRequest'
-          dashboard.getTrainerSummary: '#/components/schemas/DashboardGetTrainerSummaryRequest'
-          publicPlan.openByToken: '#/components/schemas/PublicPlanOpenByTokenRequest'
-          publicPlan.markCompletion: '#/components/schemas/PublicPlanMarkCompletionRequest'
+          trainingPlan.search: '#/components/schemas/TrainingPlanSearchRequest'
 
     IResponse:
       type: object
@@ -338,17 +255,12 @@ components:
           clientCard.read: '#/components/schemas/ClientCardReadResponse'
           clientCard.update: '#/components/schemas/ClientCardUpdateResponse'
           clientCard.archive: '#/components/schemas/ClientCardArchiveResponse'
-          clientCard.list: '#/components/schemas/ClientCardListResponse'
+          clientCard.search: '#/components/schemas/ClientCardSearchResponse'
           trainingPlan.create: '#/components/schemas/TrainingPlanCreateResponse'
           trainingPlan.read: '#/components/schemas/TrainingPlanReadResponse'
           trainingPlan.update: '#/components/schemas/TrainingPlanUpdateResponse'
           trainingPlan.archive: '#/components/schemas/TrainingPlanArchiveResponse'
-          trainingPlan.generatePublicLink: '#/components/schemas/TrainingPlanGeneratePublicLinkResponse'
-          trainingPlan.closePublicLink: '#/components/schemas/TrainingPlanClosePublicLinkResponse'
-          trainingPlan.readCompletionStatus: '#/components/schemas/TrainingPlanReadCompletionStatusResponse'
-          dashboard.getTrainerSummary: '#/components/schemas/DashboardGetTrainerSummaryResponse'
-          publicPlan.openByToken: '#/components/schemas/PublicPlanOpenByTokenResponse'
-          publicPlan.markCompletion: '#/components/schemas/PublicPlanMarkCompletionResponse'
+          trainingPlan.search: '#/components/schemas/TrainingPlanSearchResponse'
 
     Error:
       type: object
@@ -370,10 +282,7 @@ components:
     TrainerProfileId: {type: string, description: Идентификатор профиля тренера}
     ClientCardId: {type: string, description: Идентификатор клиентской карточки}
     TrainingPlanId: {type: string, description: Идентификатор тренировочного плана}
-    CompletionMarkId: {type: string, description: Идентификатор отметки выполнения}
     Lock: {type: string, description: Версия оптимистичной блокировки}
-    PublicToken: {type: string, description: Raw public token; не хранится и не логируется}
-    PublicUrl: {type: string, format: uri, description: Публичная ссылка для передачи клиенту}
 
     TrainerRole:
       type: string
@@ -383,25 +292,13 @@ components:
       enum: [ACTIVE, BLOCKED, DELETED]
     TrainerProfileOnboardingStatus:
       type: string
-      enum: [NEW, PROFILE_READY, FIRST_LINK_CREATED, COMPLETED]
+      enum: [NEW, PROFILE_READY, FIRST_CLIENT_CREATED, FIRST_PLAN_CREATED, COMPLETED]
     ClientCardStatus:
       type: string
       enum: [ACTIVE, ARCHIVED]
     TrainingPlanStatus:
       type: string
       enum: [DRAFT, ACTIVE, ARCHIVED]
-    PublicAccessStatus:
-      type: string
-      enum: [NONE, ACTIVE, REVOKED, EXPIRED]
-    CompletionStatus:
-      type: string
-      enum: [DONE, SKIPPED]
-    CompletionAggregateStatus:
-      type: string
-      enum: [NOT_STARTED, IN_PROGRESS, COMPLETED, SKIPPED, MIXED]
-    TrainerPermission:
-      type: string
-      enum: [read, update, archive, generatePublicLink, closePublicLink, readCompletionStatus]
     ItemType:
       type: string
       enum: [EXERCISE, CIRCUIT, SUPERSET]
@@ -463,7 +360,7 @@ components:
       properties:
         id: {$ref: '#/components/schemas/ClientCardId'}
         lock: {$ref: '#/components/schemas/Lock'}
-    ClientCardListFilter:
+    ClientCardSearchFilter:
       type: object
       properties:
         searchString: {type: string, maxLength: 120}
@@ -478,7 +375,6 @@ components:
             id: {$ref: '#/components/schemas/ClientCardId'}
             status: {$ref: '#/components/schemas/ClientCardStatus'}
             lastPlanStatus: {$ref: '#/components/schemas/TrainingPlanStatus'}
-            lastCompletionStatus: {$ref: '#/components/schemas/CompletionAggregateStatus'}
             createdAt: {$ref: '#/components/schemas/Timestamp'}
             updatedAt: {$ref: '#/components/schemas/Timestamp'}
             lock: {$ref: '#/components/schemas/Lock'}
@@ -569,35 +465,14 @@ components:
       properties:
         id: {$ref: '#/components/schemas/TrainingPlanId'}
         lock: {$ref: '#/components/schemas/Lock'}
-    TrainingPlanGeneratePublicLinkObject:
+    TrainingPlanSearchFilter:
       type: object
       properties:
-        id: {$ref: '#/components/schemas/TrainingPlanId'}
-        expiresAt: {$ref: '#/components/schemas/Timestamp'}
-    TrainingPlanClosePublicLinkObject:
-      type: object
-      properties:
-        id: {$ref: '#/components/schemas/TrainingPlanId'}
-        lock: {$ref: '#/components/schemas/Lock'}
-    TrainingPlanReadCompletionStatusObject:
-      type: object
-      properties:
-        id: {$ref: '#/components/schemas/TrainingPlanId'}
-    CompletionMarkResponseObject:
-      type: object
-      properties:
-        id: {$ref: '#/components/schemas/CompletionMarkId'}
-        itemId: {type: string, format: uuid}
-        status: {$ref: '#/components/schemas/CompletionStatus'}
-        completedAt: {$ref: '#/components/schemas/Timestamp'}
-        clientComment: {type: string, maxLength: 500}
-    CompletionSummary:
-      type: object
-      properties:
-        aggregateStatus: {$ref: '#/components/schemas/CompletionAggregateStatus'}
-        doneCount: {type: integer, minimum: 0}
-        skippedCount: {type: integer, minimum: 0}
-        totalItems: {type: integer, minimum: 0}
+        clientCardId: {$ref: '#/components/schemas/ClientCardId'}
+        searchString: {type: string, maxLength: 120, description: Поиск по названию плана}
+        status: {$ref: '#/components/schemas/TrainingPlanStatus'}
+        pageSize: {type: integer, minimum: 1, maximum: 100}
+        pageNumber: {type: integer, minimum: 1}
     TrainingPlanResponseObject:
       allOf:
         - $ref: '#/components/schemas/TrainingPlanBase'
@@ -607,95 +482,9 @@ components:
             clientCardId: {$ref: '#/components/schemas/ClientCardId'}
             status: {$ref: '#/components/schemas/TrainingPlanStatus'}
             version: {type: integer, minimum: 1}
-            publicAccessStatus: {$ref: '#/components/schemas/PublicAccessStatus'}
-            publicAccessExpiresAt: {$ref: '#/components/schemas/Timestamp'}
-            completionSummary: {$ref: '#/components/schemas/CompletionSummary'}
             createdAt: {$ref: '#/components/schemas/Timestamp'}
             updatedAt: {$ref: '#/components/schemas/Timestamp'}
             lock: {$ref: '#/components/schemas/Lock'}
-            permissions:
-              type: array
-              uniqueItems: true
-              items: {$ref: '#/components/schemas/TrainerPermission'}
-    PublicLinkResponseObject:
-      type: object
-      properties:
-        publicUrl: {$ref: '#/components/schemas/PublicUrl'}
-        publicToken: {$ref: '#/components/schemas/PublicToken'}
-        expiresAt: {$ref: '#/components/schemas/Timestamp'}
-        publicAccessStatus: {$ref: '#/components/schemas/PublicAccessStatus'}
-    CompletionStatusResponseObject:
-      type: object
-      properties:
-        trainingPlanId: {$ref: '#/components/schemas/TrainingPlanId'}
-        aggregateStatus: {$ref: '#/components/schemas/CompletionAggregateStatus'}
-        marks:
-          type: array
-          items: {$ref: '#/components/schemas/CompletionMarkResponseObject'}
-
-    DashboardSummaryResponseObject:
-      type: object
-      properties:
-        activeClientCards: {type: integer, minimum: 0}
-        archivedClientCards: {type: integer, minimum: 0}
-        activeTrainingPlans: {type: integer, minimum: 0}
-        activePublicLinks: {type: integer, minimum: 0}
-        recentCompletions:
-          type: array
-          items:
-            type: object
-            properties:
-              clientCardId: {$ref: '#/components/schemas/ClientCardId'}
-              trainingPlanId: {$ref: '#/components/schemas/TrainingPlanId'}
-              clientDisplayName: {type: string}
-              planTitle: {type: string}
-              aggregateStatus: {$ref: '#/components/schemas/CompletionAggregateStatus'}
-              lastCompletedAt: {$ref: '#/components/schemas/Timestamp'}
-
-    PublicPlanItem:
-      type: object
-      required: [itemId, title]
-      properties:
-        itemId: {type: string, format: uuid, description: Стабильная ссылка на элемент плана}
-        title: {type: string}
-        description: {type: string}
-    PublicCompletionState:
-      type: object
-      properties:
-        itemId: {type: string, format: uuid}
-        status: {$ref: '#/components/schemas/CompletionStatus'}
-        completedAt: {$ref: '#/components/schemas/Timestamp'}
-    PublicPlanView:
-      type: object
-      description: Минимальный public payload без internal ids, raw token/hash, email и заметок тренера
-      properties:
-        trainerPublicName: {type: string}
-        planTitle: {type: string}
-        accessStatus: {$ref: '#/components/schemas/PublicAccessStatus'}
-        expiresAt: {$ref: '#/components/schemas/Timestamp'}
-        planItems:
-          type: array
-          items: {$ref: '#/components/schemas/PublicPlanItem'}
-        completionState:
-          type: array
-          items: {$ref: '#/components/schemas/PublicCompletionState'}
-    PublicPlanMarkCompletionObject:
-      type: object
-      required: [itemId, status]
-      properties:
-        itemId: {type: string, format: uuid}
-        status: {$ref: '#/components/schemas/CompletionStatus'}
-        completedAt: {$ref: '#/components/schemas/Timestamp'}
-        clientComment: {type: string, maxLength: 500, description: Не логируется в raw виде}
-        idempotencyKey: {type: string, maxLength: 120}
-        requestFingerprint: {type: string, maxLength: 200}
-    PublicCompletionMarkResponseObject:
-      type: object
-      properties:
-        itemId: {type: string, format: uuid}
-        status: {$ref: '#/components/schemas/CompletionStatus'}
-        acceptedAt: {$ref: '#/components/schemas/Timestamp'}
-        aggregateStatus: {$ref: '#/components/schemas/CompletionAggregateStatus'}
 
     InitResponse:
       allOf:
@@ -732,8 +521,8 @@ components:
       allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardUpdateObject'}}}]
     ClientCardArchiveRequest:
       allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardArchiveObject'}}}]
-    ClientCardListRequest:
-      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {clientCardFilter: {$ref: '#/components/schemas/ClientCardListFilter'}}}]
+    ClientCardSearchRequest:
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {clientCardFilter: {$ref: '#/components/schemas/ClientCardSearchFilter'}}}]
     ClientCardCreateResponse:
       allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardResponseObject'}}}]
     ClientCardReadResponse:
@@ -742,7 +531,7 @@ components:
       allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardResponseObject'}}}]
     ClientCardArchiveResponse:
       allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {clientCard: {$ref: '#/components/schemas/ClientCardResponseObject'}}}]
-    ClientCardListResponse:
+    ClientCardSearchResponse:
       allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {clientCards: {type: array, items: {$ref: '#/components/schemas/ClientCardResponseObject'}}, totalSize: {type: integer, minimum: 0}, pageNumber: {type: integer, minimum: 1}, pageSize: {type: integer, minimum: 1}}}]
 
     TrainingPlanCreateRequest:
@@ -753,12 +542,8 @@ components:
       allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanUpdateObject'}}}]
     TrainingPlanArchiveRequest:
       allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanArchiveObject'}}}]
-    TrainingPlanGeneratePublicLinkRequest:
-      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanGeneratePublicLinkObject'}}}]
-    TrainingPlanClosePublicLinkRequest:
-      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanClosePublicLinkObject'}}}]
-    TrainingPlanReadCompletionStatusRequest:
-      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanReadCompletionStatusObject'}}}]
+    TrainingPlanSearchRequest:
+      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {trainingPlanFilter: {$ref: '#/components/schemas/TrainingPlanSearchFilter'}}}]
     TrainingPlanCreateResponse:
       allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanResponseObject'}}}]
     TrainingPlanReadResponse:
@@ -767,26 +552,8 @@ components:
       allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanResponseObject'}}}]
     TrainingPlanArchiveResponse:
       allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanResponseObject'}}}]
-    TrainingPlanGeneratePublicLinkResponse:
-      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {publicLink: {$ref: '#/components/schemas/PublicLinkResponseObject'}}}]
-    TrainingPlanClosePublicLinkResponse:
-      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {trainingPlan: {$ref: '#/components/schemas/TrainingPlanResponseObject'}}}]
-    TrainingPlanReadCompletionStatusResponse:
-      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {completionStatus: {$ref: '#/components/schemas/CompletionStatusResponseObject'}}}]
-
-    DashboardGetTrainerSummaryRequest:
-      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}]
-    DashboardGetTrainerSummaryResponse:
-      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {summary: {$ref: '#/components/schemas/DashboardSummaryResponseObject'}}}]
-
-    PublicPlanOpenByTokenRequest:
-      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {token: {$ref: '#/components/schemas/PublicToken'}}}]
-    PublicPlanMarkCompletionRequest:
-      allOf: [{$ref: '#/components/schemas/IRequest'}, {$ref: '#/components/schemas/RequestDebug'}, {type: object, properties: {token: {$ref: '#/components/schemas/PublicToken'}, completion: {$ref: '#/components/schemas/PublicPlanMarkCompletionObject'}}}]
-    PublicPlanOpenByTokenResponse:
-      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {publicPlan: {$ref: '#/components/schemas/PublicPlanView'}}}]
-    PublicPlanMarkCompletionResponse:
-      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {completion: {$ref: '#/components/schemas/PublicCompletionMarkResponseObject'}}}]
+    TrainingPlanSearchResponse:
+      allOf: [{$ref: '#/components/schemas/IResponse'}, {type: object, properties: {trainingPlans: {type: array, items: {$ref: '#/components/schemas/TrainingPlanResponseObject'}}, totalSize: {type: integer, minimum: 0}, pageNumber: {type: integer, minimum: 1}, pageSize: {type: integer, minimum: 1}}}]
 
     RequestDebugMode:
       type: string
@@ -815,12 +582,6 @@ components:
         - badClientName
         - badPlanTitle
         - badPlanBody
-        - badToken
-        - expiredToken
-        - revokedToken
         - forbidden
-        - rateLimited
         - validationError
         - cannotArchive
-        - cannotGenerateLink
-        - duplicateCompletion

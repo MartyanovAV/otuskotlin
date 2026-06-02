@@ -9,7 +9,7 @@ flowchart LR
     Plan -->|хранит hash/TTL/status| PublicAccess[Техническое состояние public access]
     Client[Клиент без регистрации] -->|только token| PublicEndpoint[Публичный endpoint плана]
     PublicEndpoint -->|"hash(token), TTL, revoke"| Plan
-    PublicEndpoint -->|создаёт| Mark[CompletionMark value object]
+    PublicEndpoint -->|создаёт| Mark[Отметка выполнения]
     Mark --> Plan
 ```
 
@@ -20,7 +20,7 @@ flowchart LR
 - Backend вычисляет hash token, ищет активный `TrainingPlan`, проверяет `publicAccessStatus`, TTL, revoke и rate limits.
 - В БД хранится только `publicAccessTokenHash`; raw token показывается тренеру один раз при генерации ссылки и запрещён в логах.
 - Публичный payload минимален: только данные плана, необходимые для выполнения, и безопасный статус доступности.
-- `CompletionMark` записывается как дочерний объект/value object `TrainingPlan`; при необходимости отдельная таблица остаётся технической оптимизацией.
+- Отметка выполнения записывается как дочерний объект/value object `TrainingPlan`; при необходимости отдельная таблица остаётся технической оптимизацией.
 
 ## Параметры для ADR
 

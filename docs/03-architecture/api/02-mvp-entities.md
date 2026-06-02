@@ -1,6 +1,6 @@
-# API-сущности trainer-first MVP с публичной ссылкой
+# API-сущности MVP Trainer Diary
 
-Сущности Gate 1: тренер, клиентская карточка, простой план, публичный доступ как technical state плана и отметка выполнения. Полная модель данных — [ERD](../ERD.md).
+Сущности текущего MVP: тренер, клиентская карточка и простой тренировочный план. Клиентский контур, сводные экраны и дневник выполнения исключены. Полная модель данных — [ERD](../ERD.md).
 
 ## [MVP] TrainerUser
 
@@ -14,7 +14,7 @@
 | status | `ACTIVE`, `BLOCKED`, `DELETED` | `ACTIVE` |
 | createdAt | Дата регистрации | `2026-05-27T10:00:00Z` |
 
-> Роль/аккаунт `CLIENT` не требуется в MVP публичного доступа к плану. Клиент открывает публичную ссылку без регистрации.
+> Роль/аккаунт `CLIENT` не требуется в MVP Trainer Diary. Клиент не входит в authenticated/public API текущего MVP.
 
 ## [MVP] TrainerProfile
 
@@ -22,9 +22,9 @@
 |------|-----------------|-----------------|
 | id | Идентификатор профиля тренера | `trp_01HX7M4C2L` |
 | userId | Пользователь-тренер | `usr_01HX7M2A9Q` |
-| publicName | Имя, безопасное для показа клиенту по ссылке | `Иван Петров` |
+| publicName | Отображаемое имя тренера в продукте | `Иван Петров` |
 | specialization | Короткая специализация | `силовой тренинг` |
-| onboardingStatus | `NEW`, `PROFILE_READY`, `FIRST_LINK_CREATED`, `COMPLETED` | `FIRST_LINK_CREATED` |
+| onboardingStatus | `NEW`, `PROFILE_READY`, `FIRST_CLIENT_CREATED`, `FIRST_PLAN_CREATED`, `COMPLETED` | `FIRST_PLAN_CREATED` |
 
 ## [MVP] ClientCard
 
@@ -33,7 +33,7 @@
 | id | Идентификатор карточки | `ccd_01HX7M3B1K` |
 | trainerUserId | Тренер-владелец карточки | `usr_01HX7M2A9Q` |
 | displayName | Имя/псевдоним клиента для тренера | `Мария` |
-| note | Внутренняя заметка тренера; не попадает в public payload | `после отпуска начать мягко` |
+| note | Внутренняя заметка тренера | `после отпуска начать мягко` |
 | status | `ACTIVE`, `ARCHIVED` | `ACTIVE` |
 | createdAt / updatedAt | Технические timestamps | `2026-05-27T10:05:00Z` |
 
@@ -47,28 +47,12 @@
 | clientCardId | Карточка клиента, для которой создан план | `ccd_01HX7M3B1K` |
 | trainerUserId | Автор и владелец плана | `usr_01HX7M2A9Q` |
 | title | Название плана | `Стартовая неделя` |
-| planBody | Структура заданий; публично отдаётся только whitelisted subset | `{ "days": [...] }` |
+| planBody | Структура заданий плана | `{ "days": [...] }` |
 | status | `DRAFT`, `ACTIVE`, `ARCHIVED` | `ACTIVE` |
 | version | Версия плана | `1` |
-| publicAccessTokenHash | Hash public token, raw token не хранится | `sha256:...` |
-| publicAccessStatus | `NONE`, `ACTIVE`, `REVOKED`, `EXPIRED` | `ACTIVE` |
-| publicAccessExpiresAt | TTL публичной ссылки | `2026-06-10T10:00:00Z` |
-| publicAccessRevokedAt | Момент закрытия ссылки | `null` |
+| createdAt / updatedAt | Технические timestamps | `2026-05-27T11:00:00Z` |
 
-> Публичная ссылка не является отдельной API/product entity. Public-link lifecycle хранится как technical state плана.
-
-## [MVP] CompletionMark
-
-| Поле | Бизнес-описание | Пример значения |
-|------|-----------------|-----------------|
-| id | Идентификатор отметки или вложенного элемента | `cmk_01HX7MAJ8S` |
-| trainingPlanId | План, по которому оставлена отметка | `tpl_01HX7MCLAV` |
-| itemId | Стабильная ссылка на день/упражнение/элемент плана (UUID в API-контракте) | `550e8400-e29b-41d4-a716-446655440000` |
-| status | `DONE`, `SKIPPED` | `DONE` |
-| completedAt | Когда клиент отметил выполнение | `2026-05-28T19:30:00Z` |
-| clientComment | Короткий необязательный комментарий; raw value не логируется | `тяжело, но сделал` |
-
-> На MVP `CompletionMark` допустимо хранить как value object внутри `TrainingPlan`; отдельная таблица — техническая оптимизация, а не расширение продуктовой модели.
+> `TrainingPlan` в MVP не содержит share/access state и клиентского дневника. Поиск планов выполняется через `/trainingPlan/search` по `clientCardId`, `searchString`, `status` и пагинации.
 
 ## API-сущности вне MVP / Phase 2
 
@@ -77,6 +61,8 @@
 | `ClientProfile` | Future client-owned profile |
 | `Invite` | Future invite/consent flow |
 | `AccessGrant` | Future granular permissions |
+| Public share flow | Future share/access flow; текущий ADR-007 отклонён |
+| Отметки выполнения / дневник | Future client-owned diary/history |
 | `TrainingEntry` | Future client-owned diary/history |
 | `ProgramAssignment` | Future assignment model после отделения plan/program/history |
 | `Notification`, `AuditEvent`, `Subscription` | Phase 2+ продуктовые контуры |
