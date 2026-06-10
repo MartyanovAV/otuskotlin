@@ -1,7 +1,7 @@
 ---
 description: Coordinates project flow through gates and agents
 mode: primary
-model: openai/gpt-5.5
+model: google/gemini-3.1-pro-preview
 reasoningEffort: high
 temperature: 0.1
 steps: 60

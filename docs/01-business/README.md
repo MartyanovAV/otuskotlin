@@ -28,6 +28,7 @@
 | [BR-007-billing-subscriptions.md](BR/BR-007-billing-subscriptions.md) | Биллинг и подписки |
 | [BR-008-team-management.md](BR/BR-008-team-management.md) | Управление командой (студия) |
 | [BR-009-consent-privacy-deletion.md](BR/BR-009-consent-privacy-deletion.md) | Согласия, приватность и удаление профиля |
+| [BR-010](BR/BR-010-public-plan-link-mvp.md) | Канонический scope trainer-first MVP с публичной ссылкой |
 
 ## Как создать новый BR
 

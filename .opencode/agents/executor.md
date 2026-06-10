@@ -1,7 +1,8 @@
 ---
 description: Implements features using TDD (Red-Green-Refactor cycle)
 mode: subagent
-model: opencode-go/qwen3.6-plus
+model: openai/gpt-5.5
+reasoningEffort: medium
 temperature: 0.1
 steps: 50
 permission:

@@ -1,0 +1,28 @@
+# Git
+.git
+.gitignore
+
+# IDEs and Editors
+.idea
+*.iml
+*.iws
+.vscode
+.opencode
+
+# Gradle
+.gradle
+build
+**/build/
+gradlew.bat
+
+# Docker volumes
+deploy/volumes/postgresql-data
+deploy/volumes/opensearch-data
+deploy/volumes/keycloak-data
+
+# Log files
+*.log
+
+# System files
+.DS_Store
+Thumbs.db

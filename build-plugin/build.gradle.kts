@@ -12,6 +12,10 @@ gradlePlugin {
             id = "build-kmp"
             implementationClass = "com.github.martyanovav.otuskotlin.plugin.BuildPluginMultiplatform"
         }
+        register("build-docker") {
+            id = "build-docker"
+            implementationClass = "com.github.martyanovav.otuskotlin.plugin.DockerPlugin"
+        }
     }
 }
 

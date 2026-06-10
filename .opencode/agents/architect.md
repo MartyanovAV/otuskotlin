@@ -3,7 +3,7 @@ description: Designs system architecture, creates technical specifications and A
 mode: subagent
 model: openai/gpt-5.5
 reasoningEffort: high
-temperature: 0.1
+temperature: 0.2
 steps: 50
 permission:
   read: allow

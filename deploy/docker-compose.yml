@@ -13,6 +13,7 @@ services:
       - "5432:5432"
     volumes:
       - postgresql-data:/var/lib/postgresql/data
+      - ./volumes/postgres-init:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U fitbridge -d fitbridge"]
       interval: 5s
@@ -21,11 +22,13 @@ services:
     networks:
       - fitbridge-network
 
-  app:
+  profile-service:
     build:
       context: ..
-      dockerfile: deploy/Dockerfile.backend
-    image: fitbridge-backend:local
+      dockerfile: deploy/Dockerfile.app
+      args:
+        SERVICE_NAME: profile-service
+    image: fitbridge-profile-service:local
     depends_on:
       postgresql:
         condition: service_healthy
@@ -36,16 +39,46 @@ services:
     environment:
       DB_HOST: postgresql
       DB_PORT: 5432
-      DB_NAME: fitbridge
-      DB_USER: fitbridge
-      DB_PASSWORD: fitbridge-password
+      DB_NAME: profile_db
+      DB_USER: profile_user
+      DB_PASSWORD: profile-password
     logging:
       driver: "fluentd"
       options:
         fluentd-address: fluent-bit:24224
-        tag: app.logs
+        tag: profile.logs
     networks:
       - fitbridge-network
+
+  training-service:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.app
+      args:
+        SERVICE_NAME: training-service
+    image: fitbridge-training-service:local
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      fluent-bit:
+        condition: service_started
+      envoy:
+        condition: service_started
+    environment:
+      DB_HOST: postgresql
+      DB_PORT: 5432
+      DB_NAME: training_db
+      DB_USER: training_user
+      DB_PASSWORD: training-password
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: fluent-bit:24224
+        tag: training.logs
+    networks:
+      - fitbridge-network
+
+
 
   fluent-bit:
     container_name: fluent-bit
