@@ -1,0 +1,279 @@
+openapi: 3.0.3
+info:
+  title: FitBridge Profile API
+  description: Trainer Diary MVP API v2 для управления клиентской базой и тренировочными
+    планами
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 2.0.0
+servers:
+- url: http://localhost:8080/v2
+tags:
+- name: trainerProfile
+  description: Профиль зарегистрированного тренера
+paths:
+  /trainerProfile/createOrUpdate:
+    post:
+      tags:
+      - trainerProfile
+      summary: Создать или обновить профиль тренера
+      operationId: trainerProfileCreateOrUpdate
+      security:
+      - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/TrainerProfileCreateOrUpdateRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/TrainerProfileCreateOrUpdateResponseBody'
+  /trainerProfile/readOwn:
+    post:
+      tags:
+      - trainerProfile
+      summary: Получить собственный профиль тренера
+      operationId: trainerProfileReadOwn
+      security:
+      - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/TrainerProfileReadOwnRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/TrainerProfileReadOwnResponseBody'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  requestBodies:
+    TrainerProfileCreateOrUpdateRequestBody:
+      description: Request body
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TrainerProfileCreateOrUpdateRequest'
+    TrainerProfileReadOwnRequestBody:
+      description: Request body
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TrainerProfileReadOwnRequest'
+  responses:
+    TrainerProfileCreateOrUpdateResponseBody:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TrainerProfileCreateOrUpdateResponse'
+    TrainerProfileReadOwnResponseBody:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TrainerProfileReadOwnResponse'
+  schemas:
+    IRequest:
+      type: object
+      description: Базовый интерфейс для всех запросов FitBridge POST Full API
+      properties:
+        requestType:
+          type: string
+          description: Поле-дискриминатор для вычисления типа запроса
+          example: trainerProfile.createOrUpdate
+        requestId:
+          $ref: '#/components/schemas/RequestId'
+        apiVersion:
+          type: string
+          example: v2
+      discriminator:
+        propertyName: requestType
+        mapping:
+          trainerProfile.createOrUpdate: '#/components/schemas/TrainerProfileCreateOrUpdateRequest'
+          trainerProfile.readOwn: '#/components/schemas/TrainerProfileReadOwnRequest'
+    IResponse:
+      type: object
+      description: Базовый интерфейс для всех ответов FitBridge POST Full API
+      properties:
+        responseType:
+          type: string
+          description: Поле-дискриминатор для вычисления типа ответа
+          example: trainerProfile.createOrUpdate
+        requestId:
+          $ref: '#/components/schemas/RequestId'
+        apiVersion:
+          type: string
+          example: v2
+        result:
+          $ref: '#/components/schemas/ResponseResult'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      discriminator:
+        propertyName: responseType
+        mapping:
+          trainerProfile.createOrUpdate: '#/components/schemas/TrainerProfileCreateOrUpdateResponse'
+          trainerProfile.readOwn: '#/components/schemas/TrainerProfileReadOwnResponse'
+          init: '#/components/schemas/InitResponse'
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          example: validation-error
+        group:
+          type: string
+          example: validation
+        field:
+          type: string
+          example: trainingPlan.title
+        message:
+          type: string
+          example: Поле заполнено некорректно
+    ResponseResult:
+      type: string
+      enum:
+      - success
+      - error
+    RequestId:
+      type: string
+      description: Идентификатор запроса для трассировки без sensitive payload
+    Timestamp:
+      type: string
+      format: date-time
+    UserId:
+      type: string
+      description: Внутренний идентификатор зарегистрированного тренера
+    TrainerProfileId:
+      type: string
+      description: Идентификатор профиля тренера
+    Lock:
+      type: string
+      description: Версия оптимистичной блокировки
+    TrainerRole:
+      type: string
+      enum:
+      - TRAINER
+    TrainerUserStatus:
+      type: string
+      enum:
+      - ACTIVE
+      - BLOCKED
+      - DELETED
+    TrainerProfileOnboardingStatus:
+      type: string
+      enum:
+      - NEW
+      - PROFILE_READY
+      - FIRST_CLIENT_CREATED
+      - FIRST_PLAN_CREATED
+      - COMPLETED
+    TrainerProfileBase:
+      type: object
+      properties:
+        publicName:
+          type: string
+          minLength: 2
+          maxLength: 80
+          description: Имя тренера, безопасное для публичного показа клиенту
+        specialization:
+          type: string
+          maxLength: 120
+    TrainerProfileCreateOrUpdateObject:
+      type: object
+      properties:
+        publicName:
+          type: string
+          minLength: 2
+          maxLength: 80
+          description: Имя тренера, безопасное для публичного показа клиенту
+        specialization:
+          type: string
+          maxLength: 120
+    TrainerProfileResponseObject:
+      type: object
+      properties:
+        publicName:
+          type: string
+          minLength: 2
+          maxLength: 80
+          description: Имя тренера, безопасное для публичного показа клиенту
+        specialization:
+          type: string
+          maxLength: 120
+        id:
+          $ref: '#/components/schemas/TrainerProfileId'
+        userId:
+          $ref: '#/components/schemas/UserId'
+        role:
+          $ref: '#/components/schemas/TrainerRole'
+        userStatus:
+          $ref: '#/components/schemas/TrainerUserStatus'
+        onboardingStatus:
+          $ref: '#/components/schemas/TrainerProfileOnboardingStatus'
+        lock:
+          $ref: '#/components/schemas/Lock'
+    InitResponse:
+      allOf:
+      - $ref: '#/components/schemas/IResponse'
+    TrainerProfileCreateOrUpdateRequest:
+      allOf:
+      - $ref: '#/components/schemas/IRequest'
+      - $ref: '#/components/schemas/RequestDebug'
+      - type: object
+        properties:
+          trainerProfile:
+            $ref: '#/components/schemas/TrainerProfileCreateOrUpdateObject'
+    TrainerProfileReadOwnRequest:
+      allOf:
+      - $ref: '#/components/schemas/IRequest'
+      - $ref: '#/components/schemas/RequestDebug'
+    TrainerProfileCreateOrUpdateResponse:
+      allOf:
+      - $ref: '#/components/schemas/IResponse'
+      - type: object
+        properties:
+          trainerProfile:
+            $ref: '#/components/schemas/TrainerProfileResponseObject'
+    TrainerProfileReadOwnResponse:
+      allOf:
+      - $ref: '#/components/schemas/IResponse'
+      - type: object
+        properties:
+          trainerProfile:
+            $ref: '#/components/schemas/TrainerProfileResponseObject'
+    RequestDebugMode:
+      type: string
+      enum:
+      - prod
+      - test
+      - stub
+    RequestDebug:
+      type: object
+      properties:
+        debug:
+          $ref: '#/components/schemas/Debug'
+    Debug:
+      type: object
+      properties:
+        mode:
+          $ref: '#/components/schemas/RequestDebugMode'
+        stub:
+          $ref: '#/components/schemas/RequestDebugStubs'
+    RequestDebugStubs:
+      type: string
+      description: Перечисление стабов для разработки и тестов MVP
+      enum:
+      - success
+      - notFound
+      - badId
+      - badLock
+      - badPublicName
+      - badClientName
+      - badPlanTitle
+      - badPlanBody
+      - forbidden
+      - validationError
+      - cannotArchive

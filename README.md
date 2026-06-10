@@ -117,10 +117,10 @@ ADR:
 
 Подробности контейнеров и границ ответственности зафиксированы в [C4 Container source](docs/03-architecture/c4/C4_CONTAINER.drawio), [C4 Component source](docs/03-architecture/c4/C4_COMPONENT.drawio) и [Security Architecture / Threat Model](docs/03-architecture/SECURITY_ARCHITECTURE.md).
 
-### Транспортные модели, API
+### Транспортные модели, API, Спецификации
 
-1. [specs](fit-bridge-other/fit-bridge-specs) - описание API в форме OpenAPI-спецификаций
-2. [fit-bridge-api-v1-jackson](fit-bridge-be/fit-bridge-api-v1-jackson) - Генерация первой версии
-   транспортных моделей с Jackson
-3. [fit-bridge-api-v2-kmp](fit-bridge-be/fit-bridge-api-v2-kmp) - Генерация второй версии транспортных
-   моделей с KMP
+1. `profile-service/specs`, `training-service/specs` - описание API в форме OpenAPI-спецификаций
+2. `profile-service/api-v1-jackson`, `training-service/api-v1-jackson` - Генерация первой версии транспортных моделей (Jackson)
+3. `profile-service/api-v2-kmp`, `training-service/api-v2-kmp` - Генерация второй версии транспортных моделей (KMP)
+4. `profile-service/swagger`, `training-service/swagger` - Сборка Docker-образов Swagger UI для визуализации API
+

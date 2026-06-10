@@ -15,8 +15,6 @@ tasks {
     register("buildInfra") {
         group = "build"
         dependsOn(project(":fit-bridge-dcompose").getTasksByName("publish",false))
-        dependsOn(project(":fit-bridge-specs").getTasksByName("publish",false))
-        dependsOn(project(":fit-bridge-swagger").getTasksByName("buildImages",false))
     }
 
     register("clean" ) {

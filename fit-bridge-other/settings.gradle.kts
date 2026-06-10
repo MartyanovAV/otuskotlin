@@ -20,6 +20,6 @@ pluginManagement {
     }
 }
 
+
+
 include(":fit-bridge-dcompose")
-include(":fit-bridge-specs")
-include(":fit-bridge-swagger")

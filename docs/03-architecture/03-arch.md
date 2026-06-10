@@ -14,7 +14,8 @@
 | Security/access/privacy | [SECURITY_ARCHITECTURE.md](./SECURITY_ARCHITECTURE.md) |
 | API index | [02-api.md](./02-api.md) |
 | API entities/contracts/rules/limits | Файлы каталога `api/`, перечислены в [02-api.md](./02-api.md) |
-| OpenAPI спецификации | [specs-fitbridge-v1.yaml](../../fit-bridge-other/fit-bridge-specs/specs/specs-fitbridge-v1.yaml), [specs-fitbridge-v2.yaml](../../fit-bridge-other/fit-bridge-specs/specs/specs-fitbridge-v2.yaml) |
+| OpenAPI спецификации | [specs-profile-v1.yaml](../../fit-bridge-be/profile-service/specs/specs-profile-v1.yaml), [specs-training-v1.yaml](../../fit-bridge-be/training-service/specs/specs-training-v1.yaml) |
+| Разделение на микросервисы | [04-microservices-plan.md](./04-microservices-plan.md) |
 | Deployment/run guide | [../../deploy/README.md](../../deploy/README.md) |
 
 ## Карта продукта

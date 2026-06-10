@@ -24,14 +24,19 @@ static_resources:
                   - name: local_service
                     domains: [ "*" ]
                     routes:
-                      - match: { path: "/" }
-                        route: { cluster: app }
-                      - match: { prefix: "/v1/diary/" }
-                        route: { cluster: app }
-                      - match: { prefix: "/v1/program/" }
-                        route: { cluster: app }
-                      - match: { prefix: "/v1/report/" }
-                        route: { cluster: app }
+                      - match: { prefix: "/v1/trainerProfile/" }
+                        route: { cluster: profile-service }
+                      - match: { prefix: "/v2/trainerProfile/" }
+                        route: { cluster: profile-service }
+                      - match: { prefix: "/v1/clientCard/" }
+                        route: { cluster: training-service }
+                      - match: { prefix: "/v2/clientCard/" }
+                        route: { cluster: training-service }
+                      - match: { prefix: "/v1/trainingPlan/" }
+                        route: { cluster: training-service }
+                      - match: { prefix: "/v2/trainingPlan/" }
+                        route: { cluster: training-service }
+
                       - match: { path: "/admin" }
                         redirect: { path_redirect: "/admin/", https_redirect: false }
                       - match: { prefix: "/admin/" }
@@ -57,30 +62,51 @@ static_resources:
                         forward: true
                         forward_payload_header: x-jwt-payload
                     rules:
-                      - match: { prefix: /v1/diary/ }
+                      - match: { prefix: /v1/trainerProfile/ }
                         requires: { provider_name: keycloak_provider }
-                      - match: { prefix: /v1/program/ }
+                      - match: { prefix: /v2/trainerProfile/ }
                         requires: { provider_name: keycloak_provider }
-                      - match: { prefix: /v1/report/ }
+                      - match: { prefix: /v1/clientCard/ }
+                        requires: { provider_name: keycloak_provider }
+                      - match: { prefix: /v2/clientCard/ }
+                        requires: { provider_name: keycloak_provider }
+                      - match: { prefix: /v1/trainingPlan/ }
+                        requires: { provider_name: keycloak_provider }
+                      - match: { prefix: /v2/trainingPlan/ }
                         requires: { provider_name: keycloak_provider }
                 - name: envoy.filters.http.router
                   typed_config:
                     "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
   clusters:
-    - name: app
+    - name: profile-service
       connect_timeout: 30s
       type: LOGICAL_DNS
       dns_lookup_family: V4_ONLY
       lb_policy: ROUND_ROBIN
       load_assignment:
-        cluster_name: app
+        cluster_name: profile-service
         endpoints:
           - lb_endpoints:
               - endpoint:
                   address:
                     socket_address:
-                      address: app
+                      address: profile-service
                       port_value: 8080
+    - name: training-service
+      connect_timeout: 30s
+      type: LOGICAL_DNS
+      dns_lookup_family: V4_ONLY
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: training-service
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: training-service
+                      port_value: 8080
+
     - name: keycloak
       connect_timeout: 0.25s
       type: LOGICAL_DNS

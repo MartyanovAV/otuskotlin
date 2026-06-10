@@ -6,7 +6,8 @@
 
 | Сервис | Назначение | Порт хоста |
 |--------|------------|------------|
-| `app` | Backend API (Kotlin/Ktor) | через Envoy `8080` |
+| `profile-service` | Backend API для работы с тренерами | через Envoy `/v1/trainerProfile/`, `/v2/trainerProfile/` |
+| `training-service` | Backend API для работы с клиентами и планами | через Envoy `/v1/clientCard/`, `/v1/trainingPlan/`, `/v2/clientCard/`, `/v2/trainingPlan/` |
 | `postgresql` | основное хранилище данных приложения | `5432` |
 | `envoy` | входной proxy и JWT validation для MVP `/v1/*` | `8080` |
 | `keycloak` | Identity Server, импорт realm `fit-bridge` | через Envoy `/admin`, `/realms` |
@@ -43,6 +44,7 @@ docker compose ps
 | Что открыть | URL | Доступ |
 |-------------|-----|--------|
 | Приложение | `http://localhost:8080/` | без авторизации |
+
 | Keycloak Admin Console | `http://localhost:8080/admin/` | `admin` / `admin` |
 | Keycloak realm | `http://localhost:8080/realms/fit-bridge` | публичный realm endpoint |
 | OpenSearch | `https://localhost:9200` | `admin` / `adm-Password123!` |
@@ -90,7 +92,8 @@ docker compose logs -f
 Логи конкретного сервиса:
 
 ```powershell
-docker compose logs -f app
+docker compose logs -f profile-service
+docker compose logs -f training-service
 docker compose logs -f postgresql
 docker compose logs -f envoy
 docker compose logs -f keycloak
@@ -166,9 +169,9 @@ docker compose logs -f keycloak envoy
 
 ## Критерии успешного запуска
 
-- `docker compose ps` показывает запущенные `app`, `postgresql`, `envoy`, `keycloak`, `opensearch`, `dashboards`, `fluent-bit`.
+- `docker compose ps` показывает запущенные `profile-service`, `training-service`, `postgresql`, `envoy`, `keycloak`, `opensearch`, `dashboards`, `fluent-bit`.
 - `http://localhost:8080/health` возвращает статус Backend API.
 - `http://localhost:8080/admin/` открывает Keycloak Admin Console.
 - `https://localhost:9200/_cluster/health` возвращает статус `green` или `yellow`.
 - `http://localhost:5601` открывает OpenSearch Dashboards.
-- PostgreSQL доступен на порту `5432` с credentials: `fitbridge` / `fitbridge-password`, база данных `fitbridge`.
+- PostgreSQL доступен на порту `5432`. Суперпользователь: `fitbridge` / `fitbridge-password`. Сервисы используют отдельные БД: `profile_db` (user: `profile_user`) и `training_db` (user: `training_user`).
