@@ -29,12 +29,12 @@ tasks {
 //    register("buildImages") {
 //        dependsOn(gradle.includedBuild("fit-bridge-be").task(":buildImages"))
 //    }
-//
-//    register("e2eTests") { ->
-//        dependsOn(
-//            gradle.includedBuild("fit-bridge-tests").task(":e2eTests")
-//        )
-//    }
+
+    register("e2eTests") { ->
+        dependsOn(
+            gradle.includedBuild("fit-bridge-be").task(":fit-bridge-e2e-be:test")
+        )
+    }
 
     register("build") {
         group = "build"

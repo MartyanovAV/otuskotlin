@@ -1,0 +1,21 @@
+{
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "trainingPlans": [
+        {
+          "id": "123"
+        }
+      ],
+      "result": "success",
+      "responseType": "search"
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  },
+  "request": {
+    "method": "POST",
+    "url": "/v2/trainingPlan/search"
+  }
+}

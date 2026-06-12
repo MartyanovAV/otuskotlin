@@ -1,0 +1,19 @@
+{
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "trainingPlan": {
+        "id": "123"
+      },
+      "result": "success",
+      "responseType": "create"
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  },
+  "request": {
+    "method": "POST",
+    "url": "/v2/trainingPlan/create"
+  }
+}

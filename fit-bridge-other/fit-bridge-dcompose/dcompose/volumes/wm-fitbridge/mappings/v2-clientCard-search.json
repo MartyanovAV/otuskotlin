@@ -1,0 +1,21 @@
+{
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "result": "success",
+      "clientCards": [
+        {
+          "id": "123"
+        }
+      ],
+      "responseType": "search"
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  },
+  "request": {
+    "method": "POST",
+    "url": "/v2/clientCard/search"
+  }
+}

@@ -1,4 +1,4 @@
-rootProject.name = "fit-bridge-be"
+rootProject.name = "fit-bridge-tests"
 
 dependencyResolutionManagement {
     versionCatalogs {
@@ -20,5 +20,10 @@ pluginManagement {
     }
 }
 
-includeBuild("training-service")
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.5.0"
+}
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 include(":fit-bridge-e2e-be")

@@ -1,0 +1,19 @@
+{
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "clientCard": {
+        "id": "123"
+      },
+      "result": "success",
+      "responseType": "archive"
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  },
+  "request": {
+    "method": "POST",
+    "url": "/v2/clientCard/archive"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/"
+  },
+
+  "response": {
+    "status": 200,
+    "body": "Hello, FitBridge Wiremock!",
+    "headers": {
+      "Content-Type": "text/plain"
+    }
+  }
+}

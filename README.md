@@ -77,6 +77,9 @@ MVP фокусируется на одном сокращённом критич
 
 Индекс архитектурной документации: [docs/03-architecture/03-arch.md](docs/03-architecture/03-arch.md).
 
+## DevOps
+- [Файлы сборки Docker Compose](./fit-bridge-other/fit-bridge-dcompose/dcompose)
+
 ### Архитектурные решения
 
 - Kotlin как основной язык backend-кода.

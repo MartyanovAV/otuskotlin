@@ -1,0 +1,8 @@
+# Конфигурация для ktor + (в перспективе) postgresql
+
+version: '3'
+services:
+  app-ktor:
+    image: fit-bridge-app-ktor:1.0-SNAPSHOT
+    ports:
+      - "8080:8080"
