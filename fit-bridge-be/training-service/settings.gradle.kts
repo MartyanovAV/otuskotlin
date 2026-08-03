@@ -22,6 +22,8 @@ pluginManagement {
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
+includeBuild("../../fit-bridge-libs")
+
 include(":common")
 include(":training-specs")
 project(":training-specs").projectDir = file("specs")

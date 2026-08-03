@@ -7,6 +7,7 @@ kotlin {
         commonMain {
             dependencies {
                 api(libs.kotlinx.datetime)
+                api("com.github.martyanovav.otuskotlin.fitbridge.libs:fit-bridge-lib-logging-common")
             }
         }
         commonTest {

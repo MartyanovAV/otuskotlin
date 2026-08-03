@@ -13,6 +13,8 @@ dependencies {
     // Используем созданную ранее конфигурацию "specsConfiguration" проекта со спецификациями
     specsFromLib(project(path = ":training-specs", configuration = "specsConfiguration"))
 
+    implementation(project(":common"))
+    implementation(libs.kotlinx.datetime)
     implementation(kotlin("stdlib"))
     implementation(libs.jackson.kotlin)
     implementation(libs.jackson.datatype)
