@@ -8,7 +8,6 @@
 |---|---|
 | Business scope MVP | Новый scope: **Trainer Diary** — создать клиента, найти клиентов, создать план, найти планы; [MVP_SCOPE_SUMMARY](../01-business/MVP_SCOPE_SUMMARY.md), [PRODUCT_ROADMAP](../01-business/PRODUCT_ROADMAP.md) |
 | Архитектурные решения | [ADR index](./01-adrs.md) и файлы каталога `ADR/` |
-| Архивное решение публичного доступа | [ADR-007](./ADR/ADR-007-public-plan-link-mvp.md) — отклонено для текущего MVP |
 | C4-диаграммы | Исходники Draw.io: [Context](./c4/C4_CONTEXT.drawio), [Container](./c4/C4_CONTAINER.drawio), [Component](./c4/C4_COMPONENT.drawio); preview SVG перечислены ниже |
 | Модель данных | [ERD.md](./ERD.md) |
 | Security/access/privacy | [SECURITY_ARCHITECTURE.md](./SECURITY_ARCHITECTURE.md) |
@@ -51,7 +50,7 @@ FitBridge MVP **Trainer Diary** — инструмент для независи
 | Identity | Keycloak/OIDC/JWT для тренера; публичный клиентский доступ отсутствует в MVP | [ADR-001](./ADR/ADR-001-use-keycloak.md), [SECURITY](./SECURITY_ARCHITECTURE.md) |
 | API | POST Full, HTTPS/JSON; приватные `/v1/*` и `/v2/*` методы `clientCard.create/search`, `trainingPlan.create/search` | [ADR-002](./ADR/ADR-002-post-full-api.md), [02-api](./02-api.md), OpenAPI specs |
 | Data | PostgreSQL; таблицы/агрегаты `FitBridgeUser`, `TrainerProfile`, `ClientCard`, `TrainingPlan` | [ADR-005](./ADR/ADR-005-use-postgresql.md), [ERD](./ERD.md) |
-| Observability | OpenSearch + UI + Fluent Bit как внешний/platform-контур, masked logs без sensitive payload | [ADR-006](./ADR/ADR-006-use-opensearch-fluent-bit-observability.md) |
+| Observability | GreptimeDB + Fluent Bit как внешний/platform-контур, masked logs без sensitive payload | [ADR-006](./ADR/ADR-006-use-greptimedb-fluent-bit-observability.md) |
 
 ## Высокоуровневая C4 / компонентная логика
 
@@ -60,7 +59,7 @@ FitBridge MVP **Trainer Diary** — инструмент для независи
 - `Trainer` — единственный зарегистрированный пользователь; работает через Web UI и Keycloak.
 - `FitBridge` — система в фокусе: хранит клиентские карточки и тренировочные планы тренера.
 - `Keycloak` — внешний Identity Server только для тренерского входа в MVP.
-- `OpenSearch Platform` — внешний observability-контур, получает только masked structured logs.
+- `GreptimeDB Platform` — внешний observability-контур, получает только masked structured logs; просмотр выполняется через встроенный GreptimeDB Dashboard.
 
 ### C4 Container
 
@@ -114,7 +113,7 @@ FitBridge MVP **Trainer Diary** — инструмент для независи
 - Нет публичных ссылок, access tokens, public endpoints и lifecycle открытия/закрытия ссылки.
 - Нет клиентского дневника выполнения, чтения статуса выполнения и отдельного сводного экрана.
 - Нет in-product `ADMIN`/support роли, support console и broad bypass.
-- OpenSearch остаётся external/platform observability, не частью application boundary; содержимое планов и sensitive payload в логи не пишутся.
+- GreptimeDB остаётся external/platform observability, не частью application boundary; содержимое планов и sensitive payload в логи не пишутся.
 
 ## Путь эволюции
 

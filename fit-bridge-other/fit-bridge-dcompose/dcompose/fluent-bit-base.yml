@@ -1,15 +1,18 @@
 services:
   fluent-bit-base:
     container_name: fluent-bit-base
-    image: fluent/fluent-bit
+    image: fluent/fluent-bit:4.2.0
     ports:
       - "24224:24224"
       - "24224:24224/udp"
       - "2020:2020"
     environment:
-      - opensearch_host=${OPENSEARCH_HOST}
-      - opensearch_user=${OPENSEARCH_USER}
-      - opensearch_pass=${OPENSEARCH_PASS}
+      - greptimedb_host=${GREPTIMEDB_HOST}
+      - greptimedb_user=${GREPTIMEDB_USER}
+      - greptimedb_pass=${GREPTIMEDB_PASS}
     volumes:
       - ./volumes/fluent-bit-etc/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
       - ./volumes/fluent-bit-etc/parsers.conf:/fluent-bit/etc/parsers.conf
+    networks:
+      - default
+      - backend-network

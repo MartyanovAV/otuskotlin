@@ -1,6 +1,6 @@
 # Бизнес-правила API MVP Trainer Diary
 
-Канонические бизнес-правила API MVP. Security-алгоритм и threat model — в [Security Architecture](../SECURITY_ARCHITECTURE.md), модель данных — в [ERD](../ERD.md), audit logging — в [ADR-006](../ADR/ADR-006-use-opensearch-fluent-bit-observability.md).
+Канонические бизнес-правила API MVP. Security-алгоритм и threat model — в [Security Architecture](../SECURITY_ARCHITECTURE.md), модель данных — в [ERD](../ERD.md), audit logging — в [ADR-006](../ADR/ADR-006-use-greptimedb-fluent-bit-observability.md).
 
 | Область | Правило MVP |
 |---|---|

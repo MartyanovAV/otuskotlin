@@ -182,7 +182,7 @@ Rollback должен быть фазовым: для contract/module split — 
 
 ### 7.7. Observability, health checks и SLA
 
-Минимальный observability-контур опирается на [ADR-006](./ADR/ADR-006-use-opensearch-fluent-bit-observability.md) и расширяется до двух сервисов:
+Минимальный observability-контур опирается на [ADR-006](./ADR/ADR-006-use-greptimedb-fluent-bit-observability.md) и расширяется до двух сервисов:
 
 | Область | Profile Service | Training Service | Gateway/Platform |
 |---|---|---|---|
@@ -196,7 +196,7 @@ Rollback должен быть фазовым: для contract/module split — 
 - SLA измеряется отдельно по каждому сервису и route group, а не только по общей доступности gateway.
 - `requestId` должен создаваться/пробрасываться на gateway и попадать в логи обоих сервисов.
 - Readiness должен учитывать доступность собственной схемы сервиса и не зависеть от чужого сервиса/чужой схемы. В MVP падение общего DB instance может сделать оба сервиса unready; этот риск принят и не считается нарушением MVP acceptance criteria.
-- Для production SLA нужны alert thresholds: 5xx rate, latency p95/p99, DB connection errors, restart loop, заполнение диска/индексов OpenSearch.
+- Для production SLA нужны alert thresholds: 5xx rate, latency p95/p99, DB connection errors, restart loop, заполнение диска/таблиц GreptimeDB.
 - Sensitive payload не логируется: ФИО, email, заметки, содержимое тренировочного плана и JWT исключаются из логов.
 
 ### 7.8. ADR-like trade-offs и предварительные решения
@@ -209,7 +209,7 @@ Rollback должен быть фазовым: для contract/module split — 
 | Shared code | Общий root `common` с доменом | Только platform contracts без домена | **Только platform contracts** | Требует дублировать/версионировать DTO, но защищает границы сервисов |
 | Auth principal | Локальный user id из Profile DB | Stable claim/`sub` из JWT | **Stable claim/`sub` для Training Service** | Training Service не зависит от Profile Service при авторизации |
 
-Эти решения являются плановыми и при начале реализации должны быть оформлены отдельными ADR, если меняют уже принятые решения [ADR-001](./ADR/ADR-001-use-keycloak.md), [ADR-003](./ADR/ADR-003-ktor.md), [ADR-005](./ADR/ADR-005-use-postgresql.md), [ADR-006](./ADR/ADR-006-use-opensearch-fluent-bit-observability.md).
+Эти решения являются плановыми и при начале реализации должны быть оформлены отдельными ADR, если меняют уже принятые решения [ADR-001](./ADR/ADR-001-use-keycloak.md), [ADR-003](./ADR/ADR-003-ktor.md), [ADR-005](./ADR/ADR-005-use-postgresql.md), [ADR-006](./ADR/ADR-006-use-greptimedb-fluent-bit-observability.md).
 
 ### 7.9. Технические риски и меры снижения
 

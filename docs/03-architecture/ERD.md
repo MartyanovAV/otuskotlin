@@ -9,7 +9,7 @@
 | Статус | Updated for Trainer Diary MVP |
 | Область | Клиентская база и тренировочные планы тренера |
 | DBMS | PostgreSQL |
-| Связанные решения | [ADR-007 отклонён для текущего MVP](./ADR/ADR-007-public-plan-link-mvp.md), [SECURITY_ARCHITECTURE](./SECURITY_ARCHITECTURE.md) |
+| Связанные решения | [SECURITY_ARCHITECTURE](./SECURITY_ARCHITECTURE.md) |
 
 ## ERD
 

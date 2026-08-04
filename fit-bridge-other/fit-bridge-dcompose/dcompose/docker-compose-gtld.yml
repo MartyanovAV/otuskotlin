@@ -1,4 +1,4 @@
-# Минимальная версия инфраструктуры на базе OpenSearch, Dashboards, Kafka и Logstash.
+# Минимальная версия инфраструктуры на базе GreptimeDB, Kafka и Logstash.
 services:
   app:
     image: bitnamilegacy/kafka:latest
@@ -33,7 +33,7 @@ services:
     image: opensearchproject/logstash-oss-with-opensearch-output-plugin:latest
     depends_on:
       - kafka
-      - opensearch
+      - greptimedb
     ports:
       - "5044:5044"
       - "1111:1111"
@@ -42,15 +42,14 @@ services:
     volumes:
       - ./volumes/logstash/10-mp-logs.conf:/usr/share/logstash/pipeline/10-mp-logs.conf
 
-  opensearch:
+  greptimedb:
     extends:
-      file: open-search-base.yml
-      service: opensearch-base
-
-  dashboards:
-    extends:
-      file: dashboards-base.yml
-      service: dashboards-base
+      file: greptimedb-base.yml
+      service: greptimedb-base
 
 volumes:
-  opensearch-data:
+  greptimedb-data:
+
+networks:
+  backend-network:
+    driver: bridge

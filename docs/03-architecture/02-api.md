@@ -27,5 +27,4 @@
 
 - Security/access/privacy: [SECURITY_ARCHITECTURE.md](./SECURITY_ARCHITECTURE.md)
 - Data model: [ERD.md](./ERD.md)
-- Архивное решение по публичному доступу к плану: [ADR-007](./ADR/ADR-007-public-plan-link-mvp.md) — Rejected/Archived для текущего MVP
 - Decisions: [ADR index](./01-adrs.md)
