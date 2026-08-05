@@ -43,31 +43,31 @@ fun ClientCardContext.toTransport(): Any = when (command) {
     else -> throw IllegalArgumentException("Unsupported client card command $command")
 }
 
-internal fun ClientCardContext.fromTransport(request: ClientCardCreateRequest) {
+fun ClientCardContext.fromTransport(request: ClientCardCreateRequest) {
     command = ClientCardCommand.CREATE
     fromTransportBase(request.requestId, request.debug)
     clientCardRequest = request.clientCard.toInternal()
 }
 
-internal fun ClientCardContext.fromTransport(request: ClientCardReadRequest) {
+fun ClientCardContext.fromTransport(request: ClientCardReadRequest) {
     command = ClientCardCommand.READ
     fromTransportBase(request.requestId, request.debug)
     clientCardRequest = request.clientCard.toInternal()
 }
 
-internal fun ClientCardContext.fromTransport(request: ClientCardUpdateRequest) {
+fun ClientCardContext.fromTransport(request: ClientCardUpdateRequest) {
     command = ClientCardCommand.UPDATE
     fromTransportBase(request.requestId, request.debug)
     clientCardRequest = request.clientCard.toInternal()
 }
 
-internal fun ClientCardContext.fromTransport(request: ClientCardArchiveRequest) {
+fun ClientCardContext.fromTransport(request: ClientCardArchiveRequest) {
     command = ClientCardCommand.ARCHIVE
     fromTransportBase(request.requestId, request.debug)
     clientCardRequest = request.clientCard.toInternal()
 }
 
-internal fun ClientCardContext.fromTransport(request: ClientCardSearchRequest) {
+fun ClientCardContext.fromTransport(request: ClientCardSearchRequest) {
     command = ClientCardCommand.SEARCH
     fromTransportBase(request.requestId, request.debug)
     clientCardFilter = request.clientCardFilter.toInternal()
@@ -83,35 +83,35 @@ private fun ClientCardSearchFilter?.toInternal() = ClientCardFilter(
 
 // ─── To Transport ────────────────────────────────────────────────────────────
 
-internal fun ClientCardContext.toTransportClientCardCreate() = ClientCardCreateResponse(
+fun ClientCardContext.toTransportClientCardCreate() = ClientCardCreateResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
     result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     clientCard = clientCardResponse.toTransportClientCard()
 )
 
-internal fun ClientCardContext.toTransportClientCardRead() = ClientCardReadResponse(
+fun ClientCardContext.toTransportClientCardRead() = ClientCardReadResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
     result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     clientCard = clientCardResponse.toTransportClientCard()
 )
 
-internal fun ClientCardContext.toTransportClientCardUpdate() = ClientCardUpdateResponse(
+fun ClientCardContext.toTransportClientCardUpdate() = ClientCardUpdateResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
     result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     clientCard = clientCardResponse.toTransportClientCard()
 )
 
-internal fun ClientCardContext.toTransportClientCardArchive() = ClientCardArchiveResponse(
+fun ClientCardContext.toTransportClientCardArchive() = ClientCardArchiveResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
     result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     clientCard = clientCardResponse.toTransportClientCard()
 )
 
-internal fun ClientCardContext.toTransportClientCardSearch() = ClientCardSearchResponse(
+fun ClientCardContext.toTransportClientCardSearch() = ClientCardSearchResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
     result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),

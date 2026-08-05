@@ -14,7 +14,7 @@ ARG SERVICE_NAME
 ENV SERVICE_NAME=${SERVICE_NAME}
 
 # Build the specific application
-RUN gradle :${SERVICE_NAME}:app-ktor:shadowJar --no-daemon -x test
+RUN gradle -p fit-bridge-be/${SERVICE_NAME} :app-ktor:shadowJar --no-daemon -x test
 
 # Stage 2: Runtime
 FROM eclipse-temurin:21-jre-alpine
@@ -30,4 +30,4 @@ COPY --from=builder /home/gradle/project/fit-bridge-be/${SERVICE_NAME}/app-ktor/
 EXPOSE 8080
 
 # Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-cp", "app.jar", "io.ktor.server.tomcat.jakarta.EngineMain"]

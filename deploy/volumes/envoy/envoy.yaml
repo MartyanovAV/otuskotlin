@@ -25,13 +25,13 @@ static_resources:
                     domains: [ "*" ]
                     routes:
                       - match: { prefix: "/v1/clientCard/" }
-                        route: { cluster: training-service }
+                        route: { cluster: training-service, prefix_rewrite: "/v1/client-card/" }
                       - match: { prefix: "/v2/clientCard/" }
-                        route: { cluster: training-service }
+                        route: { cluster: training-service, prefix_rewrite: "/v2/client-card/" }
                       - match: { prefix: "/v1/trainingPlan/" }
-                        route: { cluster: training-service }
+                        route: { cluster: training-service, prefix_rewrite: "/v1/training-plan/" }
                       - match: { prefix: "/v2/trainingPlan/" }
-                        route: { cluster: training-service }
+                        route: { cluster: training-service, prefix_rewrite: "/v2/training-plan/" }
 
                       - match: { path: "/admin" }
                         redirect: { path_redirect: "/admin/", https_redirect: false }
@@ -84,7 +84,7 @@ static_resources:
                   address:
                     socket_address:
                       address: training-service
-                      port_value: 8080
+                      port_value: 8081
 
     - name: keycloak
       connect_timeout: 0.25s
