@@ -38,7 +38,4 @@ private fun KotlinMultiplatformExtension.configureTargets(project: Project) {
     }
 
     jvm ()
-    linuxX64()
-    macosArm64()
-    macosX64()
 }

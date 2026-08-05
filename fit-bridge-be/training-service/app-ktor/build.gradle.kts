@@ -7,13 +7,6 @@ plugins {
 
 kotlin {
     jvm {  }
-    targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
-        binaries {
-            executable {
-                entryPoint = "com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.main"
-            }
-        }
-    }
 
     sourceSets {
         val commonMain by getting {
@@ -81,14 +74,6 @@ docker {
         imageName = "${rootProject.name}-jvm"
         imageTag = "${project.version}"
     }
-
-    images.register("LinuxX64") {
-        buildContext = project.layout.buildDirectory.dir("docker-linuxx64").get().toString()
-        dockerFile = "Dockerfile"
-        dependsOnTask = "linkReleaseExecutableLinuxX64"
-        imageName = "${rootProject.name}-x64"
-        imageTag = "${project.version}"
-    }
 }
 
 afterEvaluate {
@@ -101,22 +86,6 @@ afterEvaluate {
                 copy {
                     from("Dockerfile.jvm") { rename { "Dockerfile" } }
                     from(shadowJar.get().archiveFile.get())
-                    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-                    into(buildContext)
-                }
-            }
-        }
-
-        val linuxX64ProcessResources = named("linuxX64ProcessResources", org.gradle.language.jvm.tasks.ProcessResources::class)
-        named("dockerBuildLinuxX64", com.github.martyanovav.otuskotlin.plugin.DockerBuildTask::class) {
-            dependsOn("linkReleaseExecutableLinuxX64")
-            dependsOn(linuxX64ProcessResources)
-            group = "docker"
-            doFirst {
-                copy {
-                    from("Dockerfile")
-                    from(getByName("linkReleaseExecutableLinuxX64").outputs)
-                    from(linuxX64ProcessResources.get().outputs)
                     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
                     into(buildContext)
                 }

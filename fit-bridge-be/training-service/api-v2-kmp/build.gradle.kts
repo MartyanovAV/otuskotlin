@@ -33,7 +33,6 @@ tasks {
 
     val openApiGenerateTask: GenerateTask = getByName("openApiGenerate", GenerateTask::class) {
         outputDir.set(layout.buildDirectory.file("generate-resources").get().toString())
-        finalizedBy("compileCommonMainKotlinMetadata")
         configOptions.set(
             mapOf(
                 "dateLibrary" to "string",
