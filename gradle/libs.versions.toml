@@ -15,6 +15,7 @@ kotest = "6.1.11"
 kermit = "2.0.3"
 ktor = "3.4.3"
 testcontainers = "2.0.4"
+prometheus-client = "1.2.1"
 
 # BASE
 jvm-compiler = "21"
@@ -57,6 +58,10 @@ ktor-server-yaml = { module = "io.ktor:ktor-server-config-yaml", version.ref = "
 ktor-server-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
 ktor-server-calllogging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor" }
 ktor-server-test = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
+ktor-server-metrics-micrometer = { module = "io.ktor:ktor-server-metrics-micrometer", version.ref = "ktor" }
+
+micrometer-registry-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.13.1" }
+prometheus-metrics-exposition-formats = { module = "io.prometheus:prometheus-metrics-exposition-formats", version.ref = "prometheus-client" }
 
 # Testing
 kotest-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }

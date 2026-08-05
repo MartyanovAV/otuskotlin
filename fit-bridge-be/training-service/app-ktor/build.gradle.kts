@@ -47,6 +47,8 @@ kotlin {
                 implementation("com.github.martyanovav.otuskotlin.fitbridge.libs:fit-bridge-lib-logging-common")
                 implementation("com.github.martyanovav.otuskotlin.fitbridge.libs:fit-bridge-lib-logging-logback")
                 implementation(libs.logback)
+                implementation(libs.ktor.server.metrics.micrometer)
+                implementation(libs.micrometer.registry.prometheus)
             }
         }
 
@@ -61,6 +63,7 @@ kotlin {
         val jvmTest by getting {
             dependencies {
                 implementation(kotlin("test-junit"))
+                runtimeOnly(libs.prometheus.metrics.exposition.formats)
             }
         }
     }
