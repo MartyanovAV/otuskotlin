@@ -13,6 +13,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardReadO
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardReadRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardReadResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardResponseObject
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardStatus
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardUpdateObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardUpdateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardUpdateResponse
@@ -127,6 +128,7 @@ fun ClientCard.toTransportClientCard(): ClientCardResponseObject? {
         id = id.takeIf { it != ClientCardId.NONE }?.asString(),
         displayName = displayName.takeIf { it.isNotBlank() },
         note = note.takeIf { it.isNotBlank() },
+        status = if (isArchived) ClientCardStatus.ARCHIVED else ClientCardStatus.ACTIVE,
         lock = lock.takeIf { it.isNotBlank() }
     )
 }

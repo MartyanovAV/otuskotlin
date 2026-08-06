@@ -14,6 +14,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanRes
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanSearchFilter
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanSearchRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanSearchResponse
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanStatus
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanUpdateObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanUpdateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanUpdateResponse
@@ -133,6 +134,7 @@ fun TrainingPlan.toTransportTrainingPlan(): TrainingPlanResponseObject? {
         id = id.takeIf { it != TrainingPlanId.NONE }?.asString(),
         title = title.takeIf { it.isNotBlank() },
         clientCardId = clientCardId.takeIf { it != ClientCardId.NONE }?.asString(),
+        status = if (isArchived) TrainingPlanStatus.ARCHIVED else TrainingPlanStatus.ACTIVE,
         planItems = planItems.map { it.toTransportPlanItem() }
     )
 }

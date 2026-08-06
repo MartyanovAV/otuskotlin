@@ -1,5 +1,7 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.v2
 
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.apiV2RequestDeserialize
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.apiV2ResponseSerialize
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.*
 import com.github.martyanovav.otuskotlin.fitbridge.mappers.v2.fromTransport
 import com.github.martyanovav.otuskotlin.fitbridge.mappers.v2.toTransport
@@ -9,6 +11,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.IFBContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.TrainingPlanContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.helpers.ControllerHelper
 import io.ktor.server.application.*
+import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -23,7 +26,7 @@ suspend inline fun <
     clazz: KClass<*>,
     logId: String,
 ) {
-    val request = receive<Q>()
+    val request = apiV2RequestDeserialize<Q>(receiveText())
     when (request) {
         is ClientCardCreateRequest,
         is ClientCardReadRequest,
@@ -44,7 +47,12 @@ suspend inline fun <
                     }
                 },
                 { appSettings.processor.exec(this) },
-                { respond(toTransport()) },
+                {
+                    respondText(
+                        apiV2ResponseSerialize(toTransport() as IResponse),
+                        ContentType.Application.Json,
+                    )
+                },
                 { /* toLog */ },
             )
         }
@@ -67,7 +75,12 @@ suspend inline fun <
                     }
                 },
                 { appSettings.processor.exec(this) },
-                { respond(toTransport()) },
+                {
+                    respondText(
+                        apiV2ResponseSerialize(toTransport() as IResponse),
+                        ContentType.Application.Json,
+                    )
+                },
                 { /* toLog */ },
             )
         }
