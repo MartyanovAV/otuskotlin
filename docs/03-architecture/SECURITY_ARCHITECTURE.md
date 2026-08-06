@@ -9,7 +9,7 @@
 | Статус | Целевой baseline безопасности Trainer Diary MVP |
 | Область | Тренер как единственный зарегистрированный пользователь, `TrainerProfile`, `ClientCard`, `TrainingPlan`, приватные `/v1/*` и `/v2/*` API |
 | Не входит в MVP | Регистрация клиента, клиентский кабинет, `ClientProfile`, `Invite`, `AccessGrant`, granular permissions, multi-specialist, product `AuditEvent`, product `Notification`, in-product `ADMIN`/support UI |
-| Связанные решения | [ADR-001 Keycloak](./ADR/ADR-001-use-keycloak.md), [ADR-002 POST Full API](./ADR/ADR-002-post-full-api.md), [ADR-005 PostgreSQL](./ADR/ADR-005-use-postgresql.md), [ADR-006 Observability](./ADR/ADR-006-use-opensearch-fluent-bit-observability.md), [ADR-007 Rejected/Archived](./ADR/ADR-007-public-plan-link-mvp.md) |
+| Связанные решения | [ADR-001 Keycloak](./ADR/ADR-001-use-keycloak.md), [ADR-002 POST Full API](./ADR/ADR-002-post-full-api.md), [ADR-005 PostgreSQL](./ADR/ADR-005-use-postgresql.md), [ADR-006 Observability](./ADR/ADR-006-use-greptimedb-fluent-bit-observability.md) |
 | Архитектурные диаграммы | [C4 Context SVG](./c4/C4_CONTEXT.drawio.svg), [C4 Container SVG](./c4/C4_CONTAINER.drawio.svg), [C4 Component SVG](./c4/C4_COMPONENT.drawio.svg) |
 
 Security scope MVP покрывает:
@@ -31,7 +31,7 @@ Security scope MVP покрывает:
 | `FitBridge Backend` | Доверенная доменная система | POST Full API, JWT claims validation, ownership, business rules, запись данных | Единственное место доменных проверок trainer-owned ресурсов |
 | `Envoy Gateway` | Инфраструктурный boundary | Маршрутизация приватных `/v1/*` и `/v2/*`, edge JWT validation, rate limiting | Не заменяет backend-проверки ownership и статусов пользователя |
 | `PostgreSQL` | Доверенное прикладное хранилище | Хранит user/trainer/card/plan и технические статусы | Содержимое планов и заметок требует ограничений на размер и запрета логирования |
-| `OpenSearch / Fluent Bit` | Внешний observability-контур | Доставка, хранение и поиск masked logs | Не является application boundary; не получает request body, план, заметки клиента и секреты |
+| GreptimeDB / Fluent Bit | Внешний observability-контур | Доставка, хранение и поиск masked logs | Не является application boundary; не получает request body, план, заметки клиента и секреты |
 
 ## 3. Контуры доступа
 
@@ -103,7 +103,7 @@ Security scope MVP покрывает:
 
 ## 8. Audit и observability
 
-Security events связаны с [ADR-006](./ADR/ADR-006-use-opensearch-fluent-bit-observability.md). В MVP используется infrastructure audit-oriented logging, а не продуктовый `AuditEvent` API.
+Security events связаны с [ADR-006](./ADR/ADR-006-use-greptimedb-fluent-bit-observability.md). В MVP используется infrastructure audit-oriented logging, а не продуктовый `AuditEvent` API.
 
 Обязательные события MVP Trainer Diary:
 
@@ -126,7 +126,7 @@ sequenceDiagram
     participant GW as Envoy Gateway
     participant API as FitBridge Backend
     participant DB as PostgreSQL
-    participant LOG as Fluent Bit / OpenSearch
+    participant LOG as Fluent Bit / GreptimeDB
 
     Trainer->>KC: Login
     KC-->>Trainer: JWT role TRAINER
@@ -162,7 +162,7 @@ sequenceDiagram
 | Excessive payload в карточке или плане | PII/health-adjacent данные | Medium | High | Whitelist полей MVP, ограничения длины, запрет медданных/media/body metrics |
 | Sensitive logs | Заметки клиента, план, персональные данные | Medium | High | Маскирование, запрет request body, ревью log statements, тесты на sensitive payload |
 | Support/operator bypass | Раскрытие данных пилота | Low/Medium | High | Нет support domain API; runbook без чтения sensitive payload; masked logs only |
-| OpenSearch exposure | Логи, технические id | Medium | High | Network isolation, auth, retention, запрет sensitive payload в логах |
+| GreptimeDB exposure | Логи, технические id | Medium | High | Network isolation, auth, retention, запрет sensitive payload в логах |
 | Abuse приватных create/search операций | Доступность и качество данных | Medium | Medium | Rate limits, суточные лимиты, мониторинг ошибок и всплесков |
 
 ## 11. Целевые требования безопасности MVP

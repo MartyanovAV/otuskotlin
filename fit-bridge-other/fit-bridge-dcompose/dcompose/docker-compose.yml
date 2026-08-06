@@ -1,9 +1,9 @@
 # Минимальная версия инфраструктуры на базе:
-# OpenSearch, OpenSearch Dashboards, Fluent Bit, Envoy, Keycloak.
+# GreptimeDB, Fluent Bit, Envoy, Keycloak.
 
 # Адреса:
 # Приложение доступно по http://localhost:8080 через Envoy.
-# Панели мониторинга доступны по http://localhost:5601.
+# Логи и метрики доступны через http://localhost:4000/dashboard/.
 # Управление пользователями доступно по http://localhost:8080/admin.
 services:
   app:
@@ -18,16 +18,14 @@ services:
     extends:
       file: fluent-bit-base.yml
       service: fluent-bit-base
+    depends_on:
+      greptimedb:
+        condition: service_healthy
 
-  opensearch:
+  greptimedb:
     extends:
-      file: open-search-base.yml
-      service: opensearch-base
-
-  dashboards:
-    extends:
-      file: dashboards-base.yml
-      service: dashboards-base
+      file: greptimedb-base.yml
+      service: greptimedb-base
 
   envoy:
     extends:
@@ -40,4 +38,8 @@ services:
       service: keycloak-base
 
 volumes:
-  opensearch-data:
+  greptimedb-data:
+
+networks:
+  backend-network:
+    driver: bridge

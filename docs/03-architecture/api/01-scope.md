@@ -1,6 +1,6 @@
 # Scope API FitBridge MVP Trainer Diary
 
-Документ задаёт границы API MVP **Trainer Diary**: управление клиентской базой и тренировочными планами. Security/access/privacy — в [Security Architecture](../SECURITY_ARCHITECTURE.md); audit logging — в [ADR-006](../ADR/ADR-006-use-opensearch-fluent-bit-observability.md); архивное решение по публичной ссылке — [ADR-007](../ADR/ADR-007-public-plan-link-mvp.md).
+Документ задаёт границы API MVP **Trainer Diary**: управление клиентской базой и тренировочными планами. Security/access/privacy — в [Security Architecture](../SECURITY_ARCHITECTURE.md); audit logging — в [ADR-006](../ADR/ADR-006-use-greptimedb-fluent-bit-observability.md).
 
 ## Разделение scope
 

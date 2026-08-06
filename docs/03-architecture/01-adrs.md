@@ -5,5 +5,4 @@
 3. [ADR-003: Использовать Ktor для backend](ADR/ADR-003-ktor.md)
 4. [ADR-004: Использовать Kotlin как основной язык](ADR/ADR-004-kotlin.md)
 5. [ADR-005: Использовать PostgreSQL как основное хранилище приложения](ADR/ADR-005-use-postgresql.md)
-6. [ADR-006: Использовать OpenSearch, OpenSearch UI и Fluent Bit для observability MVP](ADR/ADR-006-use-opensearch-fluent-bit-observability.md)
-7. [ADR-007: Публичная ссылка на план как capability-token доступ без клиентской регистрации — Rejected/Archived для Trainer Diary MVP](ADR/ADR-007-public-plan-link-mvp.md)
+6. [ADR-006: Использовать GreptimeDB и Fluent Bit для observability MVP](ADR/ADR-006-use-greptimedb-fluent-bit-observability.md)

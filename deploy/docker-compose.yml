@@ -1,5 +1,5 @@
 # Минимальная инфраструктура FitBridge:
-# PostgreSQL, OpenSearch, OpenSearch Dashboards, Fluent Bit, Envoy, Keycloak.
+# PostgreSQL, GreptimeDB, Fluent Bit, Envoy, Keycloak.
 
 services:
   postgresql:
@@ -45,7 +45,7 @@ services:
     logging:
       driver: "fluentd"
       options:
-        fluentd-address: fluent-bit:24224
+        fluentd-address: 127.0.0.1:24224
         tag: profile.logs
     networks:
       - fitbridge-network
@@ -73,7 +73,7 @@ services:
     logging:
       driver: "fluentd"
       options:
-        fluentd-address: fluent-bit:24224
+        fluentd-address: 127.0.0.1:24224
         tag: training.logs
     networks:
       - fitbridge-network
@@ -82,62 +82,47 @@ services:
 
   fluent-bit:
     container_name: fluent-bit
-    image: fluent/fluent-bit
+    image: fluent/fluent-bit:4.2.0
+    depends_on:
+      greptimedb:
+        condition: service_healthy
     ports:
       - "24224:24224"
       - "24224:24224/udp"
       - "2020:2020"
     environment:
-      - opensearch_host=opensearch
-      - opensearch_user=admin
-      - opensearch_pass=adm-Password123!
+      - greptimedb_host=greptimedb
+      - greptimedb_user=admin
+      - greptimedb_pass=admin
     volumes:
       - ./volumes/fluent-bit-etc/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
       - ./volumes/fluent-bit-etc/parsers.conf:/fluent-bit/etc/parsers.conf
     networks:
       - fitbridge-network
 
-  opensearch:
-    container_name: opensearch
-    image: opensearchproject/opensearch:latest
-    environment:
-      - discovery.type=single-node
-      - http.port=9200
-      - bootstrap.memory_lock=true
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=adm-Password123!
+  greptimedb:
+    container_name: greptimedb
+    image: greptime/greptimedb:v0.14.4
+    command:
+      - standalone
+      - start
+      - --http-addr
+      - 0.0.0.0:4000
+      - --rpc-bind-addr
+      - 0.0.0.0:4001
     ports:
-      - '9200:9200'
-      - '9600:9600'
+      - "4000:4000"
+      - "4001:4001"
+      - "4002:4002"
+      - "4003:4003"
     volumes:
-      - opensearch-data:/usr/share/opensearch/data
+      - greptimedb-data:/tmp/greptimedb/
     healthcheck:
-      test: [ "CMD-SHELL", "curl -ku admin:adm-Password123! https://localhost:9200/_cluster/health?pretty | grep status | grep -q '\\(green\\|yellow\\)'" ]
+      test: ["CMD-SHELL", "status=$$(/usr/bin/curl --silent --show-error --output /dev/null --write-out '%{response_code}' --request GET http://127.0.0.1:4000/health) && [ \"$$status\" = 200 ]"]
       interval: 5s
-      timeout: 5s
-      retries: 24
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
-    networks:
-      - fitbridge-network
-
-  dashboards:
-    image: opensearchproject/opensearch-dashboards:latest
-    container_name: opensearch-dashboards
-    ports:
-      - 5601:5601
-    expose:
-      - "5601"
-    environment:
-      OPENSEARCH_HOSTS: '["https://opensearch:9200"]'
-    depends_on:
-      opensearch:
-        condition: service_healthy
+      timeout: 3s
+      retries: 12
+      start_period: 10s
     networks:
       - fitbridge-network
 
@@ -181,7 +166,7 @@ services:
       - fitbridge-network
 
 volumes:
-  opensearch-data:
+  greptimedb-data:
   postgresql-data:
 
 networks:

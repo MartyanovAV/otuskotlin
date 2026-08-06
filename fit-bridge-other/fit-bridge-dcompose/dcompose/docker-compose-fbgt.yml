@@ -1,0 +1,28 @@
+# Минимальная версия инфраструктуры на базе GreptimeDB и Fluent Bit.
+services:
+  app:
+    extends:
+      file: app-base.yml
+      service: app-base
+    depends_on:
+      - fluent-bit
+
+  fluent-bit:
+    extends:
+      file: fluent-bit-base.yml
+      service: fluent-bit-base
+    depends_on:
+      greptimedb:
+        condition: service_healthy
+
+  greptimedb:
+    extends:
+      file: greptimedb-base.yml
+      service: greptimedb-base
+
+volumes:
+  greptimedb-data:
+
+networks:
+  backend-network:
+    driver: bridge

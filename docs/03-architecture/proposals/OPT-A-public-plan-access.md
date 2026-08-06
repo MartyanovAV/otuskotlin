@@ -27,8 +27,8 @@ flowchart LR
 | Параметр | Значение | Источник |
 |-----------|-------|--------|
 | Регистрация клиента | Не требуется | BR-010, MVP_SCOPE_SUMMARY |
-| Хранение token | Только hash | Security guardrail BR-009 / ADR-007 |
-| Идентификаторы public URL | Только token, без `clientId`/`planId` | ADR-007 |
+| Хранение token | Только hash | Security guardrail BR-009 |
+| Идентификаторы public URL | Только token, без `clientId`/`planId` | Требование proposal |
 | Lifecycle доступа | `ACTIVE`, `REVOKED`, `EXPIRED` внутри `TrainingPlan` public-access state | ERD |
 | Payload scope | Минимальный план + форма отметки | BR-009 |
 | Future compatibility | Путь к `ClientProfile`/`Invite`/`AccessGrant` сохранён | PRODUCT_ROADMAP |

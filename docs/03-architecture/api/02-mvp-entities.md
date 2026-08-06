@@ -61,7 +61,6 @@
 | `ClientProfile` | Future client-owned profile |
 | `Invite` | Future invite/consent flow |
 | `AccessGrant` | Future granular permissions |
-| Public share flow | Future share/access flow; текущий ADR-007 отклонён |
 | Отметки выполнения / дневник | Future client-owned diary/history |
 | `TrainingEntry` | Future client-owned diary/history |
 | `ProgramAssignment` | Future assignment model после отделения plan/program/history |

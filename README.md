@@ -91,8 +91,8 @@ MVP фокусируется на одном сокращённом критич
 - Keycloak как внешний Identity Server.
 - POST Full API для бизнес-операций.
 - PostgreSQL как основное хранилище приложения.
-- OpenSearch и OpenSearch Dashboards для мониторинга и анализа логов.
-- Fluent Bit для доставки логов приложения в OpenSearch.
+- GreptimeDB для мониторинга и анализа логов и метрик через встроенный GreptimeDB Dashboard.
+- Fluent Bit для доставки логов приложения в GreptimeDB.
 
 ADR:
 
@@ -101,8 +101,7 @@ ADR:
 - [ADR-003: использовать Ktor](docs/03-architecture/ADR/ADR-003-ktor.md)
 - [ADR-004: использовать Kotlin](docs/03-architecture/ADR/ADR-004-kotlin.md)
 - [ADR-005: использовать PostgreSQL](docs/03-architecture/ADR/ADR-005-use-postgresql.md)
-- [ADR-006: использовать OpenSearch, OpenSearch Dashboards и Fluent Bit для observability](docs/03-architecture/ADR/ADR-006-use-opensearch-fluent-bit-observability.md)
-- [ADR-007: MVP с публичной ссылкой на план как capability-token доступ](docs/03-architecture/ADR/ADR-007-public-plan-link-mvp.md)
+- [ADR-006: использовать GreptimeDB и Fluent Bit для observability MVP](docs/03-architecture/ADR/ADR-006-use-greptimedb-fluent-bit-observability.md)
 
 ## Целевая инфраструктура MVP
 
@@ -113,7 +112,7 @@ ADR:
 - FitBridge Backend API на Kotlin/Ktor для POST Full бизнес-операций;
 - PostgreSQL как прикладное хранилище;
 - Keycloak как внешний Identity Server;
-- Fluent Bit, OpenSearch и OpenSearch Dashboards для logs-first observability.
+- Fluent Bit и GreptimeDB для observability.
 
 Подробности контейнеров и границ ответственности зафиксированы в [C4 Container source](docs/03-architecture/c4/C4_CONTAINER.drawio), [C4 Component source](docs/03-architecture/c4/C4_COMPONENT.drawio) и [Security Architecture / Threat Model](docs/03-architecture/SECURITY_ARCHITECTURE.md).
 
