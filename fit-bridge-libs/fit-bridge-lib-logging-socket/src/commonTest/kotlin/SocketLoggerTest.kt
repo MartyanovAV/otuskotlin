@@ -2,7 +2,7 @@ package com.github.martyanovav.otuskotlin.fitbridge.logging.socket
 
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
-import io.ktor.utils.io.core.*
+import io.ktor.utils.io.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.take
@@ -28,7 +28,7 @@ class SocketLoggerTest {
                         flow<String> {
                             val receiveChannel = socket.openReadChannel()
                             while (true) {
-                                receiveChannel.readUTF8Line(8 * 1024)?.let { emit(it) }
+                                receiveChannel.readLineStrict(limit = 8L * 1024, lineEnding = LineEnding.Lenient)?.let { emit(it) }
                             }
                         }.take(100).collect {
                             println("GOT: $it")
