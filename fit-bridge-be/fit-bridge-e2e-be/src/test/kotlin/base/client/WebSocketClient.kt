@@ -20,7 +20,7 @@ class WebSocketClient(dockerCompose: DockerCompose) : Client {
     override suspend fun sendAndReceive(version: String, path: String, request: String): String {
         val url = urlBuilder.apply {
             protocol = URLProtocol.WS
-            path("ws/$version")
+            path("$version/ws")
         }.build().toString()
 
         var response = ""

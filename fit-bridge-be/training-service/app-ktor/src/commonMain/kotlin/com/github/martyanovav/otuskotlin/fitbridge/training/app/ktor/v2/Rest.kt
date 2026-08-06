@@ -14,14 +14,23 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlin.reflect.KClass
 
-suspend inline fun <reified Q : IRequest, @Suppress("unused") reified R : IResponse> ApplicationCall.processV2(
+suspend inline fun <
+    reified Q : IRequest,
+    @Suppress("unused")
+    reified R : IResponse,
+> ApplicationCall.processV2(
     appSettings: AppSettings,
     clazz: KClass<*>,
     logId: String,
 ) {
     val request = receive<Q>()
     when (request) {
-        is ClientCardCreateRequest, is ClientCardReadRequest, is ClientCardUpdateRequest, is ClientCardArchiveRequest, is ClientCardSearchRequest -> {
+        is ClientCardCreateRequest,
+        is ClientCardReadRequest,
+        is ClientCardUpdateRequest,
+        is ClientCardArchiveRequest,
+        is ClientCardSearchRequest,
+        -> {
             ControllerHelper<ClientCardContext, Unit>(
                 { ClientCardContext() },
                 clazz,
@@ -34,12 +43,17 @@ suspend inline fun <reified Q : IRequest, @Suppress("unused") reified R : IRespo
                         is ClientCardSearchRequest -> fromTransport(request)
                     }
                 },
-                { /* processor.exec(this) */ },
+                { appSettings.processor.exec(this) },
                 { respond(toTransport()) },
-                { /* toLog */ }
+                { /* toLog */ },
             )
         }
-        is TrainingPlanCreateRequest, is TrainingPlanReadRequest, is TrainingPlanUpdateRequest, is TrainingPlanArchiveRequest, is TrainingPlanSearchRequest -> {
+        is TrainingPlanCreateRequest,
+        is TrainingPlanReadRequest,
+        is TrainingPlanUpdateRequest,
+        is TrainingPlanArchiveRequest,
+        is TrainingPlanSearchRequest,
+        -> {
             ControllerHelper<TrainingPlanContext, Unit>(
                 { TrainingPlanContext() },
                 clazz,
@@ -52,9 +66,9 @@ suspend inline fun <reified Q : IRequest, @Suppress("unused") reified R : IRespo
                         is TrainingPlanSearchRequest -> fromTransport(request)
                     }
                 },
-                { /* processor.exec(this) */ },
+                { appSettings.processor.exec(this) },
                 { respond(toTransport()) },
-                { /* toLog */ }
+                { /* toLog */ },
             )
         }
     }

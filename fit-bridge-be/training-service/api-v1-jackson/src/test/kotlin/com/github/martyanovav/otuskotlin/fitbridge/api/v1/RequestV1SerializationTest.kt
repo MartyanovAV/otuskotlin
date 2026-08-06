@@ -13,17 +13,20 @@ import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
 class RequestV1SerializationTest {
-    private val request = TrainingPlanCreateRequest(
-        requestType = "trainingPlan.create",
-        debug = Debug(
-            mode = RequestDebugMode.STUB,
-            stub = RequestDebugStubs.BAD_PLAN_TITLE,
-        ),
-        trainingPlan = TrainingPlanCreateObject(
-            title = "plan title",
-            planItems = listOf(ExerciseItem(id = UUID.fromString("550e8400-e29b-41d4-a716-446655440000"), title = "Day 1")),
-        ),
-    )
+    private val request =
+        TrainingPlanCreateRequest(
+            requestType = "trainingPlan.create",
+            debug =
+                Debug(
+                    mode = RequestDebugMode.STUB,
+                    stub = RequestDebugStubs.BAD_PLAN_TITLE,
+                ),
+            trainingPlan =
+                TrainingPlanCreateObject(
+                    title = "plan title",
+                    planItems = listOf(ExerciseItem(id = UUID.fromString("550e8400-e29b-41d4-a716-446655440000"), title = "Day 1")),
+                ),
+        )
 
     @Test
     fun serialize() {
@@ -45,9 +48,10 @@ class RequestV1SerializationTest {
 
     @Test
     fun deserializeNaked() {
-        val jsonString = """
+        val jsonString =
+            """
             {"requestType": "trainingPlan.create", "trainingPlan": null}
-        """.trimIndent()
+            """.trimIndent()
         val obj = apiV1Mapper.readValue(jsonString, TrainingPlanCreateRequest::class.java)
 
         assertEquals(null, obj.trainingPlan)

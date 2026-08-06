@@ -38,7 +38,7 @@ class KafkaClient(dockerCompose: DockerCompose) : Client {
                 ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java
             )
         ).also {
-            it.subscribe(versions.map { "marketplace-out-$it" })
+            it.subscribe(versions.map { "fitbridge-out-$it" })
         }
     }
     private var counter = 0
@@ -50,7 +50,7 @@ class KafkaClient(dockerCompose: DockerCompose) : Client {
         }
 
         counter += 1
-        producer.send(ProducerRecord("marketplace-in-$version", "test-$counter", request)).get()
+        producer.send(ProducerRecord("fitbridge-in-$version", "test-$counter", request)).get()
 
         val read = consumer.poll(Duration.ofSeconds(20))
         return read.firstOrNull()?.value() ?: ""

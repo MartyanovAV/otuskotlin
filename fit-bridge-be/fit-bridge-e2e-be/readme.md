@@ -1,7 +1,7 @@
 # Модуль E2E тестирования (End-to-End)
 
 Этот модуль содержит E2E тесты для проверки взаимодействия между компонентами системы. 
-Тесты используют библиотеку **TestContainers** для поднятия зависимостей (WireMock) в Docker-контейнерах и **Ktor Client** для отправки запросу к API.
+Тесты используют библиотеку **TestContainers** для поднятия зависимостей (WireMock) в Docker-контейнерах и **Ktor Client** для отправки HTTP- и WebSocket-запросов к API.
 
 ## Как запустить тесты
 
@@ -17,3 +17,6 @@
 ## Структура
 - `scenarios/v2/` — сценарии тестирования для API версии v2 (отдельно для ClientCard и TrainingPlan).
 - `TestWireMock.kt` — базовая проверка работоспособности контейнера WireMock.
+- `base/client/WebSocketClient.kt` — клиент WebSocket, подключающийся к прямому endpoint сервиса `/{version}/ws`, например `/v1/ws` или `/v2/ws`.
+
+При тестировании через Envoy используются внешние bounded-context paths Training Service: `/v1/training/ws` и `/v2/training/ws`.

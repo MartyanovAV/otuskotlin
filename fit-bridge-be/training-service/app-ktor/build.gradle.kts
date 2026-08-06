@@ -6,13 +6,14 @@ plugins {
 }
 
 kotlin {
-    jvm {  }
+    jvm { }
 
     sourceSets {
         val commonMain by getting {
             dependencies {
                 implementation(kotlin("stdlib-common"))
                 implementation(project(":common"))
+                implementation(project(":biz"))
                 implementation(project(":api-v2-kmp"))
                 implementation(project(":mappers-v2-common"))
                 implementation(project(":mappers-v2-client-card"))
@@ -26,6 +27,7 @@ kotlin {
                 implementation(libs.ktor.server.headers.default)
                 implementation(libs.ktor.server.headers.caching)
                 implementation(libs.ktor.server.headers.response)
+                implementation(libs.ktor.server.websocket)
 
                 implementation(libs.ktor.serialization.json)
 
@@ -57,9 +59,10 @@ kotlin {
                 implementation(kotlin("test"))
                 implementation(libs.ktor.server.test)
                 implementation(libs.coroutines.test)
+                implementation(libs.ktor.client.websockets)
             }
         }
-        
+
         val jvmTest by getting {
             dependencies {
                 implementation(kotlin("test-junit"))
@@ -71,7 +74,11 @@ kotlin {
 
 docker {
     images.register("Jvm") {
-        buildContext = project.layout.buildDirectory.dir("docker-jvm").get().toString()
+        buildContext =
+            project.layout.buildDirectory
+                .dir("docker-jvm")
+                .get()
+                .toString()
         dockerFile = "Dockerfile"
         dependsOnTask = "jvmJar"
         imageName = "${rootProject.name}-jvm"

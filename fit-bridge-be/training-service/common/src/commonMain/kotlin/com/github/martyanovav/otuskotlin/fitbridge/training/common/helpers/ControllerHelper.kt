@@ -34,7 +34,6 @@ suspend inline fun <C : IFBContext, T> ControllerHelper(
     } catch (e: Throwable) {
         ctx.state = State.FAILING
         ctx.addError(e.asFBError())
-        ctx.exec()
         if (ctx.command == com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBCommandBase.NONE) {
             when (ctx) {
                 is com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardContext -> ctx.command = com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardCommand.READ

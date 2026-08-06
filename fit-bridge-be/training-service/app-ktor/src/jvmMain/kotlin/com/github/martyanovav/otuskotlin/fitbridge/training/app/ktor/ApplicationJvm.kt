@@ -2,6 +2,7 @@ package com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor
 
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.plugins.initAppSettings
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.v1.v1Training
+import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.v1.wsHandlerV1
 import io.ktor.http.*
 import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
@@ -9,6 +10,7 @@ import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.websocket.*
 import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics
 import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics
@@ -65,6 +67,9 @@ fun Application.moduleJvm(appSettings: AppSettings = initAppSettings()) {
                 }
             }
             v1Training(appSettings)
+            webSocket("ws") {
+                wsHandlerV1(appSettings)
+            }
         }
     }
 }

@@ -32,7 +32,7 @@ tasks {
     }
 
     // 3. Привязываем генерацию к распаковке
-    val openApiGenerate by getting() {
+    val openApiGenerate by getting {
         dependsOn(extractLibSpecs)
     }
 
@@ -62,8 +62,8 @@ openApiGenerate {
             "dateLibrary" to "string",
             "enumPropertyNaming" to "UPPERCASE",
             "serializationLibrary" to "jackson",
-            "collectionType" to "list"
-        )
+            "collectionType" to "list",
+        ),
     )
 }
 

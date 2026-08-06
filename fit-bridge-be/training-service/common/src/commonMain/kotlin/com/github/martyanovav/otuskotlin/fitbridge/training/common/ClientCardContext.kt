@@ -1,16 +1,17 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.common
 
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBError
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.AuthPrincipal
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardCommand
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardFilter
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBCommand
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBError
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.RequestId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.WorkMode
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardFilter
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.stubs.Stubs
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.ws.IFBWsSession
 import kotlin.time.Instant
 
 data class ClientCardContext(
@@ -22,7 +23,7 @@ data class ClientCardContext(
     override var requestId: RequestId = RequestId.NONE,
     override var timeStart: Instant = Instant.DISTANT_PAST,
     override var principal: AuthPrincipal = AuthPrincipal.NONE,
-
+    override var wsSession: IFBWsSession = IFBWsSession.NONE,
     var clientCardRequest: ClientCard = ClientCard(),
     var clientCardResponse: ClientCard = ClientCard(),
     var clientCardsResponse: Page<ClientCard> = Page(),

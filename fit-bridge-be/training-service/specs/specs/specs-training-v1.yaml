@@ -317,6 +317,7 @@ components:
       properties:
         responseType:
           type: string
+          writeOnly: true
           description: Поле-дискриминатор для вычисления типа ответа
           example: clientCard.create
         requestId:

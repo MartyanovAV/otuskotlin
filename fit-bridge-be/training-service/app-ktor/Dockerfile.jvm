@@ -11,6 +11,6 @@ COPY ./app-ktor-0.0.1-all.jar ./app.jar
 # Create logs directory
 RUN mkdir -p /app/logs
 
-EXPOSE 8080
+EXPOSE 8081
 
 CMD ["java", "-jar", "app.jar"]

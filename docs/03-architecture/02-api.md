@@ -22,6 +22,7 @@
 | [04-mvp-diary-plan-methods.md](./api/04-mvp-diary-plan-methods.md) | Контракты создания и поиска планов |
 | [05-business-rules.md](./api/05-business-rules.md) | Бизнес-правила API, ownership/search guardrails, support/audit boundaries |
 | [06-metrics-and-limits.md](./api/06-metrics-and-limits.md) | SLO, performance targets, rate limits, надёжность |
+| [07-websocket-transport.md](./api/07-websocket-transport.md) | WebSocket-маршруты v1/v2, протокол frames, gateway/JWT и жизненный цикл сессии |
 
 ## Связанные источники
 

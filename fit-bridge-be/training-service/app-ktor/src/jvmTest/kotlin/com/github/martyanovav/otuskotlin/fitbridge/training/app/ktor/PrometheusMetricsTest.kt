@@ -10,14 +10,15 @@ import kotlin.test.assertTrue
 
 class PrometheusMetricsTest {
     @Test
-    fun `metrics route exposes jvm metrics over http`() = testApplication {
-        application {
-            moduleJvm(AppSettings())
+    fun `metrics route exposes jvm metrics over http`() =
+        testApplication {
+            application {
+                moduleJvm(AppSettings())
+            }
+
+            val response = client.get("/metrics")
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertTrue(response.bodyAsText().contains("jvm_memory_used_bytes"))
         }
-
-        val response = client.get("/metrics")
-
-        assertEquals(HttpStatusCode.OK, response.status)
-        assertTrue(response.bodyAsText().contains("jvm_memory_used_bytes"))
-    }
 }

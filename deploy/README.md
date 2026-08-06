@@ -6,9 +6,9 @@
 
 | Сервис | Назначение | Порт |
 |---|---|---|
-| `training-service` | Backend API карточек и планов | через Envoy `/v1/*`, `/v2/*` |
+| `training-service` | REST/WS Backend API карточек и планов | через Envoy `/v1/*`, `/v2/*` |
 | `postgresql` | `ClientCard` и `TrainingPlan` | `5432` |
-| `envoy` | Routing и edge JWT validation | `8080` |
+| `envoy` | REST/WS routing и edge JWT validation | `8080` |
 | `keycloak` | Registration/login/UserInfo/JWKS | через Envoy `/admin`, `/realms` |
 | `greptimedb` | Masked logs и метрики | `4000`–`4003` |
 | `fluent-bit` | Доставка логов | `24224`, `2020` |
@@ -41,15 +41,13 @@ docker compose up --build -d
 docker compose ps
 ```
 
-На текущей `main` Ktor-модуль `training-service/app-ktor` ещё не находится в tracked sources. Поэтому инфраструктурные сервисы и realm можно проверять отдельно, но сборка backend image станет доступна после реализации runtime-модуля.
-
-```powershell
-docker compose up -d keycloak envoy greptimedb fluent-bit postgresql
-```
+Compose собирает `training-service/app-ktor` и публикует его только через Envoy.
 
 Адреса:
 
 - Keycloak: `http://localhost:8080/realms/fit-bridge`;
+- Training health: `http://localhost:8080/health/training/ready`;
+- Training WebSocket v1/v2: `ws://localhost:8080/v1/training/ws`, `ws://localhost:8080/v2/training/ws`;
 - Admin Console: `http://localhost:8080/admin/` (`admin` / `admin`);
 - GreptimeDB Dashboard: `http://localhost:4000/dashboard/`;
 - Fluent Bit health: `http://localhost:2020`.
@@ -63,6 +61,8 @@ cd deploy
 ./keycloak-tokens.sh
 ./call-envoy.sh
 ```
+
+`call-envoy.sh` проверяет защищённый REST endpoint. Для WebSocket Bearer token передаётся в HTTP Upgrade request; после подключения сервер отправляет `InitResponse`.
 
 Ожидаемые claims access token:
 

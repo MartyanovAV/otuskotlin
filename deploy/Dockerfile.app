@@ -21,13 +21,16 @@ FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
+RUN apk add --no-cache curl
+
 ARG SERVICE_NAME
+ARG SERVICE_PORT=8080
 
 # Copy the built JAR from builder stage
 COPY --from=builder /home/gradle/project/fit-bridge-be/${SERVICE_NAME}/app-ktor/build/libs/*-all.jar app.jar
 
-# Expose application port (Ktor default)
-EXPOSE 8080
+# Document the port configured by the selected Ktor service.
+EXPOSE ${SERVICE_PORT}
 
 # Run the application
 ENTRYPOINT ["java", "-cp", "app.jar", "io.ktor.server.tomcat.jakarta.EngineMain"]

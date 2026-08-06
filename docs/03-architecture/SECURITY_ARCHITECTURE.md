@@ -43,7 +43,7 @@ Backend проверяет:
 5. Непустой `sub` и `preferred_username`.
 6. Наличие `TRAINER` в `realm_access.roles`.
 
-Envoy выполняет edge-проверку, но backend повторяет security-critical validation самостоятельно.
+Envoy выполняет edge-проверку как для REST, так и для WebSocket Upgrade, но backend повторяет security-critical validation самостоятельно. REST и WebSocket используют один `AuthPrincipal` и одинаковые role/ownership guards.
 
 ## 4. Ownership algorithm
 
@@ -59,6 +59,8 @@ Envoy выполняет edge-проверку, но backend повторяет 
 Keycloak `enabled` является источником IAM-статуса. Локального `ACTIVE/BLOCKED/DELETED` нет.
 
 Self-contained access token остаётся действительным до `exp`, даже если аккаунт отключён после выпуска. MVP ограничивает окно коротким access-token TTL. Немедленный revoke потребует introspection, deny-list или отдельного session-state решения и относится к дальнейшему security hardening.
+
+Для WebSocket JWT проверяется при handshake. Долгоживущее соединение не считается способом обойти TTL: gateway ограничивает длительность сессии, после чего клиент переподключается с актуальным token.
 
 ## 6. Минимизация данных
 
