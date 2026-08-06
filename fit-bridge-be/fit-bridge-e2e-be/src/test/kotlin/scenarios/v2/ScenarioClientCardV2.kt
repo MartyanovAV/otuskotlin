@@ -1,99 +1,102 @@
 package com.github.martyanovav.otuskotlin.fitbridge.e2e.scenarios.v2
 
-import io.ktor.client.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import com.github.martyanovav.otuskotlin.fitbridge.e2e.FitBridgeE2eClient
+import com.github.martyanovav.otuskotlin.fitbridge.e2e.assertSuccess
+import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.testcontainers.containers.GenericContainer
-import org.testcontainers.containers.BindMode
+import org.junit.jupiter.api.TestInstance
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ScenarioClientCardV2 {
-    companion object {
-        private lateinit var container: GenericContainer<*>
+    private val client = FitBridgeE2eClient()
 
-        @JvmStatic
-        @BeforeAll
-        fun setUp() {
-            container = GenericContainer("wiremock/wiremock:3.4.2")
-                .withExposedPorts(8080)
-                .withFileSystemBind("../../fit-bridge-other/fit-bridge-dcompose/dcompose/volumes/wm-fitbridge/mappings", "/home/wiremock/mappings", BindMode.READ_ONLY)
-            container.start()
-        }
+    @BeforeAll
+    fun checkStack() = runBlocking {
+        client.requireHealthy("/health/training/ready")
+    }
 
-        @JvmStatic
-        @AfterAll
-        fun tearDown() {
-            container.stop()
-        }
+    @AfterAll
+    fun closeClient() = client.close()
+
+    @Test
+    fun `create client card through training container`() = runBlocking {
+        assertCardOperation(
+            operation = "create",
+            payload = """"clientCard":{"displayName":"E2E Client","note":"E2E request"}""",
+        )
+        Unit
     }
 
     @Test
-    fun `test create client card v2`() = kotlinx.coroutines.runBlocking {
-        val client = HttpClient()
-        val port = container.getMappedPort(8080)
-        val host = container.host
-        
-        val response = client.post("http://$host:$port/v2/clientCard/create") {
-            contentType(ContentType.Application.Json)
-            setBody("""{ "requestType": "create" }""")
-        }
-        assertEquals(200, response.status.value)
+    fun `read client card through training container`() = runBlocking {
+        assertCardOperation(
+            operation = "read",
+            payload = """"clientCard":{"id":"00000000-0000-0000-0000-000000000101"}""",
+        )
+        Unit
     }
 
     @Test
-    fun `test read client card v2`() = kotlinx.coroutines.runBlocking {
-        val client = HttpClient()
-        val port = container.getMappedPort(8080)
-        val host = container.host
-        
-        val response = client.post("http://$host:$port/v2/clientCard/read") {
-            contentType(ContentType.Application.Json)
-            setBody("""{ "requestType": "read" }""")
-        }
-        assertEquals(200, response.status.value)
+    fun `update client card through training container`() = runBlocking {
+        assertCardOperation(
+            operation = "update",
+            payload = """"clientCard":{"id":"00000000-0000-0000-0000-000000000101","lock":"stub-lock-client-card","displayName":"E2E Client"}""",
+        )
+        Unit
     }
 
     @Test
-    fun `test update client card v2`() = kotlinx.coroutines.runBlocking {
-        val client = HttpClient()
-        val port = container.getMappedPort(8080)
-        val host = container.host
-        
-        val response = client.post("http://$host:$port/v2/clientCard/update") {
-            contentType(ContentType.Application.Json)
-            setBody("""{ "requestType": "update" }""")
-        }
-        assertEquals(200, response.status.value)
+    fun `archive client card through training container`() = runBlocking {
+        val card = assertCardOperation(
+            operation = "archive",
+            payload = """"clientCard":{"id":"00000000-0000-0000-0000-000000000101","lock":"stub-lock-client-card"}""",
+        )
+        assertEquals("ARCHIVED", card["status"]?.jsonPrimitive?.content)
     }
 
     @Test
-    fun `test archive client card v2`() = kotlinx.coroutines.runBlocking {
-        val client = HttpClient()
-        val port = container.getMappedPort(8080)
-        val host = container.host
-        
-        val response = client.post("http://$host:$port/v2/clientCard/archive") {
-            contentType(ContentType.Application.Json)
-            setBody("""{ "requestType": "archive" }""")
-        }
-        assertEquals(200, response.status.value)
+    fun `search client cards through training container`() = runBlocking {
+        val requestId = "e2e-client-card-search-v2"
+        val response = client.post(
+            "/v2/clientCard/search",
+            request("search", requestId, """"clientCardFilter":{"pageSize":10,"pageNumber":1}"""),
+        )
+
+        val json = response.assertSuccess("clientCard.search", requestId)
+        val cards = requireNotNull(json["clientCards"]?.jsonArray) { response.body }
+        assertTrue(cards.isNotEmpty(), response.body)
+        assertEquals("Анна Смирнова", cards.first().jsonObject["displayName"]?.jsonPrimitive?.content)
     }
 
-    @Test
-    fun `test search client card v2`() = kotlinx.coroutines.runBlocking {
-        val client = HttpClient()
-        val port = container.getMappedPort(8080)
-        val host = container.host
-        
-        val response = client.post("http://$host:$port/v2/clientCard/search") {
-            contentType(ContentType.Application.Json)
-            setBody("""{ "requestType": "search" }""")
-        }
-        assertEquals(200, response.status.value)
+    private suspend fun assertCardOperation(
+        operation: String,
+        payload: String,
+    ) = run {
+        val requestId = "e2e-client-card-$operation-v2"
+        val response = client.post(
+            "/v2/clientCard/$operation",
+            request(operation, requestId, payload),
+        )
+        val json = response.assertSuccess("clientCard.$operation", requestId)
+        val card = requireNotNull(json["clientCard"]?.jsonObject) { response.body }
+        assertEquals("Анна Смирнова", card["displayName"]?.jsonPrimitive?.content)
+        card
     }
+
+    private fun request(operation: String, requestId: String, payload: String) =
+        """
+            {
+              "requestType": "clientCard.$operation",
+              "requestId": "$requestId",
+              $payload,
+              "debug": {"mode": "stub", "stub": "success"}
+            }
+        """.trimIndent()
 }
-

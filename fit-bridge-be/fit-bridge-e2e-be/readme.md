@@ -1,11 +1,19 @@
 # Модуль E2E тестирования (End-to-End)
 
-Этот модуль содержит E2E тесты для проверки взаимодействия между компонентами системы. 
-Тесты используют библиотеку **TestContainers** для поднятия зависимостей (WireMock) в Docker-контейнерах и **Ktor Client** для отправки HTTP- и WebSocket-запросов к API.
+Этот модуль содержит black-box E2E-тесты развернутого FitBridge. Тесты отправляют запросы через Envoy в реальный контейнер `training-service`, а access token получают из Keycloak локального стенда.
 
 ## Как запустить тесты
 
-Запустить все E2E тесты можно из корня проекта командой:
+Сначала соберите артефакты и поднимите стенд:
+
+```bash
+cd deploy
+docker compose up -d --build --wait
+cd ..
+```
+
+После этого запустите все E2E-тесты из корня проекта:
+
 ```bash
 ./gradlew e2eTests
 ```
@@ -14,9 +22,21 @@
 ./gradlew :fit-bridge-be:fit-bridge-e2e-be:test
 ```
 
-## Структура
-- `scenarios/v2/` — сценарии тестирования для API версии v2 (отдельно для ClientCard и TrainingPlan).
-- `TestWireMock.kt` — базовая проверка работоспособности контейнера WireMock.
-- `base/client/WebSocketClient.kt` — клиент WebSocket, подключающийся к прямому endpoint сервиса `/{version}/ws`, например `/v1/ws` или `/v2/ws`.
+По умолчанию тесты обращаются к `http://localhost:8080` и используют локального пользователя `fitbridge-test` / `fitbridge`. Настройки можно переопределить переменными окружения:
 
-При тестировании через Envoy используются внешние bounded-context paths Training Service: `/v1/training/ws` и `/v2/training/ws`.
+- `FITBRIDGE_E2E_BASE_URL`;
+- `FITBRIDGE_E2E_USERNAME`;
+- `FITBRIDGE_E2E_PASSWORD`;
+- `FITBRIDGE_E2E_CLIENT_ID`.
+
+Аналогичные JVM properties имеют имена `fitbridge.e2e.baseUrl`, `fitbridge.e2e.username`, `fitbridge.e2e.password` и `fitbridge.e2e.clientId`.
+
+## Что проверяется
+
+- готовность Envoy и Training Service;
+- обязательность JWT для API;
+- получение JWT из Keycloak;
+- реальные маршруты API v2 для `ClientCard` и `TrainingPlan`;
+- тип, `requestId`, результат и содержимое каждого ответа.
+
+Тесты используют внешние маршруты Envoy: `/v2/clientCard/*` и `/v2/trainingPlan/*`. WebSocket Training Service доступен через `/v1/training/ws` и `/v2/training/ws`.

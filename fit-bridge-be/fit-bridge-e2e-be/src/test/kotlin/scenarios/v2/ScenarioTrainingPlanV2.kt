@@ -1,99 +1,102 @@
 package com.github.martyanovav.otuskotlin.fitbridge.e2e.scenarios.v2
 
-import io.ktor.client.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import com.github.martyanovav.otuskotlin.fitbridge.e2e.FitBridgeE2eClient
+import com.github.martyanovav.otuskotlin.fitbridge.e2e.assertSuccess
+import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.testcontainers.containers.GenericContainer
-import org.testcontainers.containers.BindMode
+import org.junit.jupiter.api.TestInstance
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ScenarioTrainingPlanV2 {
-    companion object {
-        private lateinit var container: GenericContainer<*>
+    private val client = FitBridgeE2eClient()
 
-        @JvmStatic
-        @BeforeAll
-        fun setUp() {
-            container = GenericContainer("wiremock/wiremock:3.4.2")
-                .withExposedPorts(8080)
-                .withFileSystemBind("../../fit-bridge-other/fit-bridge-dcompose/dcompose/volumes/wm-fitbridge/mappings", "/home/wiremock/mappings", BindMode.READ_ONLY)
-            container.start()
-        }
+    @BeforeAll
+    fun checkStack() = runBlocking {
+        client.requireHealthy("/health/training/ready")
+    }
 
-        @JvmStatic
-        @AfterAll
-        fun tearDown() {
-            container.stop()
-        }
+    @AfterAll
+    fun closeClient() = client.close()
+
+    @Test
+    fun `create training plan through training container`() = runBlocking {
+        assertPlanOperation(
+            operation = "create",
+            payload = """"trainingPlan":{"title":"E2E plan","clientCardId":"00000000-0000-0000-0000-000000000101","planItems":[{"itemType":"EXERCISE","id":"00000000-0000-0000-0000-000000000301","title":"Squats"}]}""",
+        )
+        Unit
     }
 
     @Test
-    fun `test create training plan v2`() = kotlinx.coroutines.runBlocking {
-        val client = HttpClient()
-        val port = container.getMappedPort(8080)
-        val host = container.host
-        
-        val response = client.post("http://$host:$port/v2/trainingPlan/create") {
-            contentType(ContentType.Application.Json)
-            setBody("""{ "requestType": "create" }""")
-        }
-        assertEquals(200, response.status.value)
+    fun `read training plan through training container`() = runBlocking {
+        assertPlanOperation(
+            operation = "read",
+            payload = """"trainingPlan":{"id":"00000000-0000-0000-0000-000000000201"}""",
+        )
+        Unit
     }
 
     @Test
-    fun `test read training plan v2`() = kotlinx.coroutines.runBlocking {
-        val client = HttpClient()
-        val port = container.getMappedPort(8080)
-        val host = container.host
-        
-        val response = client.post("http://$host:$port/v2/trainingPlan/read") {
-            contentType(ContentType.Application.Json)
-            setBody("""{ "requestType": "read" }""")
-        }
-        assertEquals(200, response.status.value)
+    fun `update training plan through training container`() = runBlocking {
+        assertPlanOperation(
+            operation = "update",
+            payload = """"trainingPlan":{"id":"00000000-0000-0000-0000-000000000201","lock":"stub-lock-training-plan","title":"E2E plan","planItems":[{"itemType":"EXERCISE","id":"00000000-0000-0000-0000-000000000301","title":"Squats"}]}""",
+        )
+        Unit
     }
 
     @Test
-    fun `test update training plan v2`() = kotlinx.coroutines.runBlocking {
-        val client = HttpClient()
-        val port = container.getMappedPort(8080)
-        val host = container.host
-        
-        val response = client.post("http://$host:$port/v2/trainingPlan/update") {
-            contentType(ContentType.Application.Json)
-            setBody("""{ "requestType": "update" }""")
-        }
-        assertEquals(200, response.status.value)
+    fun `archive training plan through training container`() = runBlocking {
+        val plan = assertPlanOperation(
+            operation = "archive",
+            payload = """"trainingPlan":{"id":"00000000-0000-0000-0000-000000000201","lock":"stub-lock-training-plan"}""",
+        )
+        assertEquals("ARCHIVED", plan["status"]?.jsonPrimitive?.content)
     }
 
     @Test
-    fun `test archive training plan v2`() = kotlinx.coroutines.runBlocking {
-        val client = HttpClient()
-        val port = container.getMappedPort(8080)
-        val host = container.host
-        
-        val response = client.post("http://$host:$port/v2/trainingPlan/archive") {
-            contentType(ContentType.Application.Json)
-            setBody("""{ "requestType": "archive" }""")
-        }
-        assertEquals(200, response.status.value)
+    fun `search training plans through training container`() = runBlocking {
+        val requestId = "e2e-training-plan-search-v2"
+        val response = client.post(
+            "/v2/trainingPlan/search",
+            request("search", requestId, """"trainingPlanFilter":{"pageSize":10,"pageNumber":1}"""),
+        )
+
+        val json = response.assertSuccess("trainingPlan.search", requestId)
+        val plans = requireNotNull(json["trainingPlans"]?.jsonArray) { response.body }
+        assertTrue(plans.isNotEmpty(), response.body)
+        assertEquals("Базовая тренировка", plans.first().jsonObject["title"]?.jsonPrimitive?.content)
     }
 
-    @Test
-    fun `test search training plan v2`() = kotlinx.coroutines.runBlocking {
-        val client = HttpClient()
-        val port = container.getMappedPort(8080)
-        val host = container.host
-        
-        val response = client.post("http://$host:$port/v2/trainingPlan/search") {
-            contentType(ContentType.Application.Json)
-            setBody("""{ "requestType": "search" }""")
-        }
-        assertEquals(200, response.status.value)
+    private suspend fun assertPlanOperation(
+        operation: String,
+        payload: String,
+    ) = run {
+        val requestId = "e2e-training-plan-$operation-v2"
+        val response = client.post(
+            "/v2/trainingPlan/$operation",
+            request(operation, requestId, payload),
+        )
+        val json = response.assertSuccess("trainingPlan.$operation", requestId)
+        val plan = requireNotNull(json["trainingPlan"]?.jsonObject) { response.body }
+        assertEquals("Базовая тренировка", plan["title"]?.jsonPrimitive?.content)
+        plan
     }
+
+    private fun request(operation: String, requestId: String, payload: String) =
+        """
+            {
+              "requestType": "trainingPlan.$operation",
+              "requestId": "$requestId",
+              $payload,
+              "debug": {"mode": "stub", "stub": "success"}
+            }
+        """.trimIndent()
 }
-
