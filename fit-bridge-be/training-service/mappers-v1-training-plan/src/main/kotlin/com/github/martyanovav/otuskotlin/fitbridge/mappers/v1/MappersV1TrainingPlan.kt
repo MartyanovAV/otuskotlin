@@ -20,6 +20,8 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanUpd
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.TrainingPlanContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.RequestId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBCommandBase
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.PlanItem
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ExerciseItem
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.CircuitItem
@@ -51,6 +53,8 @@ fun TrainingPlanContext.toTransport(): Any = when (command) {
     TrainingPlanCommand.UPDATE -> toTransportTrainingPlanUpdate()
     TrainingPlanCommand.ARCHIVE -> toTransportTrainingPlanArchive()
     TrainingPlanCommand.SEARCH -> toTransportTrainingPlanSearch()
+    FBCommandBase.NONE -> toTransportInit()
+    FBCommandBase.INIT -> toTransportInit()
     else -> throw IllegalArgumentException("Unsupported training plan command $command")
 }
 
@@ -92,35 +96,35 @@ fun TrainingPlanContext.fromTransport(request: TrainingPlanSearchRequest) {
 
 internal fun TrainingPlanContext.toTransportTrainingPlanCreate() = TrainingPlanCreateResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
-    result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+    result = if (state == State.RUNNING || state == State.FINISHING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     trainingPlan = trainingPlanResponse.toTransportTrainingPlan()
 )
 
 internal fun TrainingPlanContext.toTransportTrainingPlanRead() = TrainingPlanReadResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
-    result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+    result = if (state == State.RUNNING || state == State.FINISHING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     trainingPlan = trainingPlanResponse.toTransportTrainingPlan()
 )
 
 internal fun TrainingPlanContext.toTransportTrainingPlanUpdate() = TrainingPlanUpdateResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
-    result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+    result = if (state == State.RUNNING || state == State.FINISHING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     trainingPlan = trainingPlanResponse.toTransportTrainingPlan()
 )
 
 internal fun TrainingPlanContext.toTransportTrainingPlanArchive() = TrainingPlanArchiveResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
-    result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+    result = if (state == State.RUNNING || state == State.FINISHING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     trainingPlan = trainingPlanResponse.toTransportTrainingPlan()
 )
 
 internal fun TrainingPlanContext.toTransportTrainingPlanSearch() = TrainingPlanSearchResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
-    result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+    result = if (state == State.RUNNING || state == State.FINISHING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     trainingPlans = trainingPlansResponse.items.mapNotNull { it.toTransportTrainingPlan() }.takeIf { it.isNotEmpty() },
     totalSize = trainingPlansResponse.totalSize,
