@@ -1,125 +1,123 @@
-# OpenCode Agents
+# OpenCode Agents — Adaptive Pipeline
+
+## Команды (Slash Commands)
+
+Команды — это шорткаты для явного выбора трека. Если команда не указана,
+Оркестратор сам определяет трек по контексту запроса.
+- `/fix` — Fast Track: багфикс или мелкая правка (без PO и Architect)
+- `/feature` — Feature Track: полный цикл (PO → Architect → Dev → Critic → QA)
+- `/review` — Вызов Critic для code review текущих изменений (с полным отчетом)
+- `/docs` — Обновление документации (PO + Architect)
 
 ## Структура
 
 USER
 ↓
-ORCHESTRATOR
-├─ Product Owner   -> бизнес-требования, scope, acceptance criteria
-├─ Architect       -> техническое решение, C4, ERD, ADR, API contracts
-├─ Executor        -> реализация через TDD (backend, логика)
-├─ Reviewer        -> quality gate, verdict
-└─ Release Agent   -> CI/CD, deploy
+ORCHESTRATOR (Primary — маршрутизатор / Triage)
+├─ product-owner        → бизнес-требования (Feature Track)
+├─ architect            → тех. решения (Feature Track)
+├─ backend-developer    → Kotlin/Ktor код + Inner Loop верификация
+├─ frontend-developer   → UI код + линтинг
+├─ critic               → быстрый code review
+├─ qa                   → E2E тесты, негативные сценарии
+└─ devops               → CI/CD, деплой
 
 ## Три главных правила
 
 1. Только Orchestrator вызывает subagent'ов через task().
 2. Субагенты не вызывают друг друга.
-3. Любой конфликт, вопрос или нехватка данных возвращается в Orchestrator.
+3. Любой конфликт или нехватка данных возвращается в Orchestrator.
 
-## Рабочий поток
+## Рабочие потоки (Workflows)
 
-PO → Architect → [Gate 1] → Executor → [Gate 2] → Reviewer → [Gate 3] → Release Agent
+### 1. Fast Track (/fix) — Багфиксы, мелкие правки
+Developer → Critic (краткий вердикт) → Пользователь
+
+### 2. Feature Track (/feature) — Новый функционал
+PO → Architect → [Gate 1] → Developer → Critic → QA → [Gate 2] → DevOps
+
+### 3. Review Track (/review) — Code review
+Critic (полный отчет REVIEW_REPORT.md) → Пользователь
+
+### 4. Docs Track (/docs) — Документация
+PO / Architect → Пользователь
 
 ## Gate'ы
 
-Gate 1 — Strategy Sync
-- PO подготовил бизнес-артефакты
-- Architect подготовил тех. артефакты
-- Нет критических противоречий между ними
+Gate 1 — Strategy Sync (только Feature Track)
+- PO и Architect подготовили артефакты
+- Нет противоречий
 - Пользователь подтвердил переход
 
-Gate 2 — Solution Proof
-- Executor реализовал задачу
-- TDD цикл соблюдён
-- Тесты проходят
+Gate 2 — Final Accept (Feature Track)
+- Critic: verdict = APPROVE
+- QA: тесты пройдены
 - Пользователь подтвердил переход
-
-Gate 3 — Final Accept
-- Reviewer написал REVIEW_REPORT.md
-- Verdict = APPROVE
-- Пользователь подтвердил переход
-
-Release Agent вызывается только после Gate 3.
-
-## Rollback
-
-Gate 1 Reject:
-├─ Бизнес-конфликт -> Product Owner
-└─ Тех. конфликт   -> Architect
-
-Gate 2 Reject:
-├─ Бизнес-изменение -> Product Owner
-├─ Тех. ошибка      -> Architect
-└─ Ошибка кода      -> Executor
-
-Gate 3 Reject:
-└─ К нужному этапу по решению Orchestrator
 
 ## Роли
 
 ### Orchestrator
+- Маршрутизирует задачи (Triage). Выбирает трек.
 - Единственный, кто вызывает task()
 - Не создаёт файлы, не пишет код, не запускает bash
-- Управляет потоком, Gate'ами и rollback'ами
-- Ждёт human approval на каждом Gate
 
 ### Product Owner
-- Бизнес-цель, scope, personas, CJM, acceptance criteria
-- Не выбирает технологии, не проектирует БД, не пишет код
-- Не вызывает других агентов
-- Неясность -> возвращает вопросы Orchestrator
+- Бизнес-цель, scope, acceptance criteria
+- Вызывается только в Feature Track и Docs Track (не в Fast Track)
+- Не генерирует артефакты для технических задач
 
 ### Architect
-- C4, ERD, ADR, API contracts, trade-offs
-- Не пишет production-код, не запускает bash
-- Не вызывает других агентов
-- Не меняет бизнес-требования самостоятельно
-- Конфликт с PO -> возвращает Orchestrator
+- C4, ERD, ADR, API contracts
+- Вызывается только в Feature Track и Docs Track (не в Fast Track)
+- Краткий ревью вместо полных документов для локальных правок
 
-### Executor
-- Реализует утверждённый scope через TDD: RED -> GREEN -> REFACTOR
-- Не меняет бизнес-требования и архитектуру по своей инициативе
-- Не вызывает других агентов
-- Не считает задачу выполненной без passing tests
+### Backend Developer
+- Kotlin, Ktor, Gradle. Работает по TDD.
+- Inner Loop: код → ./gradlew test → анализ ошибки → повтор (до 5 итераций)
+- Не завершает задачу без passing tests
 
-### Reviewer
-- Читает код, ищет баги, security-проблемы, слабые тесты
-- Пишет docs/REVIEW_REPORT.md
-- Verdict: APPROVE или REJECT
-- Не пишет feature-код, не вызывает других агентов
+### Frontend Developer
+- UI компоненты, стейт-менеджмент.
+- Inner Loop: код → линтер/тесты → анализ → повтор
+- Строго соблюдает контракты API
 
-### Release Agent
-- CI/CD, deployment scripts, release docs, health checks
-- Запускается только после Gate 3 approval
-- Не деплоит без явной команды Orchestrator
+### Critic
+- Быстрый code review (независимая проверка)
+- По умолчанию: краткий вердикт (APPROVE / REJECT: причина)
+- Полный REVIEW_REPORT.md генерируется ТОЛЬКО при вызове через /review
+- Read-only: не имеет права изменять код
+
+### QA
+- Негативные тест-кейсы, проверка поведения
+- Не исправляет баги — возвращает Developer'у
+
+### DevOps
+- CI/CD, деплой, health checks
+- Вызывается только после Gate 2
 
 ## Запрещённые действия
 
-| Агент         | Запрещено                                               |
-|---------------|---------------------------------------------------------|
-| Orchestrator  | Создавать файлы, писать код, запускать bash             |
-| Product Owner | Технологии, БД, код, вызов агентов                      |
-| Architect     | Production-код, вызов агентов, правка бизнес-требований |
-| Executor      | Пропуск RED, выход за scope, вызов агентов              |
-| Reviewer      | Писать фичи вместо Executor                             |
-| Release Agent | Деплой до Gate 3 approval                               |
+| Агент | Запрещено |
+|-------|-----------|
+| Orchestrator | Файлы, код, bash |
+| Product Owner | Технологии, код, вызов агентов |
+| Architect | Production-код, правка бизнес-требований |
+| Backend/Frontend | Пропуск Inner Loop (тестов), выход за scope |
+| Critic | Изменять любые файлы кроме REVIEW_REPORT.md (только при /review) |
+| QA | Писать production код, исправлять баги |
+| DevOps | Деплой без Gate 2 approval |
 
 ## File versioning (все агенты)
-
 - Git handles versioning
-- Если файл существует -> edit()
-- Если файла нет -> write()
-- Никаких суффиксов: _FINAL, _UPDATED, _v2 и т.п.
+- Если файл существует → edit()
+- Если файла нет → write()
+- Никаких суффиксов: _FINAL, _UPDATED, _v2
 - ONE file = ONE version of truth
 
 ## MCP Servers
+Все агенты могут использовать MCP-серверы при необходимости.
 
-Все агенты могут использовать MCP-серверы из opencode.json.
-Явно называть MCP не нужно — используй по ситуации.
-
-## Project context (для Architect и Executor)
-
+## Project context
 Перед изменением кода или архитектуры:
 1. Определи тип файла / модуля
 2. Найди ближайший skill
