@@ -9,6 +9,7 @@ import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 
 fun Application.module(appSettings: AppSettings = initAppSettings()) {
     initPlugins(appSettings)
@@ -21,7 +22,7 @@ fun Application.module(appSettings: AppSettings = initAppSettings()) {
     routing {
         healthRoutes()
         route("v2") {
-            install(io.ktor.server.plugins.contentnegotiation.ContentNegotiation) {
+            install(ContentNegotiation) {
                 json(appSettings.json)
             }
             v2Training(appSettings)

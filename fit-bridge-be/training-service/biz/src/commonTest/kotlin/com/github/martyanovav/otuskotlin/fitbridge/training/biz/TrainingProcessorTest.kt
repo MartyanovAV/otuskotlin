@@ -24,7 +24,7 @@ class TrainingProcessorTest {
                 .forEach { command ->
                     val ctx = ClientCardContext(command = command, workMode = WorkMode.STUB, stubCase = Stubs.SUCCESS)
                     processor.exec(ctx)
-                    assertEquals(State.RUNNING, ctx.state, command.name)
+                    assertEquals(State.FINISHING, ctx.state, command.name)
                     if (command == ClientCardCommand.SEARCH) {
                         assertEquals(1, ctx.clientCardsResponse.totalSize, command.name)
                     } else {
@@ -41,7 +41,7 @@ class TrainingProcessorTest {
                 .forEach { command ->
                     val ctx = TrainingPlanContext(command = command, workMode = WorkMode.STUB, stubCase = Stubs.SUCCESS)
                     processor.exec(ctx)
-                    assertEquals(State.RUNNING, ctx.state, command.name)
+                    assertEquals(State.FINISHING, ctx.state, command.name)
                     if (command == TrainingPlanCommand.SEARCH) {
                         assertEquals(1, ctx.trainingPlansResponse.totalSize, command.name)
                     } else {

@@ -22,6 +22,7 @@ jvm-compiler = "21"
 jvm-language = "21"
 
 [libraries]
+cor = { module = "com.github.martyanovav.otuskotlin.fitbridge.libs:fit-bridge-lib-cor" }
 plugin-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 plugin-binaryCompatibilityValidator = { module = "org.jetbrains.kotlinx:binary-compatibility-validator", version.ref = "binaryCompabilityValidator" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
