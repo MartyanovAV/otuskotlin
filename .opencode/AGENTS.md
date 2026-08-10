@@ -134,7 +134,7 @@ Gate 2 — Final Accept (только Feature Full):
 
 ### Backend Developer
 - применяет TDD к багам и изменениям поведения;
-- выбирает verification ladder по фактическому scope и проходит все обязательные ступени;
+- загружает `backend-verification` и проходит обязательную verification ladder;
 - не запускает `clean` без подтверждённой причины.
 
 ### Frontend Developer

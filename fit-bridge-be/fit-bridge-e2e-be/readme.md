@@ -4,23 +4,43 @@
 
 ## Как запустить тесты
 
-Сначала соберите артефакты и поднимите стенд:
+Из корня проекта запустите канонический E2E-скрипт:
 
-```bash
-cd deploy
-docker compose up -d --build --wait
-cd ..
+Windows (PowerShell 7):
+
+```powershell
+pwsh -NoProfile -File ./scripts/run-e2e.ps1
 ```
 
-После этого запустите все E2E-тесты из корня проекта:
+Linux:
 
 ```bash
-./gradlew e2eTests
+bash ./scripts/run-e2e.sh
 ```
-Или напрямую:
+
+Он выполняет полный цикл в обязательном порядке:
+
+1. валидирует `deploy/docker-compose.yml`;
+2. собирает fat JAR (`shadowJar`) Training Service;
+3. размещает артефакт как `deploy/training-service.jar`;
+4. поднимает Compose ограниченными по времени фазами: storage → logging → identity → gateway → application services, причём Docker-образы приложений пересобираются из новых JAR;
+5. после готовности зависимостей точечно пересоздаёт только Keycloak и Envoy, чтобы они перечитали bind-mounted realm и routing configuration; массовый `--force-recreate` намеренно не используется из-за зависимости application logging от уже работающего Fluent Bit;
+6. проверяет публичные readiness endpoints;
+7. запускает корневую задачу `e2eTests` с `--rerun-tasks`, чтобы black-box тесты гарантированно выполнялись заново.
+
+Прямой запуск Gradle допустим только для повторного прогона, когда Compose-стенд уже заведомо собран из текущих артефактов и остаётся healthy:
+
 ```bash
-./gradlew :fit-bridge-be:fit-bridge-e2e-be:test
+./gradlew e2eTests --console=plain
 ```
+
+Или напрямую для этого модуля:
+
+```bash
+./gradlew -p fit-bridge-be :fit-bridge-e2e-be:test --console=plain
+```
+
+Обе версии выполняют одинаковые шаги и намеренно оставляют локальный стенд запущенным для диагностики и повторных прогонов. Остановить его без удаления данных можно командой `docker compose --file deploy/docker-compose.yml down`. Удаление volumes через `down -v` не является частью обычного тестового цикла.
 
 По умолчанию тесты обращаются к `http://localhost:8080` и используют локального пользователя `fitbridge-test` / `fitbridge`. Настройки можно переопределить переменными окружения:
 
