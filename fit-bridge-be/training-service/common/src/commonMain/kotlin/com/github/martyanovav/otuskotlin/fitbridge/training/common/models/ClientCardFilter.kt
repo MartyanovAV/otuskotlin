@@ -5,4 +5,6 @@ data class ClientCardFilter(
     var searchString: String = "",
     var pageNumber: Int = 1,
     var pageSize: Int = 10,
-)
+) {
+    fun deepCopy(): ClientCardFilter = copy()
+}

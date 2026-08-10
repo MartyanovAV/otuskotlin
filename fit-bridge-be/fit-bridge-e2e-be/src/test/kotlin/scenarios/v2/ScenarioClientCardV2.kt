@@ -3,6 +3,7 @@ package com.github.martyanovav.otuskotlin.fitbridge.e2e.scenarios.v2
 import com.github.martyanovav.otuskotlin.fitbridge.e2e.FitBridgeE2eClient
 import com.github.martyanovav.otuskotlin.fitbridge.e2e.WithFitBridgeStack
 import com.github.martyanovav.otuskotlin.fitbridge.e2e.assertSuccess
+import com.github.martyanovav.otuskotlin.fitbridge.e2e.assertValidationErrors
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -77,6 +78,47 @@ class ScenarioClientCardV2 {
         assertEquals("Анна Смирнова", cards.first().jsonObject["displayName"]?.jsonPrimitive?.content)
     }
 
+    @Test
+    fun `create rejects blank display name`() = runBlocking {
+        val requestId = "e2e-client-card-create-validation-v2"
+        val response = client.post(
+            "/v2/clientCard/create",
+            validationRequest(
+                operation = "create",
+                requestId = requestId,
+                payload = """"clientCard":{"displayName":"   "}""",
+            ),
+        )
+
+        response.assertValidationErrors(
+            "clientCard.create",
+            requestId,
+            "validation-displayName-empty",
+        )
+        Unit
+    }
+
+    @Test
+    fun `search rejects invalid pagination`() = runBlocking {
+        val requestId = "e2e-client-card-search-validation-v2"
+        val response = client.post(
+            "/v2/clientCard/search",
+            validationRequest(
+                operation = "search",
+                requestId = requestId,
+                payload = """"clientCardFilter":{"pageSize":101,"pageNumber":0}""",
+            ),
+        )
+
+        response.assertValidationErrors(
+            "clientCard.search",
+            requestId,
+            "validation-pageNumber-outOfRange",
+            "validation-pageSize-outOfRange",
+        )
+        Unit
+    }
+
     private suspend fun assertCardOperation(
         operation: String,
         payload: String,
@@ -99,6 +141,16 @@ class ScenarioClientCardV2 {
               "requestId": "$requestId",
               $payload,
               "debug": {"mode": "stub", "stub": "success"}
+            }
+        """.trimIndent()
+
+    private fun validationRequest(operation: String, requestId: String, payload: String) =
+        """
+            {
+              "requestType": "clientCard.$operation",
+              "requestId": "$requestId",
+              $payload,
+              "debug": {"mode": "test"}
             }
         """.trimIndent()
 }

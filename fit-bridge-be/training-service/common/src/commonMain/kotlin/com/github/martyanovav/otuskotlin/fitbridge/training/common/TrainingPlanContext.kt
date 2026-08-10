@@ -25,7 +25,11 @@ data class TrainingPlanContext(
     override var principal: AuthPrincipal = AuthPrincipal.NONE,
     override var wsSession: IFBWsSession = IFBWsSession.NONE,
     var trainingPlanRequest: TrainingPlan = TrainingPlan(),
+    var trainingPlanValidating: TrainingPlan = TrainingPlan(),
+    var trainingPlanValidated: TrainingPlan = TrainingPlan(),
     var trainingPlanFilter: TrainingPlanFilter = TrainingPlanFilter(),
+    var trainingPlanFilterValidating: TrainingPlanFilter = TrainingPlanFilter(),
+    var trainingPlanFilterValidated: TrainingPlanFilter = TrainingPlanFilter(),
     var trainingPlanResponse: TrainingPlan = TrainingPlan(),
     var trainingPlansResponse: Page<TrainingPlan> = Page(),
 ) : IFBContext {

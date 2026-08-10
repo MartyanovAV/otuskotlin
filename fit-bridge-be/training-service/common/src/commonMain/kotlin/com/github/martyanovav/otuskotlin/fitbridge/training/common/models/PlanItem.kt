@@ -38,3 +38,9 @@ data class SupersetItem(
     var items: MutableList<PlanItem> = mutableListOf(),
     var restBetweenSetsSeconds: Int = 0
 ) : PlanItem
+
+fun PlanItem.deepCopy(): PlanItem = when (this) {
+    is ExerciseItem -> copy(sets = sets.map { it.copy() }.toMutableList())
+    is CircuitItem -> copy(items = items.map { it.deepCopy() }.toMutableList())
+    is SupersetItem -> copy(items = items.map { it.deepCopy() }.toMutableList())
+}

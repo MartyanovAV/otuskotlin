@@ -6,4 +6,6 @@ data class TrainingPlanFilter(
     var searchString: String = "",
     var pageNumber: Int = 1,
     var pageSize: Int = 10,
-)
+) {
+    fun deepCopy(): TrainingPlanFilter = copy()
+}

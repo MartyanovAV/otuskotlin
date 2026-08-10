@@ -3,6 +3,7 @@ package com.github.martyanovav.otuskotlin.fitbridge.training.biz
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.CorSettings
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.TrainingPlanContext
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanCommand
@@ -58,11 +59,28 @@ class TrainingProcessorTest {
         }
 
     @Test
-    fun prodIsNotImplemented() =
+    fun prodRequestIsValidated() =
         runTest {
             val ctx = ClientCardContext(command = ClientCardCommand.READ)
+
             processor.exec(ctx)
+
             assertEquals(State.FAILING, ctx.state)
-            assertEquals("not-implemented", ctx.errors.single().code)
+            assertEquals("validation-id-empty", ctx.errors.single().code)
+        }
+
+    @Test
+    fun validProdRequestCompletesValidation() =
+        runTest {
+            val ctx = ClientCardContext(
+                command = ClientCardCommand.CREATE,
+                clientCardRequest = ClientCard(displayName = "Клиент"),
+            )
+
+            processor.exec(ctx)
+
+            assertEquals(State.RUNNING, ctx.state)
+            assertTrue(ctx.errors.isEmpty())
+            assertEquals("Клиент", ctx.clientCardValidated.displayName)
         }
 }

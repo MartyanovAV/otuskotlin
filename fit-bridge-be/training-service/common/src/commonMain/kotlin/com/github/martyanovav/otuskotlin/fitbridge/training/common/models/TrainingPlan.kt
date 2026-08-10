@@ -8,4 +8,8 @@ data class TrainingPlan(
     var status: TrainingPlanStatus = TrainingPlanStatus.ACTIVE,
     var lock: String = "",
     var planItems: MutableList<PlanItem> = mutableListOf(),
-)
+) {
+    fun deepCopy(): TrainingPlan = copy(
+        planItems = planItems.map { it.deepCopy() }.toMutableList(),
+    )
+}

@@ -7,4 +7,6 @@ data class ClientCard(
     var isArchived: Boolean = false,
     var note: String = "",
     var lock: String = "",
-)
+) {
+    fun deepCopy(): ClientCard = copy()
+}
