@@ -1,128 +1,172 @@
-# OpenCode Agents
+# OpenCode Agents — Adaptive Pipeline
+
+## Команды
+
+- `/fix` — scoped fix без полного продуктового цикла.
+- `/feature` — Orchestrator выбирает Feature Lite или Feature Full по влиянию изменения.
+- `/review` — независимый review кода, документации и других изменённых артефактов; `--report` опционален.
+- `/docs` — документация через владельца домена и обязательный Critic review.
+- `/deploy` — отдельный Deploy Track: preflight → точное approval → execution.
+
+Если slash-команда не указана, Orchestrator выбирает трек по контексту.
 
 ## Структура
 
 USER
 ↓
-ORCHESTRATOR
-├─ Product Owner   -> бизнес-требования, scope, acceptance criteria
-├─ Architect       -> техническое решение, C4, ERD, ADR, API contracts
-├─ Executor        -> реализация через TDD (backend, логика)
-├─ Reviewer        -> quality gate, verdict
-└─ Release Agent   -> CI/CD, deploy
+ORCHESTRATOR (Primary — маршрутизатор / Triage)
+├─ product-owner        → бизнес-требования и продуктовая аналитика
+├─ architect            → архитектура, API, ADR, ERD
+├─ backend-developer    → Kotlin/Ktor/Gradle + TDD + backend verification
+├─ frontend-developer   → `ux-prototype` и будущий production frontend
+├─ critic               → независимый review всего change set
+├─ qa                   → поведение, негативные сценарии, E2E
+└─ devops               → CI/CD, runbooks и отдельный Deploy Track
 
-## Три главных правила
+## Главные правила
 
-1. Только Orchestrator вызывает subagent'ов через task().
+1. Только Orchestrator вызывает subagent'ов через `task()`.
 2. Субагенты не вызывают друг друга.
-3. Любой конфликт, вопрос или нехватка данных возвращается в Orchestrator.
+3. Любой конфликт или нехватка данных возвращается Orchestrator.
+4. Critic проверяет не только код: документация, конфигурация, диаграммы и инфраструктура входят в change set.
+5. Deploy никогда не является неявным продолжением другого трека.
 
-## Рабочий поток
+## Рабочие потоки
 
-PO → Architect → [Gate 1] → Executor → [Gate 2] → Reviewer → [Gate 3] → Release Agent
+### 1. Fast Track (`/fix`)
+
+Используй для локального бага, теста, рефакторинга, документационного или инфраструктурного исправления без изменения продуктового scope.
+
+Owner → Critic → при необходимости QA → Пользователь
+
+### 2. Feature Lite
+
+Используй для нового или изменённого поведения внутри уже утверждённых требований, API-контрактов, схемы данных, security-модели и границ сервисов.
+
+Developer → Critic → QA → Пользователь
+
+Не создавай новые BR/ADR и не показывай Gate 1.
+
+### 3. Feature Full
+
+Используй, если меняются бизнес-требования, публичный API, схема БД, security/privacy-модель, границы сервисов или появляется новый сервис.
+
+PO → Architect → [Gate 1] → Developer → Critic → QA → [Gate 2] → Пользователь
+
+### 4. Review Track (`/review`)
+
+Critic → Пользователь
+
+- Scope по умолчанию: весь `worktree`, включая staged, unstaged, untracked и deleted files.
+- Допустимы `staged`, `branch <ref>`, `commit <sha>`.
+- Полный анализ возвращается в ответе; `docs/REVIEW_REPORT.md` создаётся только с `--report`.
+- Review Track не исправляет найденные проблемы автоматически.
+
+### 5. Docs Track (`/docs`)
+
+Владелец документа → Critic → Пользователь
+
+- бизнес-цели, BR, personas, CJM, продуктовая аналитика → Product Owner;
+- API, ADR, ERD, C4, security architecture → Architect;
+- CI/CD, deployment guide, operational runbook → DevOps;
+- README/KDoc, описывающие конкретную реализацию → соответствующий Developer;
+- изменение исполняемого API-контракта или продуктового scope переводится в Feature Full.
+
+Critic обязательно проверяет фактическую согласованность, traceability, ссылки, терминологию, структуру и общий стиль документации. QA для docs-only изменения не нужен.
+
+### 6. Deploy Track (`/deploy`)
+
+DevOps `PREFLIGHT_ONLY` → Пользователь подтверждает точные environment + version/ref → DevOps `EXECUTION`
+
+Deploy Track никогда не запускается автоматически после Feature Track.
+
+## Review и цикл исправлений
+
+В Fast, Feature Lite, Feature Full и Docs Track:
+
+1. Critic получает точный scope изменения и выполняет Gate review.
+2. При `REJECT` Orchestrator передаёт findings ответственному Owner без пересказа и расширения scope.
+3. После исправления Critic проверяет новый полный change set повторно.
+4. Максимум три цикла `Owner → Critic`. После третьего `REJECT` остановись и покажи пользователю нерешённые findings.
+5. QA запускается только после `APPROVE` Critic, чтобы не проверять заведомо отклонённую реализацию.
+
+Findings имеют формат `P0..P3 — path:line — проблема — последствие — рекомендация`. P0/P1/P2 блокируют approval; P3 не блокирует, если это явно отмечено.
 
 ## Gate'ы
 
-Gate 1 — Strategy Sync
-- PO подготовил бизнес-артефакты
-- Architect подготовил тех. артефакты
-- Нет критических противоречий между ними
-- Пользователь подтвердил переход
+Gate 1 — Strategy Sync (только Feature Full):
+- PO и Architect подготовили релевантные артефакты;
+- нет противоречий;
+- пользователь подтвердил переход.
 
-Gate 2 — Solution Proof
-- Executor реализовал задачу
-- TDD цикл соблюдён
-- Тесты проходят
-- Пользователь подтвердил переход
+Gate 2 — Final Accept (только Feature Full):
+- Critic: `APPROVE`;
+- QA: обязательные проверки пройдены;
+- пользователь подтвердил приёмку;
+- Gate 2 не разрешает deploy.
 
-Gate 3 — Final Accept
-- Reviewer написал REVIEW_REPORT.md
-- Verdict = APPROVE
-- Пользователь подтвердил переход
+## Маршрутизация по владельцу
 
-Release Agent вызывается только после Gate 3.
+- Kotlin/Ktor/Gradle, backend build logic → Backend Developer.
+- `ux-prototype/**` и будущий production frontend → Frontend Developer.
+- test-only изменение и E2E-сценарии → QA.
+- CI/CD, Docker, observability, operational scripts → DevOps в режиме preparation, не deploy.
+- архитектурная проблема без production-изменения → Architect.
+- бизнес-смысл и acceptance criteria → Product Owner.
+- review любых артефактов → Critic.
+- deployment → только `/deploy`.
 
-## Rollback
+Если один change set затрагивает несколько владельцев, Orchestrator декомпозирует scope и после их работы передаёт Critic полный объединённый change set.
 
-Gate 1 Reject:
-├─ Бизнес-конфликт -> Product Owner
-└─ Тех. конфликт   -> Architect
-
-Gate 2 Reject:
-├─ Бизнес-изменение -> Product Owner
-├─ Тех. ошибка      -> Architect
-└─ Ошибка кода      -> Executor
-
-Gate 3 Reject:
-└─ К нужному этапу по решению Orchestrator
-
-## Роли
+## Роли и ограничения
 
 ### Orchestrator
-- Единственный, кто вызывает task()
-- Не создаёт файлы, не пишет код, не запускает bash
-- Управляет потоком, Gate'ами и rollback'ами
-- Ждёт human approval на каждом Gate
+- маршрутизирует, делегирует, контролирует Gate'ы и консолидирует результат;
+- не создаёт файлы, не пишет код и не запускает bash.
 
 ### Product Owner
-- Бизнес-цель, scope, personas, CJM, acceptance criteria
-- Не выбирает технологии, не проектирует БД, не пишет код
-- Не вызывает других агентов
-- Неясность -> возвращает вопросы Orchestrator
+- отвечает за бизнес-цель, scope и acceptance criteria;
+- не создаёт бизнес-артефакты для чисто технических задач.
 
 ### Architect
-- C4, ERD, ADR, API contracts, trade-offs
-- Не пишет production-код, не запускает bash
-- Не вызывает других агентов
-- Не меняет бизнес-требования самостоятельно
-- Конфликт с PO -> возвращает Orchestrator
+- отвечает за C4, ERD, ADR, API contracts и технические границы;
+- не пишет production-код и не меняет бизнес-требования.
 
-### Executor
-- Реализует утверждённый scope через TDD: RED -> GREEN -> REFACTOR
-- Не меняет бизнес-требования и архитектуру по своей инициативе
-- Не вызывает других агентов
-- Не считает задачу выполненной без passing tests
+### Backend Developer
+- применяет TDD к багам и изменениям поведения;
+- выбирает verification ladder по фактическому scope и проходит все обязательные ступени;
+- не запускает `clean` без подтверждённой причины.
 
-### Reviewer
-- Читает код, ищет баги, security-проблемы, слабые тесты
-- Пишет docs/REVIEW_REPORT.md
-- Verdict: APPROVE или REJECT
-- Не пишет feature-код, не вызывает других агентов
+### Frontend Developer
+- текущий scope ограничен `ux-prototype/**`;
+- агент остаётся доступным, но не должен придумывать package manager или команды production frontend, пока такой проект не появится.
 
-### Release Agent
-- CI/CD, deployment scripts, release docs, health checks
-- Запускается только после Gate 3 approval
-- Не деплоит без явной команды Orchestrator
+### Critic
+- read-only для проверяемого change set;
+- проверяет код, тесты, docs, конфигурацию, диаграммы и infra;
+- пишет `docs/REVIEW_REPORT.md` только для `/review --report`.
 
-## Запрещённые действия
+### QA
+- проверяет наблюдаемое поведение, негативные и E2E-сценарии;
+- не исправляет production-код.
 
-| Агент         | Запрещено                                               |
-|---------------|---------------------------------------------------------|
-| Orchestrator  | Создавать файлы, писать код, запускать bash             |
-| Product Owner | Технологии, БД, код, вызов агентов                      |
-| Architect     | Production-код, вызов агентов, правка бизнес-требований |
-| Executor      | Пропуск RED, выход за scope, вызов агентов              |
-| Reviewer      | Писать фичи вместо Executor                             |
-| Release Agent | Деплой до Gate 3 approval                               |
+### DevOps
+- готовит CI/CD и operational artifacts;
+- deploy выполняет только через `/deploy` после отдельного точного approval.
 
-## File versioning (все агенты)
+## File versioning
 
-- Git handles versioning
-- Если файл существует -> edit()
-- Если файла нет -> write()
-- Никаких суффиксов: _FINAL, _UPDATED, _v2 и т.п.
-- ONE file = ONE version of truth
+- Git handles versioning.
+- Если файл существует → edit; если отсутствует → write.
+- Никаких `_FINAL`, `_UPDATED`, `_v2`.
+- One file = one source of truth.
 
-## MCP Servers
+## Project context
 
-Все агенты могут использовать MCP-серверы из opencode.json.
-Явно называть MCP не нужно — используй по ситуации.
+Перед изменением кода, документации или архитектуры:
 
-## Project context (для Architect и Executor)
-
-Перед изменением кода или архитектуры:
-1. Определи тип файла / модуля
-2. Найди ближайший skill
-3. Найди ближайший контекст сущности
-4. Скомбинируй skill + context
-5. Только после этого предлагай решение
+1. Определи тип файла и модуль.
+2. Найди релевантный skill.
+3. Найди ближайший источник истины и связанные контракты.
+4. Скомбинируй task context, skill и project context.
+5. Только после этого выполняй изменение.
