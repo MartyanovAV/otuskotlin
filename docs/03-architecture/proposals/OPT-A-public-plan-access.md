@@ -1,5 +1,7 @@
 # Вариант A: Публичный доступ к плану через capability-token
 
+> **Статус: DEFERRED / Phase 2 proposal.** Возможность не входит в текущий trainer-only MVP, не является утверждённым ADR и не должна присутствовать в runtime или OpenAPI до отдельного решения по scope и threat model.
+
 ## Архитектура
 
 ```mermaid
@@ -26,7 +28,7 @@ flowchart LR
 
 | Параметр | Значение | Источник |
 |-----------|-------|--------|
-| Регистрация клиента | Не требуется | BR-010, MVP_SCOPE_SUMMARY |
+| Регистрация клиента | Не требуется для этого варианта | Future scope decision |
 | Хранение token | Только hash | Security guardrail BR-009 |
 | Идентификаторы public URL | Только token, без `clientId`/`planId` | Требование proposal |
 | Lifecycle доступа | `ACTIVE`, `REVOKED`, `EXPIRED` внутри `TrainingPlan` public-access state | ERD |
@@ -38,8 +40,8 @@ flowchart LR
 - Максимально короткий time-to-first-plan-link для тренера.
 - Клиент открывает план без регистрации и установки приложения.
 - Не требует преждевременно строить `AccessGrant`, client-owned профиль и кабинет клиента.
-- Capability-token модель проще для пилота и сохраняет понятный revoke/TTL lifecycle.
-- Снижает риск scope creep при проверке trainer-first B2B-ценности.
+- Capability-token модель может сократить friction будущего пилота клиентского доступа и сохраняет понятный revoke/TTL lifecycle.
+- Может стать отдельным экспериментом только после проверки trainer-only B2B-ценности.
 
 ## Минусы
 
