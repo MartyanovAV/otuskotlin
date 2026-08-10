@@ -76,5 +76,5 @@ Trainer Diary MVP FitBridge хранит trainer-owned рабочий конту
 - Keycloak остаётся владельцем authentication и identity profile data; локальная user projection отсутствует.
 - Для поиска предусмотреть индексы по `CLIENT_CARD.ownerId/status/displayName` и `TRAINING_PLAN.ownerId/clientCardId/status/title`.
 - Для archive использовать `archivedAt` и бизнес-фильтры, а не физическое удаление в пользовательском сценарии.
-- Для `TRAINING_PLAN.planBody` зафиксировать application-level validation и ограничения размера до появления более детализированной схемы упражнений.
+- Для `TRAINING_PLAN.planItems` зафиксировать application-level validation и ограничения размера до появления более детализированной схемы упражнений.
 - Future `ClientProfile`, `Invite`, `AccessGrant`, `TrainingEntry`, `ProgramAssignment` остаются Phase 2 и могут использовать PostgreSQL без смены основного хранилища.

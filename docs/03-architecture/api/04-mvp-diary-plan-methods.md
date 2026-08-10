@@ -33,11 +33,10 @@
 | `clientCardId` | ✅ | Связь с клиентской карточкой тренера |
 | `title` | ✅ | Название плана |
 | `planItems` | ✅ | Список заданий плана |
-| `status` | ✅ | `DRAFT`, `ACTIVE`, `ARCHIVED` |
+| `status` | ✅ | `ACTIVE`, `ARCHIVED` |
 | `version` | ✅ | Версия плана |
 | `createdAt` / `updatedAt` | ✅ | Технические timestamps |
-| `publicAccess*` | ❌ | Не входит в MVP |
-| `completionSummary` и отметки выполнения | ❌ | Не входит в MVP |
+| `lock` | ✅ | Версия optimistic lock для update/archive |
 
 ## Ссылки без дублирования
 
