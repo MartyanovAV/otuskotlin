@@ -68,7 +68,11 @@ WebSocket endpoints через Envoy:
 |---|---|
 | `ws://localhost:8080/v1/training/ws` | `ws://localhost:8080/v2/training/ws` |
 
-Для полного E2E-прогона используйте канонический [E2E runbook](../fit-bridge-be/fit-bridge-e2e-be/readme.md) и скрипт для текущей ОС — `scripts/run-e2e.ps1` на Windows или `scripts/run-e2e.sh` на Linux. Они сами собирают актуальные fat JAR, пересобирают образы, ждут готовности стенда и только затем запускают тесты.
+Полный автоматизированный E2E-прогон не использует этот постоянно работающий
+стенд. Следуйте [E2E runbook](../fit-bridge-be/fit-bridge-e2e-be/readme.md): Gradle
+собирает инфраструктурный resource-артефакт и backend-образы, после чего
+Testcontainers поднимает отдельный минимальный Compose-стенд на динамическом
+порту и удаляет его после тестов.
 
 Ожидаемая проверка доступности Backend API:
 

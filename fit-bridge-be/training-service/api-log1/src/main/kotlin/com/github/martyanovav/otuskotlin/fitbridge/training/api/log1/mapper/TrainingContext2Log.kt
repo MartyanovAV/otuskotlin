@@ -49,14 +49,14 @@ private fun ClientCardContext.toTrainingLog(): TrainingLogModel? {
 private fun TrainingPlanFilter.toLog() = TrainingFilterLog(
     searchString = searchString.takeIf { it.isNotBlank() },
     clientId = null,
-    trainerId = null,
+    ownerId = null,
     cardId = null
 )
 
 private fun ClientCardFilter.toLog() = TrainingFilterLog(
     searchString = searchString.takeIf { it.isNotBlank() },
     clientId = null,
-    trainerId = null,
+    ownerId = null,
     cardId = null
 )
 
@@ -75,6 +75,6 @@ private fun TrainingPlan.toLog() = TrainingPlanLog(
 
 private fun ClientCard.toLog() = ClientCardLog(
     id = id.takeIf { it != ClientCardId.NONE }?.asString(),
-    trainerId = trainerId.takeIf { it.isNotBlank() },
+    ownerId = ownerId.takeIf { it.isNotBlank() },
     goals = note.takeIf { it.isNotBlank() },
 )

@@ -81,22 +81,27 @@ docker {
                 .toString()
         dockerFile = "Dockerfile"
         dependsOnTask = "jvmJar"
-        imageName = "${rootProject.name}-jvm"
-        imageTag = "${project.version}"
+        imageName = "fitbridge-training-service"
+        imageTag = "local"
     }
 }
 
 afterEvaluate {
     tasks {
         val shadowJar = named("shadowJar", com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar::class)
+        shadowJar.configure {
+            manifest {
+                attributes["Main-Class"] =
+                    "com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.ApplicationJvmKt"
+            }
+        }
         named("dockerBuildJvm", com.github.martyanovav.otuskotlin.plugin.DockerBuildTask::class) {
             dependsOn(shadowJar)
             group = "docker"
             doFirst {
-                copy {
+                sync {
                     from("Dockerfile.jvm") { rename { "Dockerfile" } }
-                    from(shadowJar.get().archiveFile.get())
-                    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+                    from(shadowJar.get().archiveFile.get()) { rename { "app.jar" } }
                     into(buildContext)
                 }
             }

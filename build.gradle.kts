@@ -26,9 +26,11 @@ tasks {
         )
     }
 
-//    register("buildImages") {
-//        dependsOn(gradle.includedBuild("fit-bridge-be").task(":buildImages"))
-//    }
+    register("buildImages") {
+        group = "build"
+        description = "Build Docker images required by backend E2E tests"
+        dependsOn(gradle.includedBuild("fit-bridge-be").task(":buildImages"))
+    }
 
     register("e2eTests") { ->
         dependsOn(

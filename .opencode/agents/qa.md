@@ -31,9 +31,9 @@ permission:
     "./gradlew *test*": allow
     "./gradlew *Test*": allow
     "./gradlew *check*": allow
+    "./gradlew *buildInfra*": allow
+    "./gradlew *buildImages*": allow
     "./gradlew *e2eTests*": allow
-    "pwsh -NoProfile -File ./scripts/run-e2e.ps1": allow
-    "bash ./scripts/run-e2e.sh": allow
   websearch: deny
   webfetch: deny
   skill: allow
@@ -56,7 +56,7 @@ You are in QA Automation Engineer mode. Your focus is BEHAVIOR, not code purity.
 3. Напиши и запусти тесты через bash
 4. Сообщи результат
 
-Для backend-проверок загрузи skill `backend-verification`: сначала запускай самый узкий релевантный тест, затем только обязательные для риска более широкие ступени. E2E обязателен для межсервисного, transport/API, security или иного внешне наблюдаемого сценария; не запускай его автоматически для каждой локальной правки. Когда E2E требуется, запускай канонический скрипт текущей ОС (`scripts/run-e2e.ps1` или `scripts/run-e2e.sh`), а не голый Gradle task против неизвестного состояния стенда.
+Для backend-проверок загрузи skill `backend-verification`: сначала запускай самый узкий релевантный тест, затем только обязательные для риска более широкие ступени. E2E обязателен для межсервисного, transport/API, security или иного внешне наблюдаемого сценария; не запускай его автоматически для каждой локальной правки. Когда E2E требуется, последовательно выполни `buildInfra`, `buildImages`, затем `e2eTests --rerun-tasks`. Последняя задача сама поднимает и останавливает изолированный Testcontainers-стенд.
 
 === ЖЁСТКОЕ ПРАВИЛО ===
 Если тест падает или ты находишь логическую дыру — НЕ ИСПРАВЛЯЙ код сам.

@@ -9,22 +9,18 @@ API и архитектурных решений находятся в `docs/`; 
 
 ```text
 otuskotlin/
-├── build.gradle.kts            # Агрегирующие clean/check/build/e2eTests
+├── build.gradle.kts            # Агрегирующие buildInfra/buildImages/e2eTests
 ├── settings.gradle.kts         # Composite builds
 ├── build-plugin/               # Общие Gradle convention plugins
 ├── gradle/                     # Version catalog и wrapper
 ├── fit-bridge-be/              # Backend composite build
-│   ├── profile-service/        # Профили и доступ
 │   ├── training-service/       # Клиенты, планы и тренировки
 │   └── fit-bridge-e2e-be/      # Backend E2E
 ├── fit-bridge-libs/            # Общие библиотеки COR и logging
 ├── fit-bridge-other/           # Инфраструктурные Gradle-проекты
-│   └── fit-bridge-dcompose/    # Docker Compose infrastructure
+│   └── fit-bridge-dcompose/    # Переиспользуемый Compose resource для E2E
 ├── fit-bridge-tests/           # Дополнительная тестовая инфраструктура
 ├── deploy/                     # Deployment assets
-├── scripts/                    # Канонический локальный Backend E2E workflow
-│   ├── run-e2e.ps1             # Windows / PowerShell 7
-│   └── run-e2e.sh              # Linux / Bash
 ├── docs/                       # Бизнес, анализ, архитектура и UI/UX
 └── ux-prototype/               # Временный статический HTML/CSS прототип
 ```
@@ -34,8 +30,8 @@ otuskotlin/
 
 ## Структура backend-сервисов
 
-`profile-service` и `training-service` — самостоятельные Gradle composite builds.
-Типичные модули сервиса:
+`training-service` — самостоятельный Gradle composite build. Корневой каркас
+composite builds сохранён и допускает добавление новых сервисов. Типичные модули сервиса:
 
 | Модуль | Ответственность |
 |---|---|
@@ -63,7 +59,7 @@ otuskotlin/
 
 Перед изменением кода или архитектуры:
 
-1. Определи сервис: `profile-service`, `training-service`, общая библиотека или infrastructure.
+1. Определи область: `training-service`, будущий отдельный сервис, общая библиотека или infrastructure.
 2. Определи слой/модуль: `common`, `biz`, `api-*`, `mappers-*`, `app-ktor`, tests или deploy.
 3. Прочитай ближайший фактический код и тесты этого модуля.
 4. Подключи только релевантный skill из корневой `.opencode/skills/`.

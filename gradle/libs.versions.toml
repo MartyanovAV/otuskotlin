@@ -76,6 +76,7 @@ testcontainers-core = { module = "org.testcontainers:testcontainers", version.re
 # Internal modules
 fit-bridge-specs = "com.github.martyanovav.otuskotlin.fitbridge:fit-bridge-specs:0.1.0"
 fit-bridge-api-v2-kmp = "com.github.martyanovav.otuskotlin.fitbridge:fit-bridge-api-v2-kmp:0.1.0"
+fit-bridge-dcompose = "com.github.martyanovav.otuskotlin.fitbridge:fit-bridge-dcompose:0.1.0"
 
 [bundles]
 kotest = ["kotest-junit5", "kotest-core", "kotest-property"]

@@ -40,8 +40,9 @@ permission:
     "./gradlew *dependencies*": allow
     "./gradlew *dependencyInsight*": allow
     "./gradlew *clean*": allow
-    "pwsh -NoProfile -File ./scripts/run-e2e.ps1": allow
-    "bash ./scripts/run-e2e.sh": allow
+    "./gradlew *buildInfra*": allow
+    "./gradlew *buildImages*": allow
+    "./gradlew *e2eTests*": allow
   websearch: deny
   webfetch: deny
   skill: allow
@@ -57,7 +58,7 @@ You are in Backend Developer mode. Create ALL deliverables as FILES.
 2. Напиши/измени код.
 3. Запусти самый узкий релевантный тест изменённого модуля.
 4. Если тест упал → прочитай первопричину, исправь код и повтори узкую проверку.
-5. После успеха выполни все более широкие ступени, обязательные для этого типа изменения по `backend-verification`. Если требуется E2E, используй только канонический скрипт для текущей ОС: `scripts/run-e2e.ps1` на Windows или `scripts/run-e2e.sh` на Linux.
+5. После успеха выполни все более широкие ступени, обязательные для этого типа изменения по `backend-verification`. Если требуется E2E, последовательно выполни корневые Gradle-задачи `buildInfra`, `buildImages`, затем `e2eTests --rerun-tasks`: Testcontainers сам управляет изолированным стендом.
 6. Максимум 5 итераций исправления. После 5 неудачных попыток верни задачу с командами, логами и установленной причиной.
 
 Не запускай `clean` по умолчанию: он замедляет цикл и скрывает преимущества incremental build. Используй `clean` только при подтверждённой проблеме с кэшем или stale artifacts и объясни это в отчёте.

@@ -14,7 +14,8 @@ subprojects {
 tasks {
     register("buildInfra") {
         group = "build"
-        dependsOn(project(":fit-bridge-dcompose").getTasksByName("publish",false))
+        description = "Сборка и проверка переиспользуемого Docker Compose resource-артефакта"
+        dependsOn(project(":fit-bridge-dcompose").tasks.named("verifyResourcesZip"))
     }
 
     register("clean" ) {

@@ -1,0 +1,74 @@
+services:
+  postgresql:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: fitbridge
+      POSTGRES_USER: fitbridge
+      POSTGRES_PASSWORD: fitbridge-password
+    volumes:
+      - ./volumes/postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fitbridge -d fitbridge"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  training-service:
+    image: fitbridge-training-service:local
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgresql
+      DB_PORT: 5432
+      DB_NAME: training_db
+      DB_USER: training_user
+      DB_PASSWORD: training-password
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8081/health/ready > /dev/null"]
+      interval: 5s
+      timeout: 3s
+      retries: 24
+      start_period: 10s
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1.0
+    volumes:
+      - ./volumes/keycloak/import:/opt/keycloak/data/import:ro
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: "true"
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000; echo -e 'HEAD /health/ready HTTP/1.1\r\nHost: localhost:9000\r\nConnection: close\r\n\r\n' >&3; grep -q '200 OK' <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 10s
+    command:
+      - start-dev
+      - --import-realm
+      - --hostname-strict
+      - "false"
+      - --hostname
+      - "http://localhost:8080/"
+      - --proxy-headers
+      - forwarded
+      - --hostname-backchannel-dynamic
+      - "true"
+
+  envoy:
+    image: envoyproxy/envoy:v1.29.0
+    volumes:
+      - ./volumes/envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      training-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/15001; printf 'GET /ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3; grep -q '200 OK' <&3"]
+      interval: 5s
+      timeout: 3s
+      retries: 18
+      start_period: 5s

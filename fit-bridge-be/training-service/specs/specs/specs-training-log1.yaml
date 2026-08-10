@@ -87,7 +87,7 @@ components:
           type: string
         clientId:
           type: string
-        trainerId:
+        ownerId:
           type: string
         goals:
           type: string
@@ -116,7 +116,7 @@ components:
           type: string
         clientId:
           type: string
-        trainerId:
+        ownerId:
           type: string
         cardId:
           type: string

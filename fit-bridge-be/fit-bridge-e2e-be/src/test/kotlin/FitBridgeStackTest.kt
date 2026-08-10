@@ -5,6 +5,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
+@WithFitBridgeStack
 class FitBridgeStackTest {
     @Test
     fun `gateway and training service are healthy`() = runBlocking {

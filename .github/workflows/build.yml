@@ -32,9 +32,11 @@ jobs:
       - name: Setup Gradle from Properties File
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Build stack and run E2E tests
-        run: bash ./scripts/run-e2e.sh
+      - name: Build E2E infrastructure resources
+        run: ./gradlew --no-daemon buildInfra --console=plain
 
-      - name: Show Compose logs after failure
-        if: failure()
-        run: docker compose --file deploy/docker-compose.yml logs --no-color --tail 200 || true
+      - name: Build backend Docker images
+        run: ./gradlew --no-daemon buildImages --console=plain
+
+      - name: Run containerized E2E tests
+        run: ./gradlew --no-daemon e2eTests --rerun-tasks --console=plain

@@ -1,55 +1,56 @@
 # Модуль E2E тестирования (End-to-End)
 
-Этот модуль содержит black-box E2E-тесты развернутого FitBridge. Тесты отправляют запросы через Envoy в реальный контейнер `training-service`, а access token получают из Keycloak локального стенда.
+Модуль содержит black-box тесты FitBridge. Они запускают изолированный Docker
+Compose-стенд через Testcontainers, отправляют запросы через Envoy в реальный
+`training-service`, а access token получают из Keycloak.
 
-## Как запустить тесты
+## Требования
 
-Из корня проекта запустите канонический E2E-скрипт:
+- JDK 21;
+- Docker Engine или Docker Desktop;
+- Docker Compose plugin.
 
-Windows (PowerShell 7):
+Свободные фиксированные host ports не требуются: Testcontainers публикует Envoy
+на динамический порт. Локальный стенд из `deploy/docker-compose.yml` можно не
+останавливать.
+
+## Полный запуск
+
+Команды выполняются строго последовательно из корня репозитория.
+
+Windows:
 
 ```powershell
-pwsh -NoProfile -File ./scripts/run-e2e.ps1
+.\gradlew.bat --no-daemon buildInfra --console=plain
+.\gradlew.bat --no-daemon buildImages --console=plain
+.\gradlew.bat --no-daemon e2eTests --rerun-tasks --console=plain
 ```
 
 Linux:
 
 ```bash
-bash ./scripts/run-e2e.sh
+./gradlew --no-daemon buildInfra --console=plain
+./gradlew --no-daemon buildImages --console=plain
+./gradlew --no-daemon e2eTests --rerun-tasks --console=plain
 ```
 
-Он выполняет полный цикл в обязательном порядке:
+Этапы выполняют следующее:
 
-1. валидирует `deploy/docker-compose.yml`;
-2. собирает fat JAR (`shadowJar`) Training Service;
-3. размещает артефакт как `deploy/training-service.jar`;
-4. поднимает Compose ограниченными по времени фазами: storage → logging → identity → gateway → application services, причём Docker-образы приложений пересобираются из новых JAR;
-5. после готовности зависимостей точечно пересоздаёт только Keycloak и Envoy, чтобы они перечитали bind-mounted realm и routing configuration; массовый `--force-recreate` намеренно не используется из-за зависимости application logging от уже работающего Fluent Bit;
-6. проверяет публичные readiness endpoints;
-7. запускает корневую задачу `e2eTests` с `--rerun-tasks`, чтобы black-box тесты гарантированно выполнялись заново.
+1. `buildInfra` собирает и проверяет resource ZIP модуля `fit-bridge-dcompose`;
+2. `buildImages` создаёт актуальный `fitbridge-training-service:local` из fat JAR;
+3. `e2eTests` распаковывает resource ZIP, один раз поднимает минимальный стенд
+   PostgreSQL + Keycloak + Training Service + Envoy, ждёт readiness, запускает
+   тесты и останавливает контейнеры с удалением тестовых volumes.
 
-Прямой запуск Gradle допустим только для повторного прогона, когда Compose-стенд уже заведомо собран из текущих артефактов и остаётся healthy:
+Если инфраструктура и образы не менялись, для повторного запуска достаточно
+третьей команды. `--rerun-tasks` нужен, чтобы Gradle не вернул `UP-TO-DATE`
+вместо нового black-box прогона.
 
-```bash
-./gradlew e2eTests --console=plain
-```
-
-Или напрямую для этого модуля:
-
-```bash
-./gradlew -p fit-bridge-be :fit-bridge-e2e-be:test --console=plain
-```
-
-Обе версии выполняют одинаковые шаги и намеренно оставляют локальный стенд запущенным для диагностики и повторных прогонов. Остановить его без удаления данных можно командой `docker compose --file deploy/docker-compose.yml down`. Удаление volumes через `down -v` не является частью обычного тестового цикла.
-
-По умолчанию тесты обращаются к `http://localhost:8080` и используют локального пользователя `fitbridge-test` / `fitbridge`. Настройки можно переопределить переменными окружения:
-
-- `FITBRIDGE_E2E_BASE_URL`;
-- `FITBRIDGE_E2E_USERNAME`;
-- `FITBRIDGE_E2E_PASSWORD`;
-- `FITBRIDGE_E2E_CLIENT_ID`.
-
-Аналогичные JVM properties имеют имена `fitbridge.e2e.baseUrl`, `fitbridge.e2e.username`, `fitbridge.e2e.password` и `fitbridge.e2e.clientId`.
+Логин тестового пользователя по умолчанию: `fitbridge-test` / `fitbridge`.
+Его можно переопределить переменными `FITBRIDGE_E2E_USERNAME`,
+`FITBRIDGE_E2E_PASSWORD`, `FITBRIDGE_E2E_CLIENT_ID` или одноимёнными JVM
+properties `fitbridge.e2e.username`, `fitbridge.e2e.password`,
+`fitbridge.e2e.clientId`. Адрес Envoy устанавливает Testcontainers.
 
 ## Что проверяется
 

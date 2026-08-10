@@ -1,6 +1,7 @@
 package com.github.martyanovav.otuskotlin.fitbridge.e2e.scenarios.v2
 
 import com.github.martyanovav.otuskotlin.fitbridge.e2e.FitBridgeE2eClient
+import com.github.martyanovav.otuskotlin.fitbridge.e2e.WithFitBridgeStack
 import com.github.martyanovav.otuskotlin.fitbridge.e2e.assertSuccess
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.jsonArray
@@ -14,8 +15,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@WithFitBridgeStack
 class ScenarioClientCardV2 {
-    private val client = FitBridgeE2eClient()
+    private val client by lazy(::FitBridgeE2eClient)
 
     @BeforeAll
     fun checkStack() = runBlocking {
