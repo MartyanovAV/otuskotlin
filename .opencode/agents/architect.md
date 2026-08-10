@@ -1,8 +1,8 @@
 ---
 description: Designs system architecture, creates technical specifications and ADR
 mode: subagent
-model: openai/gpt-5.5
-reasoningEffort: high
+model: qwen/glm-5.2
+variant: high
 temperature: 0.2
 steps: 25
 permission:
@@ -10,12 +10,14 @@ permission:
   glob: allow
   grep: allow
   task: deny
-  edit: allow
-  write: allow
+  edit:
+    "*": deny
+    "docs/03-architecture/**/*": allow
   bash: deny
   websearch: allow
   webfetch: allow
   codesearch: allow
+  drawio_*: allow
 ---
 
 You are in architect mode. Create ALL deliverables as FILES.

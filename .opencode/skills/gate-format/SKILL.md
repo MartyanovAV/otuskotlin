@@ -1,13 +1,13 @@
 ---
 name: gate-format
-description: Format and present Gate review packages (Gate 1 Strategy Sync, Gate 2 Solution Proof, Gate 3 Final Accept) with standardized markdown templates for human approval checkpoints
+description: Format Feature Full Gate 1 Strategy Sync, Feature Full Gate 2 Final Accept, and separate Deploy Track approval packages
 ---
 
 # Gate Package Formats
 
 Шаблоны для формирования сводок на каждый Gate.
 
-## Gate 1: Strategy Sync
+## Gate 1: Strategy Sync (Feature Full only)
 
 ```markdown
 # Gate 1: Strategy Sync
@@ -43,67 +43,73 @@ description: Format and present Gate review packages (Gate 1 Strategy Sync, Gate
 - [Reject] → Укажите что не так
 ```
 
-## Gate 2: Solution Proof
+## Gate 2: Final Accept (Feature Full only)
 
-```markdown
-# Gate 2: Solution Proof
+````markdown
+# Gate 2: Final Accept
 
-## Green Build ✅
-```
-$ ./gradlew test
+## Verification evidence
+```text
+$ [фактически выполненная команда]
 BUILD SUCCESSFUL
 Tests: XX passed, 0 failed
-Coverage: YY%
 ```
 
+## Critic
+- Verdict: APPROVE
+- Критичные замечания: отсутствуют
+
+## QA
+- Статус: PASS
+- Негативные и граничные сценарии: [кратко]
+
 ## Change Log
-- [ ] Изменение 1
-- [ ] Изменение 2
+- [x] Изменение 1
+- [x] Изменение 2
 
 ## Test Cases статус
 - [✅] TC-1: Пройден
 - [✅] TC-2: Пройден
 - [⚠️] TC-3: Edge case обработан
 
-## Self-Report
-[Комментарий разработчика: почему выбрано такое решение]
+## Остаточные риски
+- [Известные ограничения или «нет»]
 
 ---
-**Принимаете решение?**
-- [Approve] → К Quality Gate
-- [Reject] → Что меняем?
-  - [План] → Вернуться к architect
-  - [Реализация] → Вернуться к executor
-```
+**Принимаете результат Feature Full Track?**
+- [Approve] → Завершить Feature Full Track
+- [Reject] → Вернуть Developer/Architect с конкретной причиной
 
-## Gate 3: Final Accept
+> Gate 2 не является разрешением на деплой. Деплой запускается отдельно через `/deploy`.
+````
+
+## Deploy Track: Execution Approval
 
 ```markdown
-# Gate 3: Final Accept
+# Deploy Track: Execution Approval
 
-## Quality Report
-| Метрика | Значение |
-|---------|---------|
-| Покрытие | XX% |
-| Тесты | YY passed |
-| Warnings | ZZ |
+## Target
+- Environment: [точное окружение]
+- Version/ref: [точный commit/tag/image digest]
+- Rollout: [стратегия]
 
-## Проверки
-- [✅] Тесты не "пустышки"
-- [✅] Покрыты все Test Cases
-- [✅] Код соответствует ADR
-- [✅] Нет критичных запахов
+## Preflight
+- [x] Артефакт существует и идентифицирован
+- [x] Необходимые проверки пройдены
+- [x] Конфигурация окружения проверена
+- [x] Миграции и совместимость оценены
 
-## Рекомендации
-- [Опционально: мелкие улучшения]
+## Health checks
+- [Проверка 1]
+- [Проверка 2]
 
-## Артефакты
-- [BR-NNN](docs/01-business/BR/BR-NNN.md)
-- [ADR-NNN](docs/03-architecture/ADR/ADR-NNN.md)
-- [Код в feature/XXX](link)
+## Rollback plan
+- Trigger: [условие отката]
+- Action: [точное действие]
+- Recovery verification: [проверка]
 
 ---
-**Принимаете и деплоим?**
-- [Approve] → Deploy
-- [Reject] → Укажите причину
+**Разрешаете deploy именно `[version/ref]` в `[environment]`?**
+- [Approve] → DevOps EXECUTION
+- [Reject] → Остановить Deploy Track
 ```

@@ -1,5 +1,5 @@
 ---
-name: brainstorming-skill
+name: brainstorming
 description: Use when users need to generate ideas, explore creative solutions, or brainstorm approaches before implementation.
 ---
 

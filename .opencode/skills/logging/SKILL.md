@@ -31,7 +31,7 @@ description: Log a completed agent task to the session log using standard format
 ## Пример записи
 
 ```markdown
-### Task 5: reviewer @14:30 review
+### Task 5: critic @14:30 review
 **Request:** Напиши тесты на моках для модуля UserService
 **Output:** Создал 12 тестов: 8 позитивных, 4 негативных. Все на MockK.
 **Status:** success

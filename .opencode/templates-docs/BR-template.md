@@ -1,6 +1,7 @@
 # TARGET DIRECTORY: docs/01-business/BR/
 # TARGET FILENAME: BR-[NNN]-[feature-name].md (e.g., BR-001-user-registration.md)
-# NEXT NUMBER: Sequential from glob("docs/01-business/BR/BR-*.md")
+# NEXT NUMBER: Extract numeric prefixes from glob("docs/01-business/BR/BR-[0-9][0-9][0-9]-*.md"), fail on duplicates, then use max + 1 (zero-padded). Do not reuse gaps.
+# UNIQUENESS: Exactly one canonical file per BR-NNN. Deprecated aliases must not use a BR-NNN-* filename.
 
 # BR-[BR-Number]: [Название фичи]
 
