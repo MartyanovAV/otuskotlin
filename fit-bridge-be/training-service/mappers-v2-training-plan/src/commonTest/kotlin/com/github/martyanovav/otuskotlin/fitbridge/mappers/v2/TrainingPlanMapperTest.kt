@@ -120,6 +120,7 @@ class TrainingPlanMapperTest {
         assertEquals("plan-1", response.trainingPlan?.id)
         assertEquals("client-card-1", response.trainingPlan?.clientCardId)
         assertEquals("Strength Plan", response.trainingPlan?.title)
+        assertEquals(TrainingPlanStatus.ACTIVE, response.trainingPlan?.status)
         assertEquals(itemId, exercise.id)
         assertEquals("Bench press", exercise.title)
         assertEquals(null, exercise.description)

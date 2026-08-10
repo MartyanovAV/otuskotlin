@@ -5,6 +5,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.TrainingPlanC
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanCommand
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.stubs.Stubs
 import com.github.martyanovav.otuskotlin.fitbridge.training.stubs.TrainingPlanStub
 import com.github.martyanovav.otuskotlin.fitbridge.cor.ICorChainDsl
@@ -22,7 +23,12 @@ fun ICorChainDsl<IFBContext>.stubTrainingPlanSuccess(title: String) = worker {
         if (ctx.command == TrainingPlanCommand.SEARCH) {
             ctx.trainingPlansResponse = Page(items = TrainingPlanStub.getList(), totalSize = TrainingPlanStub.getList().size)
         } else {
-            ctx.trainingPlanResponse = TrainingPlanStub.get().also { it.isArchived = ctx.command == TrainingPlanCommand.ARCHIVE }
+            ctx.trainingPlanResponse = TrainingPlanStub.get().also {
+                it.status = when (ctx.command) {
+                    TrainingPlanCommand.ARCHIVE -> TrainingPlanStatus.ARCHIVED
+                    else -> it.status
+                }
+            }
         }
     }
 }

@@ -38,6 +38,8 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Traini
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanFilter
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanCommand
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanStatus as TrainingPlanStatusV1
 
 // ─── From Transport ──────────────────────────────────────────────────────────
 
@@ -138,6 +140,10 @@ internal fun TrainingPlan.toTransportTrainingPlan(): TrainingPlanResponseObject?
         id = id.takeIf { it != TrainingPlanId.NONE }?.asString(),
         title = title.takeIf { it.isNotBlank() },
         clientCardId = clientCardId.takeIf { it != ClientCardId.NONE }?.asString(),
+        status = when (status) {
+            TrainingPlanStatus.ACTIVE -> TrainingPlanStatusV1.ACTIVE
+            TrainingPlanStatus.ARCHIVED -> TrainingPlanStatusV1.ARCHIVED
+        },
         planItems = planItems.map { it.toTransportPlanItem() }
     )
 }

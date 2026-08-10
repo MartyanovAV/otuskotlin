@@ -6,6 +6,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.TrainingPlanC
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanCommand
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.WorkMode
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.stubs.Stubs
 import kotlinx.coroutines.test.runTest
@@ -46,6 +47,12 @@ class TrainingProcessorTest {
                         assertEquals(1, ctx.trainingPlansResponse.totalSize, command.name)
                     } else {
                         assertTrue(ctx.trainingPlanResponse.title.isNotBlank(), command.name)
+                        val expectedStatus =
+                            when (command) {
+                                TrainingPlanCommand.ARCHIVE -> TrainingPlanStatus.ARCHIVED
+                                else -> TrainingPlanStatus.ACTIVE
+                            }
+                        assertEquals(expectedStatus, ctx.trainingPlanResponse.status, command.name)
                     }
                 }
         }

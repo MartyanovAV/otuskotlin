@@ -5,7 +5,7 @@ data class TrainingPlan(
     var clientCardId: ClientCardId = ClientCardId.NONE,
     var ownerId: String = "",
     var title: String = "",
-    var isArchived: Boolean = false,
+    var status: TrainingPlanStatus = TrainingPlanStatus.ACTIVE,
     var lock: String = "",
     var planItems: MutableList<PlanItem> = mutableListOf(),
 )

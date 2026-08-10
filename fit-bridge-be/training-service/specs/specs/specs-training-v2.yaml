@@ -389,7 +389,6 @@ components:
     TrainingPlanStatus:
       type: string
       enum:
-      - DRAFT
       - ACTIVE
       - ARCHIVED
     ItemType:

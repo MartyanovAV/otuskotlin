@@ -14,7 +14,6 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanRes
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanSearchFilter
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanSearchRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanSearchResponse
-import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanStatus
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanUpdateObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanUpdateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanUpdateResponse
@@ -37,6 +36,8 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Traini
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBCommandBase
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanCommand
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanStatus as TrainingPlanStatusV2
 
 // ─── From Transport ──────────────────────────────────────────────────────────
 
@@ -137,7 +138,10 @@ fun TrainingPlan.toTransportTrainingPlan(): TrainingPlanResponseObject? {
         id = id.takeIf { it != TrainingPlanId.NONE }?.asString(),
         title = title.takeIf { it.isNotBlank() },
         clientCardId = clientCardId.takeIf { it != ClientCardId.NONE }?.asString(),
-        status = if (isArchived) TrainingPlanStatus.ARCHIVED else TrainingPlanStatus.ACTIVE,
+        status = when (status) {
+            TrainingPlanStatus.ACTIVE -> TrainingPlanStatusV2.ACTIVE
+            TrainingPlanStatus.ARCHIVED -> TrainingPlanStatusV2.ARCHIVED
+        },
         planItems = planItems.map { it.toTransportPlanItem() }
     )
 }
