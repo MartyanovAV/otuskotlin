@@ -12,8 +12,9 @@ permission:
   task: deny
   edit:
     "*": deny
-    "docs/01-business/**/*": allow
-    "docs/02-analysis/**/*": allow
+    "docs/01-business/*": allow
+    "docs/02-analysis/*": allow
+    "README.md": ask
   bash: deny
   websearch: allow
   webfetch: allow
@@ -61,7 +62,7 @@ FAILURE: No template used → Task FAILED
 
 WORKFLOW:
 1. Analyze business requirements
-2. Check existing files via glob("docs/**/*.md")
+2. Check existing files in "docs/**/*"
 3. Create new files with write() OR modify existing with edit()
 4. Output final report:
     - ✅ Created: [path]

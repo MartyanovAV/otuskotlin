@@ -13,7 +13,7 @@ permission:
   task: deny
   edit:
     "*": deny
-    "ux-prototype/**/*": allow
+    "ux-prototype/*": allow
   bash:
     "*": ask
     "git status*": allow
@@ -23,6 +23,12 @@ permission:
     "rg *": allow
     "npm run *": allow
     "npm test*": allow
+    "npm create *": allow
+    "npm init *": allow
+    "npm install*": allow
+    "npm ci*": allow
+    "npm exec *": allow
+    "npx *": allow
   websearch: deny
   webfetch: deny
 ---
@@ -43,7 +49,7 @@ You are in Frontend Developer mode. Create ALL deliverables as FILES.
 === ОГРАНИЧЕНИЯ ===
 - Строго соблюдай API-контракты от Architect / Backend
 - НЕ модифицируй backend-код
-- НЕ модифицируй docs/**/*
+- НЕ модифицируй docs/*
 
 === FILE VERSIONING ===
 - Git handles versioning — никаких суффиксов _FINAL, _v2

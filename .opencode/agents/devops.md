@@ -12,13 +12,13 @@ permission:
   task: deny
   edit:
     "*": deny
-    ".github/**/*": allow
-    ".deployment/**/*": allow
-    "deploy/**/*": allow
-    "scripts/**/*": allow
-    "fit-bridge-other/fit-bridge-dcompose/**/*": allow
+    ".github/*": allow
+    ".deployment/*": allow
+    "deploy/*": allow
+    "scripts/*": allow
+    "fit-bridge-other/fit-bridge-dcompose/*": allow
     "docs/DEPLOYMENT.md": allow
-    "docs/runbooks/**/*": allow
+    "docs/runbooks/*": allow
     ".dockerignore": allow
   bash:
     "*": ask

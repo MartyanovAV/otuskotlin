@@ -12,7 +12,8 @@ permission:
   task: deny
   edit:
     "*": deny
-    "docs/03-architecture/**/*": allow
+    "docs/03-architecture/*": allow
+    "README.md": ask
   bash: deny
   websearch: allow
   webfetch: allow
