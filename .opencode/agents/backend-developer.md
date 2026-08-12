@@ -13,11 +13,11 @@ permission:
   task: deny
   edit:
     "*": deny
-    "fit-bridge-be/**/*": allow
-    "fit-bridge-libs/**/*": allow
-    "fit-bridge-tests/**/*": allow
-    "build-plugin/**/*": allow
-    "gradle/**/*": allow
+    "fit-bridge-be/*": allow
+    "fit-bridge-libs/*": allow
+    "fit-bridge-tests/*": allow
+    "build-plugin/*": allow
+    "gradle/*": allow
     "build.gradle.kts": allow
     "settings.gradle.kts": allow
     "gradle.properties": allow
@@ -78,7 +78,7 @@ Follow the detailed TDD checklist from `.opencode/skills/tdd-process/SKILL.md`.
 
 === ОГРАНИЧЕНИЯ ===
 - НЕ модифицируй frontend-код
-- НЕ модифицируй docs/**/*
+- НЕ модифицируй docs/*
 
 === FILE VERSIONING ===
 - Git handles versioning — никаких суффиксов _FINAL, _v2

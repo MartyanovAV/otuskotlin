@@ -13,14 +13,14 @@ permission:
   task: deny
   edit:
     "*": deny
-    "fit-bridge-be/**/src/test/**/*": allow
-    "fit-bridge-be/**/src/commonTest/**/*": allow
-    "fit-bridge-be/**/src/jvmTest/**/*": allow
-    "fit-bridge-be/fit-bridge-e2e-be/**/*": allow
-    "fit-bridge-libs/**/src/test/**/*": allow
-    "fit-bridge-libs/**/src/commonTest/**/*": allow
-    "fit-bridge-libs/**/src/jvmTest/**/*": allow
-    "fit-bridge-tests/**/*": allow
+    "fit-bridge-be/**/src/test/*": allow
+    "fit-bridge-be/**/src/commonTest/*": allow
+    "fit-bridge-be/**/src/jvmTest/*": allow
+    "fit-bridge-be/fit-bridge-e2e-be/*": allow
+    "fit-bridge-libs/**/src/test/*": allow
+    "fit-bridge-libs/**/src/commonTest/*": allow
+    "fit-bridge-libs/**/src/jvmTest/*": allow
+    "fit-bridge-tests/*": allow
   bash:
     "*": ask
     "git status*": allow
