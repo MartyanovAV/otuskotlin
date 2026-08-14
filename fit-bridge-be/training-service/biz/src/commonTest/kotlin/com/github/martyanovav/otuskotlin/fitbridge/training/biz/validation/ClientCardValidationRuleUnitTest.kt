@@ -86,14 +86,6 @@ class ClientCardValidationRuleUnitTest {
     }
 
     @Test
-    fun `filter status must be supported`() = runTest {
-        assertRule(
-            filter = ClientCardFilter(status = "UNKNOWN"),
-            expectedCode = "validation-status-unsupported",
-        ) { validateClientCardFilterStatus("validate status") }
-    }
-
-    @Test
     fun `page number must be positive`() = runTest {
         assertRule(
             filter = ClientCardFilter(pageNumber = 0),

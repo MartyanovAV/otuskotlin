@@ -456,8 +456,6 @@ components:
             $ref: '#/components/schemas/ClientCardId'
           status:
             $ref: '#/components/schemas/ClientCardStatus'
-          lastPlanStatus:
-            $ref: '#/components/schemas/TrainingPlanStatus'
           createdAt:
             $ref: '#/components/schemas/Timestamp'
           updatedAt:

@@ -7,9 +7,12 @@ data class TrainingPlan(
     var title: String = "",
     var status: TrainingPlanStatus = TrainingPlanStatus.ACTIVE,
     var lock: String = "",
-    var planItems: MutableList<PlanItem> = mutableListOf(),
+    var planItems: List<PlanItem> = emptyList(),
+    var version: Int = 1,
+    var createdAt: String = "",
+    var updatedAt: String = "",
 ) {
     fun deepCopy(): TrainingPlan = copy(
-        planItems = planItems.map { it.deepCopy() }.toMutableList(),
+        planItems = planItems.map { it.deepCopy() },
     )
 }

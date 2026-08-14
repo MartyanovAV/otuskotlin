@@ -22,7 +22,8 @@ private const val PLAN_ITEMS_MAX_DEPTH = 5
 private const val SEARCH_STRING_MAX_LENGTH = 120
 private const val PAGE_SIZE_MIN = 1
 private const val PAGE_SIZE_MAX = 100
-private val ALLOWED_STATUSES = setOf("", "ACTIVE", "ARCHIVED")
+private val ALLOWED_STATUSES =
+    setOf(TrainingPlanStatus.NONE, TrainingPlanStatus.ACTIVE, TrainingPlanStatus.ARCHIVED)
 private val UUID_PATTERN = Regex(
     "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
 )
@@ -40,7 +41,7 @@ private data class PlanItemAtDepth(
     val depth: Int,
 )
 
-private fun List<PlanItem>.normalizedCopies(): MutableList<PlanItem> {
+private fun List<PlanItem>.normalizedCopies(): List<PlanItem> {
     val pending = ArrayDeque<NormalizationFrame>()
     asReversed().forEach { pending.addLast(NormalizationFrame(it)) }
     val normalized = mutableListOf<PlanItem>()
@@ -146,12 +147,12 @@ fun ICorChainDsl<IFBContext>.prepareTrainingPlanValidation(
         ).apply {
             id = TrainingPlanId(id.asString().trim())
             clientCardId = ClientCardId(clientCardId.asString().trim())
-            trainerId = trainerId.trim()
+            ownerId = ownerId.trim()
             this.title = this.title.trim()
             lock = lock.trim()
             if (resetIdentity) {
                 id = TrainingPlanId.NONE
-                trainerId = ""
+                ownerId = ""
                 status = TrainingPlanStatus.ACTIVE
                 lock = ""
             }
@@ -166,7 +167,6 @@ fun ICorChainDsl<IFBContext>.prepareTrainingPlanFilterValidation(title: String) 
         val ctx = trainingPlanContext
         ctx.trainingPlanFilterValidating = ctx.trainingPlanFilter.deepCopy().apply {
             clientCardId = ClientCardId(clientCardId.asString().trim())
-            status = status.trim().uppercase()
             searchString = searchString.trim()
         }
     }

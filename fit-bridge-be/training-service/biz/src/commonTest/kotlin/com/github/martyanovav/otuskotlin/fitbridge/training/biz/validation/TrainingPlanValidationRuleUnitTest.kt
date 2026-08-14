@@ -93,7 +93,7 @@ class TrainingPlanValidationRuleUnitTest {
 
     @Test
     fun `plan item count must satisfy maximum`() = runTest {
-        val items: MutableList<PlanItem> = (0..200).map { validExercise(uuid(it)) }.toMutableList()
+        val items: List<PlanItem> = (0..200).map { validExercise(uuid(it)) }
 
         assertRule(
             plan = validPlan(planItems = items),
@@ -284,14 +284,6 @@ class TrainingPlanValidationRuleUnitTest {
     }
 
     @Test
-    fun `filter status must be supported`() = runTest {
-        assertRule(
-            filter = TrainingPlanFilter(status = "UNKNOWN"),
-            expectedCode = "validation-status-unsupported",
-        ) { validateTrainingPlanFilterStatus("validate status") }
-    }
-
-    @Test
     fun `page number must be positive`() = runTest {
         assertRule(
             filter = TrainingPlanFilter(pageNumber = 0),
@@ -330,7 +322,7 @@ class TrainingPlanValidationRuleUnitTest {
         clientCardId: ClientCardId = ClientCardId("client-1"),
         title: String = "Training plan",
         lock: String = "lock-1",
-        planItems: MutableList<PlanItem> = mutableListOf(validExercise(uuid(1))),
+        planItems: List<PlanItem> = mutableListOf(validExercise(uuid(1))),
     ) = TrainingPlan(
         id = id,
         clientCardId = clientCardId,
@@ -343,7 +335,7 @@ class TrainingPlanValidationRuleUnitTest {
         id: String,
         title: String = "Exercise",
         description: String = "",
-        sets: MutableList<ExerciseSet> = mutableListOf(),
+        sets: List<ExerciseSet> = mutableListOf(),
         restBetweenSetsSeconds: Int = 0,
     ) = ExerciseItem(
         id = id,

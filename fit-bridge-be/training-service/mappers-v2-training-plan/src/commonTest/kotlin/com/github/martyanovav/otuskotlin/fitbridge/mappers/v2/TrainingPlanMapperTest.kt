@@ -7,6 +7,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.RequestDebugMod
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanCreateObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanCreateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanCreateResponse
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanReadResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanSearchFilter
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanSearchRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanSearchResponse
@@ -22,6 +23,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Exerci
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ExerciseSet as InternalExerciseSet
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus as InternalTrainingPlanStatus
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -83,7 +85,7 @@ class TrainingPlanMapperTest {
         assertEquals(TrainingPlanCommand.SEARCH, context.command)
         assertEquals(WorkMode.STUB, context.workMode)
         assertEquals(ClientCardId("client-card-1"), context.trainingPlanFilter.clientCardId)
-        assertEquals("ACTIVE", context.trainingPlanFilter.status)
+        assertEquals(InternalTrainingPlanStatus.ACTIVE, context.trainingPlanFilter.status)
         assertEquals("strength", context.trainingPlanFilter.searchString)
         assertEquals(3, context.trainingPlansResponse.pageNumber)
         assertEquals(15, context.trainingPlansResponse.pageSize)
@@ -149,5 +151,72 @@ class TrainingPlanMapperTest {
         assertEquals(1, response.totalSize)
         assertEquals(1, response.pageNumber)
         assertEquals(10, response.pageSize)
+    }
+
+    @Test
+    fun `training plan response maps status version and audit fields to transport`() {
+        val context = TrainingPlanContext(
+            requestId = RequestId("tp-response-2"),
+            command = TrainingPlanCommand.READ,
+            state = State.RUNNING,
+            trainingPlanResponse = TrainingPlan(
+                id = TrainingPlanId("plan-2"),
+                clientCardId = ClientCardId("client-card-2"),
+                title = "Archived Plan",
+                status = InternalTrainingPlanStatus.ARCHIVED,
+                version = 3,
+                createdAt = "2026-02-01T09:00:00Z",
+                updatedAt = "2026-02-02T10:00:00Z",
+            ),
+        )
+
+        val response = context.toTransport() as TrainingPlanReadResponse
+
+        assertEquals("plan-2", response.trainingPlan?.id)
+        assertEquals("client-card-2", response.trainingPlan?.clientCardId)
+        assertEquals("Archived Plan", response.trainingPlan?.title)
+        assertEquals(TrainingPlanStatus.ARCHIVED, response.trainingPlan?.status)
+        assertEquals(3, response.trainingPlan?.version)
+        assertEquals("2026-02-01T09:00:00Z", response.trainingPlan?.createdAt)
+        assertEquals("2026-02-02T10:00:00Z", response.trainingPlan?.updatedAt)
+    }
+
+    @Test
+    fun `training plan response maps none status to null`() {
+        val context = TrainingPlanContext(
+            requestId = RequestId("tp-response-3"),
+            command = TrainingPlanCommand.READ,
+            state = State.RUNNING,
+            trainingPlanResponse = TrainingPlan(
+                id = TrainingPlanId("plan-3"),
+                title = "Draft Plan",
+                status = InternalTrainingPlanStatus.NONE,
+            ),
+        )
+
+        val response = context.toTransport() as TrainingPlanReadResponse
+
+        assertEquals(null, response.trainingPlan?.status)
+    }
+
+    @Test
+    fun `training plan search filter status values map to domain`() {
+        val cases = listOf(
+            TrainingPlanStatus.ACTIVE to InternalTrainingPlanStatus.ACTIVE,
+            TrainingPlanStatus.ARCHIVED to InternalTrainingPlanStatus.ARCHIVED,
+            null to InternalTrainingPlanStatus.NONE,
+        )
+
+        cases.forEach { (transportStatus, expected) ->
+            val request = TrainingPlanSearchRequest(
+                requestId = "tp-search-2",
+                debug = Debug(mode = RequestDebugMode.STUB),
+                trainingPlanFilter = TrainingPlanSearchFilter(status = transportStatus),
+            )
+
+            val context = request.fromTransport()
+
+            assertEquals(expected, context.trainingPlanFilter.status, "Unexpected domain status for $transportStatus")
+        }
     }
 }

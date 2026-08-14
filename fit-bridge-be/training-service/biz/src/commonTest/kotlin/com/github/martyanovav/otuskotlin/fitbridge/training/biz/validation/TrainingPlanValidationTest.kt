@@ -173,7 +173,6 @@ class TrainingPlanValidationTest {
             workMode = WorkMode.TEST,
             trainingPlanFilter = TrainingPlanFilter(
                 clientCardId = ClientCardId("bad id"),
-                status = "unknown",
                 searchString = "a".repeat(121),
                 pageNumber = 0,
                 pageSize = 101,
@@ -187,7 +186,6 @@ class TrainingPlanValidationTest {
             setOf(
                 "validation-clientCardId-badFormat",
                 "validation-searchString-tooLong",
-                "validation-status-unsupported",
                 "validation-pageNumber-outOfRange",
                 "validation-pageSize-outOfRange",
             ),

@@ -35,14 +35,14 @@ fun Debug?.transportToStubCase(): Stubs = when (this?.stub) {
     RequestDebugStubs.SUCCESS -> Stubs.SUCCESS
     RequestDebugStubs.NOT_FOUND -> Stubs.NOT_FOUND
     RequestDebugStubs.BAD_ID -> Stubs.BAD_ID
+    RequestDebugStubs.BAD_LOCK -> Stubs.BAD_LOCK
+    RequestDebugStubs.BAD_PUBLIC_NAME -> Stubs.BAD_PUBLIC_NAME
+    RequestDebugStubs.BAD_CLIENT_NAME -> Stubs.BAD_CLIENT_NAME
     RequestDebugStubs.BAD_PLAN_TITLE -> Stubs.BAD_PLAN_TITLE
+    RequestDebugStubs.BAD_PLAN_BODY -> Stubs.BAD_PLAN_BODY
+    RequestDebugStubs.FORBIDDEN -> Stubs.FORBIDDEN
+    RequestDebugStubs.VALIDATION_ERROR -> Stubs.VALIDATION_ERROR
     RequestDebugStubs.CANNOT_ARCHIVE -> Stubs.CANNOT_ARCHIVE
-    RequestDebugStubs.BAD_PUBLIC_NAME -> Stubs.NONE
-    RequestDebugStubs.BAD_LOCK -> Stubs.NONE
-    RequestDebugStubs.BAD_CLIENT_NAME -> Stubs.NONE
-    RequestDebugStubs.BAD_PLAN_BODY -> Stubs.NONE
-    RequestDebugStubs.FORBIDDEN -> Stubs.NONE
-    RequestDebugStubs.VALIDATION_ERROR -> Stubs.NONE
     null -> Stubs.NONE
 }
 

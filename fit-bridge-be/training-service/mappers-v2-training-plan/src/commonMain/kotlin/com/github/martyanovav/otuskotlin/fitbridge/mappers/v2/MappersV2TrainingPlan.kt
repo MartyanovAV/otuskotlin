@@ -139,9 +139,13 @@ fun TrainingPlan.toTransportTrainingPlan(): TrainingPlanResponseObject? {
         title = title.takeIf { it.isNotBlank() },
         clientCardId = clientCardId.takeIf { it != ClientCardId.NONE }?.asString(),
         status = when (status) {
+            TrainingPlanStatus.NONE -> null
             TrainingPlanStatus.ACTIVE -> TrainingPlanStatusV2.ACTIVE
             TrainingPlanStatus.ARCHIVED -> TrainingPlanStatusV2.ARCHIVED
         },
+        version = version,
+        createdAt = createdAt.takeIf { it.isNotBlank() },
+        updatedAt = updatedAt.takeIf { it.isNotBlank() },
         planItems = planItems.map { it.toTransportPlanItem() }
     )
 }
@@ -194,7 +198,7 @@ private fun PlanItemV2.toInternal(): PlanItem = when(this) {
                 weightUnit = it.weightUnit.orEmpty(),
                 durationSeconds = it.durationSeconds ?: 0
             )
-        }?.toMutableList() ?: mutableListOf(),
+        } ?: emptyList(),
         restBetweenSetsSeconds = this.restBetweenSetsSeconds ?: 0
     )
     is CircuitItemV2 -> CircuitItem(
@@ -202,14 +206,14 @@ private fun PlanItemV2.toInternal(): PlanItem = when(this) {
         title = this.title.orEmpty(),
         description = this.description.orEmpty(),
         rounds = this.rounds ?: 1,
-        items = this.items?.map { it.toInternal() }?.toMutableList() ?: mutableListOf(),
+        items = this.items?.map { it.toInternal() } ?: emptyList(),
         restBetweenRoundsSeconds = this.restBetweenRoundsSeconds ?: 0
     )
     is SupersetItemV2 -> SupersetItem(
         id = this.id.orEmpty(),
         title = this.title.orEmpty(),
         description = this.description.orEmpty(),
-        items = this.items?.map { it.toInternal() }?.toMutableList() ?: mutableListOf(),
+        items = this.items?.map { it.toInternal() } ?: emptyList(),
         restBetweenSetsSeconds = this.restBetweenSetsSeconds ?: 0
     )
 }
@@ -217,7 +221,7 @@ private fun PlanItemV2.toInternal(): PlanItem = when(this) {
 private fun TrainingPlanCreateObject?.toInternal() = TrainingPlan(
     title = this?.title.orEmpty(),
     clientCardId = this?.clientCardId.toClientCardId(),
-    planItems = this?.planItems?.map { it.toInternal() }?.toMutableList() ?: mutableListOf()
+    planItems = this?.planItems?.map { it.toInternal() } ?: emptyList()
 )
 
 private fun TrainingPlanReadObject?.toInternal() = TrainingPlan(
@@ -228,7 +232,7 @@ private fun TrainingPlanUpdateObject?.toInternal() = TrainingPlan(
     id = this?.id.toTrainingPlanId(),
     title = this?.title.orEmpty(),
     lock = this?.lock.orEmpty(),
-    planItems = this?.planItems?.map { it.toInternal() }?.toMutableList() ?: mutableListOf()
+    planItems = this?.planItems?.map { it.toInternal() } ?: emptyList()
 )
 
 private fun TrainingPlanArchiveObject?.toInternal() = TrainingPlan(
@@ -238,8 +242,14 @@ private fun TrainingPlanArchiveObject?.toInternal() = TrainingPlan(
 
 private fun TrainingPlanSearchFilter?.toInternal() = TrainingPlanFilter(
     clientCardId = this?.clientCardId.toClientCardId(),
-    status = this?.status?.value.orEmpty(),
+    status = this?.status.toTrainingPlanStatus(),
     searchString = this?.searchString.orEmpty(),
     pageNumber = this?.pageNumber ?: 1,
     pageSize = this?.pageSize ?: 10,
 )
+
+private fun TrainingPlanStatusV2?.toTrainingPlanStatus() = when (this) {
+    TrainingPlanStatusV2.ACTIVE -> TrainingPlanStatus.ACTIVE
+    TrainingPlanStatusV2.ARCHIVED -> TrainingPlanStatus.ARCHIVED
+    null -> TrainingPlanStatus.NONE
+}

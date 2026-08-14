@@ -57,7 +57,6 @@ class ClientCardValidationTest {
             command = ClientCardCommand.SEARCH,
             workMode = WorkMode.TEST,
             clientCardFilter = ClientCardFilter(
-                status = "unknown",
                 searchString = "a".repeat(121),
                 pageNumber = 0,
                 pageSize = 101,
@@ -70,7 +69,6 @@ class ClientCardValidationTest {
         assertEquals(
             setOf(
                 "validation-searchString-tooLong",
-                "validation-status-unsupported",
                 "validation-pageNumber-outOfRange",
                 "validation-pageSize-outOfRange",
             ),

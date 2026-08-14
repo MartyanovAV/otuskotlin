@@ -5,6 +5,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.cor.worker
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.IFBContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardStatus
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
 
 private const val DISPLAY_NAME_MAX_LENGTH = 120
@@ -12,7 +13,7 @@ private const val NOTE_MAX_LENGTH = 1000
 private const val SEARCH_STRING_MAX_LENGTH = 120
 private const val PAGE_SIZE_MIN = 1
 private const val PAGE_SIZE_MAX = 100
-private val ALLOWED_STATUSES = setOf("", "ACTIVE", "ARCHIVED")
+private val ALLOWED_STATUSES = setOf(ClientCardStatus.NONE, ClientCardStatus.ACTIVE, ClientCardStatus.ARCHIVED)
 
 private val IFBContext.clientCardContext: ClientCardContext
     get() = this as ClientCardContext
@@ -27,13 +28,13 @@ fun ICorChainDsl<IFBContext>.prepareClientCardValidation(
         val ctx = clientCardContext
         ctx.clientCardValidating = ctx.clientCardRequest.deepCopy().apply {
             id = ClientCardId(id.asString().trim())
-            trainerId = trainerId.trim()
+            ownerId = ownerId.trim()
             displayName = displayName.trim()
             note = note.trim()
             lock = lock.trim()
             if (resetIdentity) {
                 id = ClientCardId.NONE
-                trainerId = ""
+                ownerId = ""
                 isArchived = false
                 lock = ""
             }
@@ -47,7 +48,6 @@ fun ICorChainDsl<IFBContext>.prepareClientCardFilterValidation(title: String) = 
     handle {
         val ctx = clientCardContext
         ctx.clientCardFilterValidating = ctx.clientCardFilter.deepCopy().apply {
-            status = status.trim().uppercase()
             searchString = searchString.trim()
         }
     }

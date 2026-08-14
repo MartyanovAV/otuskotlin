@@ -21,11 +21,14 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardCon
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardFilter
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardStatus
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBCommandBase
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.RequestId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardStatus as ClientCardStatusV1
+
 
 // ─── From Transport ──────────────────────────────────────────────────────────
 
@@ -78,11 +81,17 @@ fun ClientCardContext.fromTransport(request: ClientCardSearchRequest) {
 }
 
 private fun ClientCardSearchFilter?.toInternal() = ClientCardFilter(
-    status = this?.status?.value.orEmpty(),
+    status = this?.status.toClientCardStatus(),
     searchString = this?.searchString.orEmpty(),
     pageNumber = this?.pageNumber ?: 1,
     pageSize = this?.pageSize ?: 10,
 )
+
+private fun ClientCardStatusV1?.toClientCardStatus() = when (this) {
+    ClientCardStatusV1.ACTIVE -> ClientCardStatus.ACTIVE
+    ClientCardStatusV1.ARCHIVED -> ClientCardStatus.ARCHIVED
+    null -> ClientCardStatus.NONE
+}
 
 // ─── To Transport ────────────────────────────────────────────────────────────
 
@@ -130,6 +139,12 @@ internal fun ClientCard.toTransportClientCard(): ClientCardResponseObject? {
         id = id.takeIf { it != ClientCardId.NONE }?.asString(),
         displayName = displayName.takeIf { it.isNotBlank() },
         note = note.takeIf { it.isNotBlank() },
+        status = when (isArchived) {
+            true -> ClientCardStatusV1.ARCHIVED
+            false -> ClientCardStatusV1.ACTIVE
+        },
+        createdAt = createdAt.takeIf { it.isNotBlank() },
+        updatedAt = updatedAt.takeIf { it.isNotBlank() },
         lock = lock.takeIf { it.isNotBlank() }
     )
 }

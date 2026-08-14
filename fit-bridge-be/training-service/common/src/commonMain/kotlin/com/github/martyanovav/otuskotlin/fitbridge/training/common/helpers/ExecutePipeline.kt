@@ -33,6 +33,11 @@ suspend inline fun <C : IFBContext, T> executePipeline(
     } catch (e: Throwable) {
         ctx.state = State.FAILING
         ctx.addError(e.asFBError())
-        ctx.respond()
+        try {
+            ctx.respond()
+        } catch (respondError: Throwable) {
+            respondError.addSuppressed(e)
+            throw respondError
+        }
     }
 }
