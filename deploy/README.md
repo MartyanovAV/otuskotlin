@@ -8,6 +8,7 @@
 |--------|------------|------------|
 | `training-service` | Backend API для работы с клиентами и планами | REST через Envoy `/v1/clientCard/`, `/v1/trainingPlan/`, `/v2/clientCard/`, `/v2/trainingPlan/`; WS `/v1/training/ws`, `/v2/training/ws` |
 | `postgresql` | основное хранилище данных приложения | `5432` |
+| `liquibase-training` | применение схемы Training DB перед запуском приложения | без порта хоста |
 | `envoy` | входной proxy, JWT validation и WebSocket Upgrade для MVP `/v1/*`, `/v2/*` | `8080` |
 | `keycloak` | Identity Server, импорт realm `fit-bridge` | через Envoy `/admin`, `/realms` |
 | `greptimedb` | хранилище masked logs и метрик, встроенный Dashboard | `4000`–`4003` |
@@ -36,12 +37,38 @@ Helper использует Direct Access Grant только для локаль
 ## Запуск
 
 ```powershell
+.\gradlew.bat --no-daemon buildInfra
 cd deploy
 docker compose up --build -d
 docker compose ps
 ```
 
-Compose собирает `training-service/app-ktor` и публикует его только через Envoy.
+`buildInfra` собирает образ миграций. Затем Compose запускает Liquibase после готовности PostgreSQL и запускает Training Service только после успешного применения схемы. `training-service/app-ktor` публикуется только через Envoy.
+
+## Миграции Training DB
+
+В PostgreSQL существует только прикладная база `training_db`. Identity-профиль остаётся в Keycloak, поэтому отдельной Profile DB и profile-миграций нет.
+
+Исходники Liquibase находятся в `fit-bridge-other/fit-bridge-migration-pg/src/main/liquibase/training/`. Начальная схема создаёт `client_card` и `training_plan`, их ownership/search индексы, archive state и optimistic locks.
+
+Повторный запуск безопасен: Liquibase сохраняет историю применённых changeset-ов в `training_db`.
+
+Собрать только migration image из корня репозитория:
+
+```powershell
+.\gradlew.bat :fit-bridge-other:fit-bridge-migration-pg:buildImages
+```
+
+Повторно применить миграции или посмотреть историю из `deploy/`:
+
+```powershell
+docker compose run --rm liquibase-training
+docker compose run --rm liquibase-training history
+```
+
+Для новой версии схемы нужно добавить новый formatted SQL-файл в каталог `training/` и подключить его из `changelog-master.yaml`; уже применённый changeset не редактируется.
+
+Ручной workflow `.github/workflows/migrate.yml` использует secrets `TRAINING_DB_URL`, `TRAINING_DB_USER` и `TRAINING_DB_PASSWORD`. Он нужен только после появления доступного CI окружения базы данных.
 
 Адреса:
 

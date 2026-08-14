@@ -13,11 +13,21 @@ services:
       timeout: 5s
       retries: 10
 
-  training-service:
-    image: fitbridge-training-service:local
+  liquibase-training:
+    image: fit-bridge-migration-pg-training:0.1.0
+    environment:
+      LIQUIBASE_COMMAND_URL: jdbc:postgresql://postgresql:5432/training_db
+      LIQUIBASE_COMMAND_USERNAME: training_user
+      LIQUIBASE_COMMAND_PASSWORD: training-password
     depends_on:
       postgresql:
         condition: service_healthy
+
+  training-service:
+    image: fitbridge-training-service:local
+    depends_on:
+      liquibase-training:
+        condition: service_completed_successfully
     environment:
       DB_HOST: postgresql
       DB_PORT: 5432
