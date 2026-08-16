@@ -2,6 +2,7 @@ package com.github.martyanovav.otuskotlin.fitbridge.training.common
 
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBError
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBCommand
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.AuthPrincipal
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.RequestId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
@@ -20,6 +21,7 @@ data class ClientCardContext(
     override var stubCase: Stubs = Stubs.NONE,
     override var requestId: RequestId = RequestId.NONE,
     override var timeStart: Instant = Instant.DISTANT_PAST,
+    override var principal: AuthPrincipal = AuthPrincipal.NONE,
 
     var clientCardRequest: ClientCard = ClientCard(),
     var clientCardResponse: ClientCard = ClientCard(),

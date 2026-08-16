@@ -18,7 +18,7 @@
 
 | Trace ID | MVP capability | Funnel stage | BR / AC | FR / NFR | Tests | Status |
 |---|---|---|---|---|---|---|
-| RTM-001 | Регистрация и вход тренера | trainer signup | [BR-006](../01-business/BR/BR-006-trainer-onboarding.md), `US-R006-001` | FR `1.1`; NFR `1.1`, `3.1` | `TEST-E2E-001`: тренер входит и получает доступ к стартовому приватному сценарию | Ready |
+| RTM-001 | Регистрация и вход тренера | trainer signup | [BR-006](../01-business/BR/BR-006-trainer-onboarding.md), `US-R006-001` | FR `1.1`; NFR `1.1`, `3.1` | `TEST-E2E-001`: форма явно обозначает trainer account; уникальный username входит и получает `TRAINER` | Ready |
 | RTM-002 | Создание минимальной `ClientCard` | client card | [BR-010](../01-business/BR/BR-010-trainer-diary-mvp.md), `US-R010-001` | FR `2.1`; NFR `1.2`, `3.2` | `TEST-E2E-002`: тренер создаёт карточку без клиентского аккаунта | Ready |
 | RTM-003 | Поиск и просмотр своих `ClientCard` | trainer return | [BR-010](../01-business/BR/BR-010-trainer-diary-mvp.md), `US-R010-002` | FR `2.2`; NFR `1.2`, `2.1`, `3.2` | `TEST-E2E-003`: поиск возвращает только карточки владельца | Ready |
 | RTM-004 | Создание `TrainingPlan` для своей карточки | plan | [BR-010](../01-business/BR/BR-010-trainer-diary-mvp.md), `US-R010-003` | FR `3.1`; NFR `1.3`, `2.2` | `TEST-E2E-004`: план создаётся только для карточки того же тренера | Ready |

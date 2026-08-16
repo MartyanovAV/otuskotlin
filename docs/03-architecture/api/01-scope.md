@@ -6,7 +6,7 @@
 
 | Область | Что означает | Что реализуется |
 |-------|--------------|-----------------|
-| **MVP / Gate 1** | Обязательный API Trainer Diary | Тренерский профиль, `ClientCard.create/search`, `TrainingPlan.create/search`, masked logs |
+| **MVP / Gate 1** | Обязательный API Trainer Diary | Keycloak registration/login, `ClientCard.create/search`, `TrainingPlan.create/search`, masked logs |
 | **Phase 2 / Out of MVP** | Client-owned и расширенные продуктовые контуры | Клиентская регистрация, `ClientProfile`, `Invite`, `AccessGrant`, дневник, solo-client путь, multi-specialist, product `AuditEvent`, `Notification`, billing |
 
 Если сущность, поле, метод, правило или лимит помечены как Phase 2 / Out of MVP, они не входят в обязательный MVP API.
@@ -15,9 +15,10 @@
 
 ### Приватный trainer API (versioned `/v1/*` и `/v2/*`, требуется JWT)
 
-- `trainerProfile.createOrUpdate`, `trainerProfile.readOwn`
 - `clientCard.create`, `clientCard.search`
 - `trainingPlan.create`, `trainingPlan.search`
+
+Имя, email и username доступны UI через OIDC ID Token/UserInfo и не являются методами FitBridge domain API.
 
 ### Публичный API
 

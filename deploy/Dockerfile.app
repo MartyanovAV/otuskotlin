@@ -9,12 +9,12 @@ WORKDIR /home/gradle/project
 # Copy the entire project (filtered by .dockerignore)
 COPY . .
 
-# Argument to select the service to build (e.g. profile-service or training-service)
+# Argument to select the backend service to build (training-service for MVP)
 ARG SERVICE_NAME
 ENV SERVICE_NAME=${SERVICE_NAME}
 
 # Build the specific application
-RUN gradle :${SERVICE_NAME}:app:build --no-daemon -x test
+RUN gradle :${SERVICE_NAME}:app-ktor:shadowJar --no-daemon -x test
 
 # Stage 2: Runtime
 FROM eclipse-temurin:21-jre-alpine
@@ -24,7 +24,7 @@ WORKDIR /app
 ARG SERVICE_NAME
 
 # Copy the built JAR from builder stage
-COPY --from=builder /home/gradle/project/fit-bridge-be/${SERVICE_NAME}/app/build/libs/*-all.jar app.jar
+COPY --from=builder /home/gradle/project/fit-bridge-be/${SERVICE_NAME}/app-ktor/build/libs/*-all.jar app.jar
 
 # Expose application port (Ktor default)
 EXPOSE 8080

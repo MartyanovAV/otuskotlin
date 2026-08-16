@@ -1155,7 +1155,7 @@
       <div class="canvas-header" id="trainer-onboarding">
         <div class="canvas-title">
           <h1>T1 · Онбординг и приглашение клиента</h1>
-          <p>Регистрация → мастер первого клиента → отправка приглашения по QR/ссылке/email. BR-006, time-to-first-client ≤ 1 день.</p>
+          <p>Регистрация аккаунта тренера → первый клиент → первый план. BR-006, time-to-first-plan ≤ 1 день.</p>
         </div>
         <div class="canvas-meta">
           <span class="flow-badge">BR-006</span>
@@ -1178,9 +1178,17 @@
               </div>
               <div class="app-content">
                 <h2 style="font-family:var(--font-display);font-size:22px;font-weight:700;letter-spacing:-0.02em">Создай рабочий кабинет</h2>
-                <p style="color:var(--text-muted);font-size:13px;margin-top:-8px">Первые 14 дней — все функции бесплатно, до 3 активных клиентов.</p>
+                <p style="color:var(--text-muted);font-size:13px;margin-top:-8px">Сейчас FitBridge доступен только тренерам. Кабинет клиента появится позднее.</p>
 
                 <div style="display:flex;flex-direction:column;gap:var(--s-3)">
+                  <div>
+                    <label style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Тип аккаунта</label>
+                    <div class="set-input" style="text-align:left;padding:12px 14px;font-weight:700;background:var(--primary-soft);color:var(--primary-soft-text);margin-top:4px">Тренер</div>
+                  </div>
+                  <div>
+                    <label style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Логин</label>
+                    <div class="set-input" style="text-align:left;padding:12px 14px;font-weight:500;background:var(--surface);margin-top:4px">coach_irina</div>
+                  </div>
                   <div>
                     <label style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Имя</label>
                     <div class="set-input" style="text-align:left;padding:12px 14px;font-weight:500;background:var(--surface);margin-top:4px">Ирина Соколова</div>
@@ -1190,23 +1198,8 @@
                     <div class="set-input" style="text-align:left;padding:12px 14px;font-weight:500;background:var(--surface);margin-top:4px">irina.sokolova@mail.ru</div>
                   </div>
                   <div>
-                    <label style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Специализация</label>
-                    <div class="tag-row" style="margin-top:6px">
-                      <span class="chip primary"><span class="dot-mini"></span>Силовая</span>
-                      <span class="chip primary"><span class="dot-mini"></span>Жиросжигание</span>
-                      <span class="chip">Реабилит.</span>
-                      <span class="chip">Йога</span>
-                      <span class="chip">Бег</span>
-                    </div>
-                  </div>
-                  <div>
-                    <label style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Сколько клиентов сейчас?</label>
-                    <div class="tag-row" style="margin-top:6px">
-                      <span class="chip">1–5</span>
-                      <span class="chip">6–15</span>
-                      <span class="chip primary"><span class="dot-mini"></span>16–25</span>
-                      <span class="chip">25+</span>
-                    </div>
+                    <label style="font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Пароль</label>
+                    <div class="set-input" style="text-align:left;padding:12px 14px;font-weight:500;background:var(--surface);margin-top:4px">••••••••••••</div>
                   </div>
                 </div>
 
@@ -1215,13 +1208,13 @@
                   Стартовая настройка займёт ~3 минуты
                 </div>
 
-                <button class="btn primary block">Продолжить</button>
+                <button class="btn primary block">Создать аккаунт тренера</button>
               </div>
             </div>
           </div>
           <div class="phone-caption">
             <strong>T1.1 Регистрация</strong>
-            Короткая форма + сегментация · setup < 15 мин по CJM
+            Явный тип аккаунта + уникальный логин · роль назначает Keycloak
           </div>
         </div>
 

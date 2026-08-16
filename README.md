@@ -54,7 +54,7 @@ MVP фокусируется на одном сокращённом критич
 
 | Сущность | Назначение в MVP | Статус |
 |---|---|---|
-| `Trainer` | Единственный зарегистрированный пользователь MVP | Входит |
+| `TrainerIdentity` | Keycloak-аккаунт с уникальным username и ролью `TRAINER` | Входит |
 | `ClientCard` | Минимальная карточка клиента, создаётся тренером | Входит |
 | `TrainingPlan` | Простой тренировочный план, создаётся тренером | Входит |
 | `ClientProfile` | Полноценный клиентский профиль и история | Phase 2 |
@@ -69,9 +69,9 @@ MVP фокусируется на одном сокращённом критич
 Архитектура описана в обзорном документе и C4-диаграммах Draw.io:
 
 - [Обзор архитектуры](docs/03-architecture/03-arch.md);
-- [C4 Context source](docs/03-architecture/c4/C4_CONTEXT.drawio);
-- [C4 Container source](docs/03-architecture/c4/C4_CONTAINER.drawio);
-- [C4 Component source](docs/03-architecture/c4/C4_COMPONENT.drawio);
+- [C4 Context](docs/03-architecture/c4/C4_CONTEXT.md);
+- [C4 Container](docs/03-architecture/c4/C4_CONTAINER.md);
+- [C4 Component](docs/03-architecture/c4/C4_COMPONENT.md);
 - [ERD MVP](docs/03-architecture/ERD.md);
 - [Security Architecture / Threat Model](docs/03-architecture/SECURITY_ARCHITECTURE.md).
 
@@ -95,6 +95,7 @@ ADR:
 - [ADR-004: использовать Kotlin](docs/03-architecture/ADR/ADR-004-kotlin.md)
 - [ADR-005: использовать PostgreSQL](docs/03-architecture/ADR/ADR-005-use-postgresql.md)
 - [ADR-006: использовать GreptimeDB и Fluent Bit для observability MVP](docs/03-architecture/ADR/ADR-006-use-greptimedb-fluent-bit-observability.md)
+- [ADR-007: использовать Keycloak как источник identity-профиля MVP](docs/03-architecture/ADR/ADR-007-use-keycloak-as-mvp-user-profile.md)
 
 ## Целевая инфраструктура MVP
 
@@ -102,17 +103,19 @@ ADR:
 
 - планируемый Web UI приватного кабинета тренера; клиентский и in-product support UI относятся к Phase 2;
 - Envoy Gateway как входной proxy и boundary для проверки JWT;
-- FitBridge Backend API на Kotlin/Ktor для POST Full бизнес-операций;
+- единый Training Service на Kotlin/Ktor для POST Full бизнес-операций;
 - PostgreSQL как прикладное хранилище;
 - Keycloak как внешний Identity Server;
 - Fluent Bit и GreptimeDB для observability.
 
-Подробности контейнеров и границ ответственности зафиксированы в [C4 Container source](docs/03-architecture/c4/C4_CONTAINER.drawio), [C4 Component source](docs/03-architecture/c4/C4_COMPONENT.drawio) и [Security Architecture / Threat Model](docs/03-architecture/SECURITY_ARCHITECTURE.md).
+Подробности контейнеров и границ ответственности зафиксированы в [C4 Container](docs/03-architecture/c4/C4_CONTAINER.md), [C4 Component](docs/03-architecture/c4/C4_COMPONENT.md) и [Security Architecture / Threat Model](docs/03-architecture/SECURITY_ARCHITECTURE.md).
 
 ### Транспортные модели, API, Спецификации
 
-1. `profile-service/specs`, `training-service/specs` - описание API в форме OpenAPI-спецификаций
-2. `profile-service/api-v1-jackson`, `training-service/api-v1-jackson` - Генерация первой версии транспортных моделей (Jackson)
-3. `profile-service/api-v2-kmp`, `training-service/api-v2-kmp` - Генерация второй версии транспортных моделей (KMP)
-4. `profile-service/swagger`, `training-service/swagger` - Сборка Docker-образов Swagger UI для визуализации API
+1. `training-service/specs` — описание domain API в форме OpenAPI-спецификаций.
+2. `training-service/api-v1-jackson` — генерация первой версии транспортных моделей (Jackson).
+3. `training-service/api-v2-kmp` — генерация второй версии транспортных моделей (KMP).
+4. `training-service/swagger` — сборка Swagger UI для визуализации API.
+
+Регистрация, login и identity profile не имеют собственного FitBridge API: они предоставляются Keycloak через OIDC. `JWT.sub` используется как owner id, а `preferred_username` — как уникальный логин внутри realm.
 

@@ -2,8 +2,15 @@
 **/.kotlin/
 /kotlin-js-store/
 **/build/
+**/bin/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/**/build/
+
+# Reproducible OpenAPI Generator output and metadata
+**/.openapi-generator/
+**/generated-sources/openapi/
+**/generated/openapi/
+**/generate-resources/
 
 /.idea/
 /.gigaide/

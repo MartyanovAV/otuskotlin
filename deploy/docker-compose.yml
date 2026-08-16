@@ -22,34 +22,6 @@ services:
     networks:
       - fitbridge-network
 
-  profile-service:
-    build:
-      context: ..
-      dockerfile: deploy/Dockerfile.app
-      args:
-        SERVICE_NAME: profile-service
-    image: fitbridge-profile-service:local
-    depends_on:
-      postgresql:
-        condition: service_healthy
-      fluent-bit:
-        condition: service_started
-      envoy:
-        condition: service_started
-    environment:
-      DB_HOST: postgresql
-      DB_PORT: 5432
-      DB_NAME: profile_db
-      DB_USER: profile_user
-      DB_PASSWORD: profile-password
-    logging:
-      driver: "fluentd"
-      options:
-        fluentd-address: 127.0.0.1:24224
-        tag: profile.logs
-    networks:
-      - fitbridge-network
-
   training-service:
     build:
       context: ..
@@ -142,6 +114,7 @@ services:
     image: quay.io/keycloak/keycloak:26.1.0
     volumes:
       - ./volumes/keycloak/import:/opt/keycloak/data/import
+      - ./volumes/keycloak/themes:/opt/keycloak/themes:ro
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
