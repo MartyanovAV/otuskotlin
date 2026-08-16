@@ -4,10 +4,10 @@ plugins {
 }
 
 val resourcesZip = tasks.register<Zip>("resourcesZip") {
-    description = "Упаковка ресурсов в Zip-архив"
+    description = "Упаковка канонической deploy-конфигурации в Zip-архив"
     archiveClassifier.set("resources")
     archiveExtension.set("zip")
-    from("dcompose")
+    from(rootProject.file("../deploy"))
 }
 
 // Добавляем артефакт в стандартную конфигурацию runtime,

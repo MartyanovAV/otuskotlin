@@ -291,7 +291,7 @@ components:
         requestType:
           type: string
           description: Поле-дискриминатор для вычисления типа запроса
-          example: trainerProfile.createOrUpdate
+          example: clientCard.create
         requestId:
           $ref: '#/components/schemas/RequestId'
         apiVersion:
@@ -317,7 +317,7 @@ components:
         responseType:
           type: string
           description: Поле-дискриминатор для вычисления типа ответа
-          example: trainerProfile.createOrUpdate
+          example: clientCard.create
         requestId:
           $ref: '#/components/schemas/RequestId'
         apiVersion:

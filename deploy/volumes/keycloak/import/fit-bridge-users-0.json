@@ -4,7 +4,10 @@
     {
       "username": "fitbridge-test",
       "enabled": true,
+      "email": "trainer@example.com",
       "emailVerified": true,
+      "firstName": "Иван",
+      "lastName": "Тренеров",
       "credentials": [
         {
           "type": "password",
@@ -13,7 +16,6 @@
         }
       ],
       "realmRoles": [
-        "CLIENT",
         "TRAINER"
       ]
     }

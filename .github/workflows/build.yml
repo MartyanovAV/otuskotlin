@@ -41,7 +41,13 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
 
       - name: Build Infrastructure
-        run: gradle buildInfra --info --build-cache
+        run: ./gradlew --no-daemon buildInfra --build-cache
+
+      - name: Validate Compose
+        run: docker compose -f deploy/docker-compose.yml config --quiet
+
+      - name: Check Backend Contracts
+        run: ./gradlew --no-daemon check --build-cache
 #      - name: Build App Images
 #        run: gradle buildImages --info --build-cache
 #      - name: Run E2E Tests

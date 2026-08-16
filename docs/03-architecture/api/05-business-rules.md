@@ -4,9 +4,9 @@
 
 | Область | Правило MVP |
 |---|---|
-| Trainer-only registration | Единственный зарегистрированный пользователь MVP — тренер; клиент не регистрируется и не получает кабинет. |
-| ClientCard ownership | `ClientCard` создаётся и управляется тренером; это не client-owned `ClientProfile`. |
-| TrainingPlan ownership | План принадлежит тренеру и связан с `ClientCard`; приватные операции требуют trainer JWT + ownership check. |
+| Trainer-only registration | Форма явно обозначает аккаунт тренера; уникальный username создаётся в Keycloak, а `TRAINER` назначается сервером. Клиент не регистрируется. |
+| ClientCard ownership | Backend назначает `ownerId = JWT.sub`; это не client-owned `ClientProfile`. |
+| TrainingPlan ownership | План получает тот же `ownerId`, что и принадлежащая trainer principal карточка. |
 | ClientCard search | `clientCard.search` возвращает только карточки текущего тренера; фильтры: `searchString`, `status`, пагинация. |
 | TrainingPlan search | `trainingPlan.search` возвращает только планы текущего тренера; фильтры: `clientCardId`, `searchString`, `status`, пагинация. |
 | Share/access scope | Share/access-сценарии и отдельный клиентский контур не входят в текущий MVP. |

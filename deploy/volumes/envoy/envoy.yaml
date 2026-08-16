@@ -24,10 +24,6 @@ static_resources:
                   - name: local_service
                     domains: [ "*" ]
                     routes:
-                      - match: { prefix: "/v1/trainerProfile/" }
-                        route: { cluster: profile-service }
-                      - match: { prefix: "/v2/trainerProfile/" }
-                        route: { cluster: profile-service }
                       - match: { prefix: "/v1/clientCard/" }
                         route: { cluster: training-service }
                       - match: { prefix: "/v2/clientCard/" }
@@ -52,6 +48,7 @@ static_resources:
                     providers:
                       keycloak_provider:
                         issuer: "http://localhost:8080/realms/fit-bridge"
+                        audiences: [ "fit-bridge-service" ]
                         remote_jwks:
                           http_uri:
                             uri: http://keycloak:8080/realms/fit-bridge/protocol/openid-connect/certs
@@ -62,10 +59,6 @@ static_resources:
                         forward: true
                         forward_payload_header: x-jwt-payload
                     rules:
-                      - match: { prefix: /v1/trainerProfile/ }
-                        requires: { provider_name: keycloak_provider }
-                      - match: { prefix: /v2/trainerProfile/ }
-                        requires: { provider_name: keycloak_provider }
                       - match: { prefix: /v1/clientCard/ }
                         requires: { provider_name: keycloak_provider }
                       - match: { prefix: /v2/clientCard/ }
@@ -78,20 +71,6 @@ static_resources:
                   typed_config:
                     "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
   clusters:
-    - name: profile-service
-      connect_timeout: 30s
-      type: LOGICAL_DNS
-      dns_lookup_family: V4_ONLY
-      lb_policy: ROUND_ROBIN
-      load_assignment:
-        cluster_name: profile-service
-        endpoints:
-          - lb_endpoints:
-              - endpoint:
-                  address:
-                    socket_address:
-                      address: profile-service
-                      port_value: 8080
     - name: training-service
       connect_timeout: 30s
       type: LOGICAL_DNS
