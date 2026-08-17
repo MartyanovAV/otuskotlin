@@ -2,7 +2,7 @@
 
 TOKEN=$(./keycloak-tokens.sh)
 
-curl -H "Authorization: Bearer ${TOKEN}" \
+curl -X POST -H "Authorization: Bearer ${TOKEN}" \
   -H "X-Request-ID: 1234" \
   -H "x-client-request-id: 1235" \
   -H "Content-Type: application/json" \

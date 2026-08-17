@@ -14,6 +14,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanRes
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanSearchFilter
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanSearchRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanSearchResponse
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanStatus
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanUpdateObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanUpdateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanUpdateResponse
@@ -53,31 +54,31 @@ fun TrainingPlanContext.toTransport(): Any = when (command) {
     else -> throw IllegalArgumentException("Unsupported training plan command $command")
 }
 
-internal fun TrainingPlanContext.fromTransport(request: TrainingPlanCreateRequest) {
+fun TrainingPlanContext.fromTransport(request: TrainingPlanCreateRequest) {
     command = TrainingPlanCommand.CREATE
     fromTransportBase(request.requestId, request.debug)
     trainingPlanRequest = request.trainingPlan.toInternal()
 }
 
-internal fun TrainingPlanContext.fromTransport(request: TrainingPlanReadRequest) {
+fun TrainingPlanContext.fromTransport(request: TrainingPlanReadRequest) {
     command = TrainingPlanCommand.READ
     fromTransportBase(request.requestId, request.debug)
     trainingPlanRequest = request.trainingPlan.toInternal()
 }
 
-internal fun TrainingPlanContext.fromTransport(request: TrainingPlanUpdateRequest) {
+fun TrainingPlanContext.fromTransport(request: TrainingPlanUpdateRequest) {
     command = TrainingPlanCommand.UPDATE
     fromTransportBase(request.requestId, request.debug)
     trainingPlanRequest = request.trainingPlan.toInternal()
 }
 
-internal fun TrainingPlanContext.fromTransport(request: TrainingPlanArchiveRequest) {
+fun TrainingPlanContext.fromTransport(request: TrainingPlanArchiveRequest) {
     command = TrainingPlanCommand.ARCHIVE
     fromTransportBase(request.requestId, request.debug)
     trainingPlanRequest = request.trainingPlan.toInternal()
 }
 
-internal fun TrainingPlanContext.fromTransport(request: TrainingPlanSearchRequest) {
+fun TrainingPlanContext.fromTransport(request: TrainingPlanSearchRequest) {
     command = TrainingPlanCommand.SEARCH
     fromTransportBase(request.requestId, request.debug)
     trainingPlanFilter = request.trainingPlanFilter.toInternal()
@@ -89,35 +90,35 @@ internal fun TrainingPlanContext.fromTransport(request: TrainingPlanSearchReques
 
 // ─── To Transport ────────────────────────────────────────────────────────────
 
-internal fun TrainingPlanContext.toTransportTrainingPlanCreate() = TrainingPlanCreateResponse(
+fun TrainingPlanContext.toTransportTrainingPlanCreate() = TrainingPlanCreateResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
     result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     trainingPlan = trainingPlanResponse.toTransportTrainingPlan()
 )
 
-internal fun TrainingPlanContext.toTransportTrainingPlanRead() = TrainingPlanReadResponse(
+fun TrainingPlanContext.toTransportTrainingPlanRead() = TrainingPlanReadResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
     result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     trainingPlan = trainingPlanResponse.toTransportTrainingPlan()
 )
 
-internal fun TrainingPlanContext.toTransportTrainingPlanUpdate() = TrainingPlanUpdateResponse(
+fun TrainingPlanContext.toTransportTrainingPlanUpdate() = TrainingPlanUpdateResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
     result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     trainingPlan = trainingPlanResponse.toTransportTrainingPlan()
 )
 
-internal fun TrainingPlanContext.toTransportTrainingPlanArchive() = TrainingPlanArchiveResponse(
+fun TrainingPlanContext.toTransportTrainingPlanArchive() = TrainingPlanArchiveResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
     result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     trainingPlan = trainingPlanResponse.toTransportTrainingPlan()
 )
 
-internal fun TrainingPlanContext.toTransportTrainingPlanSearch() = TrainingPlanSearchResponse(
+fun TrainingPlanContext.toTransportTrainingPlanSearch() = TrainingPlanSearchResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
     result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
@@ -127,12 +128,13 @@ internal fun TrainingPlanContext.toTransportTrainingPlanSearch() = TrainingPlanS
     pageSize = trainingPlansResponse.pageSize.takeIf { it > 0 },
 )
 
-internal fun TrainingPlan.toTransportTrainingPlan(): TrainingPlanResponseObject? {
+fun TrainingPlan.toTransportTrainingPlan(): TrainingPlanResponseObject? {
     if (this == TrainingPlan()) return null
     return TrainingPlanResponseObject(
         id = id.takeIf { it != TrainingPlanId.NONE }?.asString(),
         title = title.takeIf { it.isNotBlank() },
         clientCardId = clientCardId.takeIf { it != ClientCardId.NONE }?.asString(),
+        status = if (isArchived) TrainingPlanStatus.ARCHIVED else TrainingPlanStatus.ACTIVE,
         planItems = planItems.map { it.toTransportPlanItem() }
     )
 }

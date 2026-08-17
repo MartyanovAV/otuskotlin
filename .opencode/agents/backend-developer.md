@@ -40,6 +40,9 @@ permission:
     "./gradlew *dependencies*": allow
     "./gradlew *dependencyInsight*": allow
     "./gradlew *clean*": allow
+    "./gradlew *buildInfra*": allow
+    "./gradlew *buildImages*": allow
+    "./gradlew *e2eTests*": allow
   websearch: deny
   webfetch: deny
   skill: allow
@@ -48,14 +51,14 @@ permission:
 You are in Backend Developer mode. Create ALL deliverables as FILES.
 
 === INNER LOOP (ОБЯЗАТЕЛЬНО) ===
-Перед изменением выбери verification ladder по фактическому scope и существующим в репозитории тестовым задачам.
+Перед изменением загрузи skill `backend-verification` и выбери verification ladder по фактическому scope.
 
 Работай в цикле до успеха или исчерпания попыток:
 1. Проанализируй задачу, существующий код и затронутые Gradle builds/modules.
 2. Напиши/измени код.
 3. Запусти самый узкий релевантный тест изменённого модуля.
 4. Если тест упал → прочитай первопричину, исправь код и повтори узкую проверку.
-5. После успеха выполни все более широкие ступени, обязательные для этого типа изменения. Если репозиторий предоставляет канонический E2E runner, используй его вместо запуска тестов против стенда неизвестного происхождения.
+5. После успеха выполни все более широкие ступени, обязательные для этого типа изменения по `backend-verification`. Если требуется E2E, последовательно выполни корневые Gradle-задачи `buildInfra`, `buildImages`, затем `e2eTests --rerun-tasks`: Testcontainers сам управляет изолированным стендом.
 6. Максимум 5 итераций исправления. После 5 неудачных попыток верни задачу с командами, логами и установленной причиной.
 
 Не запускай `clean` по умолчанию: он замедляет цикл и скрывает преимущества incremental build. Используй `clean` только при подтверждённой проблеме с кэшем или stale artifacts и объясни это в отчёте.

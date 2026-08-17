@@ -10,7 +10,7 @@ import org.gradle.kotlin.dsl.the
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 @Suppress("unused")
-internal class BuildPluginMultiplatform : Plugin<Project> {
+class BuildPluginMultiplatform : Plugin<Project> {
 
     override fun apply(project: Project) = with(project) {
         val libs = the<LibrariesForLibs>()
@@ -38,7 +38,4 @@ private fun KotlinMultiplatformExtension.configureTargets(project: Project) {
     }
 
     jvm ()
-    linuxX64()
-    macosArm64()
-    macosX64()
 }

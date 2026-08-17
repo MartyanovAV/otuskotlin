@@ -1,0 +1,16 @@
+FROM eclipse-temurin:21-jre-alpine
+
+WORKDIR /app
+
+RUN apk update && \
+    apk add --no-cache curl
+
+# The Gradle Docker task stages the current fat JAR under a stable name.
+COPY ./app.jar ./app.jar
+
+# Create logs directory
+RUN mkdir -p /app/logs
+
+EXPOSE 8081
+
+CMD ["java", "-jar", "app.jar"]

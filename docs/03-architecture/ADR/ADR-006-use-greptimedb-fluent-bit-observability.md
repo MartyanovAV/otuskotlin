@@ -2,6 +2,7 @@
 
 **Статус:** Accepted
 **Дата:** 2026-08-04
+
 ## Контекст
 
 Для успешного проведения пилота FitBridge MVP необходим надёжный, но легковесный observability-контур. Команде важно отслеживать доступность системы, метрики производительности, ошибки API и бизнес-события через структурированное логирование.
@@ -30,6 +31,7 @@
 - GreptimeDB как хранилище и поисковый движок для логов и метрик;
 - встроенный GreptimeDB Dashboard как веб-интерфейс для мониторинга и support/debugging;
 - masked JSON-события от backend API и инфраструктурных контейнеров;
+- Training Service и Envoy используют Docker `fluentd` logging driver и единый Fluent Bit input; access logs Envoy сохраняются без URL query, JWT и request body;
 - health endpoint Fluent Bit на `:2020`.
 
 Расширенный продуктовый `AuditEvent` API не входит в MVP. Audit-oriented события фиксируются как masked structured logs без раскрытия лишних данных.

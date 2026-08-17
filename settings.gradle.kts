@@ -10,3 +10,4 @@ pluginManagement {
 //includeBuild("lessons")
 includeBuild("fit-bridge-other")
 includeBuild("fit-bridge-be")
+includeBuild("fit-bridge-libs")

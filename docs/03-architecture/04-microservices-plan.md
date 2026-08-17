@@ -59,13 +59,13 @@ fit-bridge-be/
 
 Допустимые shared-модули должны быть техническими и стабильными. В `platform-contracts` нельзя выносить `ClientCard`, `TrainingPlan`, их бизнес-правила, repository ports/implementations или domain mappers. Общего repo-layer на уровне `training-service` быть не должно.
 
-Текущие плоские модули `common`, `api-*` и `mappers-*` являются переходным состоянием: они компилируются, но ещё не приведены к целевым entity boundaries. Runtime-модуль `app-ktor`, `biz` и `repo-*` также ещё не входят в tracked sources. Dockerfile ориентирован на целевое имя `app-ktor`, а сборку образа следует включать в CI после добавления runtime-модуля.
+Текущие плоские модули `common`, `api-*`, `mappers-*`, `biz` и `app-ktor` являются переходным состоянием: REST/WS runtime и stub-процессоры уже находятся в tracked sources, но ещё не приведены к целевым entity boundaries. Persistence и `repo-*` пока отсутствуют. Dockerfile собирает `app-ktor`; сборку образа и E2E следует закрепить в CI после подключения production-репозиториев и authorization chain.
 
 ## Последовательность дальнейшей реализации backend
 
 1. Разнести текущие common-модели, контексты и entity-specific мапперы по `entities/client-card` и `entities/training-plan`; оставить в `platform-contracts` только технические контракты.
-2. Добавить для каждой сущности собственные `biz`, `api`, `repo-pgjvm`, `repo-inmemory` и `app`, не создавая общий repository-layer сервиса.
-3. Добавить `app-ktor` как точку сборки сущностей и Ktor JWT authentication с проверкой issuer, audience и времени жизни.
+2. Разнести существующий stub-biz по сущностям и добавить собственные `repo-pgjvm`, `repo-inmemory` и `app`, не создавая общий repository-layer сервиса.
+3. Дополнить существующий `app-ktor` backend-проверкой JWT с проверкой issuer, audience и времени жизни; REST и WebSocket должны использовать одну модель principal.
 4. Преобразовать claims в `AuthPrincipal`, положить principal в domain context и реализовать authorization chain: authenticated → `TRAINER` → owner guard.
 5. Реализовать начальную PostgreSQL schema; миграции и repository implementations хранить внутри соответствующих сущностей `ClientCard` и `TrainingPlan`.
 6. Добавить негативные тесты no-token, wrong-role и cross-owner.

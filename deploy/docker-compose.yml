@@ -1,5 +1,5 @@
 # Минимальная инфраструктура FitBridge:
-# PostgreSQL, GreptimeDB, Fluent Bit, Envoy, Keycloak.
+# PostgreSQL, GreptimeDB, Fluent Bit, Envoy, Keycloak and Ktor services.
 
 services:
   postgresql:
@@ -28,6 +28,7 @@ services:
       dockerfile: deploy/Dockerfile.app
       args:
         SERVICE_NAME: training-service
+        SERVICE_PORT: 8081
     image: fitbridge-training-service:local
     depends_on:
       postgresql:
@@ -35,7 +36,7 @@ services:
       fluent-bit:
         condition: service_started
       envoy:
-        condition: service_started
+        condition: service_healthy
     environment:
       DB_HOST: postgresql
       DB_PORT: 5432
@@ -47,6 +48,12 @@ services:
       options:
         fluentd-address: 127.0.0.1:24224
         tag: training.logs
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8081/health/ready > /dev/null"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
     networks:
       - fitbridge-network
 
@@ -107,6 +114,19 @@ services:
     depends_on:
       keycloak:
         condition: service_healthy
+      fluent-bit:
+        condition: service_started
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: 127.0.0.1:24224
+        tag: envoy.logs
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/15001; printf 'GET /ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3; grep -q '200 OK' <&3"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
     networks:
       - fitbridge-network
 

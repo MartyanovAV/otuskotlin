@@ -10,7 +10,7 @@ import org.gradle.kotlin.dsl.the
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 @Suppress("unused")
-internal class BuildPluginJvm : Plugin<Project> {
+class BuildPluginJvm : Plugin<Project> {
 
     override fun apply(project: Project) = with(project) {
         val libs = the<LibrariesForLibs>()

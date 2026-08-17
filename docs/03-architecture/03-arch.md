@@ -30,8 +30,8 @@ FitBridge MVP **Trainer Diary** позволяет зарегистрирова�
 |---|---|
 | Web UI | OIDC login/registration и приватный кабинет тренера |
 | Keycloak | Identity Server: username, credentials, profile claims, `TRAINER`, JWT/JWKS |
-| Envoy Gateway | Маршрутизация и edge JWT validation |
-| Training Service | POST Full API, Auth Guard, ownership и бизнес-правила карточек/планов |
+| Envoy Gateway | REST/WS-маршрутизация и edge JWT validation, включая WebSocket Upgrade |
+| Training Service | POST Full и WebSocket API, Auth Guard, ownership и бизнес-правила карточек/планов |
 | PostgreSQL | `ClientCard`, `TrainingPlan`, locks и archive state |
 | Fluent Bit / GreptimeDB | Masked logs и техническая наблюдаемость |
 
@@ -52,10 +52,11 @@ FitBridge MVP **Trainer Diary** позволяет зарегистрирова�
 
 - `/v1/clientCard/*`, `/v2/clientCard/*`;
 - `/v1/trainingPlan/*`, `/v2/trainingPlan/*`;
+- `/v1/training/ws`, `/v2/training/ws` — дополнительный WebSocket transport с теми же DTO;
 - Keycloak `/realms/fit-bridge/*` для OIDC registration/login/UserInfo.
 
 Profile API отсутствует. `ClientProfile`, `Invite`, `AccessGrant`, client registration, public endpoints и completion diary остаются Phase 2.
 
 ## Текущее состояние реализации
 
-OpenAPI, transport models, common models и мапперы Training Service компилируются, но пока находятся в переходной плоской структуре и должны быть разнесены по entity-модулям. Production Ktor application, persistence и authorization chains ещё должны быть добавлены; поэтому backend image и E2E пока не являются завершённым runtime-контуром.
+OpenAPI, transport/common models, мапперы, Ktor application и REST/WS endpoints Training Service находятся в tracked sources. Процессоры пока работают как учебный stub-фасад; persistence, полная JWT validation в backend и authorization chains ещё должны быть реализованы. Плоская структура модулей остаётся переходной и позднее должна быть разнесена по entity-модулям без изменения структуры монорепозитория.

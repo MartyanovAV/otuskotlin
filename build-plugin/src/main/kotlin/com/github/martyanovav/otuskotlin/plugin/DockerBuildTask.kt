@@ -1,12 +1,12 @@
 package com.github.martyanovav.otuskotlin.plugin
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.MapProperty
-import org.gradle.api.tasks.StopExecutionException
 import org.gradle.process.ExecOperations
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
@@ -90,7 +90,7 @@ abstract class DockerBuildTask : DefaultTask() {
 
         if (execResult.exitValue != 0) {
             logger.error("Docker build failed:\n${outputStream}")
-            throw StopExecutionException("Docker build failed with exit code ${execResult.exitValue}")
+            throw GradleException("Docker build failed with exit code ${execResult.exitValue}")
         }
 
         logger.lifecycle("Docker image built successfully: $fullImageName")

@@ -11,8 +11,10 @@
 
 # Gradle
 .gradle
+**/.gradle
 build
 **/build/
+!fit-bridge-be/*/app-ktor/build/libs/*-all.jar
 gradlew.bat
 
 # Docker volumes

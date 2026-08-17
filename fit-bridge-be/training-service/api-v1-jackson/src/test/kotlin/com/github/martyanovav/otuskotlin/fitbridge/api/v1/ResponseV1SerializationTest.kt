@@ -11,13 +11,15 @@ import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
 class ResponseV1SerializationTest {
-    private val response = TrainingPlanCreateResponse(
-        result = ResponseResult.SUCCESS,
-        trainingPlan = TrainingPlanResponseObject(
-            title = "plan title",
-            planItems = listOf(ExerciseItem(id = UUID.fromString("550e8400-e29b-41d4-a716-446655440000"), title = "Day 1")),
-        ),
-    )
+    private val response =
+        TrainingPlanCreateResponse(
+            result = ResponseResult.SUCCESS,
+            trainingPlan =
+                TrainingPlanResponseObject(
+                    title = "plan title",
+                    planItems = listOf(ExerciseItem(id = UUID.fromString("550e8400-e29b-41d4-a716-446655440000"), title = "Day 1")),
+                ),
+        )
 
     @Test
     fun serialize() {
@@ -25,6 +27,7 @@ class ResponseV1SerializationTest {
 
         assertContains(json, Regex("\"title\":\\s*\"plan title\""))
         assertContains(json, Regex("\"responseType\":\\s*\"trainingPlan\\.create\""))
+        assertEquals(1, Regex("\"responseType\"\\s*:").findAll(json).count())
     }
 
     @Test

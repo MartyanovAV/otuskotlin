@@ -23,4 +23,11 @@ tasks {
             dependsOn(it.task(":check"))
         }
     }
+    register("buildImages") {
+        description = "Сборка Docker-образов backend-сервисов для E2E"
+        group = "build"
+        dependsOn(
+            gradle.includedBuild("training-service").task(":app-ktor:dockerBuildJvm"),
+        )
+    }
 }

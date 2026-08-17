@@ -49,7 +49,7 @@ description: Apply a pragmatic Red-Green-Refactor cycle to backend bug fixes and
 
 ### REFACTOR
 
-После GREEN убери дублирование, уточни имена и структуру, не меняя поведение. Повтори целевой тест, затем выполни обязательные для scope более широкие ступени verification ladder.
+После GREEN убери дублирование, уточни имена и структуру, не меняя поведение. Повтори целевой тест, затем загрузи skill `backend-verification` и выполни обязательные для scope более широкие ступени.
 
 ## Чеклист готовности
 

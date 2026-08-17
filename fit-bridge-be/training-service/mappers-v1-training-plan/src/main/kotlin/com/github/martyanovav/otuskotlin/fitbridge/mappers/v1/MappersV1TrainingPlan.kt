@@ -54,31 +54,31 @@ fun TrainingPlanContext.toTransport(): Any = when (command) {
     else -> throw IllegalArgumentException("Unsupported training plan command $command")
 }
 
-internal fun TrainingPlanContext.fromTransport(request: TrainingPlanCreateRequest) {
+fun TrainingPlanContext.fromTransport(request: TrainingPlanCreateRequest) {
     command = TrainingPlanCommand.CREATE
     fromTransportBase(request.requestId, request.debug)
     trainingPlanRequest = request.trainingPlan.toInternal()
 }
 
-internal fun TrainingPlanContext.fromTransport(request: TrainingPlanReadRequest) {
+fun TrainingPlanContext.fromTransport(request: TrainingPlanReadRequest) {
     command = TrainingPlanCommand.READ
     fromTransportBase(request.requestId, request.debug)
     trainingPlanRequest = request.trainingPlan.toInternal()
 }
 
-internal fun TrainingPlanContext.fromTransport(request: TrainingPlanUpdateRequest) {
+fun TrainingPlanContext.fromTransport(request: TrainingPlanUpdateRequest) {
     command = TrainingPlanCommand.UPDATE
     fromTransportBase(request.requestId, request.debug)
     trainingPlanRequest = request.trainingPlan.toInternal()
 }
 
-internal fun TrainingPlanContext.fromTransport(request: TrainingPlanArchiveRequest) {
+fun TrainingPlanContext.fromTransport(request: TrainingPlanArchiveRequest) {
     command = TrainingPlanCommand.ARCHIVE
     fromTransportBase(request.requestId, request.debug)
     trainingPlanRequest = request.trainingPlan.toInternal()
 }
 
-internal fun TrainingPlanContext.fromTransport(request: TrainingPlanSearchRequest) {
+fun TrainingPlanContext.fromTransport(request: TrainingPlanSearchRequest) {
     command = TrainingPlanCommand.SEARCH
     fromTransportBase(request.requestId, request.debug)
     trainingPlanFilter = request.trainingPlanFilter.toInternal()
