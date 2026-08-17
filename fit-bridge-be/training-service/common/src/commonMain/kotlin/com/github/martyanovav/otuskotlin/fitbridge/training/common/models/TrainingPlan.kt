@@ -5,7 +5,14 @@ data class TrainingPlan(
     var clientCardId: ClientCardId = ClientCardId.NONE,
     var ownerId: String = "",
     var title: String = "",
-    var isArchived: Boolean = false,
+    var status: TrainingPlanStatus = TrainingPlanStatus.ACTIVE,
     var lock: String = "",
-    var planItems: MutableList<PlanItem> = mutableListOf(),
-)
+    var planItems: List<PlanItem> = emptyList(),
+    var version: Int = 1,
+    var createdAt: String = "",
+    var updatedAt: String = "",
+) {
+    fun deepCopy(): TrainingPlan = copy(
+        planItems = planItems.map { it.deepCopy() },
+    )
+}

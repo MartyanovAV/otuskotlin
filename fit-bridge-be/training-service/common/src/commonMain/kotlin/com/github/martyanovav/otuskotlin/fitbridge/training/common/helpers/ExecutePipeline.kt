@@ -1,7 +1,6 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.common.helpers
 
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.IFBContext
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBError
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
 import kotlin.reflect.KClass
@@ -9,7 +8,7 @@ import kotlin.reflect.KClass
 fun Throwable.asFBError(
     code: String = "unknown",
     group: String = "exceptions",
-    message: String = this.message ?: "",
+    message: String = this.message.orEmpty(),
 ) = FBError(
     code = code,
     group = group,
@@ -18,7 +17,7 @@ fun Throwable.asFBError(
     exception = this,
 )
 
-suspend inline fun <C : IFBContext, T> ControllerHelper(
+suspend inline fun <C : IFBContext, T> executePipeline(
     crossinline getContext: () -> C,
     @Suppress("UNUSED_PARAMETER") clazz: KClass<*>,
     crossinline receive: suspend C.() -> Unit,
@@ -34,12 +33,11 @@ suspend inline fun <C : IFBContext, T> ControllerHelper(
     } catch (e: Throwable) {
         ctx.state = State.FAILING
         ctx.addError(e.asFBError())
-        if (ctx.command == com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBCommandBase.NONE) {
-            when (ctx) {
-                is com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardContext -> ctx.command = com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardCommand.READ
-                is com.github.martyanovav.otuskotlin.fitbridge.training.common.TrainingPlanContext -> ctx.command = com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanCommand.READ
-            }
+        try {
+            ctx.respond()
+        } catch (respondError: Throwable) {
+            respondError.addSuppressed(e)
+            throw respondError
         }
-        ctx.respond()
     }
 }

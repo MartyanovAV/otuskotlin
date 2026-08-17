@@ -25,9 +25,13 @@ data class ClientCardContext(
     override var principal: AuthPrincipal = AuthPrincipal.NONE,
     override var wsSession: IFBWsSession = IFBWsSession.NONE,
     var clientCardRequest: ClientCard = ClientCard(),
+    var clientCardValidating: ClientCard = ClientCard(),
+    var clientCardValidated: ClientCard = ClientCard(),
     var clientCardResponse: ClientCard = ClientCard(),
     var clientCardsResponse: Page<ClientCard> = Page(),
     var clientCardFilter: ClientCardFilter = ClientCardFilter(),
+    var clientCardFilterValidating: ClientCardFilter = ClientCardFilter(),
+    var clientCardFilterValidated: ClientCardFilter = ClientCardFilter(),
 ) : IFBContext {
     override fun addError(error: FBError) {
         errors.add(error)

@@ -98,3 +98,19 @@ internal fun E2eResponse.assertSuccess(
     assertEquals("success", json["result"]?.jsonPrimitive?.contentOrNull, body)
     return json
 }
+
+internal fun E2eResponse.assertValidationErrors(
+    responseType: String,
+    requestId: String,
+    vararg expectedCodes: String,
+): JsonObject {
+    assertEquals(HttpStatusCode.OK, status, "Unexpected response: $body")
+    assertEquals(responseType, json["responseType"]?.jsonPrimitive?.contentOrNull, body)
+    assertEquals(requestId, json["requestId"]?.jsonPrimitive?.contentOrNull, body)
+    assertEquals("error", json["result"]?.jsonPrimitive?.contentOrNull, body)
+    val actualCodes = requireNotNull(json["errors"]?.jsonArray) { body }
+        .mapNotNull { it.jsonObject["code"]?.jsonPrimitive?.contentOrNull }
+        .toSet()
+    assertEquals(expectedCodes.toSet(), actualCodes, body)
+    return json
+}
