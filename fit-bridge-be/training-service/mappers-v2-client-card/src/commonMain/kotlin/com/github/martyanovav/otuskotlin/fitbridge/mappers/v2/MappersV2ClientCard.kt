@@ -13,7 +13,6 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardReadO
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardReadRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardReadResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardResponseObject
-import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardStatus
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardUpdateObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardUpdateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardUpdateResponse
@@ -22,10 +21,14 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardCon
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardFilter
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardStatus
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBCommandBase
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.RequestId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardStatus as ClientCardStatusV2
+
 
 // ─── From Transport ──────────────────────────────────────────────────────────
 
@@ -41,6 +44,8 @@ fun ClientCardContext.toTransport(): Any = when (command) {
     ClientCardCommand.UPDATE -> toTransportClientCardUpdate()
     ClientCardCommand.ARCHIVE -> toTransportClientCardArchive()
     ClientCardCommand.SEARCH -> toTransportClientCardSearch()
+    FBCommandBase.NONE -> toTransportInit()
+    FBCommandBase.INIT -> toTransportInit()
     else -> throw IllegalArgumentException("Unsupported client card command $command")
 }
 
@@ -76,45 +81,51 @@ fun ClientCardContext.fromTransport(request: ClientCardSearchRequest) {
 }
 
 private fun ClientCardSearchFilter?.toInternal() = ClientCardFilter(
-    status = this?.status?.value.orEmpty(),
+    status = this?.status.toClientCardStatus(),
     searchString = this?.searchString.orEmpty(),
     pageNumber = this?.pageNumber ?: 1,
     pageSize = this?.pageSize ?: 10,
 )
 
+private fun ClientCardStatusV2?.toClientCardStatus() = when (this) {
+    ClientCardStatusV2.ACTIVE -> ClientCardStatus.ACTIVE
+    ClientCardStatusV2.ARCHIVED -> ClientCardStatus.ARCHIVED
+    null -> ClientCardStatus.NONE
+}
+
 // ─── To Transport ────────────────────────────────────────────────────────────
 
 fun ClientCardContext.toTransportClientCardCreate() = ClientCardCreateResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
-    result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+    result = if (state == State.RUNNING || state == State.FINISHING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     clientCard = clientCardResponse.toTransportClientCard()
 )
 
 fun ClientCardContext.toTransportClientCardRead() = ClientCardReadResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
-    result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+    result = if (state == State.RUNNING || state == State.FINISHING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     clientCard = clientCardResponse.toTransportClientCard()
 )
 
 fun ClientCardContext.toTransportClientCardUpdate() = ClientCardUpdateResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
-    result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+    result = if (state == State.RUNNING || state == State.FINISHING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     clientCard = clientCardResponse.toTransportClientCard()
 )
 
 fun ClientCardContext.toTransportClientCardArchive() = ClientCardArchiveResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
-    result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+    result = if (state == State.RUNNING || state == State.FINISHING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     clientCard = clientCardResponse.toTransportClientCard()
 )
 
 fun ClientCardContext.toTransportClientCardSearch() = ClientCardSearchResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
-    result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+    result = if (state == State.RUNNING || state == State.FINISHING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     clientCards = clientCardsResponse.items.mapNotNull { it.toTransportClientCard() }.takeIf { it.isNotEmpty() },
     totalSize = clientCardsResponse.totalSize,
@@ -128,7 +139,12 @@ fun ClientCard.toTransportClientCard(): ClientCardResponseObject? {
         id = id.takeIf { it != ClientCardId.NONE }?.asString(),
         displayName = displayName.takeIf { it.isNotBlank() },
         note = note.takeIf { it.isNotBlank() },
-        status = if (isArchived) ClientCardStatus.ARCHIVED else ClientCardStatus.ACTIVE,
+        status = when (isArchived) {
+            true -> ClientCardStatusV2.ARCHIVED
+            false -> ClientCardStatusV2.ACTIVE
+        },
+        createdAt = createdAt.takeIf { it.isNotBlank() },
+        updatedAt = updatedAt.takeIf { it.isNotBlank() },
         lock = lock.takeIf { it.isNotBlank() }
     )
 }

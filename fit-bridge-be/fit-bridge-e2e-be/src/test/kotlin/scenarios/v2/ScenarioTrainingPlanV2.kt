@@ -3,6 +3,7 @@ package com.github.martyanovav.otuskotlin.fitbridge.e2e.scenarios.v2
 import com.github.martyanovav.otuskotlin.fitbridge.e2e.FitBridgeE2eClient
 import com.github.martyanovav.otuskotlin.fitbridge.e2e.WithFitBridgeStack
 import com.github.martyanovav.otuskotlin.fitbridge.e2e.assertSuccess
+import com.github.martyanovav.otuskotlin.fitbridge.e2e.assertValidationErrors
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -75,6 +76,68 @@ class ScenarioTrainingPlanV2 {
         val plans = requireNotNull(json["trainingPlans"]?.jsonArray) { response.body }
         assertTrue(plans.isNotEmpty(), response.body)
         assertEquals("Базовая тренировка", plans.first().jsonObject["title"]?.jsonPrimitive?.content)
+    }
+
+    @Test
+    fun `create validates nested plan items`() = runBlocking {
+        val requestId = "e2e-training-plan-validation-v2"
+        val duplicateId = "00000000-0000-0000-0000-000000000303"
+        val response = client.post(
+            "/v2/trainingPlan/create",
+            """
+                {
+                  "requestType": "trainingPlan.create",
+                  "requestId": "$requestId",
+                  "trainingPlan": {
+                    "title": "E2E invalid plan",
+                    "clientCardId": "00000000-0000-0000-0000-000000000101",
+                    "planItems": [
+                      {
+                        "itemType": "CIRCUIT",
+                        "id": "not-a-uuid",
+                        "title": "Circuit",
+                        "rounds": 0,
+                        "restBetweenRoundsSeconds": -1,
+                        "items": [
+                          {
+                            "itemType": "SUPERSET",
+                            "id": "00000000-0000-0000-0000-000000000302",
+                            "title": "Superset",
+                            "restBetweenSetsSeconds": -1,
+                            "items": [
+                              {
+                                "itemType": "EXERCISE",
+                                "id": "$duplicateId",
+                                "title": "Squats",
+                                "sets": [{"durationSeconds": -1}]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "itemType": "EXERCISE",
+                        "id": "$duplicateId",
+                        "title": "Duplicate"
+                      }
+                    ]
+                  },
+                  "debug": {"mode": "test"}
+                }
+            """.trimIndent(),
+        )
+
+        response.assertValidationErrors(
+            "trainingPlan.create",
+            requestId,
+            "validation-planItems.id-badFormat",
+            "validation-planItems.id-duplicate",
+            "validation-planItems.items-invalidSize",
+            "validation-planItems.rounds-outOfRange",
+            "validation-planItems.sets.durationSeconds-outOfRange",
+            "validation-planItems.restSeconds-outOfRange",
+        )
+        Unit
     }
 
     private suspend fun assertPlanOperation(

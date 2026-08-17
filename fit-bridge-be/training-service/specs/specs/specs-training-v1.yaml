@@ -388,7 +388,6 @@ components:
     TrainingPlanStatus:
       type: string
       enum:
-      - DRAFT
       - ACTIVE
       - ARCHIVED
     ItemType:
@@ -457,8 +456,6 @@ components:
             $ref: '#/components/schemas/ClientCardId'
           status:
             $ref: '#/components/schemas/ClientCardStatus'
-          lastPlanStatus:
-            $ref: '#/components/schemas/TrainingPlanStatus'
           createdAt:
             $ref: '#/components/schemas/Timestamp'
           updatedAt:
@@ -480,7 +477,9 @@ components:
         id:
           type: string
           format: uuid
-          description: Уникальный идентификатор элемента
+          pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+          example: 550e8400-e29b-41d4-a716-446655440000
+          description: UUID элемента, уникальный в пределах тренировочного плана
         itemType:
           $ref: '#/components/schemas/ItemType'
         title:
@@ -505,6 +504,7 @@ components:
           example: KG
         durationSeconds:
           type: integer
+          minimum: 0
           example: 60
     ExerciseItem:
       allOf:
@@ -520,6 +520,7 @@ components:
               $ref: '#/components/schemas/ExerciseSet'
           restBetweenSetsSeconds:
             type: integer
+            minimum: 0
     CircuitItem:
       allOf:
       - $ref: '#/components/schemas/PlanItem'
@@ -527,12 +528,16 @@ components:
         properties:
           rounds:
             type: integer
+            minimum: 1
           items:
             type: array
+            minItems: 1
+            maxItems: 200
             items:
               $ref: '#/components/schemas/PlanItem'
           restBetweenRoundsSeconds:
             type: integer
+            minimum: 0
     SupersetItem:
       allOf:
       - $ref: '#/components/schemas/PlanItem'
@@ -540,10 +545,13 @@ components:
         properties:
           items:
             type: array
+            minItems: 2
+            maxItems: 200
             items:
               $ref: '#/components/schemas/PlanItem'
           restBetweenSetsSeconds:
             type: integer
+            minimum: 0
     TrainingPlanBase:
       type: object
       properties:
@@ -554,6 +562,8 @@ components:
         planItems:
           type: array
           minItems: 1
+          maxItems: 200
+          description: Не более 200 элементов суммарно с вложенными, максимальная глубина вложенности — 5
           items:
             $ref: '#/components/schemas/PlanItem'
     TrainingPlanCreateObject:

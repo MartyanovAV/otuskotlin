@@ -20,6 +20,8 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanUpd
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.TrainingPlanContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.RequestId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBCommandBase
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.PlanItem
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ExerciseItem
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.CircuitItem
@@ -36,6 +38,8 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Traini
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanFilter
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanCommand
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanStatus as TrainingPlanStatusV1
 
 // ─── From Transport ──────────────────────────────────────────────────────────
 
@@ -51,6 +55,8 @@ fun TrainingPlanContext.toTransport(): Any = when (command) {
     TrainingPlanCommand.UPDATE -> toTransportTrainingPlanUpdate()
     TrainingPlanCommand.ARCHIVE -> toTransportTrainingPlanArchive()
     TrainingPlanCommand.SEARCH -> toTransportTrainingPlanSearch()
+    FBCommandBase.NONE -> toTransportInit()
+    FBCommandBase.INIT -> toTransportInit()
     else -> throw IllegalArgumentException("Unsupported training plan command $command")
 }
 
@@ -92,35 +98,35 @@ fun TrainingPlanContext.fromTransport(request: TrainingPlanSearchRequest) {
 
 internal fun TrainingPlanContext.toTransportTrainingPlanCreate() = TrainingPlanCreateResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
-    result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+    result = if (state == State.RUNNING || state == State.FINISHING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     trainingPlan = trainingPlanResponse.toTransportTrainingPlan()
 )
 
 internal fun TrainingPlanContext.toTransportTrainingPlanRead() = TrainingPlanReadResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
-    result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+    result = if (state == State.RUNNING || state == State.FINISHING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     trainingPlan = trainingPlanResponse.toTransportTrainingPlan()
 )
 
 internal fun TrainingPlanContext.toTransportTrainingPlanUpdate() = TrainingPlanUpdateResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
-    result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+    result = if (state == State.RUNNING || state == State.FINISHING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     trainingPlan = trainingPlanResponse.toTransportTrainingPlan()
 )
 
 internal fun TrainingPlanContext.toTransportTrainingPlanArchive() = TrainingPlanArchiveResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
-    result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+    result = if (state == State.RUNNING || state == State.FINISHING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     trainingPlan = trainingPlanResponse.toTransportTrainingPlan()
 )
 
 internal fun TrainingPlanContext.toTransportTrainingPlanSearch() = TrainingPlanSearchResponse(
     requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
-    result = if (state == State.RUNNING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+    result = if (state == State.RUNNING || state == State.FINISHING) ResponseResult.SUCCESS else ResponseResult.ERROR,
     errors = errors.toTransportErrors(),
     trainingPlans = trainingPlansResponse.items.mapNotNull { it.toTransportTrainingPlan() }.takeIf { it.isNotEmpty() },
     totalSize = trainingPlansResponse.totalSize,
@@ -134,6 +140,14 @@ internal fun TrainingPlan.toTransportTrainingPlan(): TrainingPlanResponseObject?
         id = id.takeIf { it != TrainingPlanId.NONE }?.asString(),
         title = title.takeIf { it.isNotBlank() },
         clientCardId = clientCardId.takeIf { it != ClientCardId.NONE }?.asString(),
+        status = when (status) {
+            TrainingPlanStatus.NONE -> null
+            TrainingPlanStatus.ACTIVE -> TrainingPlanStatusV1.ACTIVE
+            TrainingPlanStatus.ARCHIVED -> TrainingPlanStatusV1.ARCHIVED
+        },
+        version = version,
+        createdAt = createdAt.takeIf { it.isNotBlank() },
+        updatedAt = updatedAt.takeIf { it.isNotBlank() },
         planItems = planItems.map { it.toTransportPlanItem() }
     )
 }
@@ -186,7 +200,7 @@ private fun PlanItemV1.toInternal(): PlanItem = when(this) {
                 weightUnit = it.weightUnit.orEmpty(),
                 durationSeconds = it.durationSeconds ?: 0
             )
-        }?.toMutableList() ?: mutableListOf(),
+        } ?: emptyList(),
         restBetweenSetsSeconds = this.restBetweenSetsSeconds ?: 0
     )
     is CircuitItemV1 -> CircuitItem(
@@ -194,14 +208,14 @@ private fun PlanItemV1.toInternal(): PlanItem = when(this) {
         title = this.title,
         description = this.description.orEmpty(),
         rounds = this.rounds ?: 1,
-        items = this.items?.map { it.toInternal() }?.toMutableList() ?: mutableListOf(),
+        items = this.items?.map { it.toInternal() } ?: emptyList(),
         restBetweenRoundsSeconds = this.restBetweenRoundsSeconds ?: 0
     )
     is SupersetItemV1 -> SupersetItem(
         id = this.id.toString(),
         title = this.title,
         description = this.description.orEmpty(),
-        items = this.items?.map { it.toInternal() }?.toMutableList() ?: mutableListOf(),
+        items = this.items?.map { it.toInternal() } ?: emptyList(),
         restBetweenSetsSeconds = this.restBetweenSetsSeconds ?: 0
     )
     else -> throw IllegalArgumentException("Unknown plan item type")
@@ -210,7 +224,7 @@ private fun PlanItemV1.toInternal(): PlanItem = when(this) {
 private fun TrainingPlanCreateObject?.toInternal() = TrainingPlan(
     title = this?.title.orEmpty(),
     clientCardId = this?.clientCardId.toClientCardId(),
-    planItems = this?.planItems?.map { it.toInternal() }?.toMutableList() ?: mutableListOf()
+    planItems = this?.planItems?.map { it.toInternal() } ?: emptyList()
 )
 
 private fun TrainingPlanReadObject?.toInternal() = TrainingPlan(
@@ -221,7 +235,7 @@ private fun TrainingPlanUpdateObject?.toInternal() = TrainingPlan(
     id = this?.id.toTrainingPlanId(),
     title = this?.title.orEmpty(),
     lock = this?.lock.orEmpty(),
-    planItems = this?.planItems?.map { it.toInternal() }?.toMutableList() ?: mutableListOf()
+    planItems = this?.planItems?.map { it.toInternal() } ?: emptyList()
 )
 
 private fun TrainingPlanArchiveObject?.toInternal() = TrainingPlan(
@@ -231,8 +245,14 @@ private fun TrainingPlanArchiveObject?.toInternal() = TrainingPlan(
 
 private fun TrainingPlanSearchFilter?.toInternal() = TrainingPlanFilter(
     clientCardId = this?.clientCardId.toClientCardId(),
-    status = this?.status?.value.orEmpty(),
+    status = this?.status.toTrainingPlanStatus(),
     searchString = this?.searchString.orEmpty(),
     pageNumber = this?.pageNumber ?: 1,
     pageSize = this?.pageSize ?: 10,
 )
+
+private fun TrainingPlanStatusV1?.toTrainingPlanStatus() = when (this) {
+    TrainingPlanStatusV1.ACTIVE -> TrainingPlanStatus.ACTIVE
+    TrainingPlanStatusV1.ARCHIVED -> TrainingPlanStatus.ARCHIVED
+    null -> TrainingPlanStatus.NONE
+}

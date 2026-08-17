@@ -35,5 +35,6 @@ val extractLibResources = tasks.register<Copy>("extractLibResources") {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    dependsOn(rootProject.tasks.named("buildImages"))
     dependsOn(extractLibResources)
 }
