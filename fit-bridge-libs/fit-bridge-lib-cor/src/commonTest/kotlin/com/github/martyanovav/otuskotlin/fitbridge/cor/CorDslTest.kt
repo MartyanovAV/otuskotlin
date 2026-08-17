@@ -37,7 +37,10 @@ class CorDslTest {
         val chain = rootChain<TestContext> {
             worker {
                 handle { error("failure") }
-                except { history = it.message.orEmpty(); status = TestContext.Status.ERROR }
+                except {
+                    history = it.message.orEmpty()
+                    status = TestContext.Status.ERROR
+                }
             }
         }.build()
 

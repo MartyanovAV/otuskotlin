@@ -6,24 +6,24 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardArchi
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardCreateObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardCreateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardCreateResponse
-import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardSearchFilter
-import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardSearchRequest
-import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardSearchResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardReadObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardReadRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardReadResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardResponseObject
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardSearchFilter
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardSearchRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardSearchResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardUpdateObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardUpdateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardUpdateResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ResponseResult
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardFilter
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardStatus
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBCommandBase
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.RequestId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
@@ -33,9 +33,13 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardStatu
 // ─── From Transport ──────────────────────────────────────────────────────────
 
 fun ClientCardCreateRequest.fromTransport(): ClientCardContext = ClientCardContext().apply { fromTransport(this@fromTransport) }
+
 fun ClientCardReadRequest.fromTransport(): ClientCardContext = ClientCardContext().apply { fromTransport(this@fromTransport) }
+
 fun ClientCardUpdateRequest.fromTransport(): ClientCardContext = ClientCardContext().apply { fromTransport(this@fromTransport) }
+
 fun ClientCardArchiveRequest.fromTransport(): ClientCardContext = ClientCardContext().apply { fromTransport(this@fromTransport) }
+
 fun ClientCardSearchRequest.fromTransport(): ClientCardContext = ClientCardContext().apply { fromTransport(this@fromTransport) }
 
 fun ClientCardContext.toTransport(): Any = when (command) {

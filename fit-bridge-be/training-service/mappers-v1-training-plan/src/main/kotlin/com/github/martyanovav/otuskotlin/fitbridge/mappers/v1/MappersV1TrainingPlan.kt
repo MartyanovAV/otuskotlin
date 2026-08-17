@@ -18,35 +18,38 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanUpd
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanUpdateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanUpdateResponse
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.TrainingPlanContext
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.RequestId
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBCommandBase
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.PlanItem
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ExerciseItem
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.CircuitItem
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.SupersetItem
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ExerciseItem
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ExerciseSet
-import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.PlanItem as PlanItemV1
-import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ExerciseItem as ExerciseItemV1
-import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.CircuitItem as CircuitItemV1
-import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.SupersetItem as SupersetItemV1
-import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ExerciseSet as ExerciseSetV1
-import java.util.UUID
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBCommandBase
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.PlanItem
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.RequestId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.SupersetItem
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlan
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanFilter
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus
+import java.util.UUID
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.CircuitItem as CircuitItemV1
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ExerciseItem as ExerciseItemV1
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ExerciseSet as ExerciseSetV1
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.PlanItem as PlanItemV1
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.SupersetItem as SupersetItemV1
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanStatus as TrainingPlanStatusV1
 
 // ─── From Transport ──────────────────────────────────────────────────────────
 
 fun TrainingPlanCreateRequest.fromTransport(): TrainingPlanContext = TrainingPlanContext().apply { fromTransport(this@fromTransport) }
+
 fun TrainingPlanReadRequest.fromTransport(): TrainingPlanContext = TrainingPlanContext().apply { fromTransport(this@fromTransport) }
+
 fun TrainingPlanUpdateRequest.fromTransport(): TrainingPlanContext = TrainingPlanContext().apply { fromTransport(this@fromTransport) }
+
 fun TrainingPlanArchiveRequest.fromTransport(): TrainingPlanContext = TrainingPlanContext().apply { fromTransport(this@fromTransport) }
+
 fun TrainingPlanSearchRequest.fromTransport(): TrainingPlanContext = TrainingPlanContext().apply { fromTransport(this@fromTransport) }
 
 fun TrainingPlanContext.toTransport(): Any = when (command) {
@@ -152,7 +155,7 @@ internal fun TrainingPlan.toTransportTrainingPlan(): TrainingPlanResponseObject?
     )
 }
 
-private fun PlanItem.toTransportPlanItem(): PlanItemV1 = when(this) {
+private fun PlanItem.toTransportPlanItem(): PlanItemV1 = when (this) {
     is ExerciseItem -> ExerciseItemV1(
         id = UUID.fromString(this.id),
         title = this.title,
@@ -187,7 +190,7 @@ private fun PlanItem.toTransportPlanItem(): PlanItemV1 = when(this) {
 
 // ─── Private: Request DTO to Internal ────────────────────────────────────────
 
-private fun PlanItemV1.toInternal(): PlanItem = when(this) {
+private fun PlanItemV1.toInternal(): PlanItem = when (this) {
     is ExerciseItemV1 -> ExerciseItem(
         id = this.id.toString(),
         title = this.title,

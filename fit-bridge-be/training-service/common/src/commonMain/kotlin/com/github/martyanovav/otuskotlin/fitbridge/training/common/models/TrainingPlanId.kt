@@ -1,7 +1,5 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.common.models
 
-import kotlin.jvm.JvmInline
-
 @JvmInline
 value class TrainingPlanId(private val id: String) {
     fun asString() = id

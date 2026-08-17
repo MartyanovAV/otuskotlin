@@ -2,9 +2,9 @@ package com.github.martyanovav.otuskotlin.fitbridge.mappers.v1
 
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.Debug
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.Error
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.InitResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.RequestDebugMode
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.RequestDebugStubs
-import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.InitResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ResponseResult
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.IFBContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId

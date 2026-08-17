@@ -1,8 +1,8 @@
 package com.github.martyanovav.otuskotlin.fitbridge.logging.jvm
 
 import ch.qos.logback.classic.Logger
-import org.slf4j.LoggerFactory
 import com.github.martyanovav.otuskotlin.fitbridge.logging.common.IMpLogWrapper
+import org.slf4j.LoggerFactory
 import kotlin.reflect.KClass
 
 /**
@@ -16,5 +16,6 @@ fun mpLoggerLogback(logger: Logger): IMpLogWrapper = MpLogWrapperLogback(
 )
 
 fun mpLoggerLogback(clazz: KClass<*>): IMpLogWrapper = mpLoggerLogback(LoggerFactory.getLogger(clazz.java) as Logger)
+
 @Suppress("unused")
 fun mpLoggerLogback(loggerId: String): IMpLogWrapper = mpLoggerLogback(LoggerFactory.getLogger(loggerId) as Logger)

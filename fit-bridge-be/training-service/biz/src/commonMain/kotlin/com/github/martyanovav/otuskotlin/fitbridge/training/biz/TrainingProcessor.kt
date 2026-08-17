@@ -1,5 +1,6 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.biz
 
+import com.github.martyanovav.otuskotlin.fitbridge.cor.rootChain
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.general.clientCardOperation
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.general.initStatus
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.general.stubs
@@ -63,7 +64,6 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.CorSettings
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.IFBContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanCommand
-import com.github.martyanovav.otuskotlin.fitbridge.cor.rootChain
 
 class TrainingProcessor(
     @Suppress("unused") private val corSettings: CorSettings,

@@ -23,6 +23,23 @@ tasks {
             dependsOn(it.task(":check"))
         }
     }
+
+    register("ktlintFormat") {
+        description = "Форматирование кода ktlint для всех сервисов"
+        group = "formatting"
+        gradle.includedBuilds.filter { it.name != "build-plugin" }.forEach {
+            dependsOn(it.task(":ktlintFormat"))
+        }
+    }
+
+    register("ktlintCheck") {
+        description = "Проверка кода ktlint для всех сервисов"
+        group = "verification"
+        gradle.includedBuilds.filter { it.name != "build-plugin" }.forEach {
+            dependsOn(it.task(":ktlintCheck"))
+        }
+    }
+
     register("buildImages") {
         description = "Сборка Docker-образов backend-сервисов для E2E"
         group = "build"

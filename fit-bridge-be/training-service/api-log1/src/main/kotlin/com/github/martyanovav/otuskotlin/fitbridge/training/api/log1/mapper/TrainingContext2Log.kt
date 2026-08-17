@@ -1,9 +1,24 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.api.log1.mapper
 
-import com.github.martyanovav.otuskotlin.fitbridge.api.log1.models.*
+import com.github.martyanovav.otuskotlin.fitbridge.api.log1.models.ClientCardLog
+import com.github.martyanovav.otuskotlin.fitbridge.api.log1.models.CommonLogModel
+import com.github.martyanovav.otuskotlin.fitbridge.api.log1.models.ErrorLogModel
+import com.github.martyanovav.otuskotlin.fitbridge.api.log1.models.TrainingFilterLog
+import com.github.martyanovav.otuskotlin.fitbridge.api.log1.models.TrainingLogModel
+import com.github.martyanovav.otuskotlin.fitbridge.api.log1.models.TrainingLogOperation
+import com.github.martyanovav.otuskotlin.fitbridge.api.log1.models.TrainingPlanLog
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.TrainingPlanContext
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.*
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardCommand
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardFilter
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBError
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.RequestId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlan
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanCommand
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanFilter
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
 import java.time.Instant
 
 fun TrainingPlanContext.toLog(logId: String) = CommonLogModel(

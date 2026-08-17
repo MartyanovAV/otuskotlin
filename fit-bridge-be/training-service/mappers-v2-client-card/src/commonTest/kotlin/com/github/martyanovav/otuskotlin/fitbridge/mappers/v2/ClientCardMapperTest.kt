@@ -8,17 +8,16 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardStatu
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.Debug
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.RequestDebugMode
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardContext
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardCommand
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.RequestId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.WorkMode
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardStatus as InternalClientCardStatus
-
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardStatus as InternalClientCardStatus
 
 class ClientCardMapperTest {
     @Test

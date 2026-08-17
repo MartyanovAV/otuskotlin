@@ -1,5 +1,7 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.biz.stubs
 
+import com.github.martyanovav.otuskotlin.fitbridge.cor.ICorChainDsl
+import com.github.martyanovav.otuskotlin.fitbridge.cor.worker
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.IFBContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.TrainingPlanContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
@@ -8,8 +10,6 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Traini
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.stubs.Stubs
 import com.github.martyanovav.otuskotlin.fitbridge.training.stubs.TrainingPlanStub
-import com.github.martyanovav.otuskotlin.fitbridge.cor.ICorChainDsl
-import com.github.martyanovav.otuskotlin.fitbridge.cor.worker
 
 fun ICorChainDsl<IFBContext>.stubTrainingPlanSuccess(title: String) = worker {
     this.title = title

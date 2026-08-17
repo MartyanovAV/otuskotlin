@@ -92,16 +92,36 @@ private suspend fun String.processV1(
 ): IResponse {
     val request = apiV1RequestDeserialize<IRequest>(this)
     return when (request) {
-        is ClientCardCreateRequest -> processWsReq<ClientCardCreateRequest, ClientCardContext>(request, wsSession, appSettings, { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse })
-        is ClientCardReadRequest -> processWsReq<ClientCardReadRequest, ClientCardContext>(request, wsSession, appSettings, { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse })
-        is ClientCardUpdateRequest -> processWsReq<ClientCardUpdateRequest, ClientCardContext>(request, wsSession, appSettings, { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse })
-        is ClientCardArchiveRequest -> processWsReq<ClientCardArchiveRequest, ClientCardContext>(request, wsSession, appSettings, { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse })
-        is ClientCardSearchRequest -> processWsReq<ClientCardSearchRequest, ClientCardContext>(request, wsSession, appSettings, { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse })
-        is TrainingPlanCreateRequest -> processWsReq<TrainingPlanCreateRequest, TrainingPlanContext>(request, wsSession, appSettings, { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse })
-        is TrainingPlanReadRequest -> processWsReq<TrainingPlanReadRequest, TrainingPlanContext>(request, wsSession, appSettings, { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse })
-        is TrainingPlanUpdateRequest -> processWsReq<TrainingPlanUpdateRequest, TrainingPlanContext>(request, wsSession, appSettings, { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse })
-        is TrainingPlanArchiveRequest -> processWsReq<TrainingPlanArchiveRequest, TrainingPlanContext>(request, wsSession, appSettings, { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse })
-        is TrainingPlanSearchRequest -> processWsReq<TrainingPlanSearchRequest, TrainingPlanContext>(request, wsSession, appSettings, { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse })
+        is ClientCardCreateRequest -> processWsReq(
+            request, wsSession, appSettings, { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+        )
+        is ClientCardReadRequest -> processWsReq(
+            request, wsSession, appSettings, { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+        )
+        is ClientCardUpdateRequest -> processWsReq(
+            request, wsSession, appSettings, { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+        )
+        is ClientCardArchiveRequest -> processWsReq(
+            request, wsSession, appSettings, { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+        )
+        is ClientCardSearchRequest -> processWsReq(
+            request, wsSession, appSettings, { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+        )
+        is TrainingPlanCreateRequest -> processWsReq(
+            request, wsSession, appSettings, { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+        )
+        is TrainingPlanReadRequest -> processWsReq(
+            request, wsSession, appSettings, { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+        )
+        is TrainingPlanUpdateRequest -> processWsReq(
+            request, wsSession, appSettings, { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+        )
+        is TrainingPlanArchiveRequest -> processWsReq(
+            request, wsSession, appSettings, { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+        )
+        is TrainingPlanSearchRequest -> processWsReq(
+            request, wsSession, appSettings, { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+        )
         else -> error("Unsupported v1 WebSocket request: ${request::class.simpleName}")
     }
 }

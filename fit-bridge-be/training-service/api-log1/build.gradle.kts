@@ -41,6 +41,10 @@ tasks {
     compileKotlin {
         dependsOn(openApiGenerate)
     }
+
+    withType<org.jlleitschuh.gradle.ktlint.tasks.KtLintCheckTask> {
+        dependsOn(openApiGenerate)
+    }
 }
 
 openApiGenerate {
@@ -49,7 +53,7 @@ openApiGenerate {
     packageName.set(openapiGroup)
     apiPackage.set("$openapiGroup.api")
     modelPackage.set("$openapiGroup.models")
-    invokerPackage.set("$openapiGroup.invoker")
+
 
     // 4. Указываем конкретный файл внутри распакованной папки
     inputSpec.set(specDir.map { it.file("specs-training-log1.yaml").asFile.absolutePath })

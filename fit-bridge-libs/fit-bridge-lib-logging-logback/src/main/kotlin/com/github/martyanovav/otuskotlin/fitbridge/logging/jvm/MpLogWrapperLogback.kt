@@ -1,13 +1,13 @@
 package com.github.martyanovav.otuskotlin.fitbridge.logging.jvm
 
 import ch.qos.logback.classic.Logger
+import com.github.martyanovav.otuskotlin.fitbridge.logging.common.IMpLogWrapper
+import com.github.martyanovav.otuskotlin.fitbridge.logging.common.LogLevel
 import net.logstash.logback.argument.StructuredArguments
 import org.slf4j.Marker
 import org.slf4j.event.KeyValuePair
 import org.slf4j.event.Level
 import org.slf4j.event.LoggingEvent
-import com.github.martyanovav.otuskotlin.fitbridge.logging.common.IMpLogWrapper
-import com.github.martyanovav.otuskotlin.fitbridge.logging.common.LogLevel
 import java.time.Instant
 
 class MpLogWrapperLogback(

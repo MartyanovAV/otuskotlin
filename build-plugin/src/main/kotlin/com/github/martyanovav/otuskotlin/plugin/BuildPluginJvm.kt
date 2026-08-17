@@ -15,6 +15,7 @@ class BuildPluginJvm : Plugin<Project> {
     override fun apply(project: Project) = with(project) {
         val libs = the<LibrariesForLibs>()
         pluginManager.apply("org.jetbrains.kotlin.jvm")
+        pluginManager.apply("build-ktlint")
 
 //        pluginManager.apply(KotlinPlatformJvmPlugin::class.java)
         group = rootProject.group

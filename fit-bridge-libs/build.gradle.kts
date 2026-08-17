@@ -30,4 +30,16 @@ tasks {
             dependsOn(subprojects.map {  it.getTasksByName(tsk,false)})
         }
     }
+
+    register("ktlintFormat") {
+        description = "Форматирование кода ktlint для всех подпроектов"
+        group = "formatting"
+        dependsOn(subprojects.map { it.getTasksByName("ktlintFormat", false) })
+    }
+
+    register("ktlintCheck") {
+        description = "Проверка кода ktlint для всех подпроектов"
+        group = "verification"
+        dependsOn(subprojects.map { it.getTasksByName("ktlintCheck", false) })
+    }
 }

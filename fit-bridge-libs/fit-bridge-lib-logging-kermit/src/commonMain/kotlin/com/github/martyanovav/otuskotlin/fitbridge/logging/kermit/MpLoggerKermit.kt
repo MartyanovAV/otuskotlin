@@ -30,6 +30,6 @@ fun mpLoggerKermit(cls: KClass<*>): IMpLogWrapper {
     )
     return MpLoggerWrapperKermit(
         logger = logger,
-        loggerId = cls.qualifiedName?: "",
+        loggerId = cls.qualifiedName ?: "",
     )
 }

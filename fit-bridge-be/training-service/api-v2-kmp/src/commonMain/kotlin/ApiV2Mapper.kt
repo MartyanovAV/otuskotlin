@@ -2,10 +2,10 @@
 
 package com.github.martyanovav.otuskotlin.fitbridge.api.v2
 
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.Json
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.IRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.IResponse
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
 
 @OptIn(ExperimentalSerializationApi::class)
 @Suppress("JSON_FORMAT_REDUNDANT_DEFAULT")

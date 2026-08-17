@@ -1,10 +1,10 @@
 package com.github.martyanovav.otuskotlin.fitbridge.logging.socket
 
+import com.github.martyanovav.otuskotlin.fitbridge.logging.common.IMpLogWrapper
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
-import com.github.martyanovav.otuskotlin.fitbridge.logging.common.IMpLogWrapper
 import kotlin.reflect.KClass
 
 data class SocketLoggerSettings(

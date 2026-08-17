@@ -1,8 +1,8 @@
 package com.github.martyanovav.otuskotlin.fitbridge.logging
 
+import com.github.martyanovav.otuskotlin.fitbridge.logging.jvm.mpLoggerLogback
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
-import com.github.martyanovav.otuskotlin.fitbridge.logging.jvm.mpLoggerLogback
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 import kotlin.test.Test

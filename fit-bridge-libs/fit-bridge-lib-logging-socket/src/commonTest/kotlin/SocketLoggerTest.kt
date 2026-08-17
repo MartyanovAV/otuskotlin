@@ -1,12 +1,19 @@
 package com.github.martyanovav.otuskotlin.fitbridge.logging.socket
 
-import io.ktor.network.selector.*
-import io.ktor.network.sockets.*
-import io.ktor.utils.io.*
-import kotlinx.coroutines.*
+import io.ktor.network.selector.SelectorManager
+import io.ktor.network.sockets.aSocket
+import io.ktor.utils.io.LineEnding
+import io.ktor.utils.io.readLineStrict
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.test.runTest
+import kotlin.io.println
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds

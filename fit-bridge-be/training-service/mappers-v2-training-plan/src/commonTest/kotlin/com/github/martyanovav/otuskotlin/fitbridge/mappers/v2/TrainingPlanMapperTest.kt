@@ -13,19 +13,19 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanSea
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanSearchResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanStatus
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.TrainingPlanContext
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.RequestId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanCommand
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.WorkMode
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ExerciseItem as InternalExerciseItem
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ExerciseSet as InternalExerciseSet
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlan
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus as InternalTrainingPlanStatus
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.WorkMode
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ExerciseItem as InternalExerciseItem
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ExerciseSet as InternalExerciseSet
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus as InternalTrainingPlanStatus
 
 class TrainingPlanMapperTest {
     @Test

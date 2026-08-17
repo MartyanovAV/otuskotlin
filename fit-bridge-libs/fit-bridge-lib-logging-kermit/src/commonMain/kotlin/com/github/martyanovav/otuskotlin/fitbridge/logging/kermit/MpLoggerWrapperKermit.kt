@@ -9,14 +9,13 @@ class MpLoggerWrapperKermit(
     val logger: Logger,
     override val loggerId: String
     ) : IMpLogWrapper {
-
-    override fun log(
+        override fun log(
         msg: String,
         level: LogLevel,
         marker: String,
         e: Throwable?,
         data: Any?,
-        objs: Map<String,Any>?
+        objs: Map<String, Any>?
     ) {
         logger.log(
             severity = level.toKermit(),
@@ -38,7 +37,7 @@ class MpLoggerWrapperKermit(
     private inline fun formatMessage(
         msg: String = "",
         data: Any? = null,
-        objs: Map<String,Any>? = null
+        objs: Map<String, Any>? = null
     ): String {
         var message = msg
         data?.let {
