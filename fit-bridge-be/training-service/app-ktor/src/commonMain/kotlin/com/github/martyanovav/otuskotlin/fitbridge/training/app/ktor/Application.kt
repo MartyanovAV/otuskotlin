@@ -4,12 +4,14 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.plugins.ini
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.plugins.initPlugins
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.v2.v2Training
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.v2.wsHandlerV2
-import io.ktor.server.application.*
-import io.ktor.server.routing.*
-import io.ktor.server.websocket.*
-
-import io.ktor.serialization.kotlinx.json.*
+import io.ktor.serialization.kotlinx.json.json
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.routing.route
+import io.ktor.server.routing.routing
+import io.ktor.server.websocket.WebSockets
+import io.ktor.server.websocket.webSocket
 
 fun Application.module(appSettings: AppSettings = initAppSettings()) {
     initPlugins(appSettings)

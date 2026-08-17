@@ -1,6 +1,6 @@
 package com.github.martyanovav.otuskotlin.fitbridge.e2e
 
-import io.ktor.http.*
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

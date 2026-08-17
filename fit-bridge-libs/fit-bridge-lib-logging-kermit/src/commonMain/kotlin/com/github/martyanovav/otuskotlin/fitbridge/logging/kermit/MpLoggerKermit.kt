@@ -8,12 +8,14 @@ import kotlin.reflect.KClass
 
 @Suppress("unused")
 fun mpLoggerKermit(loggerId: String): IMpLogWrapper {
-    val logger = Logger(
-        config = StaticConfig(
-            minSeverity = Severity.Info,
-        ),
-        tag = "DEV"
-    )
+    val logger =
+        Logger(
+            config =
+                StaticConfig(
+                    minSeverity = Severity.Info,
+                ),
+            tag = "DEV"
+        )
     return MpLoggerWrapperKermit(
         logger = logger,
         loggerId = loggerId,
@@ -22,14 +24,16 @@ fun mpLoggerKermit(loggerId: String): IMpLogWrapper {
 
 @Suppress("unused")
 fun mpLoggerKermit(cls: KClass<*>): IMpLogWrapper {
-    val logger = Logger(
-        config = StaticConfig(
-            minSeverity = Severity.Info,
-        ),
-        tag = "DEV"
-    )
+    val logger =
+        Logger(
+            config =
+                StaticConfig(
+                    minSeverity = Severity.Info,
+                ),
+            tag = "DEV"
+        )
     return MpLoggerWrapperKermit(
         logger = logger,
-        loggerId = cls.qualifiedName?: "",
+        loggerId = cls.qualifiedName ?: "",
     )
 }

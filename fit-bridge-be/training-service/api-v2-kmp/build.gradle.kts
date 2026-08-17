@@ -31,22 +31,28 @@ tasks {
         dependsOn(extractLibSpecs)
     }
 
-    val openApiGenerateTask: GenerateTask = getByName("openApiGenerate", GenerateTask::class) {
-        outputDir.set(layout.buildDirectory.file("generate-resources").get().toString())
-        configOptions.set(
-            mapOf(
-                "dateLibrary" to "string",
-                "enumPropertyNaming" to "UPPERCASE",
-                "serializationLibrary" to "kotlinx-serialization",
-                "collectionType" to "list"
+    val openApiGenerateTask: GenerateTask =
+        getByName("openApiGenerate", GenerateTask::class) {
+            outputDir.set(layout.buildDirectory.file("generate-resources").get().toString())
+            configOptions.set(
+                mapOf(
+                    "dateLibrary" to "string",
+                    "enumPropertyNaming" to "UPPERCASE",
+                    "serializationLibrary" to "kotlinx-serialization",
+                    "collectionType" to "list"
+                )
             )
-        )
-    }
+        }
 
     filter { it.name.startsWith("compile") }.forEach {
         it.dependsOn(openApiGenerateTask)
     }
+
+    withType<org.jlleitschuh.gradle.ktlint.tasks.KtLintCheckTask> {
+        dependsOn(openApiGenerateTask)
+    }
 }
+
 crowdprojGenerate {
     packageName.set("${project.group}.api.v2")
     inputSpec.set(specDir.map { it.file("specs-training-v2.yaml").asFile.absolutePath })

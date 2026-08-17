@@ -8,31 +8,32 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardStatu
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.Debug
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.RequestDebugMode
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardContext
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardCommand
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.RequestId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.WorkMode
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardStatus as InternalClientCardStatus
-
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardStatus as InternalClientCardStatus
 
 class ClientCardMapperTest {
     @Test
     fun `client card search request maps to context`() {
-        val req = ClientCardSearchRequest(
-            requestId = "cc-search-1",
-            debug = Debug(mode = RequestDebugMode.TEST),
-            clientCardFilter = ClientCardSearchFilter(
-                status = ClientCardStatus.ARCHIVED,
-                searchString = "Ann",
-                pageNumber = 2,
-                pageSize = 25,
+        val req =
+            ClientCardSearchRequest(
+                requestId = "cc-search-1",
+                debug = Debug(mode = RequestDebugMode.TEST),
+                clientCardFilter =
+                    ClientCardSearchFilter(
+                        status = ClientCardStatus.ARCHIVED,
+                        searchString = "Ann",
+                        pageNumber = 2,
+                        pageSize = 25,
+                    )
             )
-        )
 
         val context = req.fromTransport()
 
@@ -46,17 +47,19 @@ class ClientCardMapperTest {
 
     @Test
     fun `client card search context maps to response`() {
-        val context = ClientCardContext(
-            requestId = RequestId("cc-res-1"),
-            command = ClientCardCommand.SEARCH,
-            state = State.RUNNING,
-            clientCardsResponse = Page(
-                items = listOf(ClientCard(id = ClientCardId("client-1"), displayName = "Ann")),
-                totalSize = 1,
-                pageNumber = 1,
-                pageSize = 10,
+        val context =
+            ClientCardContext(
+                requestId = RequestId("cc-res-1"),
+                command = ClientCardCommand.SEARCH,
+                state = State.RUNNING,
+                clientCardsResponse =
+                    Page(
+                        items = listOf(ClientCard(id = ClientCardId("client-1"), displayName = "Ann")),
+                        totalSize = 1,
+                        pageNumber = 1,
+                        pageSize = 10,
+                    )
             )
-        )
 
         val response = context.toTransport() as ClientCardSearchResponse
 
@@ -67,20 +70,22 @@ class ClientCardMapperTest {
 
     @Test
     fun `client card response maps all fields to transport`() {
-        val context = ClientCardContext(
-            requestId = RequestId("cc-res-2"),
-            command = ClientCardCommand.READ,
-            state = State.RUNNING,
-            clientCardResponse = ClientCard(
-                id = ClientCardId("client-2"),
-                displayName = "Ann",
-                note = "Prefers morning sessions",
-                isArchived = false,
-                createdAt = "2026-01-01T10:00:00Z",
-                updatedAt = "2026-01-02T11:30:00Z",
-                lock = "lock-cc-1",
-            ),
-        )
+        val context =
+            ClientCardContext(
+                requestId = RequestId("cc-res-2"),
+                command = ClientCardCommand.READ,
+                state = State.RUNNING,
+                clientCardResponse =
+                    ClientCard(
+                        id = ClientCardId("client-2"),
+                        displayName = "Ann",
+                        note = "Prefers morning sessions",
+                        isArchived = false,
+                        createdAt = "2026-01-01T10:00:00Z",
+                        updatedAt = "2026-01-02T11:30:00Z",
+                        lock = "lock-cc-1",
+                    ),
+            )
 
         val response = context.toTransport() as ClientCardReadResponse
 
@@ -95,22 +100,25 @@ class ClientCardMapperTest {
 
     @Test
     fun `client card response maps archived flag to status`() {
-        val cases = listOf(
-            Pair(false, ClientCardStatus.ACTIVE),
-            Pair(true, ClientCardStatus.ARCHIVED),
-        )
+        val cases =
+            listOf(
+                Pair(false, ClientCardStatus.ACTIVE),
+                Pair(true, ClientCardStatus.ARCHIVED),
+            )
 
         cases.forEach { (isArchived, expectedStatus) ->
-            val context = ClientCardContext(
-                requestId = RequestId("cc-res-3"),
-                command = ClientCardCommand.READ,
-                state = State.RUNNING,
-                clientCardResponse = ClientCard(
-                    id = ClientCardId("client-3"),
-                    displayName = "Ann",
-                    isArchived = isArchived,
-                ),
-            )
+            val context =
+                ClientCardContext(
+                    requestId = RequestId("cc-res-3"),
+                    command = ClientCardCommand.READ,
+                    state = State.RUNNING,
+                    clientCardResponse =
+                        ClientCard(
+                            id = ClientCardId("client-3"),
+                            displayName = "Ann",
+                            isArchived = isArchived,
+                        ),
+                )
 
             val response = context.toTransport() as ClientCardReadResponse
 
@@ -120,18 +128,20 @@ class ClientCardMapperTest {
 
     @Test
     fun `client card search filter status values map to domain`() {
-        val cases = listOf(
-            ClientCardStatus.ACTIVE to InternalClientCardStatus.ACTIVE,
-            ClientCardStatus.ARCHIVED to InternalClientCardStatus.ARCHIVED,
-            null to InternalClientCardStatus.NONE,
-        )
+        val cases =
+            listOf(
+                ClientCardStatus.ACTIVE to InternalClientCardStatus.ACTIVE,
+                ClientCardStatus.ARCHIVED to InternalClientCardStatus.ARCHIVED,
+                null to InternalClientCardStatus.NONE,
+            )
 
         cases.forEach { (transportStatus, expected) ->
-            val request = ClientCardSearchRequest(
-                requestId = "cc-search-2",
-                debug = Debug(mode = RequestDebugMode.TEST),
-                clientCardFilter = ClientCardSearchFilter(status = transportStatus),
-            )
+            val request =
+                ClientCardSearchRequest(
+                    requestId = "cc-search-2",
+                    debug = Debug(mode = RequestDebugMode.TEST),
+                    clientCardFilter = ClientCardSearchFilter(status = transportStatus),
+                )
 
             val context = request.fromTransport()
 

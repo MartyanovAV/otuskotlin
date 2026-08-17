@@ -8,7 +8,7 @@ import org.slf4j.Marker
 class DefaultMarker(
     private val name: String,
     private val submarkers: List<Marker> = emptyList()
-): Marker {
+) : Marker {
     override fun getName(): String = name
 
     override fun add(reference: Marker) {}
@@ -27,5 +27,4 @@ class DefaultMarker(
     override fun contains(name: String): Boolean = submarkers.any { it.name == name }
 
     override fun toString(): String = arrayOf(name, *submarkers.toTypedArray()).joinToString(",")
-
 }

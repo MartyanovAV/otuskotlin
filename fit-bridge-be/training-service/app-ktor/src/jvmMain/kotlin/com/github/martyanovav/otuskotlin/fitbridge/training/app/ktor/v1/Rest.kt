@@ -1,6 +1,17 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.v1
 
-import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.*
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardArchiveRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardCreateRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardReadRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardSearchRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardUpdateRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.IRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.IResponse
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanArchiveRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanCreateRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanReadRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanSearchRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanUpdateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.mappers.v1.fromTransport
 import com.github.martyanovav.otuskotlin.fitbridge.mappers.v1.toTransport
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.AppSettings
@@ -8,10 +19,13 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardCon
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.IFBContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.TrainingPlanContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.helpers.executePipeline
-import io.ktor.server.application.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.call
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.post
+import io.ktor.server.routing.route
 import kotlin.reflect.KClass
 
 suspend inline fun <
@@ -19,7 +33,7 @@ suspend inline fun <
     @Suppress("unused")
     reified R : IResponse,
     C : IFBContext
-> ApplicationCall.processV1(
+    > ApplicationCall.processV1(
     appSettings: AppSettings,
     clazz: KClass<*>,
     logId: String,

@@ -12,7 +12,8 @@ data class TrainingPlan(
     var createdAt: String = "",
     var updatedAt: String = "",
 ) {
-    fun deepCopy(): TrainingPlan = copy(
-        planItems = planItems.map { it.deepCopy() },
-    )
+    fun deepCopy(): TrainingPlan =
+        copy(
+            planItems = planItems.map { it.deepCopy() },
+        )
 }

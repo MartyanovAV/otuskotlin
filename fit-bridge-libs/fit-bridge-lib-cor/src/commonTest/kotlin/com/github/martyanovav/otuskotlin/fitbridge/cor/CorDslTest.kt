@@ -14,46 +14,55 @@ class CorDslTest {
     }
 
     @Test
-    fun `chain executes matching workers in order`() = runTest {
-        val chain = rootChain<TestContext> {
-            worker("start") {
-                history += "start; "
-                status = TestContext.Status.RUNNING
-            }
-            worker {
-                on { status == TestContext.Status.RUNNING }
-                handle { history += "process; " }
-            }
-        }.build()
+    fun `chain executes matching workers in order`() =
+        runTest {
+            val chain =
+                rootChain<TestContext> {
+                    worker("start") {
+                        history += "start; "
+                        status = TestContext.Status.RUNNING
+                    }
+                    worker {
+                        on { status == TestContext.Status.RUNNING }
+                        handle { history += "process; " }
+                    }
+                }.build()
 
-        val context = TestContext()
-        chain.exec(context)
+            val context = TestContext()
+            chain.exec(context)
 
-        assertEquals("start; process; ", context.history)
-    }
-
-    @Test
-    fun `except handles worker exception`() = runTest {
-        val chain = rootChain<TestContext> {
-            worker {
-                handle { error("failure") }
-                except { history = it.message.orEmpty(); status = TestContext.Status.ERROR }
-            }
-        }.build()
-
-        val context = TestContext()
-        chain.exec(context)
-
-        assertEquals("failure", context.history)
-        assertEquals(TestContext.Status.ERROR, context.status)
-    }
+            assertEquals("start; process; ", context.history)
+        }
 
     @Test
-    fun `exception is propagated without except handler`() = runTest {
-        val chain = rootChain<TestContext> {
-            worker("failure") { error("failure") }
-        }.build()
+    fun `except handles worker exception`() =
+        runTest {
+            val chain =
+                rootChain<TestContext> {
+                    worker {
+                        handle { error("failure") }
+                        except {
+                            history = it.message.orEmpty()
+                            status = TestContext.Status.ERROR
+                        }
+                    }
+                }.build()
 
-        assertFailsWith<IllegalStateException> { chain.exec(TestContext()) }
-    }
+            val context = TestContext()
+            chain.exec(context)
+
+            assertEquals("failure", context.history)
+            assertEquals(TestContext.Status.ERROR, context.status)
+        }
+
+    @Test
+    fun `exception is propagated without except handler`() =
+        runTest {
+            val chain =
+                rootChain<TestContext> {
+                    worker("failure") { error("failure") }
+                }.build()
+
+            assertFailsWith<IllegalStateException> { chain.exec(TestContext()) }
+        }
 }

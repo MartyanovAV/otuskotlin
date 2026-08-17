@@ -1,8 +1,8 @@
 package com.github.martyanovav.otuskotlin.fitbridge.logging
 
+import com.github.martyanovav.otuskotlin.fitbridge.logging.jvm.mpLoggerLogback
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
-import com.github.martyanovav.otuskotlin.fitbridge.logging.jvm.mpLoggerLogback
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 import kotlin.test.Test
@@ -11,8 +11,8 @@ import kotlin.test.assertTrue
 class LoggerTest {
     private val logId = "test-logger"
     val lggr = LoggerFactory.getLogger("xx")
-    data class Xx(val x: String = "sdf")
 
+    data class Xx(val x: String = "sdf")
 
     @Test
     fun slf4jTest() {
@@ -24,9 +24,10 @@ class LoggerTest {
 
     @Test
     fun `logger init`() {
-        val output = invokeLogger {
-            println("Some action")
-        }
+        val output =
+            invokeLogger {
+                println("Some action")
+            }
 
         assertTrue(Regex("Started .* $logId.*").containsMatchIn(output.toString()))
         assertTrue(output.toString().contains("Some action"))
@@ -35,9 +36,10 @@ class LoggerTest {
 
     @Test
     fun `logger fails`() {
-        val output = invokeLogger {
-            throw RuntimeException("Some action")
-        }
+        val output =
+            invokeLogger {
+                throw RuntimeException("Some action")
+            }
 
         assertTrue(Regex("Started .* $logId.*").containsMatchIn(output.toString()))
         assertTrue(Regex("Failed .* $logId.*").containsMatchIn(output.toString()))

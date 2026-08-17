@@ -25,11 +25,12 @@ class CorWorkerDsl<T> : CorExecDsl<T>(), ICorWorkerDsl<T> {
         blockHandle = function
     }
 
-    override fun build(): ICorExec<T> = CorWorker(
-        title = title,
-        description = description,
-        blockOn = blockOn,
-        blockHandle = blockHandle,
-        blockExcept = blockExcept,
-    )
+    override fun build(): ICorExec<T> =
+        CorWorker(
+            title = title,
+            description = description,
+            blockOn = blockOn,
+            blockHandle = blockHandle,
+            blockExcept = blockExcept,
+        )
 }

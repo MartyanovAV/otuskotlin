@@ -39,8 +39,9 @@ data class SupersetItem(
     var restBetweenSetsSeconds: Int = 0
 ) : PlanItem
 
-fun PlanItem.deepCopy(): PlanItem = when (this) {
-    is ExerciseItem -> copy(sets = sets.map { it.copy() })
-    is CircuitItem -> copy(items = items.map { it.deepCopy() })
-    is SupersetItem -> copy(items = items.map { it.deepCopy() })
-}
+fun PlanItem.deepCopy(): PlanItem =
+    when (this) {
+        is ExerciseItem -> copy(sets = sets.map { it.copy() })
+        is CircuitItem -> copy(items = items.map { it.deepCopy() })
+        is SupersetItem -> copy(items = items.map { it.deepCopy() })
+    }

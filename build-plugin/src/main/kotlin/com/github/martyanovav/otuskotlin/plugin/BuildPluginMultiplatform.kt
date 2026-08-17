@@ -15,6 +15,7 @@ class BuildPluginMultiplatform : Plugin<Project> {
     override fun apply(project: Project) = with(project) {
         val libs = the<LibrariesForLibs>()
         pluginManager.apply("org.jetbrains.kotlin.multiplatform")
+        pluginManager.apply("build-ktlint")
         group = rootProject.group
         version = rootProject.version
 

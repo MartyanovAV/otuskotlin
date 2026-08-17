@@ -9,7 +9,9 @@ interface ICorExecDsl<T> {
     var description: String
 
     fun on(function: suspend T.() -> Boolean)
+
     fun except(function: suspend T.(Throwable) -> Unit)
+
     fun build(): ICorExec<T>
 }
 
@@ -45,9 +47,11 @@ fun <T> ICorChainDsl<T>.worker(
     description: String = "",
     blockHandle: T.() -> Unit,
 ) {
-    add(CorWorkerDsl<T>().also {
-        it.title = title
-        it.description = description
-        it.handle(blockHandle)
-    })
+    add(
+        CorWorkerDsl<T>().also {
+            it.title = title
+            it.description = description
+            it.handle(blockHandle)
+        }
+    )
 }

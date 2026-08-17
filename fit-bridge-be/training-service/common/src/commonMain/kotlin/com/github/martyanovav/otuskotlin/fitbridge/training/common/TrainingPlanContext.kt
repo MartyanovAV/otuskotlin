@@ -1,7 +1,7 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.common
 
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.AuthPrincipal
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBError
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.RequestId

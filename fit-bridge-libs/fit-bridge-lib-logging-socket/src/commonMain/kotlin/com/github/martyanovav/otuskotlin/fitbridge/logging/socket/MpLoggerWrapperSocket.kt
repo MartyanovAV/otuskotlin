@@ -1,19 +1,24 @@
 package com.github.martyanovav.otuskotlin.fitbridge.logging.socket
 
-import io.ktor.network.selector.*
-import io.ktor.network.sockets.*
-import io.ktor.util.cio.*
-import io.ktor.utils.io.*
-import io.ktor.utils.io.core.*
-import kotlinx.atomicfu.AtomicBoolean
-import kotlinx.atomicfu.atomic
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.onSubscription
-import kotlinx.serialization.json.Json
 import com.github.martyanovav.otuskotlin.fitbridge.logging.common.IMpLogWrapper
 import com.github.martyanovav.otuskotlin.fitbridge.logging.common.LogLevel
+import io.ktor.network.selector.SelectorManager
+import io.ktor.network.sockets.aSocket
+import io.ktor.network.sockets.openWriteChannel
+import io.ktor.utils.io.flush
+import io.ktor.utils.io.writeStringUtf8
+import kotlinx.atomicfu.AtomicBoolean
+import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.onSubscription
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 
 @ExperimentalStdlibApi
 class MpLoggerWrapperSocket(
@@ -26,22 +31,23 @@ class MpLoggerWrapperSocket(
     scope: CoroutineScope = CoroutineScope(Dispatchers.Default + CoroutineName("Logging")),
 ) : IMpLogWrapper {
     private val selectorManager = SelectorManager(Dispatchers.IO)
-    private val sf = MutableSharedFlow<LogData>(
-        extraBufferCapacity = bufferSize,
-        onBufferOverflow = overflowPolicy,
-    )
+    private val sf =
+        MutableSharedFlow<LogData>(
+            extraBufferCapacity = bufferSize,
+            onBufferOverflow = overflowPolicy,
+        )
     private val isActive: AtomicBoolean = atomic(true)
     val isReady: AtomicBoolean = atomic(false)
-    private val jsonSerializer = Json {
-        encodeDefaults = true
-    }
+    private val jsonSerializer =
+        Json {
+            encodeDefaults = true
+        }
 
     private val job = scope.launch { handleLogs() }
 
     private suspend fun handleLogs() {
         while (isActive.value) {
             try {
-
                 aSocket(selectorManager).tcp().connect(host, port).use { socket ->
                     socket.openWriteChannel().use {
                         sf

@@ -47,4 +47,18 @@ tasks {
         group = "verification"
         dependsOn(gradle.includedBuild("fit-bridge-be").task(":check"))
     }
+    
+    register("ktlintFormat") {
+        group = "formatting"
+        gradle.includedBuilds.filter { it.name != "fit-bridge-other" }.forEach {
+            dependsOn(it.task(":ktlintFormat"))
+        }
+    }
+
+    register("ktlintCheck") {
+        group = "verification"
+        gradle.includedBuilds.filter { it.name != "fit-bridge-other" }.forEach {
+            dependsOn(it.task(":ktlintCheck"))
+        }
+    }
 }

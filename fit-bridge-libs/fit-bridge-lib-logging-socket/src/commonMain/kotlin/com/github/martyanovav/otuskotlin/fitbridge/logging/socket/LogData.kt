@@ -1,7 +1,7 @@
 package com.github.martyanovav.otuskotlin.fitbridge.logging.socket
 
-import kotlinx.serialization.Serializable
 import com.github.martyanovav.otuskotlin.fitbridge.logging.common.LogLevel
+import kotlinx.serialization.Serializable
 
 @Serializable
 data class LogData(

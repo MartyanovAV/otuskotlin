@@ -10,19 +10,20 @@ import kotlin.test.assertEquals
 class MappersV1BaseTest {
     @Test
     fun `all spec debug stubs map to domain stub cases`() {
-        val cases = listOf(
-            RequestDebugStubs.SUCCESS to Stubs.SUCCESS,
-            RequestDebugStubs.NOT_FOUND to Stubs.NOT_FOUND,
-            RequestDebugStubs.BAD_ID to Stubs.BAD_ID,
-            RequestDebugStubs.BAD_LOCK to Stubs.BAD_LOCK,
-            RequestDebugStubs.BAD_PUBLIC_NAME to Stubs.BAD_PUBLIC_NAME,
-            RequestDebugStubs.BAD_CLIENT_NAME to Stubs.BAD_CLIENT_NAME,
-            RequestDebugStubs.BAD_PLAN_TITLE to Stubs.BAD_PLAN_TITLE,
-            RequestDebugStubs.BAD_PLAN_BODY to Stubs.BAD_PLAN_BODY,
-            RequestDebugStubs.FORBIDDEN to Stubs.FORBIDDEN,
-            RequestDebugStubs.VALIDATION_ERROR to Stubs.VALIDATION_ERROR,
-            RequestDebugStubs.CANNOT_ARCHIVE to Stubs.CANNOT_ARCHIVE,
-        )
+        val cases =
+            listOf(
+                RequestDebugStubs.SUCCESS to Stubs.SUCCESS,
+                RequestDebugStubs.NOT_FOUND to Stubs.NOT_FOUND,
+                RequestDebugStubs.BAD_ID to Stubs.BAD_ID,
+                RequestDebugStubs.BAD_LOCK to Stubs.BAD_LOCK,
+                RequestDebugStubs.BAD_PUBLIC_NAME to Stubs.BAD_PUBLIC_NAME,
+                RequestDebugStubs.BAD_CLIENT_NAME to Stubs.BAD_CLIENT_NAME,
+                RequestDebugStubs.BAD_PLAN_TITLE to Stubs.BAD_PLAN_TITLE,
+                RequestDebugStubs.BAD_PLAN_BODY to Stubs.BAD_PLAN_BODY,
+                RequestDebugStubs.FORBIDDEN to Stubs.FORBIDDEN,
+                RequestDebugStubs.VALIDATION_ERROR to Stubs.VALIDATION_ERROR,
+                RequestDebugStubs.CANNOT_ARCHIVE to Stubs.CANNOT_ARCHIVE,
+            )
 
         assertEquals(RequestDebugStubs.entries.size, cases.size, "Spec stub enum changed, update the test cases")
         cases.forEach { (transportStub, expected) ->
