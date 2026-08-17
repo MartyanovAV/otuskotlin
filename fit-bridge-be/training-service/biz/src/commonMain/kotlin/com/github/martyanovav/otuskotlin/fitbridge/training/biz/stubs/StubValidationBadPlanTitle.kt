@@ -7,14 +7,16 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBErro
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.stubs.Stubs
 
-fun ICorChainDsl<IFBContext>.stubValidationBadPlanTitle(title: String) = worker {
-    this.title = title
-    this.description = """
-        Кейс ошибки валидации: название плана невалидно
-    """.trimIndent()
-    on { stubCase == Stubs.BAD_PLAN_TITLE && state == State.RUNNING }
-    handle {
-        state = State.FAILING
-        addError(FBError(code = "bad-plan-title", group = "business", field = "title", message = "Training plan title is invalid"))
+fun ICorChainDsl<IFBContext>.stubValidationBadPlanTitle(title: String) =
+    worker {
+        this.title = title
+        this.description =
+            """
+            Кейс ошибки валидации: название плана невалидно
+            """.trimIndent()
+        on { stubCase == Stubs.BAD_PLAN_TITLE && state == State.RUNNING }
+        handle {
+            state = State.FAILING
+            addError(FBError(code = "bad-plan-title", group = "business", field = "title", message = "Training plan title is invalid"))
+        }
     }
-}

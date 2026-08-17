@@ -3,13 +3,14 @@ plugins {
     id("maven-publish")
 }
 
-val specsZip = tasks.register<Zip>("specsZip") {
-    description = "Упаковка спецификаций в Zip-архив"
-    archiveBaseName.set("training-specs")
-    archiveClassifier.set("spec")
-    archiveExtension.set("zip")
-    from("specs")
-}
+val specsZip =
+    tasks.register<Zip>("specsZip") {
+        description = "Упаковка спецификаций в Zip-архив"
+        archiveBaseName.set("training-specs")
+        archiveClassifier.set("spec")
+        archiveExtension.set("zip")
+        from("specs")
+    }
 
 val specsConfiguration by configurations.creating {
     isCanBeConsumed = true

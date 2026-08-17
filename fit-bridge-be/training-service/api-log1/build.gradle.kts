@@ -54,7 +54,6 @@ openApiGenerate {
     apiPackage.set("$openapiGroup.api")
     modelPackage.set("$openapiGroup.models")
 
-
     // 4. Указываем конкретный файл внутри распакованной папки
     inputSpec.set(specDir.map { it.file("specs-training-log1.yaml").asFile.absolutePath })
 
@@ -79,4 +78,3 @@ sourceSets {
         java.srcDir(layout.buildDirectory.dir("generate-resources/main/src/main/kotlin"))
     }
 }
-

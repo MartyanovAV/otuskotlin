@@ -155,10 +155,11 @@ class TrainingProcessorTest {
     @Test
     fun validProdRequestCompletesValidation() =
         runTest {
-            val ctx = ClientCardContext(
-                command = ClientCardCommand.CREATE,
-                clientCardRequest = ClientCard(displayName = "Клиент"),
-            )
+            val ctx =
+                ClientCardContext(
+                    command = ClientCardCommand.CREATE,
+                    clientCardRequest = ClientCard(displayName = "Клиент"),
+                )
 
             processor.exec(ctx)
 
@@ -173,11 +174,12 @@ class TrainingProcessorTest {
         expectedCode: String,
         expectedField: String = "",
     ) {
-        val ctx = ClientCardContext(
-            command = command,
-            workMode = WorkMode.STUB,
-            stubCase = stubCase,
-        )
+        val ctx =
+            ClientCardContext(
+                command = command,
+                workMode = WorkMode.STUB,
+                stubCase = stubCase,
+            )
 
         processor.exec(ctx)
 
@@ -195,11 +197,12 @@ class TrainingProcessorTest {
         expectedCode: String,
         expectedField: String = "",
     ) {
-        val ctx = TrainingPlanContext(
-            command = command,
-            workMode = WorkMode.STUB,
-            stubCase = stubCase,
-        )
+        val ctx =
+            TrainingPlanContext(
+                command = command,
+                workMode = WorkMode.STUB,
+                stubCase = stubCase,
+            )
 
         processor.exec(ctx)
 

@@ -7,14 +7,16 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBErro
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.stubs.Stubs
 
-fun ICorChainDsl<IFBContext>.stubValidationBadId(title: String) = worker {
-    this.title = title
-    this.description = """
-        Кейс ошибки валидации: ID невалиден
-    """.trimIndent()
-    on { stubCase == Stubs.BAD_ID && state == State.RUNNING }
-    handle {
-        state = State.FAILING
-        addError(FBError(code = "bad-id", group = "business", field = "id", message = "Id is invalid"))
+fun ICorChainDsl<IFBContext>.stubValidationBadId(title: String) =
+    worker {
+        this.title = title
+        this.description =
+            """
+            Кейс ошибки валидации: ID невалиден
+            """.trimIndent()
+        on { stubCase == Stubs.BAD_ID && state == State.RUNNING }
+        handle {
+            state = State.FAILING
+            addError(FBError(code = "bad-id", group = "business", field = "id", message = "Id is invalid"))
+        }
     }
-}

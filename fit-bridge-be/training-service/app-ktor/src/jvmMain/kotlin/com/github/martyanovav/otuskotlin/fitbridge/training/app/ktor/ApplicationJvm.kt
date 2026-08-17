@@ -32,20 +32,22 @@ fun Application.moduleJvm(appSettings: AppSettings = initAppSettings()) {
 
     install(MicrometerMetrics) {
         registry = appMicrometerRegistry
-        meterBinders = listOf(
-            JvmMemoryMetrics(),
-            JvmGcMetrics(),
-            JvmThreadMetrics(),
-            ProcessorMetrics()
-        )
-        distributionStatisticConfig = io.micrometer.core.instrument.distribution.DistributionStatisticConfig.builder()
-            .percentilesHistogram(true)
-            .serviceLevelObjectives(
-                Duration.ofMillis(100).toNanos().toDouble(),
-                Duration.ofMillis(300).toNanos().toDouble(),
-                Duration.ofSeconds(1).toNanos().toDouble()
+        meterBinders =
+            listOf(
+                JvmMemoryMetrics(),
+                JvmGcMetrics(),
+                JvmThreadMetrics(),
+                ProcessorMetrics()
             )
-            .build()
+        distributionStatisticConfig =
+            io.micrometer.core.instrument.distribution.DistributionStatisticConfig.builder()
+                .percentilesHistogram(true)
+                .serviceLevelObjectives(
+                    Duration.ofMillis(100).toNanos().toDouble(),
+                    Duration.ofMillis(300).toNanos().toDouble(),
+                    Duration.ofSeconds(1).toNanos().toDouble()
+                )
+                .build()
     }
 
     routing {

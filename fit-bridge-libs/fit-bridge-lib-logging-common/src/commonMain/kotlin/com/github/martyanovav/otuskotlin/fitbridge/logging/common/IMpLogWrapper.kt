@@ -48,24 +48,25 @@ interface IMpLogWrapper : AutoCloseable {
         id: String = "",
         level: LogLevel = LogLevel.INFO,
         block: suspend () -> T,
-    ): T = try {
-        log("Started $loggerId $id", level)
-        val (res, diffTime) = measureTimedValue { block() }
+    ): T =
+        try {
+            log("Started $loggerId $id", level)
+            val (res, diffTime) = measureTimedValue { block() }
 
-        log(
-            msg = "Finished $loggerId $id",
-            level = level,
-            objs = mapOf("metricHandleTime" to diffTime.toIsoString())
-        )
-        res
-    } catch (e: Throwable) {
-        log(
-            msg = "Failed $loggerId $id",
-            level = LogLevel.ERROR,
-            e = e
-        )
-        throw e
-    }
+            log(
+                msg = "Finished $loggerId $id",
+                level = level,
+                objs = mapOf("metricHandleTime" to diffTime.toIsoString())
+            )
+            res
+        } catch (e: Throwable) {
+            log(
+                msg = "Failed $loggerId $id",
+                level = LogLevel.ERROR,
+                e = e
+            )
+            throw e
+        }
 
     /**
      * Функция обертка для выполнения прикладного кода с логированием ошибки
@@ -74,43 +75,47 @@ interface IMpLogWrapper : AutoCloseable {
         id: String = "",
         throwRequired: Boolean = true,
         block: suspend () -> T,
-    ): T? = try {
-        val result = block()
-        result
-    } catch (e: Throwable) {
-        log(
-            msg = "Failed $loggerId $id",
-            level = LogLevel.ERROR,
-            e = e
-        )
-        if (throwRequired) throw e else null
-    }
+    ): T? =
+        try {
+            val result = block()
+            result
+        } catch (e: Throwable) {
+            log(
+                msg = "Failed $loggerId $id",
+                level = LogLevel.ERROR,
+                e = e
+            )
+            if (throwRequired) throw e else null
+        }
 
     override fun close() {}
 
     companion object {
-        val DEFAULT = object : IMpLogWrapper {
-            override val loggerId: String = "NONE"
+        val DEFAULT =
+            object : IMpLogWrapper {
+                override val loggerId: String = "NONE"
 
-            override fun log(
-                msg: String,
-                level: LogLevel,
-                marker: String,
-                e: Throwable?,
-                data: Any?,
-                objs: Map<String, Any>?,
-            ) {
-                val markerString = marker
-                    .takeIf { it.isNotBlank() }
-                    ?.let { " ($it)" }
-                val args = listOfNotNull(
-                    "${Clock.System.now()} [${level.name}]$markerString: $msg",
-                    e?.let { "${it.message ?: "Unknown reason"}:\n${it.stackTraceToString()}" },
-                    data.toString(),
-                    objs.toString(),
-                )
-                println(args.joinToString("\n"))
+                override fun log(
+                    msg: String,
+                    level: LogLevel,
+                    marker: String,
+                    e: Throwable?,
+                    data: Any?,
+                    objs: Map<String, Any>?,
+                ) {
+                    val markerString =
+                        marker
+                            .takeIf { it.isNotBlank() }
+                            ?.let { " ($it)" }
+                    val args =
+                        listOfNotNull(
+                            "${Clock.System.now()} [${level.name}]$markerString: $msg",
+                            e?.let { "${it.message ?: "Unknown reason"}:\n${it.stackTraceToString()}" },
+                            data.toString(),
+                            objs.toString(),
+                        )
+                    println(args.joinToString("\n"))
+                }
             }
-        }
     }
 }

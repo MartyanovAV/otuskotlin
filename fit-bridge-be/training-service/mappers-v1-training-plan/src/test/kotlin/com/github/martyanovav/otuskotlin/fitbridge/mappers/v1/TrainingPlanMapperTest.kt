@@ -32,25 +32,28 @@ class TrainingPlanMapperTest {
     @Test
     fun `training plan create request maps to context`() {
         val itemId = UUID.fromString("11111111-1111-1111-1111-111111111111")
-        val request = TrainingPlanCreateRequest(
-            requestType = "trainingPlan.create",
-            requestId = "tp-create-1",
-            debug = Debug(mode = RequestDebugMode.TEST),
-            trainingPlan = TrainingPlanCreateObject(
-                title = "Hypertrophy Plan",
-                clientCardId = "client-card-1",
-                planItems = listOf(
-                    ExerciseItem(
-                        id = itemId,
-                        title = "Squat",
-                        description = "Back squat",
-                        exerciseId = "exercise-squat",
-                        sets = listOf(ExerciseSet(reps = "8", weight = "100", weightUnit = "KG", durationSeconds = 0)),
-                        restBetweenSetsSeconds = 120,
-                    )
-                ),
-            ),
-        )
+        val request =
+            TrainingPlanCreateRequest(
+                requestType = "trainingPlan.create",
+                requestId = "tp-create-1",
+                debug = Debug(mode = RequestDebugMode.TEST),
+                trainingPlan =
+                    TrainingPlanCreateObject(
+                        title = "Hypertrophy Plan",
+                        clientCardId = "client-card-1",
+                        planItems =
+                            listOf(
+                                ExerciseItem(
+                                    id = itemId,
+                                    title = "Squat",
+                                    description = "Back squat",
+                                    exerciseId = "exercise-squat",
+                                    sets = listOf(ExerciseSet(reps = "8", weight = "100", weightUnit = "KG", durationSeconds = 0)),
+                                    restBetweenSetsSeconds = 120,
+                                )
+                            ),
+                    ),
+            )
 
         val context = request.fromTransport()
         val exercise = context.trainingPlanRequest.planItems.first() as InternalExerciseItem
@@ -70,18 +73,20 @@ class TrainingPlanMapperTest {
 
     @Test
     fun `training plan search request maps to context and response page`() {
-        val request = TrainingPlanSearchRequest(
-            requestType = "trainingPlan.search",
-            requestId = "tp-search-1",
-            debug = Debug(mode = RequestDebugMode.STUB),
-            trainingPlanFilter = TrainingPlanSearchFilter(
-                clientCardId = "client-card-1",
-                status = TrainingPlanStatus.ACTIVE,
-                searchString = "strength",
-                pageNumber = 3,
-                pageSize = 15,
-            ),
-        )
+        val request =
+            TrainingPlanSearchRequest(
+                requestType = "trainingPlan.search",
+                requestId = "tp-search-1",
+                debug = Debug(mode = RequestDebugMode.STUB),
+                trainingPlanFilter =
+                    TrainingPlanSearchFilter(
+                        clientCardId = "client-card-1",
+                        status = TrainingPlanStatus.ACTIVE,
+                        searchString = "strength",
+                        pageNumber = 3,
+                        pageSize = 15,
+                    ),
+            )
 
         val context = request.fromTransport()
 
@@ -97,26 +102,29 @@ class TrainingPlanMapperTest {
     @Test
     fun `training plan context maps to create response`() {
         val itemId = "22222222-2222-2222-2222-222222222222"
-        val context = TrainingPlanContext(
-            requestId = RequestId("tp-response-1"),
-            command = TrainingPlanCommand.CREATE,
-            state = State.RUNNING,
-            trainingPlanResponse = TrainingPlan(
-                id = TrainingPlanId("plan-1"),
-                clientCardId = ClientCardId("client-card-1"),
-                title = "Strength Plan",
-                planItems = mutableListOf(
-                    InternalExerciseItem(
-                        id = itemId,
-                        title = "Bench press",
-                        description = "",
-                        exerciseId = "exercise-bench",
-                        sets = mutableListOf(InternalExerciseSet(reps = "5", weight = "80", weightUnit = "KG")),
-                        restBetweenSetsSeconds = 180,
-                    )
-                ),
-            ),
-        )
+        val context =
+            TrainingPlanContext(
+                requestId = RequestId("tp-response-1"),
+                command = TrainingPlanCommand.CREATE,
+                state = State.RUNNING,
+                trainingPlanResponse =
+                    TrainingPlan(
+                        id = TrainingPlanId("plan-1"),
+                        clientCardId = ClientCardId("client-card-1"),
+                        title = "Strength Plan",
+                        planItems =
+                            mutableListOf(
+                                InternalExerciseItem(
+                                    id = itemId,
+                                    title = "Bench press",
+                                    description = "",
+                                    exerciseId = "exercise-bench",
+                                    sets = mutableListOf(InternalExerciseSet(reps = "5", weight = "80", weightUnit = "KG")),
+                                    restBetweenSetsSeconds = 180,
+                                )
+                            ),
+                    ),
+            )
 
         val response = context.toTransport() as TrainingPlanCreateResponse
         val exercise = response.trainingPlan?.planItems?.first() as ExerciseItem
@@ -135,17 +143,19 @@ class TrainingPlanMapperTest {
 
     @Test
     fun `training plan context maps to search response`() {
-        val context = TrainingPlanContext(
-            requestId = RequestId("tp-search-response-1"),
-            command = TrainingPlanCommand.SEARCH,
-            state = State.RUNNING,
-            trainingPlansResponse = Page(
-                items = listOf(TrainingPlan(id = TrainingPlanId("plan-1"), title = "Strength Plan")),
-                totalSize = 1,
-                pageNumber = 1,
-                pageSize = 10,
-            ),
-        )
+        val context =
+            TrainingPlanContext(
+                requestId = RequestId("tp-search-response-1"),
+                command = TrainingPlanCommand.SEARCH,
+                state = State.RUNNING,
+                trainingPlansResponse =
+                    Page(
+                        items = listOf(TrainingPlan(id = TrainingPlanId("plan-1"), title = "Strength Plan")),
+                        totalSize = 1,
+                        pageNumber = 1,
+                        pageSize = 10,
+                    ),
+            )
 
         val response = context.toTransport() as TrainingPlanSearchResponse
 
@@ -158,20 +168,22 @@ class TrainingPlanMapperTest {
 
     @Test
     fun `training plan response maps status version and audit fields to transport`() {
-        val context = TrainingPlanContext(
-            requestId = RequestId("tp-response-2"),
-            command = TrainingPlanCommand.READ,
-            state = State.RUNNING,
-            trainingPlanResponse = TrainingPlan(
-                id = TrainingPlanId("plan-2"),
-                clientCardId = ClientCardId("client-card-2"),
-                title = "Archived Plan",
-                status = InternalTrainingPlanStatus.ARCHIVED,
-                version = 3,
-                createdAt = "2026-02-01T09:00:00Z",
-                updatedAt = "2026-02-02T10:00:00Z",
-            ),
-        )
+        val context =
+            TrainingPlanContext(
+                requestId = RequestId("tp-response-2"),
+                command = TrainingPlanCommand.READ,
+                state = State.RUNNING,
+                trainingPlanResponse =
+                    TrainingPlan(
+                        id = TrainingPlanId("plan-2"),
+                        clientCardId = ClientCardId("client-card-2"),
+                        title = "Archived Plan",
+                        status = InternalTrainingPlanStatus.ARCHIVED,
+                        version = 3,
+                        createdAt = "2026-02-01T09:00:00Z",
+                        updatedAt = "2026-02-02T10:00:00Z",
+                    ),
+            )
 
         val response = context.toTransport() as TrainingPlanReadResponse
 
@@ -186,16 +198,18 @@ class TrainingPlanMapperTest {
 
     @Test
     fun `training plan response maps none status to null`() {
-        val context = TrainingPlanContext(
-            requestId = RequestId("tp-response-3"),
-            command = TrainingPlanCommand.READ,
-            state = State.RUNNING,
-            trainingPlanResponse = TrainingPlan(
-                id = TrainingPlanId("plan-3"),
-                title = "Draft Plan",
-                status = InternalTrainingPlanStatus.NONE,
-            ),
-        )
+        val context =
+            TrainingPlanContext(
+                requestId = RequestId("tp-response-3"),
+                command = TrainingPlanCommand.READ,
+                state = State.RUNNING,
+                trainingPlanResponse =
+                    TrainingPlan(
+                        id = TrainingPlanId("plan-3"),
+                        title = "Draft Plan",
+                        status = InternalTrainingPlanStatus.NONE,
+                    ),
+            )
 
         val response = context.toTransport() as TrainingPlanReadResponse
 
@@ -204,19 +218,21 @@ class TrainingPlanMapperTest {
 
     @Test
     fun `training plan search filter status values map to domain`() {
-        val cases = listOf(
-            TrainingPlanStatus.ACTIVE to InternalTrainingPlanStatus.ACTIVE,
-            TrainingPlanStatus.ARCHIVED to InternalTrainingPlanStatus.ARCHIVED,
-            null to InternalTrainingPlanStatus.NONE,
-        )
+        val cases =
+            listOf(
+                TrainingPlanStatus.ACTIVE to InternalTrainingPlanStatus.ACTIVE,
+                TrainingPlanStatus.ARCHIVED to InternalTrainingPlanStatus.ARCHIVED,
+                null to InternalTrainingPlanStatus.NONE,
+            )
 
         cases.forEach { (transportStatus, expected) ->
-            val request = TrainingPlanSearchRequest(
-                requestType = "trainingPlan.search",
-                requestId = "tp-search-2",
-                debug = Debug(mode = RequestDebugMode.STUB),
-                trainingPlanFilter = TrainingPlanSearchFilter(status = transportStatus),
-            )
+            val request =
+                TrainingPlanSearchRequest(
+                    requestType = "trainingPlan.search",
+                    requestId = "tp-search-2",
+                    debug = Debug(mode = RequestDebugMode.STUB),
+                    trainingPlanFilter = TrainingPlanSearchFilter(status = transportStatus),
+                )
 
             val context = request.fromTransport()
 

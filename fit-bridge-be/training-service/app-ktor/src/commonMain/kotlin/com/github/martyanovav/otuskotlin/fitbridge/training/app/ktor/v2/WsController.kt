@@ -78,14 +78,15 @@ private suspend inline fun <reified Q : IRequest, C : IFBContext> processWsReq(
     crossinline makeCtx: () -> C,
     crossinline fromTransport: suspend C.(Q) -> Unit,
     crossinline toTransport: suspend C.() -> IResponse
-): IResponse = executePipeline(
-    getContext = { makeCtx().apply { this.wsSession = wsSession } },
-    clazz = Q::class,
-    receive = { fromTransport(request) },
-    exec = { appSettings.processor.exec(this) },
-    respond = { toTransport() },
-    toLog = { /* toLog */ }
-)
+): IResponse =
+    executePipeline(
+        getContext = { makeCtx().apply { this.wsSession = wsSession } },
+        clazz = Q::class,
+        receive = { fromTransport(request) },
+        exec = { appSettings.processor.exec(this) },
+        respond = { toTransport() },
+        toLog = { /* toLog */ }
+    )
 
 private suspend fun String.processV2(
     appSettings: AppSettings,
@@ -93,35 +94,45 @@ private suspend fun String.processV2(
 ): IResponse {
     val request = apiV2RequestDeserialize<IRequest>(this)
     return when (request) {
-        is ClientCardCreateRequest -> processWsReq(
-            request, wsSession, appSettings, { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse },
-        )
-        is ClientCardReadRequest -> processWsReq(
-            request, wsSession, appSettings, { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse },
-        )
-        is ClientCardUpdateRequest -> processWsReq(
-            request, wsSession, appSettings, { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse },
-        )
-        is ClientCardArchiveRequest -> processWsReq(
-            request, wsSession, appSettings, { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse },
-        )
-        is ClientCardSearchRequest -> processWsReq(
-            request, wsSession, appSettings, { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse },
-        )
-        is TrainingPlanCreateRequest -> processWsReq(
-            request, wsSession, appSettings, { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
-        )
-        is TrainingPlanReadRequest -> processWsReq(
-            request, wsSession, appSettings, { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
-        )
-        is TrainingPlanUpdateRequest -> processWsReq(
-            request, wsSession, appSettings, { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
-        )
-        is TrainingPlanArchiveRequest -> processWsReq(
-            request, wsSession, appSettings, { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
-        )
-        is TrainingPlanSearchRequest -> processWsReq(
-            request, wsSession, appSettings, { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
-        )
+        is ClientCardCreateRequest ->
+            processWsReq(
+                request, wsSession, appSettings, { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+            )
+        is ClientCardReadRequest ->
+            processWsReq(
+                request, wsSession, appSettings, { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+            )
+        is ClientCardUpdateRequest ->
+            processWsReq(
+                request, wsSession, appSettings, { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+            )
+        is ClientCardArchiveRequest ->
+            processWsReq(
+                request, wsSession, appSettings, { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+            )
+        is ClientCardSearchRequest ->
+            processWsReq(
+                request, wsSession, appSettings, { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+            )
+        is TrainingPlanCreateRequest ->
+            processWsReq(
+                request, wsSession, appSettings, { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+            )
+        is TrainingPlanReadRequest ->
+            processWsReq(
+                request, wsSession, appSettings, { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+            )
+        is TrainingPlanUpdateRequest ->
+            processWsReq(
+                request, wsSession, appSettings, { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+            )
+        is TrainingPlanArchiveRequest ->
+            processWsReq(
+                request, wsSession, appSettings, { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+            )
+        is TrainingPlanSearchRequest ->
+            processWsReq(
+                request, wsSession, appSettings, { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+            )
     }
 }

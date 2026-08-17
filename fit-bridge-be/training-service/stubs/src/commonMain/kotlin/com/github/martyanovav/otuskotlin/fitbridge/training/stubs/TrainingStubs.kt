@@ -7,7 +7,6 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Exerci
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
 
-
 object ClientCardStub {
     private val card =
         ClientCard(

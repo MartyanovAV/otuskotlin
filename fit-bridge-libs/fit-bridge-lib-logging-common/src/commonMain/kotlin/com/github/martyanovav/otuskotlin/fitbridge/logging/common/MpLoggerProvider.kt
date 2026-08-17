@@ -35,4 +35,3 @@ class MpLoggerProvider(
      */
     fun logger(function: KFunction<*>): IMpLogWrapper = provider(function.name)
 }
-

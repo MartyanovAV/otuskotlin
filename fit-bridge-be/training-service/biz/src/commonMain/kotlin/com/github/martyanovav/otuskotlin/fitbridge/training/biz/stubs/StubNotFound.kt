@@ -7,14 +7,16 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBErro
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.stubs.Stubs
 
-fun ICorChainDsl<IFBContext>.stubNotFound(title: String) = worker {
-    this.title = title
-    this.description = """
-        Кейс ошибки: объект не найден
-    """.trimIndent()
-    on { stubCase == Stubs.NOT_FOUND && state == State.RUNNING }
-    handle {
-        state = State.FAILING
-        addError(FBError(code = "not-found", group = "business", field = "", message = "Entity was not found"))
+fun ICorChainDsl<IFBContext>.stubNotFound(title: String) =
+    worker {
+        this.title = title
+        this.description =
+            """
+            Кейс ошибки: объект не найден
+            """.trimIndent()
+        on { stubCase == Stubs.NOT_FOUND && state == State.RUNNING }
+        handle {
+            state = State.FAILING
+            addError(FBError(code = "not-found", group = "business", field = "", message = "Entity was not found"))
+        }
     }
-}

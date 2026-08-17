@@ -24,27 +24,29 @@ fun String?.toRequestId() = this?.let { RequestId(it) } ?: RequestId.NONE
 
 fun String?.toInstant() = this?.let { Instant.parse(it) } ?: Instant.DISTANT_PAST
 
-fun Debug?.transportToWorkMode(): WorkMode = when (this?.mode) {
-    RequestDebugMode.PROD -> WorkMode.PROD
-    RequestDebugMode.TEST -> WorkMode.TEST
-    RequestDebugMode.STUB -> WorkMode.STUB
-    null -> WorkMode.PROD
-}
+fun Debug?.transportToWorkMode(): WorkMode =
+    when (this?.mode) {
+        RequestDebugMode.PROD -> WorkMode.PROD
+        RequestDebugMode.TEST -> WorkMode.TEST
+        RequestDebugMode.STUB -> WorkMode.STUB
+        null -> WorkMode.PROD
+    }
 
-fun Debug?.transportToStubCase(): Stubs = when (this?.stub) {
-    RequestDebugStubs.SUCCESS -> Stubs.SUCCESS
-    RequestDebugStubs.NOT_FOUND -> Stubs.NOT_FOUND
-    RequestDebugStubs.BAD_ID -> Stubs.BAD_ID
-    RequestDebugStubs.BAD_LOCK -> Stubs.BAD_LOCK
-    RequestDebugStubs.BAD_PUBLIC_NAME -> Stubs.BAD_PUBLIC_NAME
-    RequestDebugStubs.BAD_CLIENT_NAME -> Stubs.BAD_CLIENT_NAME
-    RequestDebugStubs.BAD_PLAN_TITLE -> Stubs.BAD_PLAN_TITLE
-    RequestDebugStubs.BAD_PLAN_BODY -> Stubs.BAD_PLAN_BODY
-    RequestDebugStubs.FORBIDDEN -> Stubs.FORBIDDEN
-    RequestDebugStubs.VALIDATION_ERROR -> Stubs.VALIDATION_ERROR
-    RequestDebugStubs.CANNOT_ARCHIVE -> Stubs.CANNOT_ARCHIVE
-    null -> Stubs.NONE
-}
+fun Debug?.transportToStubCase(): Stubs =
+    when (this?.stub) {
+        RequestDebugStubs.SUCCESS -> Stubs.SUCCESS
+        RequestDebugStubs.NOT_FOUND -> Stubs.NOT_FOUND
+        RequestDebugStubs.BAD_ID -> Stubs.BAD_ID
+        RequestDebugStubs.BAD_LOCK -> Stubs.BAD_LOCK
+        RequestDebugStubs.BAD_PUBLIC_NAME -> Stubs.BAD_PUBLIC_NAME
+        RequestDebugStubs.BAD_CLIENT_NAME -> Stubs.BAD_CLIENT_NAME
+        RequestDebugStubs.BAD_PLAN_TITLE -> Stubs.BAD_PLAN_TITLE
+        RequestDebugStubs.BAD_PLAN_BODY -> Stubs.BAD_PLAN_BODY
+        RequestDebugStubs.FORBIDDEN -> Stubs.FORBIDDEN
+        RequestDebugStubs.VALIDATION_ERROR -> Stubs.VALIDATION_ERROR
+        RequestDebugStubs.CANNOT_ARCHIVE -> Stubs.CANNOT_ARCHIVE
+        null -> Stubs.NONE
+    }
 
 fun IFBContext.fromTransportBase(reqId: String?, debug: Debug?) {
     requestId = reqId.toRequestId()
@@ -52,20 +54,22 @@ fun IFBContext.fromTransportBase(reqId: String?, debug: Debug?) {
     stubCase = debug.transportToStubCase()
 }
 
-fun IFBContext.toTransportInit() = InitResponse(
-    requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
-    result = if (state == State.RUNNING || state == State.FINISHING) ResponseResult.SUCCESS else ResponseResult.ERROR,
-    errors = errors.toTransportErrors()
-)
+fun IFBContext.toTransportInit() =
+    InitResponse(
+        requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
+        result = if (state == State.RUNNING || state == State.FINISHING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+        errors = errors.toTransportErrors()
+    )
 
-fun List<FBError>.toTransportErrors(): List<Error>? = this
-    .map { it.toTransport() }
-    .takeIf { it.isNotEmpty() }
+fun List<FBError>.toTransportErrors(): List<Error>? =
+    this
+        .map { it.toTransport() }
+        .takeIf { it.isNotEmpty() }
 
-fun FBError.toTransport() = Error(
-    code = code.takeIf { it.isNotBlank() },
-    group = group.takeIf { it.isNotBlank() },
-    field = field.takeIf { it.isNotBlank() },
-    message = message.takeIf { it.isNotBlank() }
-)
-
+fun FBError.toTransport() =
+    Error(
+        code = code.takeIf { it.isNotBlank() },
+        group = group.takeIf { it.isNotBlank() },
+        field = field.takeIf { it.isNotBlank() },
+        message = message.takeIf { it.isNotBlank() }
+    )

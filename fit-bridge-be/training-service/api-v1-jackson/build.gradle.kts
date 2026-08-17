@@ -52,7 +52,6 @@ openApiGenerate {
     apiPackage.set("$openapiGroup.api")
     modelPackage.set("$openapiGroup.models")
 
-
     // 4. Указываем конкретный файл внутри распакованной папки
     inputSpec.set(specDir.map { it.file("specs-training-v1.yaml").asFile.absolutePath })
 

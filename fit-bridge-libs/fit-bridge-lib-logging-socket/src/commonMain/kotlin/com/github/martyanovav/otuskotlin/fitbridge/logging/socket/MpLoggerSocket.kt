@@ -21,18 +21,20 @@ data class SocketLoggerSettings(
 fun mpLoggerSocket(
     loggerId: String,
     settings: SocketLoggerSettings = SocketLoggerSettings()
-): IMpLogWrapper = MpLoggerWrapperSocket(
-    loggerId = loggerId,
-    host = settings.host,
-    port = settings.port,
-    emitToStdout = settings.emitToStdout,
-    bufferSize = settings.bufferSize,
-    overflowPolicy = settings.overflowPolicy,
-    scope = settings.scope,
-)
+): IMpLogWrapper =
+    MpLoggerWrapperSocket(
+        loggerId = loggerId,
+        host = settings.host,
+        port = settings.port,
+        emitToStdout = settings.emitToStdout,
+        bufferSize = settings.bufferSize,
+        overflowPolicy = settings.overflowPolicy,
+        scope = settings.scope,
+    )
 
 @Suppress("unused")
-fun mpLoggerSocket(cls: KClass<*>, settings: SocketLoggerSettings = SocketLoggerSettings()): IMpLogWrapper = mpLoggerSocket(
-    loggerId = cls.qualifiedName.orEmpty(),
-    settings = settings,
-)
+fun mpLoggerSocket(cls: KClass<*>, settings: SocketLoggerSettings = SocketLoggerSettings()): IMpLogWrapper =
+    mpLoggerSocket(
+        loggerId = cls.qualifiedName.orEmpty(),
+        settings = settings,
+    )

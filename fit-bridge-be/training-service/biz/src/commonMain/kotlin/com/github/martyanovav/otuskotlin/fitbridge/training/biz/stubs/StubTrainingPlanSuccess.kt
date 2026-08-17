@@ -11,24 +11,28 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Traini
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.stubs.Stubs
 import com.github.martyanovav.otuskotlin.fitbridge.training.stubs.TrainingPlanStub
 
-fun ICorChainDsl<IFBContext>.stubTrainingPlanSuccess(title: String) = worker {
-    this.title = title
-    this.description = """
-        Кейс успеха для тренировочного плана
-    """.trimIndent()
-    on { stubCase == Stubs.SUCCESS && state == State.RUNNING && this is TrainingPlanContext }
-    handle {
-        val ctx = this as TrainingPlanContext
-        ctx.state = State.FINISHING
-        if (ctx.command == TrainingPlanCommand.SEARCH) {
-            ctx.trainingPlansResponse = Page(items = TrainingPlanStub.getList(), totalSize = TrainingPlanStub.getList().size)
-        } else {
-            ctx.trainingPlanResponse = TrainingPlanStub.get().also {
-                it.status = when (ctx.command) {
-                    TrainingPlanCommand.ARCHIVE -> TrainingPlanStatus.ARCHIVED
-                    else -> it.status
-                }
+fun ICorChainDsl<IFBContext>.stubTrainingPlanSuccess(title: String) =
+    worker {
+        this.title = title
+        this.description =
+            """
+            Кейс успеха для тренировочного плана
+            """.trimIndent()
+        on { stubCase == Stubs.SUCCESS && state == State.RUNNING && this is TrainingPlanContext }
+        handle {
+            val ctx = this as TrainingPlanContext
+            ctx.state = State.FINISHING
+            if (ctx.command == TrainingPlanCommand.SEARCH) {
+                ctx.trainingPlansResponse = Page(items = TrainingPlanStub.getList(), totalSize = TrainingPlanStub.getList().size)
+            } else {
+                ctx.trainingPlanResponse =
+                    TrainingPlanStub.get().also {
+                        it.status =
+                            when (ctx.command) {
+                                TrainingPlanCommand.ARCHIVE -> TrainingPlanStatus.ARCHIVED
+                                else -> it.status
+                            }
+                    }
             }
         }
     }
-}

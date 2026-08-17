@@ -27,5 +27,4 @@ class DefaultMarker(
     override fun contains(name: String): Boolean = submarkers.any { it.name == name }
 
     override fun toString(): String = arrayOf(name, *submarkers.toTypedArray()).joinToString(",")
-
 }

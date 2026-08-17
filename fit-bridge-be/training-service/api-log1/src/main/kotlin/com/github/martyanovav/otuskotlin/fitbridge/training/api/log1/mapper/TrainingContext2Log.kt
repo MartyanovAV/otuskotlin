@@ -21,21 +21,23 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Traini
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
 import java.time.Instant
 
-fun TrainingPlanContext.toLog(logId: String) = CommonLogModel(
-    messageTime = Instant.now().toString(),
-    logId = logId,
-    source = "fit-bridge-training",
-    training = toTrainingLog(),
-    errors = errors.map { it.toLog() },
-)
+fun TrainingPlanContext.toLog(logId: String) =
+    CommonLogModel(
+        messageTime = Instant.now().toString(),
+        logId = logId,
+        source = "fit-bridge-training",
+        training = toTrainingLog(),
+        errors = errors.map { it.toLog() },
+    )
 
-fun ClientCardContext.toLog(logId: String) = CommonLogModel(
-    messageTime = Instant.now().toString(),
-    logId = logId,
-    source = "fit-bridge-training",
-    training = toTrainingLog(),
-    errors = errors.map { it.toLog() },
-)
+fun ClientCardContext.toLog(logId: String) =
+    CommonLogModel(
+        messageTime = Instant.now().toString(),
+        logId = logId,
+        source = "fit-bridge-training",
+        training = toTrainingLog(),
+        errors = errors.map { it.toLog() },
+    )
 
 private fun TrainingPlanContext.toTrainingLog(): TrainingLogModel? {
     val planNone = TrainingPlan()
@@ -61,35 +63,40 @@ private fun ClientCardContext.toTrainingLog(): TrainingLogModel? {
     ).takeIf { it != TrainingLogModel() }
 }
 
-private fun TrainingPlanFilter.toLog() = TrainingFilterLog(
-    searchString = searchString.takeIf { it.isNotBlank() },
-    clientId = null,
-    ownerId = null,
-    cardId = null
-)
+private fun TrainingPlanFilter.toLog() =
+    TrainingFilterLog(
+        searchString = searchString.takeIf { it.isNotBlank() },
+        clientId = null,
+        ownerId = null,
+        cardId = null
+    )
 
-private fun ClientCardFilter.toLog() = TrainingFilterLog(
-    searchString = searchString.takeIf { it.isNotBlank() },
-    clientId = null,
-    ownerId = null,
-    cardId = null
-)
+private fun ClientCardFilter.toLog() =
+    TrainingFilterLog(
+        searchString = searchString.takeIf { it.isNotBlank() },
+        clientId = null,
+        ownerId = null,
+        cardId = null
+    )
 
-private fun FBError.toLog() = ErrorLogModel(
-    message = message.takeIf { it.isNotBlank() },
-    field = field.takeIf { it.isNotBlank() },
-    code = code.takeIf { it.isNotBlank() },
-    level = level.name,
-)
+private fun FBError.toLog() =
+    ErrorLogModel(
+        message = message.takeIf { it.isNotBlank() },
+        field = field.takeIf { it.isNotBlank() },
+        code = code.takeIf { it.isNotBlank() },
+        level = level.name,
+    )
 
-private fun TrainingPlan.toLog() = TrainingPlanLog(
-    id = id.takeIf { it != TrainingPlanId.NONE }?.asString(),
-    cardId = clientCardId.takeIf { it != ClientCardId.NONE }?.asString(),
-    title = title.takeIf { it.isNotBlank() }
-)
+private fun TrainingPlan.toLog() =
+    TrainingPlanLog(
+        id = id.takeIf { it != TrainingPlanId.NONE }?.asString(),
+        cardId = clientCardId.takeIf { it != ClientCardId.NONE }?.asString(),
+        title = title.takeIf { it.isNotBlank() }
+    )
 
-private fun ClientCard.toLog() = ClientCardLog(
-    id = id.takeIf { it != ClientCardId.NONE }?.asString(),
-    ownerId = ownerId.takeIf { it.isNotBlank() },
-    goals = note.takeIf { it.isNotBlank() },
-)
+private fun ClientCard.toLog() =
+    ClientCardLog(
+        id = id.takeIf { it != ClientCardId.NONE }?.asString(),
+        ownerId = ownerId.takeIf { it.isNotBlank() },
+        goals = note.takeIf { it.isNotBlank() },
+    )

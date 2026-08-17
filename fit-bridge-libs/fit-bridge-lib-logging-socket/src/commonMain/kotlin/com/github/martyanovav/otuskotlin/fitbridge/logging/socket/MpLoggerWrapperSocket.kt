@@ -12,12 +12,12 @@ import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.onSubscription
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
 @ExperimentalStdlibApi
@@ -31,15 +31,17 @@ class MpLoggerWrapperSocket(
     scope: CoroutineScope = CoroutineScope(Dispatchers.Default + CoroutineName("Logging")),
 ) : IMpLogWrapper {
     private val selectorManager = SelectorManager(Dispatchers.IO)
-    private val sf = MutableSharedFlow<LogData>(
-        extraBufferCapacity = bufferSize,
-        onBufferOverflow = overflowPolicy,
-    )
+    private val sf =
+        MutableSharedFlow<LogData>(
+            extraBufferCapacity = bufferSize,
+            onBufferOverflow = overflowPolicy,
+        )
     private val isActive: AtomicBoolean = atomic(true)
     val isReady: AtomicBoolean = atomic(false)
-    private val jsonSerializer = Json {
-        encodeDefaults = true
-    }
+    private val jsonSerializer =
+        Json {
+            encodeDefaults = true
+        }
 
     private val job = scope.launch { handleLogs() }
 

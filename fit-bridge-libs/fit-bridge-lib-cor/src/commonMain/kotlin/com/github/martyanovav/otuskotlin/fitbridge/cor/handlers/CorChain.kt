@@ -26,11 +26,12 @@ class CorChainDsl<T> : CorExecDsl<T>(), ICorChainDsl<T> {
         workers.add(worker)
     }
 
-    override fun build(): ICorExec<T> = CorChain(
-        title = title,
-        description = description,
-        execs = workers.map { it.build() },
-        blockOn = blockOn,
-        blockExcept = blockExcept,
-    )
+    override fun build(): ICorExec<T> =
+        CorChain(
+            title = title,
+            description = description,
+            execs = workers.map { it.build() },
+            blockOn = blockOn,
+            blockExcept = blockExcept,
+        )
 }

@@ -33,33 +33,44 @@ class MpLogWrapperLogback(
         data: Any? = null,
         objs: Map<String, Any>? = null,
     ) {
-        logger.log(object : LoggingEvent {
-            override fun getThrowable() = e
-            override fun getTimeStamp(): Long = Instant.now().toEpochMilli()
-            override fun getThreadName(): String = Thread.currentThread().name
-            override fun getMessage(): String = msg
-            override fun getArguments(): MutableList<Any> = argumentArray.toMutableList()
-            override fun getArgumentArray(): Array<out Any> = data
-                ?.let { d ->
-                    listOfNotNull(
-                        objs?.map { StructuredArguments.keyValue(it.key, it.value) }?.toTypedArray(),
-                        StructuredArguments.keyValue("data", d),
-                    ).toTypedArray()
-                }
-                ?: objs?.mapNotNull { StructuredArguments.keyValue(it.key, it.value) }?.toTypedArray()
-                ?: emptyArray()
+        logger.log(
+            object : LoggingEvent {
+                override fun getThrowable() = e
 
-            override fun getMarkers(): MutableList<Marker> = mutableListOf(marker)
-            override fun getKeyValuePairs(): MutableList<KeyValuePair> = objs
-                ?.mapNotNull {
-                    it.let { KeyValuePair(it.key, it.value) }
-                }
-                ?.toMutableList()
-                ?: mutableListOf()
+                override fun getTimeStamp(): Long = Instant.now().toEpochMilli()
 
-            override fun getLevel(): Level = level
-            override fun getLoggerName(): String = logger.name
-        })
+                override fun getThreadName(): String = Thread.currentThread().name
+
+                override fun getMessage(): String = msg
+
+                override fun getArguments(): MutableList<Any> = argumentArray.toMutableList()
+
+                override fun getArgumentArray(): Array<out Any> =
+                    data
+                        ?.let { d ->
+                            listOfNotNull(
+                                objs?.map { StructuredArguments.keyValue(it.key, it.value) }?.toTypedArray(),
+                                StructuredArguments.keyValue("data", d),
+                            ).toTypedArray()
+                        }
+                        ?: objs?.mapNotNull { StructuredArguments.keyValue(it.key, it.value) }?.toTypedArray()
+                        ?: emptyArray()
+
+                override fun getMarkers(): MutableList<Marker> = mutableListOf(marker)
+
+                override fun getKeyValuePairs(): MutableList<KeyValuePair> =
+                    objs
+                        ?.mapNotNull {
+                            it.let { KeyValuePair(it.key, it.value) }
+                        }
+                        ?.toMutableList()
+                        ?: mutableListOf()
+
+                override fun getLevel(): Level = level
+
+                override fun getLoggerName(): String = logger.name
+            }
+        )
     }
 
     override fun log(
@@ -78,11 +89,12 @@ class MpLogWrapperLogback(
         objs = objs,
     )
 
-    private fun LogLevel.toSlf() = when (this) {
-        LogLevel.ERROR -> Level.ERROR
-        LogLevel.WARN -> Level.WARN
-        LogLevel.INFO -> Level.INFO
-        LogLevel.DEBUG -> Level.DEBUG
-        LogLevel.TRACE -> Level.TRACE
-    }
+    private fun LogLevel.toSlf() =
+        when (this) {
+            LogLevel.ERROR -> Level.ERROR
+            LogLevel.WARN -> Level.WARN
+            LogLevel.INFO -> Level.INFO
+            LogLevel.DEBUG -> Level.DEBUG
+            LogLevel.TRACE -> Level.TRACE
+        }
 }

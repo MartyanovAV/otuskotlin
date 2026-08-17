@@ -9,10 +9,11 @@ import kotlinx.serialization.json.Json
 
 @OptIn(ExperimentalSerializationApi::class)
 @Suppress("JSON_FORMAT_REDUNDANT_DEFAULT")
-val apiV2Mapper = Json {
+val apiV2Mapper =
+    Json {
 //    ignoreUnknownKeys = true
-    allowTrailingComma = true
-}
+        allowTrailingComma = true
+    }
 
 @Suppress("UNCHECKED_CAST")
 fun <T : IRequest> apiV2RequestDeserialize(json: String) =

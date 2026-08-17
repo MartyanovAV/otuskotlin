@@ -8,8 +8,8 @@ import com.github.martyanovav.otuskotlin.fitbridge.logging.common.LogLevel
 class MpLoggerWrapperKermit(
     val logger: Logger,
     override val loggerId: String
-    ) : IMpLogWrapper {
-        override fun log(
+) : IMpLogWrapper {
+    override fun log(
         msg: String,
         level: LogLevel,
         marker: String,
@@ -25,13 +25,14 @@ class MpLoggerWrapperKermit(
         )
     }
 
-    private fun LogLevel.toKermit() = when(this) {
-        LogLevel.ERROR -> Severity.Error
-        LogLevel.WARN -> Severity.Warn
-        LogLevel.INFO -> Severity.Info
-        LogLevel.DEBUG -> Severity.Debug
-        LogLevel.TRACE -> Severity.Verbose
-    }
+    private fun LogLevel.toKermit() =
+        when (this) {
+            LogLevel.ERROR -> Severity.Error
+            LogLevel.WARN -> Severity.Warn
+            LogLevel.INFO -> Severity.Info
+            LogLevel.DEBUG -> Severity.Debug
+            LogLevel.TRACE -> Severity.Verbose
+        }
 
     // TODO Нужно для data придумать сериализацию или трансформацию в map
     private inline fun formatMessage(
@@ -48,5 +49,4 @@ class MpLoggerWrapperKermit(
         }
         return message
     }
-
 }
