@@ -1,0 +1,43 @@
+package com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests
+
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardFilterRequest
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardsResponseOk
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.IRepoClientCard
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertIs
+
+abstract class RepoClientCardSearchTest {
+    abstract val repo: IRepoClientCard
+
+    protected open val initializedObjects: List<ClientCard> = initObjects
+
+    @Test
+    fun searchByDisplayName() =
+        runRepoTest {
+            val result = repo.searchClientCards(DbClientCardFilterRequest(searchString = "ad1"))
+            assertIs<DbClientCardsResponseOk>(result)
+            val expected = listOf(initializedObjects[0])
+            assertEquals(expected.size, result.data.size)
+        }
+
+    @Test
+    fun searchAll() =
+        runRepoTest {
+            val result = repo.searchClientCards(DbClientCardFilterRequest())
+            assertIs<DbClientCardsResponseOk>(result)
+            assertEquals(initializedObjects.size, result.data.size)
+        }
+
+    companion object : BaseInitClientCards("search") {
+        override val initObjects: List<ClientCard> =
+            listOf(
+                createInitTestModel("ad1"),
+                createInitTestModel("ad2", ownerId = "owner-124"),
+                createInitTestModel("ad3"),
+                createInitTestModel("ad4", ownerId = "owner-124"),
+                createInitTestModel("ad5"),
+            )
+    }
+}

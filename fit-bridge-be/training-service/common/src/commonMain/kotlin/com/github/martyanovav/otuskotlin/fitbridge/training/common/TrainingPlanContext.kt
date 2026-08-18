@@ -10,6 +10,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Traini
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanFilter
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.WorkMode
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.IRepoTrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.stubs.Stubs
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.ws.IFBWsSession
 import kotlin.time.Instant
@@ -24,12 +25,18 @@ data class TrainingPlanContext(
     override var timeStart: Instant = Instant.DISTANT_PAST,
     override var principal: AuthPrincipal = AuthPrincipal.NONE,
     override var wsSession: IFBWsSession = IFBWsSession.NONE,
+    override var corSettings: CorSettings = CorSettings(),
     var trainingPlanRequest: TrainingPlan = TrainingPlan(),
     var trainingPlanValidating: TrainingPlan = TrainingPlan(),
     var trainingPlanValidated: TrainingPlan = TrainingPlan(),
     var trainingPlanFilter: TrainingPlanFilter = TrainingPlanFilter(),
     var trainingPlanFilterValidating: TrainingPlanFilter = TrainingPlanFilter(),
     var trainingPlanFilterValidated: TrainingPlanFilter = TrainingPlanFilter(),
+    var trainingPlanRepo: IRepoTrainingPlan = IRepoTrainingPlan.NONE,
+    var trainingPlanRepoRead: TrainingPlan = TrainingPlan(),
+    var trainingPlanRepoPrepare: TrainingPlan = TrainingPlan(),
+    var trainingPlanRepoDone: TrainingPlan = TrainingPlan(),
+    var trainingPlansRepoDone: MutableList<TrainingPlan> = mutableListOf(),
     var trainingPlanResponse: TrainingPlan = TrainingPlan(),
     var trainingPlansResponse: Page<TrainingPlan> = Page(),
 ) : IFBContext {

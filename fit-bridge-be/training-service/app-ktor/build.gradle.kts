@@ -32,6 +32,10 @@ kotlin {
                 implementation(libs.ktor.serialization.json)
 
                 implementation(libs.coroutines.core)
+
+                // DB
+                implementation(project(":repo-stubs"))
+                implementation(project(":repo-inmemory"))
             }
         }
 
@@ -60,6 +64,9 @@ kotlin {
                 implementation(libs.ktor.server.test)
                 implementation(libs.coroutines.test)
                 implementation(libs.ktor.client.websockets)
+
+                // DB
+                implementation(project(":repo-common"))
             }
         }
 

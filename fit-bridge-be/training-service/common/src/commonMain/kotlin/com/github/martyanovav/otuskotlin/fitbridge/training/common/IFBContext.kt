@@ -20,6 +20,7 @@ interface IFBContext {
     var timeStart: Instant
     var principal: AuthPrincipal
     var wsSession: IFBWsSession
+    var corSettings: CorSettings
 
     fun addError(error: FBError)
 }

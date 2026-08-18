@@ -11,13 +11,27 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Traini
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.WorkMode
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.stubs.Stubs
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.inmemory.RepoClientCardInMemory
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.inmemory.RepoTrainingPlanInMemory
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.stubs.RepoClientCardStub
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.stubs.RepoTrainingPlanStub
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TrainingProcessorTest {
-    private val processor = TrainingProcessor(CorSettings())
+    private val processor =
+        TrainingProcessor(
+            CorSettings(
+                repoClientCardTest = RepoClientCardInMemory(),
+                repoClientCardProd = RepoClientCardInMemory(),
+                repoClientCardStub = RepoClientCardStub(),
+                repoTrainingPlanTest = RepoTrainingPlanInMemory(),
+                repoTrainingPlanProd = RepoTrainingPlanInMemory(),
+                repoTrainingPlanStub = RepoTrainingPlanStub(),
+            ),
+        )
 
     @Test
     fun allClientCardCommandsReturnSuccessStub() =
@@ -163,7 +177,7 @@ class TrainingProcessorTest {
 
             processor.exec(ctx)
 
-            assertEquals(State.RUNNING, ctx.state)
+            assertEquals(State.FINISHING, ctx.state)
             assertTrue(ctx.errors.isEmpty())
             assertEquals("Клиент", ctx.clientCardValidated.displayName)
         }

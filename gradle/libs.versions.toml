@@ -18,12 +18,17 @@ ktor = "3.4.3"
 testcontainers = "2.0.4"
 prometheus-client = "1.2.1"
 
+uuid = "0.8.4"
+cache4k = "0.13.0"
+
 # BASE
 jvm-compiler = "21"
 jvm-language = "21"
 
 [libraries]
 cor = { module = "com.github.martyanovav.otuskotlin.fitbridge.libs:fit-bridge-lib-cor" }
+uuid = { module = "com.benasher44:uuid", version.ref = "uuid" }
+db-cache4k = { module = "io.github.reactivecircus.cache4k:cache4k", version.ref = "cache4k" }
 plugin-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 plugin-ktlint = { module = "org.jlleitschuh.gradle:ktlint-gradle", version.ref = "ktlint-plugin" }
 plugin-binaryCompatibilityValidator = { module = "org.jetbrains.kotlinx:binary-compatibility-validator", version.ref = "binaryCompabilityValidator" }

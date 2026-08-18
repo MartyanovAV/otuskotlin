@@ -8,13 +8,21 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Client
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardFilter
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.WorkMode
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.inmemory.RepoClientCardInMemory
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.stubs.RepoClientCardStub
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class ClientCardValidationTest {
-    private val processor = TrainingProcessor(CorSettings())
+    private val processor =
+        TrainingProcessor(
+            CorSettings(
+                repoClientCardTest = RepoClientCardInMemory(),
+                repoClientCardStub = RepoClientCardStub(),
+            ),
+        )
 
     @Test
     fun validCreateRequestIsNormalizedAndValidated() =
@@ -29,7 +37,7 @@ class ClientCardValidationTest {
 
             processor.exec(ctx)
 
-            assertEquals(State.RUNNING, ctx.state)
+            assertEquals(State.FINISHING, ctx.state)
             assertTrue(ctx.errors.isEmpty())
             assertEquals("Анна", ctx.clientCardValidated.displayName)
             assertEquals("Заметка", ctx.clientCardValidated.note)

@@ -14,13 +14,21 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Traini
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanFilter
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.WorkMode
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.inmemory.RepoTrainingPlanInMemory
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.stubs.RepoTrainingPlanStub
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TrainingPlanValidationTest {
-    private val processor = TrainingProcessor(CorSettings())
+    private val processor =
+        TrainingProcessor(
+            CorSettings(
+                repoTrainingPlanTest = RepoTrainingPlanInMemory(),
+                repoTrainingPlanStub = RepoTrainingPlanStub(),
+            ),
+        )
 
     @Test
     fun validCreateRequestIsDeepCopiedNormalizedAndValidated() =
@@ -46,7 +54,7 @@ class TrainingPlanValidationTest {
 
             processor.exec(ctx)
 
-            assertEquals(State.RUNNING, ctx.state)
+            assertEquals(State.FINISHING, ctx.state)
             assertTrue(ctx.errors.isEmpty())
             assertEquals("client-1", ctx.trainingPlanValidated.clientCardId.asString())
             assertEquals("План", ctx.trainingPlanValidated.title)

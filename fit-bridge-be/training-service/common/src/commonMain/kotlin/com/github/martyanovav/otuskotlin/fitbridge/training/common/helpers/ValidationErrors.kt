@@ -22,3 +22,20 @@ fun IFBContext.fail(error: FBError) {
     addError(error)
     state = State.FAILING
 }
+
+fun IFBContext.fail(errors: Collection<FBError>) {
+    errors.forEach { addError(it) }
+    state = State.FAILING
+}
+
+fun errorSystem(
+    violationCode: String,
+    level: LogLevel = LogLevel.ERROR,
+    e: Throwable,
+) = FBError(
+    code = "system-$violationCode",
+    group = "system",
+    message = "System error occurred. Our stuff has been informed, please retry later",
+    level = level,
+    exception = e,
+)

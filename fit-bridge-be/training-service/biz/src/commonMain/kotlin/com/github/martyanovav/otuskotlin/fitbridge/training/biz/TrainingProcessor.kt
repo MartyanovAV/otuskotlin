@@ -1,10 +1,30 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.biz
 
+import com.github.martyanovav.otuskotlin.fitbridge.cor.chain
 import com.github.martyanovav.otuskotlin.fitbridge.cor.rootChain
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.general.clientCardOperation
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.general.initStatus
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.general.stubs
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.general.trainingPlanOperation
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.clientCardRepoArchive
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.clientCardRepoCreate
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.clientCardRepoPrepareArchive
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.clientCardRepoPrepareCreate
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.clientCardRepoPrepareUpdate
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.clientCardRepoRead
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.clientCardRepoSearch
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.clientCardRepoUpdate
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.initClientCardRepo
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.initTrainingPlanRepo
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.prepareRepoResult
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoArchive
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoCreate
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoPrepareArchive
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoPrepareCreate
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoPrepareUpdate
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoRead
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoSearch
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoUpdate
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.stubs.stubCannotArchive
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.stubs.stubClientCardSuccess
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.stubs.stubNoCase
@@ -68,7 +88,10 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Traini
 class TrainingProcessor(
     @Suppress("unused") private val corSettings: CorSettings,
 ) {
-    suspend fun exec(ctx: IFBContext) = businessChain.exec(ctx)
+    suspend fun exec(ctx: IFBContext) {
+        ctx.corSettings = corSettings
+        businessChain.exec(ctx)
+    }
 
     private val businessChain =
         rootChain<IFBContext> {
@@ -76,6 +99,7 @@ class TrainingProcessor(
 
             // ClientCard Commands
             clientCardOperation("Создание карточки клиента", ClientCardCommand.CREATE) {
+                initClientCardRepo("Инициализация репозитория")
                 stubs("Обработка стабов") {
                     stubClientCardSuccess("Успешная обработка")
                     stubNoCase("Ошибка: запрошенный стаб недопустим")
@@ -88,8 +112,15 @@ class TrainingProcessor(
                     validateClientCardNoteMaxLength("Проверка длины заметки")
                     finishClientCardValidation("Завершение валидации карточки клиента")
                 }
+                chain {
+                    title = "Логика сохранения"
+                    clientCardRepoPrepareCreate("Подготовка объекта для сохранения")
+                    clientCardRepoCreate("Создание карточки клиента в БД")
+                }
+                prepareRepoResult("Подготовка ответа")
             }
             clientCardOperation("Чтение карточки клиента", ClientCardCommand.READ) {
+                initClientCardRepo("Инициализация репозитория")
                 stubs("Обработка стабов") {
                     stubClientCardSuccess("Успешная обработка")
                     stubNotFound("Не найдено")
@@ -102,8 +133,14 @@ class TrainingProcessor(
                     validateClientCardIdFormat("Проверка формата ID")
                     finishClientCardValidation("Завершение валидации карточки клиента")
                 }
+                chain {
+                    title = "Логика чтения"
+                    clientCardRepoRead("Чтение карточки клиента из БД")
+                }
+                prepareRepoResult("Подготовка ответа")
             }
             clientCardOperation("Обновление карточки клиента", ClientCardCommand.UPDATE) {
+                initClientCardRepo("Инициализация репозитория")
                 stubs("Обработка стабов") {
                     stubClientCardSuccess("Успешная обработка")
                     stubNotFound("Не найдено")
@@ -122,8 +159,16 @@ class TrainingProcessor(
                     validateClientCardLockFormat("Проверка формата lock")
                     finishClientCardValidation("Завершение валидации карточки клиента")
                 }
+                chain {
+                    title = "Логика сохранения"
+                    clientCardRepoRead("Чтение карточки клиента из БД")
+                    clientCardRepoPrepareUpdate("Подготовка объекта для обновления")
+                    clientCardRepoUpdate("Обновление карточки клиента в БД")
+                }
+                prepareRepoResult("Подготовка ответа")
             }
             clientCardOperation("Архивирование карточки клиента", ClientCardCommand.ARCHIVE) {
+                initClientCardRepo("Инициализация репозитория")
                 stubs("Обработка стабов") {
                     stubClientCardSuccess("Успешная обработка")
                     stubNotFound("Не найдено")
@@ -139,8 +184,16 @@ class TrainingProcessor(
                     validateClientCardLockFormat("Проверка формата lock")
                     finishClientCardValidation("Завершение валидации карточки клиента")
                 }
+                chain {
+                    title = "Логика архивирования"
+                    clientCardRepoRead("Чтение карточки клиента из БД")
+                    clientCardRepoPrepareArchive("Подготовка объекта для архивирования")
+                    clientCardRepoArchive("Архивирование карточки клиента в БД")
+                }
+                prepareRepoResult("Подготовка ответа")
             }
             clientCardOperation("Поиск карточки клиента", ClientCardCommand.SEARCH) {
+                initClientCardRepo("Инициализация репозитория")
                 stubs("Обработка стабов") {
                     stubClientCardSuccess("Успешная обработка")
                     stubNoCase("Ошибка: запрошенный стаб недопустим")
@@ -153,10 +206,13 @@ class TrainingProcessor(
                     validateClientCardPageSize("Проверка размера страницы")
                     finishClientCardFilterValidation("Завершение валидации фильтра карточек")
                 }
+                clientCardRepoSearch("Поиск карточек клиентов в БД по фильтру")
+                prepareRepoResult("Подготовка ответа")
             }
 
             // TrainingPlan Commands
             trainingPlanOperation("Создание тренировочного плана", TrainingPlanCommand.CREATE) {
+                initTrainingPlanRepo("Инициализация репозитория")
                 stubs("Обработка стабов") {
                     stubTrainingPlanSuccess("Успешная обработка")
                     stubValidationBadPlanTitle("Неверное название")
@@ -183,8 +239,15 @@ class TrainingProcessor(
                     validateTrainingPlanItemRestSeconds("Проверка длительности отдыха")
                     finishTrainingPlanValidation("Завершение валидации тренировочного плана")
                 }
+                chain {
+                    title = "Логика сохранения"
+                    trainingPlanRepoPrepareCreate("Подготовка объекта для сохранения")
+                    trainingPlanRepoCreate("Создание тренировочного плана в БД")
+                }
+                prepareRepoResult("Подготовка ответа")
             }
             trainingPlanOperation("Чтение тренировочного плана", TrainingPlanCommand.READ) {
+                initTrainingPlanRepo("Инициализация репозитория")
                 stubs("Обработка стабов") {
                     stubTrainingPlanSuccess("Успешная обработка")
                     stubNotFound("Не найдено")
@@ -197,8 +260,14 @@ class TrainingProcessor(
                     validateTrainingPlanIdFormat("Проверка формата ID")
                     finishTrainingPlanValidation("Завершение валидации тренировочного плана")
                 }
+                chain {
+                    title = "Логика чтения"
+                    trainingPlanRepoRead("Чтение тренировочного плана из БД")
+                }
+                prepareRepoResult("Подготовка ответа")
             }
             trainingPlanOperation("Обновление тренировочного плана", TrainingPlanCommand.UPDATE) {
+                initTrainingPlanRepo("Инициализация репозитория")
                 stubs("Обработка стабов") {
                     stubTrainingPlanSuccess("Успешная обработка")
                     stubNotFound("Не найдено")
@@ -229,8 +298,16 @@ class TrainingProcessor(
                     validateTrainingPlanLockFormat("Проверка формата lock")
                     finishTrainingPlanValidation("Завершение валидации тренировочного плана")
                 }
+                chain {
+                    title = "Логика сохранения"
+                    trainingPlanRepoRead("Чтение тренировочного плана из БД")
+                    trainingPlanRepoPrepareUpdate("Подготовка объекта для обновления")
+                    trainingPlanRepoUpdate("Обновление тренировочного плана в БД")
+                }
+                prepareRepoResult("Подготовка ответа")
             }
             trainingPlanOperation("Архивирование тренировочного плана", TrainingPlanCommand.ARCHIVE) {
+                initTrainingPlanRepo("Инициализация репозитория")
                 stubs("Обработка стабов") {
                     stubTrainingPlanSuccess("Успешная обработка")
                     stubNotFound("Не найдено")
@@ -246,8 +323,16 @@ class TrainingProcessor(
                     validateTrainingPlanLockFormat("Проверка формата lock")
                     finishTrainingPlanValidation("Завершение валидации тренировочного плана")
                 }
+                chain {
+                    title = "Логика архивирования"
+                    trainingPlanRepoRead("Чтение тренировочного плана из БД")
+                    trainingPlanRepoPrepareArchive("Подготовка объекта для архивирования")
+                    trainingPlanRepoArchive("Архивирование тренировочного плана в БД")
+                }
+                prepareRepoResult("Подготовка ответа")
             }
             trainingPlanOperation("Поиск тренировочного плана", TrainingPlanCommand.SEARCH) {
+                initTrainingPlanRepo("Инициализация репозитория")
                 stubs("Обработка стабов") {
                     stubTrainingPlanSuccess("Успешная обработка")
                     stubNoCase("Ошибка: запрошенный стаб недопустим")
@@ -261,6 +346,8 @@ class TrainingProcessor(
                     validateTrainingPlanPageSize("Проверка размера страницы")
                     finishTrainingPlanFilterValidation("Завершение валидации фильтра планов")
                 }
+                trainingPlanRepoSearch("Поиск тренировочных планов в БД по фильтру")
+                prepareRepoResult("Подготовка ответа")
             }
         }.build()
 }
