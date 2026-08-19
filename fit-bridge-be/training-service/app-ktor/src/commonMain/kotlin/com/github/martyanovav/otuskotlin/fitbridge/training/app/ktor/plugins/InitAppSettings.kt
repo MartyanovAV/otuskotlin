@@ -1,5 +1,6 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.plugins
 
+import com.github.martyanovav.otuskotlin.fitbridge.logging.common.FbLoggerProvider
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.AppSettings
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.base.KtorWsSessionRepo
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.configs.ConfigPaths
@@ -18,7 +19,9 @@ import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationStopped
 import org.jetbrains.exposed.v1.jdbc.Database
 
-fun Application.initAppSettings(): AppSettings {
+fun Application.initAppSettings(
+    loggerProvider: FbLoggerProvider = FbLoggerProvider()
+): AppSettings {
     val prodType = environment.config.propertyOrNull("${ConfigPaths.REPOSITORY}.prod")?.getString()?.lowercase() ?: "inmemory"
     val testType = environment.config.propertyOrNull("${ConfigPaths.REPOSITORY}.test")?.getString()?.lowercase() ?: "inmemory"
 
@@ -62,6 +65,7 @@ fun Application.initAppSettings(): AppSettings {
     return AppSettings(
         corSettings =
             CorSettings(
+                loggerProvider = loggerProvider,
                 wsSessionsV1 = KtorWsSessionRepo(),
                 wsSessionsV2 = KtorWsSessionRepo(),
                 repoClientCardTest = repoClientCardTest,

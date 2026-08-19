@@ -1,7 +1,7 @@
 package com.github.martyanovav.otuskotlin.fitbridge.logging.jvm
 
 import ch.qos.logback.classic.Logger
-import com.github.martyanovav.otuskotlin.fitbridge.logging.common.IMpLogWrapper
+import com.github.martyanovav.otuskotlin.fitbridge.logging.common.IFbLogWrapper
 import com.github.martyanovav.otuskotlin.fitbridge.logging.common.LogLevel
 import net.logstash.logback.argument.StructuredArguments
 import org.slf4j.Marker
@@ -10,7 +10,7 @@ import org.slf4j.event.Level
 import org.slf4j.event.LoggingEvent
 import java.time.Instant
 
-class MpLogWrapperLogback(
+class FbLogWrapperLogback(
     /**
      * Экземпляр логера (Logback)
      * logger.info("Hello {}, {}, {}", "DATA1", 123, 12.345)
@@ -21,7 +21,7 @@ class MpLogWrapperLogback(
      * логера о входе и выходе из функции.
      */
     override val loggerId: String = logger.name,
-) : IMpLogWrapper {
+) : IFbLogWrapper {
     /**
      * Основная функция для логирования
      */

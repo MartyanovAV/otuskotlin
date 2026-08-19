@@ -6,7 +6,7 @@ import kotlin.time.measureTimedValue
 
 @OptIn(ExperimentalStdlibApi::class)
 @Suppress("unused")
-interface IMpLogWrapper : AutoCloseable {
+interface IFbLogWrapper : AutoCloseable {
     val loggerId: String
 
     fun log(
@@ -92,7 +92,7 @@ interface IMpLogWrapper : AutoCloseable {
 
     companion object {
         val DEFAULT =
-            object : IMpLogWrapper {
+            object : IFbLogWrapper {
                 override val loggerId: String = "NONE"
 
                 override fun log(

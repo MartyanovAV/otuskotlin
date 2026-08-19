@@ -10,28 +10,28 @@ import kotlin.reflect.KFunction
  * // Обычно логер вызывается вот так
  * val logger = LoggerFactory.getLogger(this::class.java)
  * // Мы создаем экземпляр логер-провайдера вот так
- * val loggerProvider = MkpLoggerProvider { clazz -> mpLoggerLogback(clazz) }
+ * val loggerProvider = MkpLoggerProvider { clazz -> FbLoggerLogback(clazz) }
  *
  * // В дальнейшем будем использовать этот экземпляр вот так:
  * val logger = loggerProvider.logger(this::class)
  * logger.info("My log")
  * ```
  */
-class MpLoggerProvider(
-    private val provider: (String) -> IMpLogWrapper = { IMpLogWrapper.DEFAULT }
+class FbLoggerProvider(
+    private val provider: (String) -> IFbLogWrapper = { IFbLogWrapper.DEFAULT }
 ) {
     /**
      * Инициализирует и возвращает экземпляр логера
      */
-    fun logger(loggerId: String): IMpLogWrapper = provider(loggerId)
+    fun logger(loggerId: String): IFbLogWrapper = provider(loggerId)
 
     /**
      * Инициализирует и возвращает экземпляр логера
      */
-    fun logger(clazz: KClass<*>): IMpLogWrapper = provider(clazz.qualifiedName ?: clazz.simpleName ?: "(unknown)")
+    fun logger(clazz: KClass<*>): IFbLogWrapper = provider(clazz.qualifiedName ?: clazz.simpleName ?: "(unknown)")
 
     /**
      * Инициализирует и возвращает экземпляр логера
      */
-    fun logger(function: KFunction<*>): IMpLogWrapper = provider(function.name)
+    fun logger(function: KFunction<*>): IFbLogWrapper = provider(function.name)
 }

@@ -1,6 +1,8 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor
 
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.apiV1Mapper
+import com.github.martyanovav.otuskotlin.fitbridge.logging.common.FbLoggerProvider
+import com.github.martyanovav.otuskotlin.fitbridge.logging.jvm.FbLoggerLogback
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.plugins.initAppSettings
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.v1.v1Training
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.v1.wsHandlerV1
@@ -11,6 +13,7 @@ import io.ktor.server.application.Application
 import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.metrics.micrometer.MicrometerMetrics
+import io.ktor.server.plugins.calllogging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
@@ -25,12 +28,19 @@ import io.micrometer.core.instrument.binder.system.ProcessorMetrics
 import io.micrometer.core.instrument.distribution.DistributionStatisticConfig
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import org.slf4j.event.Level
 import java.time.Duration
 
 fun main(args: Array<String>): Unit = EngineMain.main(args)
 
 @Suppress("unused") // Referenced in application.yaml
-fun Application.moduleJvm(appSettings: AppSettings = initAppSettings()) {
+fun Application.moduleJvm(
+    appSettings: AppSettings = initAppSettings(FbLoggerProvider { FbLoggerLogback(it) })
+) {
+    install(CallLogging) {
+        level = Level.INFO
+    }
+
     val appMicrometerRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
 
     install(MicrometerMetrics) {

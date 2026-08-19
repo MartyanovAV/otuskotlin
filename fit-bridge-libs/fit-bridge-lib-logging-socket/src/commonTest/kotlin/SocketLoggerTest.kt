@@ -46,9 +46,9 @@ class SocketLoggerTest {
                         }
                     }
                 // Prepare Logger
-                mpLoggerSocket("test", loggerSettings).use { logger ->
+                FbLoggerSocket("test", loggerSettings).use { logger ->
                     // Wait for logger is ready
-                    while ((logger as? MpLoggerWrapperSocket)?.isReady?.value != true) {
+                    while ((logger as? FbLoggerWrapperSocket)?.isReady?.value != true) {
                         delay(1)
                     }
                     coroutineScope {

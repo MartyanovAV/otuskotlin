@@ -1,6 +1,6 @@
 package com.github.martyanovav.otuskotlin.fitbridge.logging.socket
 
-import com.github.martyanovav.otuskotlin.fitbridge.logging.common.IMpLogWrapper
+import com.github.martyanovav.otuskotlin.fitbridge.logging.common.IFbLogWrapper
 import com.github.martyanovav.otuskotlin.fitbridge.logging.common.LogLevel
 import io.ktor.network.selector.SelectorManager
 import io.ktor.network.sockets.aSocket
@@ -21,7 +21,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
 @ExperimentalStdlibApi
-class MpLoggerWrapperSocket(
+class FbLoggerWrapperSocket(
     override val loggerId: String,
     private val host: String = "127.0.0.1",
     private val port: Int = 9002,
@@ -29,7 +29,7 @@ class MpLoggerWrapperSocket(
     bufferSize: Int = 16,
     overflowPolicy: BufferOverflow = BufferOverflow.SUSPEND,
     scope: CoroutineScope = CoroutineScope(Dispatchers.Default + CoroutineName("Logging")),
-) : IMpLogWrapper {
+) : IFbLogWrapper {
     private val selectorManager = SelectorManager(Dispatchers.IO)
     private val sf =
         MutableSharedFlow<LogData>(

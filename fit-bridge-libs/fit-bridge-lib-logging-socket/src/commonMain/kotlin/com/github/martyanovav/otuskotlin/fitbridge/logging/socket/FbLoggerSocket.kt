@@ -1,6 +1,6 @@
 package com.github.martyanovav.otuskotlin.fitbridge.logging.socket
 
-import com.github.martyanovav.otuskotlin.fitbridge.logging.common.IMpLogWrapper
+import com.github.martyanovav.otuskotlin.fitbridge.logging.common.IFbLogWrapper
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,12 +17,12 @@ data class SocketLoggerSettings(
 )
 
 @OptIn(ExperimentalStdlibApi::class)
-@Suppress("unused")
-fun mpLoggerSocket(
+@Suppress("unused", "FunctionName")
+fun FbLoggerSocket(
     loggerId: String,
     settings: SocketLoggerSettings = SocketLoggerSettings()
-): IMpLogWrapper =
-    MpLoggerWrapperSocket(
+): IFbLogWrapper =
+    FbLoggerWrapperSocket(
         loggerId = loggerId,
         host = settings.host,
         port = settings.port,
@@ -32,9 +32,9 @@ fun mpLoggerSocket(
         scope = settings.scope,
     )
 
-@Suppress("unused")
-fun mpLoggerSocket(cls: KClass<*>, settings: SocketLoggerSettings = SocketLoggerSettings()): IMpLogWrapper =
-    mpLoggerSocket(
+@Suppress("unused", "FunctionName")
+fun FbLoggerSocket(cls: KClass<*>, settings: SocketLoggerSettings = SocketLoggerSettings()): IFbLogWrapper =
+    FbLoggerSocket(
         loggerId = cls.qualifiedName.orEmpty(),
         settings = settings,
     )

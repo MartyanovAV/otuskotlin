@@ -2,13 +2,13 @@ package com.github.martyanovav.otuskotlin.fitbridge.logging.kermit
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
-import com.github.martyanovav.otuskotlin.fitbridge.logging.common.IMpLogWrapper
+import com.github.martyanovav.otuskotlin.fitbridge.logging.common.IFbLogWrapper
 import com.github.martyanovav.otuskotlin.fitbridge.logging.common.LogLevel
 
-class MpLoggerWrapperKermit(
+class FbLoggerWrapperKermit(
     val logger: Logger,
     override val loggerId: String
-) : IMpLogWrapper {
+) : IFbLogWrapper {
     override fun log(
         msg: String,
         level: LogLevel,
