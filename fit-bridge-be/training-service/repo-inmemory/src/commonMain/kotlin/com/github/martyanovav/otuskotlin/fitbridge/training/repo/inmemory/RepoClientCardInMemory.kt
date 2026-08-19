@@ -3,6 +3,7 @@ package com.github.martyanovav.otuskotlin.fitbridge.training.repo.inmemory
 import com.benasher44.uuid.uuid4
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardStatus
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardFilterRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardIdRequest
@@ -15,6 +16,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.IRepoCli
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.RepoClientCardBase
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorEmptyClientCardId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorNotFoundClientCard
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorRepoConcurrencyClientCard
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.common.IRepoClientCardInitializable
 import io.github.reactivecircus.cache4k.Cache
 import kotlinx.coroutines.sync.Mutex
@@ -70,11 +72,14 @@ class RepoClientCardInMemory(
             val key = id.asString()
 
             mutex.withLock {
-                val oldCard = cache.get(key)?.toInternal()
+                val oldEntity = cache.get(key)
+                val oldCard = oldEntity?.toInternal()
                 when {
                     oldCard == null -> errorNotFoundClientCard(id)
+                    oldCard.lock != ClientCardLock.NONE && oldCard.lock != rqCard.lock ->
+                        errorRepoConcurrencyClientCard(oldCard, rqCard.lock)
                     else -> {
-                        val newCard = rqCard.copy()
+                        val newCard = rqCard.copy(lock = ClientCardLock(randomUuid()))
                         val entity = ClientCardEntity(newCard)
                         cache.put(key, entity)
                         DbClientCardResponseOk(newCard)
@@ -89,11 +94,14 @@ class RepoClientCardInMemory(
             val key = id.asString()
 
             mutex.withLock {
-                val oldCard = cache.get(key)?.toInternal()
+                val oldEntity = cache.get(key)
+                val oldCard = oldEntity?.toInternal()
                 when {
                     oldCard == null -> errorNotFoundClientCard(id)
+                    oldCard.lock != ClientCardLock.NONE && oldCard.lock != rq.lock ->
+                        errorRepoConcurrencyClientCard(oldCard, rq.lock)
                     else -> {
-                        val archivedCard = oldCard.copy(isArchived = true)
+                        val archivedCard = oldCard.copy(isArchived = true, lock = ClientCardLock(randomUuid()))
                         val entity = ClientCardEntity(archivedCard)
                         cache.put(key, entity)
                         DbClientCardResponseOk(archivedCard)

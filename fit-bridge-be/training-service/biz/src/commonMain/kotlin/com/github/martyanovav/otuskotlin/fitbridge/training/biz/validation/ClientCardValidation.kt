@@ -5,6 +5,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.cor.worker
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.IFBContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardStatus
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
 
@@ -32,12 +33,12 @@ fun ICorChainDsl<IFBContext>.prepareClientCardValidation(
                 ownerId = ownerId.trim()
                 displayName = displayName.trim()
                 note = note.trim()
-                lock = lock.trim()
+                lock = ClientCardLock(lock.asString().trim())
                 if (resetIdentity) {
                     id = ClientCardId.NONE
                     ownerId = ""
                     isArchived = false
-                    lock = ""
+                    lock = ClientCardLock.NONE
                 }
             }
     }
@@ -116,7 +117,7 @@ fun ICorChainDsl<IFBContext>.validateClientCardLockNotEmpty(title: String) =
         field = "lock",
         violationCode = "empty",
         description = "field must not be empty",
-    ) { clientCardContext.clientCardValidating.lock.isEmpty() }
+    ) { clientCardContext.clientCardValidating.lock == ClientCardLock.NONE }
 
 fun ICorChainDsl<IFBContext>.validateClientCardLockFormat(title: String) =
     validationWorker(
@@ -125,7 +126,7 @@ fun ICorChainDsl<IFBContext>.validateClientCardLockFormat(title: String) =
         violationCode = "badFormat",
         description = "field must contain only letters, numbers and ID separators",
     ) {
-        val lock = clientCardContext.clientCardValidating.lock
+        val lock = clientCardContext.clientCardValidating.lock.asString()
         lock.isNotEmpty() && !lock.matches(ID_PATTERN)
     }
 

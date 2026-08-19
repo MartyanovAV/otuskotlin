@@ -21,6 +21,7 @@ abstract class RepoClientCardUpdateTest {
             ownerId = "owner-123",
             displayName = "update object",
             note = "update object description",
+            lock = updateSucc.lock,
         )
     }
     private val reqUpdateNotFound =

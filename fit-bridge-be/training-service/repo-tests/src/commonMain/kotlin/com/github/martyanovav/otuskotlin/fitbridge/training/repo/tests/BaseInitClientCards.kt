@@ -2,6 +2,7 @@ package com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests
 
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardLock
 
 abstract class BaseInitClientCards(private val op: String) : IInitObjects<ClientCard> {
     fun createInitTestModel(
@@ -12,5 +13,6 @@ abstract class BaseInitClientCards(private val op: String) : IInitObjects<Client
         ownerId = ownerId,
         displayName = "$suf stub",
         note = "$suf stub description",
+        lock = ClientCardLock("lock-$op-$suf"),
     )
 }

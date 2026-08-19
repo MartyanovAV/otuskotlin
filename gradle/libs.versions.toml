@@ -20,6 +20,8 @@ prometheus-client = "1.2.1"
 
 uuid = "0.8.4"
 cache4k = "0.13.0"
+hikari = "5.1.0"
+pgjdbc = "42.7.3"
 
 # BASE
 jvm-compiler = "21"
@@ -29,6 +31,8 @@ jvm-language = "21"
 cor = { module = "com.github.martyanovav.otuskotlin.fitbridge.libs:fit-bridge-lib-cor" }
 uuid = { module = "com.benasher44:uuid", version.ref = "uuid" }
 db-cache4k = { module = "io.github.reactivecircus.cache4k:cache4k", version.ref = "cache4k" }
+db-postgres = { module = "org.postgresql:postgresql", version.ref = "pgjdbc" }
+db-hikari = { module = "com.zaxxer:HikariCP", version.ref = "hikari" }
 plugin-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 plugin-ktlint = { module = "org.jlleitschuh.gradle:ktlint-gradle", version.ref = "ktlint-plugin" }
 plugin-binaryCompatibilityValidator = { module = "org.jetbrains.kotlinx:binary-compatibility-validator", version.ref = "binaryCompabilityValidator" }
@@ -80,6 +84,7 @@ coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", ve
 coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 
 testcontainers-core = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
+testcontainers-postgres = { module = "org.testcontainers:testcontainers-postgresql", version.ref = "testcontainers" }
 
 # Internal modules
 fit-bridge-specs = "com.github.martyanovav.otuskotlin.fitbridge:fit-bridge-specs:0.1.0"

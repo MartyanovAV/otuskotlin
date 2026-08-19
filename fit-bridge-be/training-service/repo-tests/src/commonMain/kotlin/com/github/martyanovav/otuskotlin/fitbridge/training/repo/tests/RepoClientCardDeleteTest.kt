@@ -2,6 +2,7 @@ package com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests
 
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardIdRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardResponseErr
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardResponseOk
@@ -19,7 +20,7 @@ abstract class RepoClientCardDeleteTest {
     @Test
     fun deleteSuccess() =
         runRepoTest {
-            val result = repo.archiveClientCard(DbClientCardIdRequest(deleteSucc.id))
+            val result = repo.archiveClientCard(DbClientCardIdRequest(deleteSucc))
             assertIs<DbClientCardResponseOk>(result)
             assertEquals(deleteSucc.displayName, result.data.displayName)
             assertEquals(deleteSucc.note, result.data.note)
@@ -28,7 +29,7 @@ abstract class RepoClientCardDeleteTest {
     @Test
     fun deleteNotFound() =
         runRepoTest {
-            val result = repo.readClientCard(DbClientCardIdRequest(notFoundId))
+            val result = repo.readClientCard(DbClientCardIdRequest(notFoundId, ClientCardLock.NONE))
 
             assertIs<DbClientCardResponseErr>(result)
             val error = result.errors.find { it.code == "repo-not-found" }

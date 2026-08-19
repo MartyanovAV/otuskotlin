@@ -1,6 +1,7 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests
 
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ExerciseItem
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbTrainingPlanRequest
@@ -20,6 +21,7 @@ abstract class RepoTrainingPlanCreateTest {
             clientCardId = ClientCardId("cc-123"),
             ownerId = "owner-123",
             title = "create object",
+            planItems = listOf(ExerciseItem(id = "ex-create", title = "Create Exercise", exerciseId = "ex-1")),
         )
 
     @Test

@@ -3,7 +3,7 @@ package com.github.martyanovav.otuskotlin.fitbridge.training.repo.common
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
 
 class RepoClientCardInitialized(
-    private val repo: IRepoClientCardInitializable,
+    val repo: IRepoClientCardInitializable,
     initObjects: Collection<ClientCard> = emptyList(),
 ) : IRepoClientCardInitializable by repo {
     @Suppress("unused")

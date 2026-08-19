@@ -2,6 +2,7 @@ package com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests
 
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbTrainingPlanIdRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbTrainingPlanResponseErr
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbTrainingPlanResponseOk
@@ -19,7 +20,7 @@ abstract class RepoTrainingPlanDeleteTest {
     @Test
     fun deleteSuccess() =
         runRepoTest {
-            val result = repo.archiveTrainingPlan(DbTrainingPlanIdRequest(deleteSucc.id))
+            val result = repo.archiveTrainingPlan(DbTrainingPlanIdRequest(deleteSucc))
             assertIs<DbTrainingPlanResponseOk>(result)
             assertEquals(deleteSucc.title, result.data.title)
         }
@@ -27,7 +28,7 @@ abstract class RepoTrainingPlanDeleteTest {
     @Test
     fun deleteNotFound() =
         runRepoTest {
-            val result = repo.readTrainingPlan(DbTrainingPlanIdRequest(notFoundId))
+            val result = repo.readTrainingPlan(DbTrainingPlanIdRequest(notFoundId, TrainingPlanLock.NONE))
 
             assertIs<DbTrainingPlanResponseErr>(result)
             val error = result.errors.find { it.code == "repo-not-found" }

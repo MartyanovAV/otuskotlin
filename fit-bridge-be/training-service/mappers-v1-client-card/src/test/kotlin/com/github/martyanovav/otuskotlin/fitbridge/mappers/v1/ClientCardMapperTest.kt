@@ -11,6 +11,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardCon
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.RequestId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
@@ -111,7 +112,7 @@ class ClientCardMapperTest {
                         isArchived = false,
                         createdAt = "2026-01-01T10:00:00Z",
                         updatedAt = "2026-01-02T11:30:00Z",
-                        lock = "lock-cc-1",
+                        lock = ClientCardLock("lock-cc-1"),
                     ),
             )
 

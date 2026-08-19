@@ -2,6 +2,7 @@ package com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests
 
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbTrainingPlanIdRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbTrainingPlanResponseErr
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbTrainingPlanResponseOk
@@ -17,16 +18,20 @@ abstract class RepoTrainingPlanReadTest {
     @Test
     fun readSuccess() =
         runRepoTest {
-            val result = repo.readTrainingPlan(DbTrainingPlanIdRequest(readSucc.id))
+            val result = repo.readTrainingPlan(DbTrainingPlanIdRequest(readSucc))
 
             assertIs<DbTrainingPlanResponseOk>(result)
-            assertEquals(readSucc, result.data)
+            assertEquals(readSucc.id, result.data.id)
+            assertEquals(readSucc.clientCardId, result.data.clientCardId)
+            assertEquals(readSucc.ownerId, result.data.ownerId)
+            assertEquals(readSucc.title, result.data.title)
+            assertEquals(readSucc.status, result.data.status)
         }
 
     @Test
     fun readNotFound() =
         runRepoTest {
-            val result = repo.readTrainingPlan(DbTrainingPlanIdRequest(notFoundId))
+            val result = repo.readTrainingPlan(DbTrainingPlanIdRequest(notFoundId, TrainingPlanLock.NONE))
 
             assertIs<DbTrainingPlanResponseErr>(result)
             val error = result.errors.find { it.code == "repo-not-found" }

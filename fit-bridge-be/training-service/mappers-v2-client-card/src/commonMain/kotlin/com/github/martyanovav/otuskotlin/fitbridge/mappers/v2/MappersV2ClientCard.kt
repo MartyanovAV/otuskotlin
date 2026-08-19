@@ -22,6 +22,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Client
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardFilter
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardStatus
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBCommandBase
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
@@ -157,7 +158,7 @@ fun ClientCard.toTransportClientCard(): ClientCardResponseObject? {
             },
         createdAt = createdAt.takeIf { it.isNotBlank() },
         updatedAt = updatedAt.takeIf { it.isNotBlank() },
-        lock = lock.takeIf { it.isNotBlank() }
+        lock = lock.asString().takeIf { it.isNotBlank() }
     )
 }
 
@@ -179,11 +180,11 @@ private fun ClientCardUpdateObject?.toInternal() =
         id = this?.id.toClientCardId(),
         displayName = this?.displayName.orEmpty(),
         note = this?.note.orEmpty(),
-        lock = this?.lock.orEmpty()
+        lock = ClientCardLock(this?.lock.orEmpty())
     )
 
 private fun ClientCardArchiveObject?.toInternal() =
     ClientCard(
         id = this?.id.toClientCardId(),
-        lock = this?.lock.orEmpty()
+        lock = ClientCardLock(this?.lock.orEmpty())
     )

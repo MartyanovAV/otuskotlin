@@ -6,7 +6,7 @@ data class TrainingPlan(
     var ownerId: String = "",
     var title: String = "",
     var status: TrainingPlanStatus = TrainingPlanStatus.ACTIVE,
-    var lock: String = "",
+    var lock: TrainingPlanLock = TrainingPlanLock.NONE,
     var planItems: List<PlanItem> = emptyList(),
     var version: Int = 1,
     var createdAt: String = "",

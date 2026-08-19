@@ -11,6 +11,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.PlanIt
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.SupersetItem
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus
 
 private const val TITLE_MIN_LENGTH = 3
@@ -158,12 +159,12 @@ fun ICorChainDsl<IFBContext>.prepareTrainingPlanValidation(
                 clientCardId = ClientCardId(clientCardId.asString().trim())
                 ownerId = ownerId.trim()
                 this.title = this.title.trim()
-                lock = lock.trim()
+                lock = TrainingPlanLock(lock.asString().trim())
                 if (resetIdentity) {
                     id = TrainingPlanId.NONE
                     ownerId = ""
                     status = TrainingPlanStatus.ACTIVE
-                    lock = ""
+                    lock = TrainingPlanLock.NONE
                 }
             }
     }
@@ -406,7 +407,7 @@ fun ICorChainDsl<IFBContext>.validateTrainingPlanLockNotEmpty(title: String) =
         field = "lock",
         violationCode = "empty",
         description = "field must not be empty",
-    ) { trainingPlanContext.trainingPlanValidating.lock.isEmpty() }
+    ) { trainingPlanContext.trainingPlanValidating.lock == TrainingPlanLock.NONE }
 
 fun ICorChainDsl<IFBContext>.validateTrainingPlanLockFormat(title: String) =
     validationWorker(
@@ -415,7 +416,7 @@ fun ICorChainDsl<IFBContext>.validateTrainingPlanLockFormat(title: String) =
         violationCode = "badFormat",
         description = "field must contain only letters, numbers and ID separators",
     ) {
-        val lock = trainingPlanContext.trainingPlanValidating.lock
+        val lock = trainingPlanContext.trainingPlanValidating.lock.asString()
         lock.isNotEmpty() && !lock.matches(ID_PATTERN)
     }
 

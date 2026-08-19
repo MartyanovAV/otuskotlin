@@ -4,6 +4,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Client
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.PlanItem
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus
 
 data class TrainingPlanEntity(
@@ -24,7 +25,7 @@ data class TrainingPlanEntity(
         ownerId = model.ownerId.takeIf { it.isNotBlank() },
         title = model.title.takeIf { it.isNotBlank() },
         status = model.status.takeIf { it != TrainingPlanStatus.NONE }?.name,
-        lock = model.lock.takeIf { it.isNotBlank() },
+        lock = model.lock.asString().takeIf { it.isNotBlank() },
         planItems = model.planItems,
         version = model.version,
         createdAt = model.createdAt.takeIf { it.isNotBlank() },
@@ -38,7 +39,7 @@ data class TrainingPlanEntity(
             ownerId = ownerId ?: "",
             title = title ?: "",
             status = status?.let { TrainingPlanStatus.valueOf(it) } ?: TrainingPlanStatus.NONE,
-            lock = lock ?: "",
+            lock = TrainingPlanLock(lock ?: ""),
             planItems = planItems,
             version = version,
             createdAt = createdAt ?: "",

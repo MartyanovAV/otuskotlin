@@ -4,6 +4,7 @@ import com.benasher44.uuid.uuid4
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbTrainingPlanFilterRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbTrainingPlanIdRequest
@@ -16,6 +17,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.IRepoTra
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.RepoTrainingPlanBase
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorEmptyTrainingPlanId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorNotFoundTrainingPlan
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorRepoConcurrencyTrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.common.IRepoTrainingPlanInitializable
 import io.github.reactivecircus.cache4k.Cache
 import kotlinx.coroutines.sync.Mutex
@@ -71,11 +73,14 @@ class RepoTrainingPlanInMemory(
             val key = id.asString()
 
             mutex.withLock {
-                val oldPlan = cache.get(key)?.toInternal()
+                val oldEntity = cache.get(key)
+                val oldPlan = oldEntity?.toInternal()
                 when {
                     oldPlan == null -> errorNotFoundTrainingPlan(id)
+                    oldPlan.lock != TrainingPlanLock.NONE && oldPlan.lock != rqPlan.lock ->
+                        errorRepoConcurrencyTrainingPlan(oldPlan, rqPlan.lock)
                     else -> {
-                        val newPlan = rqPlan.copy()
+                        val newPlan = rqPlan.copy(lock = TrainingPlanLock(randomUuid()))
                         val entity = TrainingPlanEntity(newPlan)
                         cache.put(key, entity)
                         DbTrainingPlanResponseOk(newPlan)
@@ -90,11 +95,14 @@ class RepoTrainingPlanInMemory(
             val key = id.asString()
 
             mutex.withLock {
-                val oldPlan = cache.get(key)?.toInternal()
+                val oldEntity = cache.get(key)
+                val oldPlan = oldEntity?.toInternal()
                 when {
                     oldPlan == null -> errorNotFoundTrainingPlan(id)
+                    oldPlan.lock != TrainingPlanLock.NONE && oldPlan.lock != rq.lock ->
+                        errorRepoConcurrencyTrainingPlan(oldPlan, rq.lock)
                     else -> {
-                        val archivedPlan = oldPlan.copy(status = TrainingPlanStatus.ARCHIVED)
+                        val archivedPlan = oldPlan.copy(status = TrainingPlanStatus.ARCHIVED, lock = TrainingPlanLock(randomUuid()))
                         val entity = TrainingPlanEntity(archivedPlan)
                         cache.put(key, entity)
                         DbTrainingPlanResponseOk(archivedPlan)

@@ -14,6 +14,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Supers
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanFilter
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanLock
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -293,7 +294,7 @@ class TrainingPlanValidationRuleUnitTest {
     fun `lock must not be empty`() =
         runTest {
             assertRule(
-                plan = validPlan(lock = ""),
+                plan = validPlan(lock = TrainingPlanLock.NONE),
                 expectedCode = "validation-lock-empty",
             ) { validateTrainingPlanLockNotEmpty("validate lock") }
         }
@@ -302,7 +303,7 @@ class TrainingPlanValidationRuleUnitTest {
     fun `lock must have valid format`() =
         runTest {
             assertRule(
-                plan = validPlan(lock = "bad lock"),
+                plan = validPlan(lock = TrainingPlanLock("bad lock")),
                 expectedCode = "validation-lock-badFormat",
             ) { validateTrainingPlanLockFormat("validate lock") }
         }
@@ -366,7 +367,7 @@ class TrainingPlanValidationRuleUnitTest {
         id: TrainingPlanId = TrainingPlanId("plan-1"),
         clientCardId: ClientCardId = ClientCardId("client-1"),
         title: String = "Training plan",
-        lock: String = "lock-1",
+        lock: TrainingPlanLock = TrainingPlanLock("lock-1"),
         planItems: List<PlanItem> = mutableListOf(validExercise(uuid(1))),
     ) = TrainingPlan(
         id = id,

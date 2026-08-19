@@ -6,7 +6,7 @@ data class ClientCard(
     var displayName: String = "",
     var isArchived: Boolean = false,
     var note: String = "",
-    var lock: String = "",
+    var lock: ClientCardLock = ClientCardLock.NONE,
     var createdAt: String = "",
     var updatedAt: String = "",
 ) {

@@ -36,6 +36,7 @@ kotlin {
                 // DB
                 implementation(project(":repo-stubs"))
                 implementation(project(":repo-inmemory"))
+                implementation(project(":repo-pg"))
             }
         }
 

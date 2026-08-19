@@ -2,6 +2,7 @@ package com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests
 
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardIdRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardResponseErr
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardResponseOk
@@ -17,16 +18,20 @@ abstract class RepoClientCardReadTest {
     @Test
     fun readSuccess() =
         runRepoTest {
-            val result = repo.readClientCard(DbClientCardIdRequest(readSucc.id))
+            val result = repo.readClientCard(DbClientCardIdRequest(readSucc))
 
             assertIs<DbClientCardResponseOk>(result)
-            assertEquals(readSucc, result.data)
+            assertEquals(readSucc.id, result.data.id)
+            assertEquals(readSucc.ownerId, result.data.ownerId)
+            assertEquals(readSucc.displayName, result.data.displayName)
+            assertEquals(readSucc.note, result.data.note)
+            assertEquals(readSucc.isArchived, result.data.isArchived)
         }
 
     @Test
     fun readNotFound() =
         runRepoTest {
-            val result = repo.readClientCard(DbClientCardIdRequest(notFoundId))
+            val result = repo.readClientCard(DbClientCardIdRequest(notFoundId, ClientCardLock.NONE))
 
             assertIs<DbClientCardResponseErr>(result)
             val error = result.errors.find { it.code == "repo-not-found" }

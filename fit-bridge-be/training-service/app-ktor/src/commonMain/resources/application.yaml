@@ -8,3 +8,15 @@ ktor:
   application:
     modules:
       - "com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.ApplicationJvmKt.moduleJvm"
+
+fitbridge:
+  repository:
+    test: "inmemory"
+    prod: "${DB_TYPE_PROD:inmemory}"
+    psql:
+      schema: public
+      database: "${DB_NAME:fitbridge_training}"
+      host: "${DB_HOST:localhost}"
+      port: "${DB_PORT:5432}"
+      user: "${DB_USER:postgres}"
+      password: "${DB_PASSWORD:postgres}"

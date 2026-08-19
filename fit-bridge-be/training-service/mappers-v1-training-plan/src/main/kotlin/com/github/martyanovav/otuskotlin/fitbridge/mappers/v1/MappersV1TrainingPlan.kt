@@ -31,6 +31,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Traini
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanFilter
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus
 import java.util.UUID
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.CircuitItem as CircuitItemV1
@@ -258,14 +259,14 @@ private fun TrainingPlanUpdateObject?.toInternal() =
     TrainingPlan(
         id = this?.id.toTrainingPlanId(),
         title = this?.title.orEmpty(),
-        lock = this?.lock.orEmpty(),
+        lock = TrainingPlanLock(this?.lock.orEmpty()),
         planItems = this?.planItems?.map { it.toInternal() } ?: emptyList()
     )
 
 private fun TrainingPlanArchiveObject?.toInternal() =
     TrainingPlan(
         id = this?.id.toTrainingPlanId(),
-        lock = this?.lock.orEmpty()
+        lock = TrainingPlanLock(this?.lock.orEmpty())
     )
 
 private fun TrainingPlanSearchFilter?.toInternal() =
