@@ -10,5 +10,5 @@ data class PgProperties(
     val maxConnections: Int = 4,
 ) {
     val url: String
-        get() = "jdbc:postgresql://$host:$port/$database"
+        get() = "jdbc:postgresql://$host:$port/$database?currentSchema=$schema"
 }

@@ -1,6 +1,7 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests
 
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardStatus
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardFilterRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardsResponseOk
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.IRepoClientCard
@@ -20,6 +21,21 @@ abstract class RepoClientCardSearchTest {
             assertIs<DbClientCardsResponseOk>(result)
             val expected = listOf(initializedObjects[0])
             assertEquals(expected.size, result.data.size)
+        }
+
+    @Test
+    fun searchByStatusAndDisplayName() =
+        runRepoTest {
+            val result =
+                repo.searchClientCards(
+                    DbClientCardFilterRequest(
+                        status = ClientCardStatus.ACTIVE,
+                        searchString = "ad2",
+                    ),
+                )
+            assertIs<DbClientCardsResponseOk>(result)
+            assertEquals(1, result.data.size)
+            assertEquals(initializedObjects[1].id, result.data[0].id)
         }
 
     @Test

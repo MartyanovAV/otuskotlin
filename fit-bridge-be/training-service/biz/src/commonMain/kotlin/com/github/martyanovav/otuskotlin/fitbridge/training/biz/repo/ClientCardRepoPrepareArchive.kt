@@ -13,6 +13,9 @@ fun ICorChainDsl<IFBContext>.clientCardRepoPrepareArchive(title: String) =
         on { state == State.RUNNING }
         handle {
             val ctx = this@handle as ClientCardContext
-            ctx.clientCardRepoPrepare = ctx.clientCardRepoRead.deepCopy()
+            ctx.clientCardRepoPrepare =
+                ctx.clientCardRepoRead.deepCopy().apply {
+                    lock = ctx.clientCardValidated.lock
+                }
         }
     }

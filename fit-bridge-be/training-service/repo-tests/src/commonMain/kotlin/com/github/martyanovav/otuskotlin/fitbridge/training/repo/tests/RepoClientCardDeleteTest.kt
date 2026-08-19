@@ -5,6 +5,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Client
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardIdRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardResponseErr
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardResponseErrWithData
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardResponseOk
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.IRepoClientCard
 import kotlin.test.Test
@@ -29,11 +30,29 @@ abstract class RepoClientCardDeleteTest {
     @Test
     fun deleteNotFound() =
         runRepoTest {
-            val result = repo.readClientCard(DbClientCardIdRequest(notFoundId, ClientCardLock.NONE))
+            val result = repo.archiveClientCard(DbClientCardIdRequest(notFoundId, ClientCardLock("some-lock")))
 
             assertIs<DbClientCardResponseErr>(result)
             val error = result.errors.find { it.code == "repo-not-found" }
             assertNotNull(error)
+        }
+
+    @Test
+    fun deleteConcurrency() =
+        runRepoTest {
+            val result =
+                repo.archiveClientCard(
+                    DbClientCardIdRequest(
+                        id = deleteSucc.id,
+                        lock = ClientCardLock("bad-lock"),
+                    ),
+                )
+            assertIs<DbClientCardResponseErrWithData>(result)
+            val error = result.errors.find { it.code == "repo-concurrency" }
+            assertNotNull(error)
+            assertEquals("lock", error.field)
+            assertEquals(deleteSucc.id, result.data.id)
+            assertEquals(deleteSucc.lock, result.data.lock)
         }
 
     companion object : BaseInitClientCards("delete") {

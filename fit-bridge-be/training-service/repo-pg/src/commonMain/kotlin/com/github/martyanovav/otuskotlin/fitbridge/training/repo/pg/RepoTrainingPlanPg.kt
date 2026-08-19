@@ -22,32 +22,42 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorRep
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.common.IRepoTrainingPlanInitializable
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import org.jetbrains.exposed.v1.core.Op
+import org.jetbrains.exposed.v1.core.ResultRow
+import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.like
+import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.deleteAll
+import org.jetbrains.exposed.v1.jdbc.insertReturning
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.update
 import java.time.OffsetDateTime
-import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 class RepoTrainingPlanPg(
     private val properties: PgProperties = PgProperties(),
+    private val db: Database? = null,
     private val randomUuid: () -> String = { UUID.randomUUID().toString() },
 ) : RepoTrainingPlanBase(), IRepoTrainingPlanInitializable {
-    private var _ds: HikariDataSource? = null
-    private val ds: HikariDataSource
-        get() {
-            if (_ds == null) {
-                _ds =
-                    HikariConfig().apply {
-                        jdbcUrl = properties.url
-                        username = properties.user
-                        password = properties.password
-                        maximumPoolSize = properties.maxConnections
-                        isAutoCommit = true
-                    }.let { HikariDataSource(it) }
-            }
-            return _ds!!
+    private var dsRef: HikariDataSource? = null
+    private val database: Database by lazy {
+        if (db != null) {
+            db
+        } else {
+            val dataSource =
+                HikariConfig().apply {
+                    jdbcUrl = properties.url
+                    username = properties.user
+                    password = properties.password
+                    maximumPoolSize = properties.maxConnections
+                    isAutoCommit = true
+                }.let { HikariDataSource(it) }
+            dsRef = dataSource
+            Database.connect(dataSource)
         }
-
-    private val dbName = "\"${properties.schema}\".\"training_plan\""
-    private val cols = PgTrainingPlanFields.allFields.joinToString { it.quoted() }
+    }
 
     override suspend fun createTrainingPlan(rq: DbTrainingPlanRequest): IDbTrainingPlanResponse =
         tryMethod {
@@ -56,122 +66,131 @@ class RepoTrainingPlanPg(
                     id = TrainingPlanId(randomUuid()),
                     lock = TrainingPlanLock(randomUuid()),
                 )
-            val now = nowTimestamp()
-            val sql = PgQueryBuilder.insertTrainingPlan(dbName, cols).replaceNamedParams()
-            val status =
-                when (plan.status) {
-                    TrainingPlanStatus.ARCHIVED -> PgTrainingPlanFields.STATUS_ARCHIVED
-                    else -> PgTrainingPlanFields.STATUS_ACTIVE
+            val now = OffsetDateTime.now()
+            val status = statusToString(plan.status)
+            val result =
+                transaction(database) {
+                    TrainingPlanTable.insertReturning {
+                        it[id] = plan.id.asString()
+                        it[clientCardId] = plan.clientCardId.asString()
+                        it[ownerId] = plan.ownerId
+                        it[title] = plan.title
+                        it[planItems] = plan.planItems
+                        it[TrainingPlanTable.status] = status
+                        it[version] = plan.version
+                        it[lock] = plan.lock.asString()
+                        it[createdAt] = now
+                        it[updatedAt] = now
+                    }.single().toTrainingPlan()
                 }
-            val planItemsJson = TrainingPlanRowMapper.serializePlanItems(plan.planItems)
-            ds.connection.use { conn ->
-                conn.prepareStatement(sql).use { ps ->
-                    var i = 1
-                    ps.setString(i++, plan.id.asString())
-                    ps.setString(i++, plan.clientCardId.asString())
-                    ps.setString(i++, plan.ownerId)
-                    ps.setString(i++, plan.title)
-                    ps.setString(i++, planItemsJson)
-                    ps.setString(i++, status)
-                    ps.setInt(i++, plan.version)
-                    ps.setString(i++, plan.lock.asString())
-                    ps.setString(i++, now)
-                    ps.setString(i++, now)
-                    ps.executeQuery().use { rs ->
-                        if (rs.next()) {
-                            DbTrainingPlanResponseOk(TrainingPlanRowMapper.map(rs))
-                        } else {
-                            throw RuntimeException("DB error: insert returned no rows")
-                        }
-                    }
-                }
-            }
+            DbTrainingPlanResponseOk(result)
         }
 
     override suspend fun readTrainingPlan(rq: DbTrainingPlanIdRequest): IDbTrainingPlanResponse =
         tryMethod {
-            val sql = PgQueryBuilder.readTrainingPlan(dbName, cols).replaceNamedParams()
-            ds.connection.use { conn ->
-                conn.prepareStatement(sql).use { ps ->
-                    ps.setString(1, rq.id.asString())
-                    ps.executeQuery().use { rs ->
-                        if (rs.next()) {
-                            DbTrainingPlanResponseOk(TrainingPlanRowMapper.map(rs))
-                        } else {
-                            errorNotFoundTrainingPlan(rq.id)
-                        }
-                    }
+            val result =
+                transaction(database) {
+                    TrainingPlanTable
+                        .selectAll()
+                        .where { TrainingPlanTable.id eq rq.id.asString() }
+                        .singleOrNull()
+                        ?.toTrainingPlan()
                 }
+            if (result != null) {
+                DbTrainingPlanResponseOk(result)
+            } else {
+                errorNotFoundTrainingPlan(rq.id)
             }
         }
 
     override suspend fun updateTrainingPlan(rq: DbTrainingPlanRequest): IDbTrainingPlanResponse =
         tryMethod {
             val newPlan = rq.trainingPlan.copy(lock = TrainingPlanLock(randomUuid()))
-            val now = nowTimestamp()
-            val status =
-                when (newPlan.status) {
-                    TrainingPlanStatus.ARCHIVED -> PgTrainingPlanFields.STATUS_ARCHIVED
-                    else -> PgTrainingPlanFields.STATUS_ACTIVE
-                }
-            val planItemsJson = TrainingPlanRowMapper.serializePlanItems(newPlan.planItems)
-            val sql = PgQueryBuilder.updateTrainingPlan(dbName, cols).replaceNamedParams()
-            ds.connection.use { conn ->
-                conn.prepareStatement(sql).use { ps ->
-                    var i = 1
-                    ps.setString(i++, newPlan.title)
-                    ps.setString(i++, planItemsJson)
-                    ps.setString(i++, status)
-                    ps.setInt(i++, newPlan.version)
-                    ps.setString(i++, newPlan.lock.asString())
-                    ps.setString(i++, now)
-                    ps.setString(i++, newPlan.id.asString())
-                    ps.setString(i++, rq.trainingPlan.lock.asString())
-                    ps.setString(i++, newPlan.id.asString())
-                    ps.executeQuery().use { rs ->
-                        if (rs.next()) {
-                            val returned = TrainingPlanRowMapper.map(rs)
-                            if (returned.lock == newPlan.lock) {
-                                DbTrainingPlanResponseOk(returned)
-                            } else {
-                                errorRepoConcurrencyTrainingPlan(returned, rq.trainingPlan.lock)
-                            }
+            val now = OffsetDateTime.now()
+            val status = statusToString(newPlan.status)
+            val result =
+                transaction(database) {
+                    val affected =
+                        TrainingPlanTable.update(
+                            where = {
+                                (TrainingPlanTable.id eq newPlan.id.asString()) and
+                                    (TrainingPlanTable.lock eq rq.trainingPlan.lock.asString())
+                            },
+                        ) {
+                            it[title] = newPlan.title
+                            it[planItems] = newPlan.planItems
+                            it[TrainingPlanTable.status] = status
+                            it[version] = newPlan.version
+                            it[lock] = newPlan.lock.asString()
+                            it[updatedAt] = now
+                        }
+                    if (affected > 0) {
+                        val returned = newPlan.copy(updatedAt = now.toString())
+                        DbTrainingPlanResponseOk(returned)
+                    } else {
+                        val current =
+                            TrainingPlanTable
+                                .selectAll()
+                                .where { TrainingPlanTable.id eq newPlan.id.asString() }
+                                .singleOrNull()
+                                ?.toTrainingPlan()
+                        if (current != null) {
+                            errorRepoConcurrencyTrainingPlan(current, rq.trainingPlan.lock)
                         } else {
                             errorNotFoundTrainingPlan(newPlan.id)
                         }
                     }
                 }
-            }
+            result
         }
 
     override suspend fun archiveTrainingPlan(rq: DbTrainingPlanIdRequest): IDbTrainingPlanResponse =
         tryMethod {
             val id = rq.id.takeIf { it != TrainingPlanId.NONE } ?: return@tryMethod errorEmptyTrainingPlanId
             val oldLock = rq.lock.takeIf { it != TrainingPlanLock.NONE } ?: return@tryMethod errorEmptyTrainingPlanLock(id)
-            val now = nowTimestamp()
-            val sql = PgQueryBuilder.archiveTrainingPlan(dbName, cols).replaceNamedParams()
-            ds.connection.use { conn ->
-                conn.prepareStatement(sql).use { ps ->
-                    var i = 1
-                    ps.setString(i++, now)
-                    ps.setString(i++, now)
-                    ps.setString(i++, id.asString())
-                    ps.setString(i++, oldLock.asString())
-                    ps.setString(i++, id.asString())
-                    ps.executeQuery().use { rs ->
-                        if (rs.next()) {
-                            val returned = TrainingPlanRowMapper.map(rs)
-                            if (returned.lock == oldLock) {
-                                DbTrainingPlanResponseOk(returned)
-                            } else {
-                                errorRepoConcurrencyTrainingPlan(returned, oldLock)
-                            }
+            val newLock = TrainingPlanLock(randomUuid())
+            val now = OffsetDateTime.now()
+            val result =
+                transaction(database) {
+                    val affected =
+                        TrainingPlanTable.update(
+                            where = {
+                                (TrainingPlanTable.id eq id.asString()) and
+                                    (TrainingPlanTable.lock eq oldLock.asString())
+                            },
+                        ) {
+                            it[status] = STATUS_ARCHIVED
+                            it[lock] = newLock.asString()
+                            it[archivedAt] = now
+                            it[updatedAt] = now
+                        }
+                    if (affected > 0) {
+                        val returned =
+                            TrainingPlanTable
+                                .selectAll()
+                                .where { TrainingPlanTable.id eq id.asString() }
+                                .single()
+                                .toTrainingPlan()
+                        if (returned.lock == newLock) {
+                            DbTrainingPlanResponseOk(returned)
+                        } else {
+                            errorRepoConcurrencyTrainingPlan(returned, oldLock)
+                        }
+                    } else {
+                        val current =
+                            TrainingPlanTable
+                                .selectAll()
+                                .where { TrainingPlanTable.id eq id.asString() }
+                                .singleOrNull()
+                                ?.toTrainingPlan()
+                        if (current != null) {
+                            errorRepoConcurrencyTrainingPlan(current, oldLock)
                         } else {
                             errorNotFoundTrainingPlan(id)
                         }
                     }
                 }
-            }
+            result
         }
 
     override suspend fun searchTrainingPlans(rq: DbTrainingPlanFilterRequest): IDbTrainingPlansResponse =
@@ -179,92 +198,66 @@ class RepoTrainingPlanPg(
             val hasClientCardId = rq.clientCardId != ClientCardId.NONE
             val hasTitle = rq.searchString.isNotBlank()
             val hasStatus = rq.status != TrainingPlanStatus.NONE
-            val sql =
-                PgQueryBuilder.searchTrainingPlans(
-                    dbName, cols,
-                    ownerId = false,
-                    clientCardId = hasClientCardId,
-                    status = hasStatus,
-                    title = hasTitle,
-                ).replaceNamedParams()
-            ds.connection.use { conn ->
-                conn.prepareStatement(sql).use { ps ->
-                    var i = 1
+            val result =
+                transaction(database) {
+                    val conditions = mutableListOf<Op<Boolean>>()
                     if (hasClientCardId) {
-                        ps.setString(i++, rq.clientCardId.asString())
+                        conditions +=
+                            TrainingPlanTable.clientCardId eq rq.clientCardId.asString()
                     }
                     if (hasStatus) {
-                        val statusStr =
-                            when (rq.status) {
-                                TrainingPlanStatus.ARCHIVED -> PgTrainingPlanFields.STATUS_ARCHIVED
-                                else -> PgTrainingPlanFields.STATUS_ACTIVE
-                            }
-                        ps.setString(i++, statusStr)
+                        conditions +=
+                            TrainingPlanTable.status eq statusToString(rq.status)
                     }
                     if (hasTitle) {
-                        ps.setString(i++, "%${rq.searchString}%")
+                        conditions +=
+                            TrainingPlanTable.title like "%${rq.searchString}%"
                     }
-                    ps.executeQuery().use { rs ->
-                        val result = mutableListOf<TrainingPlan>()
-                        while (rs.next()) {
-                            result += TrainingPlanRowMapper.map(rs)
+                    val query =
+                        if (conditions.isNotEmpty()) {
+                            TrainingPlanTable.selectAll().where { conditions.reduce { acc, op -> acc and op } }
+                        } else {
+                            TrainingPlanTable.selectAll()
                         }
-                        DbTrainingPlansResponseOk(result)
-                    }
+                    query.map { it.toTrainingPlan() }
                 }
-            }
+            DbTrainingPlansResponseOk(result)
         }
 
     override fun save(plans: Collection<TrainingPlan>): Collection<TrainingPlan> {
-        val now = nowTimestamp()
-        val sql = PgQueryBuilder.insertTrainingPlan(dbName, cols).replaceNamedParams()
-        ds.connection.use { conn ->
-            return plans.map { plan ->
+        val now = OffsetDateTime.now()
+        return transaction(database) {
+            plans.map { plan ->
                 val savedPlan =
                     plan.copy(
                         id = if (plan.id == TrainingPlanId.NONE) TrainingPlanId(randomUuid()) else plan.id,
                         lock = if (plan.lock == TrainingPlanLock.NONE) TrainingPlanLock(randomUuid()) else plan.lock,
                     )
-                val status =
-                    when (savedPlan.status) {
-                        TrainingPlanStatus.ARCHIVED -> PgTrainingPlanFields.STATUS_ARCHIVED
-                        else -> PgTrainingPlanFields.STATUS_ACTIVE
-                    }
-                val planItemsJson = TrainingPlanRowMapper.serializePlanItems(savedPlan.planItems)
-                conn.prepareStatement(sql).use { ps ->
-                    var i = 1
-                    ps.setString(i++, savedPlan.id.asString())
-                    ps.setString(i++, savedPlan.clientCardId.asString())
-                    ps.setString(i++, savedPlan.ownerId)
-                    ps.setString(i++, savedPlan.title)
-                    ps.setString(i++, planItemsJson)
-                    ps.setString(i++, status)
-                    ps.setInt(i++, savedPlan.version)
-                    ps.setString(i++, savedPlan.lock.asString())
-                    ps.setString(i++, now)
-                    ps.setString(i++, now)
-                    ps.executeQuery().use { rs ->
-                        rs.next()
-                        TrainingPlanRowMapper.map(rs)
-                    }
-                }
+                TrainingPlanTable.insertReturning {
+                    it[id] = savedPlan.id.asString()
+                    it[clientCardId] = savedPlan.clientCardId.asString()
+                    it[ownerId] = savedPlan.ownerId
+                    it[title] = savedPlan.title
+                    it[planItems] = savedPlan.planItems
+                    it[TrainingPlanTable.status] = statusToString(savedPlan.status)
+                    it[version] = savedPlan.version
+                    it[lock] = savedPlan.lock.asString()
+                    it[createdAt] = now
+                    it[updatedAt] = now
+                }.single().toTrainingPlan()
             }
         }
     }
 
     fun clear() {
-        ds.connection.use { conn ->
-            conn.createStatement().use { st ->
-                st.execute(PgQueryBuilder.clear(dbName))
-            }
+        transaction(database) {
+            TrainingPlanTable.deleteAll()
         }
     }
 
     fun close() {
-        _ds?.close()
+        dsRef?.close()
     }
-
-    private fun nowTimestamp(): String = OffsetDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 
     private inline fun tryMethod(block: () -> IDbTrainingPlanResponse): IDbTrainingPlanResponse =
         try {
@@ -279,4 +272,33 @@ class RepoTrainingPlanPg(
         } catch (e: Throwable) {
             DbTrainingPlansResponseErr()
         }
+
+    companion object {
+        private const val STATUS_ACTIVE = "ACTIVE"
+        private const val STATUS_ARCHIVED = "ARCHIVED"
+
+        private fun statusToString(status: TrainingPlanStatus): String =
+            when (status) {
+                TrainingPlanStatus.ARCHIVED -> STATUS_ARCHIVED
+                else -> STATUS_ACTIVE
+            }
+    }
 }
+
+private fun ResultRow.toTrainingPlan(): TrainingPlan =
+    TrainingPlan(
+        id = TrainingPlanId(this[TrainingPlanTable.id]),
+        clientCardId = ClientCardId(this[TrainingPlanTable.clientCardId]),
+        ownerId = this[TrainingPlanTable.ownerId],
+        title = this[TrainingPlanTable.title],
+        status =
+            when (this[TrainingPlanTable.status]) {
+                "ARCHIVED" -> TrainingPlanStatus.ARCHIVED
+                else -> TrainingPlanStatus.ACTIVE
+            },
+        lock = TrainingPlanLock(this[TrainingPlanTable.lock]),
+        planItems = this[TrainingPlanTable.planItems],
+        version = this[TrainingPlanTable.version],
+        createdAt = this[TrainingPlanTable.createdAt].toString(),
+        updatedAt = this[TrainingPlanTable.updatedAt].toString(),
+    )

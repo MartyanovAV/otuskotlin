@@ -32,6 +32,21 @@ abstract class RepoTrainingPlanSearchTest {
         }
 
     @Test
+    fun searchByClientCardIdAndTitle() =
+        runRepoTest {
+            val result =
+                repo.searchTrainingPlans(
+                    DbTrainingPlanFilterRequest(
+                        clientCardId = searchClientCardId,
+                        searchString = "ad2",
+                    ),
+                )
+            assertIs<DbTrainingPlansResponseOk>(result)
+            assertEquals(1, result.data.size)
+            assertEquals(initializedObjects[1].id, result.data[0].id)
+        }
+
+    @Test
     fun searchAll() =
         runRepoTest {
             val result = repo.searchTrainingPlans(DbTrainingPlanFilterRequest())

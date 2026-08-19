@@ -37,6 +37,9 @@ kotlin {
                 implementation(project(":repo-stubs"))
                 implementation(project(":repo-inmemory"))
                 implementation(project(":repo-pg"))
+                implementation(libs.db.hikari)
+                implementation(libs.db.exposed.core)
+                implementation(libs.db.exposed.jdbc)
             }
         }
 

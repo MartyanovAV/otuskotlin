@@ -23,6 +23,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Client
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ExerciseItem
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ExerciseSet
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBCommandBase
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.PlanItem
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.RequestId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
@@ -93,7 +94,7 @@ fun TrainingPlanContext.fromTransport(request: TrainingPlanSearchRequest) {
     fromTransportBase(request.requestId, request.debug)
     trainingPlanFilter = request.trainingPlanFilter.toInternal()
     trainingPlansResponse =
-        com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page(
+        Page(
             pageNumber = trainingPlanFilter.pageNumber,
             pageSize = trainingPlanFilter.pageSize,
         )

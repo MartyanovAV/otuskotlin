@@ -16,6 +16,10 @@ kotlin {
                 implementation(libs.uuid)
                 implementation(libs.db.postgres)
                 implementation(libs.db.hikari)
+                implementation(libs.db.exposed.core)
+                implementation(libs.db.exposed.jdbc)
+                implementation(libs.db.exposed.json)
+                implementation(libs.db.exposed.java.time)
                 implementation(libs.kotlinx.serialization.json)
             }
         }

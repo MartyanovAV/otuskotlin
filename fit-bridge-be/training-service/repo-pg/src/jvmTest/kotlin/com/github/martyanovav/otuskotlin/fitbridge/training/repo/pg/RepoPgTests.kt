@@ -6,6 +6,16 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Client
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.BaseInitClientCards
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.BaseInitTrainingPlans
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoClientCardCreateTest
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoClientCardDeleteTest
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoClientCardReadTest
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoClientCardSearchTest
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoClientCardUpdateTest
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoTrainingPlanCreateTest
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoTrainingPlanDeleteTest
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoTrainingPlanReadTest
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoTrainingPlanSearchTest
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoTrainingPlanUpdateTest
 
 private val parentClientCard =
     ClientCard(
@@ -23,7 +33,7 @@ private val searchParentClientCard =
         lock = ClientCardLock("lock-search-parent"),
     )
 
-class RepoClientCardPgCreateTest : com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoClientCardCreateTest() {
+class RepoClientCardPgCreateTest : RepoClientCardCreateTest() {
     override val repo = testClientCardRepo(initObjects, randomUuid = { uuidNew.asString() }).repo
 
     companion object : BaseInitClientCards("create") {
@@ -31,7 +41,7 @@ class RepoClientCardPgCreateTest : com.github.martyanovav.otuskotlin.fitbridge.t
     }
 }
 
-class RepoClientCardPgReadTest : com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoClientCardReadTest() {
+class RepoClientCardPgReadTest : RepoClientCardReadTest() {
     override val repo = testClientCardRepo(initObjects).repo
 
     companion object : BaseInitClientCards("read") {
@@ -39,7 +49,7 @@ class RepoClientCardPgReadTest : com.github.martyanovav.otuskotlin.fitbridge.tra
     }
 }
 
-class RepoClientCardPgUpdateTest : com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoClientCardUpdateTest() {
+class RepoClientCardPgUpdateTest : RepoClientCardUpdateTest() {
     override val repo = testClientCardRepo(initObjects).repo
 
     companion object : BaseInitClientCards("update") {
@@ -47,7 +57,7 @@ class RepoClientCardPgUpdateTest : com.github.martyanovav.otuskotlin.fitbridge.t
     }
 }
 
-class RepoClientCardPgDeleteTest : com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoClientCardDeleteTest() {
+class RepoClientCardPgDeleteTest : RepoClientCardDeleteTest() {
     override val repo = testClientCardRepo(initObjects).repo
 
     companion object : BaseInitClientCards("delete") {
@@ -55,7 +65,7 @@ class RepoClientCardPgDeleteTest : com.github.martyanovav.otuskotlin.fitbridge.t
     }
 }
 
-class RepoClientCardPgSearchTest : com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoClientCardSearchTest() {
+class RepoClientCardPgSearchTest : RepoClientCardSearchTest() {
     override val repo = testClientCardRepo(initObjects).repo
 
     companion object : BaseInitClientCards("search") {
@@ -70,7 +80,7 @@ class RepoClientCardPgSearchTest : com.github.martyanovav.otuskotlin.fitbridge.t
     }
 }
 
-class RepoTrainingPlanPgCreateTest : com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoTrainingPlanCreateTest() {
+class RepoTrainingPlanPgCreateTest : RepoTrainingPlanCreateTest() {
     override val repo =
         testTrainingPlanRepo(initObjects, parentClientCards = listOf(parentClientCard), randomUuid = {
             uuidNew.asString()
@@ -81,7 +91,7 @@ class RepoTrainingPlanPgCreateTest : com.github.martyanovav.otuskotlin.fitbridge
     }
 }
 
-class RepoTrainingPlanPgReadTest : com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoTrainingPlanReadTest() {
+class RepoTrainingPlanPgReadTest : RepoTrainingPlanReadTest() {
     override val repo = testTrainingPlanRepo(initObjects, parentClientCards = listOf(parentClientCard)).repo
 
     companion object : BaseInitTrainingPlans("read") {
@@ -89,7 +99,7 @@ class RepoTrainingPlanPgReadTest : com.github.martyanovav.otuskotlin.fitbridge.t
     }
 }
 
-class RepoTrainingPlanPgUpdateTest : com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoTrainingPlanUpdateTest() {
+class RepoTrainingPlanPgUpdateTest : RepoTrainingPlanUpdateTest() {
     override val repo = testTrainingPlanRepo(initObjects, parentClientCards = listOf(parentClientCard)).repo
 
     companion object : BaseInitTrainingPlans("update") {
@@ -97,7 +107,7 @@ class RepoTrainingPlanPgUpdateTest : com.github.martyanovav.otuskotlin.fitbridge
     }
 }
 
-class RepoTrainingPlanPgDeleteTest : com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoTrainingPlanDeleteTest() {
+class RepoTrainingPlanPgDeleteTest : RepoTrainingPlanDeleteTest() {
     override val repo = testTrainingPlanRepo(initObjects, parentClientCards = listOf(parentClientCard)).repo
 
     companion object : BaseInitTrainingPlans("delete") {
@@ -105,11 +115,11 @@ class RepoTrainingPlanPgDeleteTest : com.github.martyanovav.otuskotlin.fitbridge
     }
 }
 
-class RepoTrainingPlanPgSearchTest : com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoTrainingPlanSearchTest() {
+class RepoTrainingPlanPgSearchTest : RepoTrainingPlanSearchTest() {
     override val repo = testTrainingPlanRepo(initObjects, parentClientCards = listOf(parentClientCard, searchParentClientCard)).repo
 
     companion object : BaseInitTrainingPlans("search") {
-        val searchClientCardId = com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId("cc-search-owner")
+        val searchClientCardId = ClientCardId("cc-search-owner")
         override val initObjects: List<TrainingPlan> =
             listOf(
                 createInitTestModel("ad1"),

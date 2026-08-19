@@ -10,6 +10,9 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.IDbTrain
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.common.IRepoTrainingPlanInitializable
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.common.RepoClientCardInitialized
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.common.RepoTrainingPlanInitialized
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
+import org.jetbrains.exposed.v1.jdbc.Database
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.MountableFile
 import java.sql.SQLException
@@ -20,6 +23,7 @@ object PgTestContainer {
             .withDatabaseName("fitbridge_test")
             .withUsername("postgres")
             .withPassword("postgres")
+            .withCommand("postgres", "-c", "max_connections=300")
             .withCopyFileToContainer(
                 MountableFile.forClasspathResource("init.sql"),
                 "/docker-entrypoint-initdb.d/init.sql",
@@ -48,6 +52,19 @@ object PgTestContainer {
             password = container.password,
             database = container.databaseName,
         )
+
+    val sharedDb: Database by lazy {
+        val dataSource =
+            HikariConfig().apply {
+                jdbcUrl = properties.url
+                username = properties.user
+                password = properties.password
+                maximumPoolSize = properties.maxConnections
+                isAutoCommit = true
+            }.let { HikariDataSource(it) }
+        registerForCleanup { dataSource.close() }
+        Database.connect(dataSource)
+    }
 }
 
 fun testClientCardRepo(
@@ -55,9 +72,8 @@ fun testClientCardRepo(
     randomUuid: () -> String = { java.util.UUID.randomUUID().toString() },
 ) = RepoClientCardInitialized(
     repo =
-        RepoClientCardPg(PgTestContainer.properties, randomUuid = randomUuid).apply {
+        RepoClientCardPg(PgTestContainer.properties, db = PgTestContainer.sharedDb, randomUuid = randomUuid).apply {
             clear()
-            PgTestContainer.registerForCleanup { close() }
         },
     initObjects = initObjects,
 )
@@ -113,10 +129,8 @@ fun testTrainingPlanRepo(
     parentClientCards: List<ClientCard> = emptyList(),
     randomUuid: () -> String = { java.util.UUID.randomUUID().toString() },
 ): RepoTrainingPlanInitialized {
-    val tpRepo = RepoTrainingPlanPg(PgTestContainer.properties, randomUuid = randomUuid)
-    val ccRepo = RepoClientCardPg(PgTestContainer.properties)
-    PgTestContainer.registerForCleanup { tpRepo.close() }
-    PgTestContainer.registerForCleanup { ccRepo.close() }
+    val tpRepo = RepoTrainingPlanPg(PgTestContainer.properties, db = PgTestContainer.sharedDb, randomUuid = randomUuid)
+    val ccRepo = RepoClientCardPg(PgTestContainer.properties, db = PgTestContainer.sharedDb)
     tpRepo.clear()
     ccRepo.clear()
     parentClientCards.forEach { ccRepo.save(listOf(it)) }

@@ -17,6 +17,7 @@ fun ICorChainDsl<IFBContext>.clientCardRepoPrepareUpdate(title: String) =
                 ctx.clientCardRepoRead.deepCopy().apply {
                     displayName = ctx.clientCardValidated.displayName
                     note = ctx.clientCardValidated.note
+                    lock = ctx.clientCardValidated.lock
                 }
         }
     }

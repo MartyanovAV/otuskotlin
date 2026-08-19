@@ -2,8 +2,10 @@ package com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests
 
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardResponseErr
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardResponseErrWithData
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardResponseOk
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.IRepoClientCard
 import kotlin.test.Test
@@ -31,6 +33,15 @@ abstract class RepoClientCardUpdateTest {
             displayName = "update object not found",
             note = "update object not found description",
         )
+    private val reqUpdateConc by lazy {
+        ClientCard(
+            id = updateSucc.id,
+            ownerId = "owner-123",
+            displayName = "update object",
+            note = "update object description",
+            lock = ClientCardLock("bad-lock"),
+        )
+    }
 
     @Test
     fun updateSuccess() =
@@ -49,6 +60,17 @@ abstract class RepoClientCardUpdateTest {
             assertIs<DbClientCardResponseErr>(result)
             val error = result.errors.find { it.code == "repo-not-found" }
             assertEquals("id", error?.field)
+        }
+
+    @Test
+    fun updateConcurrency() =
+        runRepoTest {
+            val result = repo.updateClientCard(DbClientCardRequest(reqUpdateConc))
+            assertIs<DbClientCardResponseErrWithData>(result)
+            val error = result.errors.find { it.code == "repo-concurrency" }
+            assertEquals("lock", error?.field)
+            assertEquals(updateSucc.id, result.data.id)
+            assertEquals(updateSucc.lock, result.data.lock)
         }
 
     companion object : BaseInitClientCards("update") {

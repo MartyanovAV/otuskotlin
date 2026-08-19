@@ -13,6 +13,9 @@ fun ICorChainDsl<IFBContext>.trainingPlanRepoPrepareArchive(title: String) =
         on { state == State.RUNNING }
         handle {
             val ctx = this@handle as TrainingPlanContext
-            ctx.trainingPlanRepoPrepare = ctx.trainingPlanRepoRead.deepCopy()
+            ctx.trainingPlanRepoPrepare =
+                ctx.trainingPlanRepoRead.deepCopy().apply {
+                    lock = ctx.trainingPlanValidated.lock
+                }
         }
     }

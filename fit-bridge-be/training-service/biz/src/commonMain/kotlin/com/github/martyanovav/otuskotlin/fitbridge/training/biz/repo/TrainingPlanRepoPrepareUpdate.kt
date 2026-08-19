@@ -19,6 +19,7 @@ fun ICorChainDsl<IFBContext>.trainingPlanRepoPrepareUpdate(title: String) =
                     clientCardId = ctx.trainingPlanValidated.clientCardId
                     planItems = ctx.trainingPlanValidated.planItems
                     version = ctx.trainingPlanValidated.version
+                    lock = ctx.trainingPlanValidated.lock
                 }
         }
     }

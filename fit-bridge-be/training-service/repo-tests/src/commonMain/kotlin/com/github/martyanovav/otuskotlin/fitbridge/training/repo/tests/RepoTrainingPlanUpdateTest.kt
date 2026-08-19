@@ -4,8 +4,10 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Client
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ExerciseItem
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbTrainingPlanRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbTrainingPlanResponseErr
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbTrainingPlanResponseErrWithData
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbTrainingPlanResponseOk
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.IRepoTrainingPlan
 import kotlin.test.Test
@@ -34,6 +36,16 @@ abstract class RepoTrainingPlanUpdateTest {
             ownerId = "owner-123",
             title = "update object not found",
         )
+    private val reqUpdateConc by lazy {
+        TrainingPlan(
+            id = updateSucc.id,
+            clientCardId = ClientCardId("cc-123"),
+            ownerId = "owner-123",
+            title = "update object",
+            lock = TrainingPlanLock("bad-lock"),
+            planItems = listOf(ExerciseItem(id = "ex-update", title = "Update Exercise", exerciseId = "ex-1")),
+        )
+    }
 
     @Test
     fun updateSuccess() =
@@ -51,6 +63,17 @@ abstract class RepoTrainingPlanUpdateTest {
             assertIs<DbTrainingPlanResponseErr>(result)
             val error = result.errors.find { it.code == "repo-not-found" }
             assertEquals("id", error?.field)
+        }
+
+    @Test
+    fun updateConcurrency() =
+        runRepoTest {
+            val result = repo.updateTrainingPlan(DbTrainingPlanRequest(reqUpdateConc))
+            assertIs<DbTrainingPlanResponseErrWithData>(result)
+            val error = result.errors.find { it.code == "repo-concurrency" }
+            assertEquals("lock", error?.field)
+            assertEquals(updateSucc.id, result.data.id)
+            assertEquals(updateSucc.lock, result.data.lock)
         }
 
     companion object : BaseInitTrainingPlans("update") {
