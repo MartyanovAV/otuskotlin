@@ -16,7 +16,8 @@ abstract class RepoClientCardCreateTest {
 
     private val createObj =
         ClientCard(
-            ownerId = "owner-123",
+            ownerUserId = "owner-123",
+            createdByUserId = "owner-123",
             displayName = "create object",
             note = "create object description",
         )

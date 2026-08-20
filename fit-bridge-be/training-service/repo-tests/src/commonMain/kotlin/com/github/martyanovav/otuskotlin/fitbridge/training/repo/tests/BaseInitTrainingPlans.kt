@@ -10,10 +10,12 @@ abstract class BaseInitTrainingPlans(private val op: String) : IInitObjects<Trai
     fun createInitTestModel(
         suf: String,
         clientCardId: ClientCardId = ClientCardId("cc-123"),
+        ownerUserId: String = "owner-123",
     ) = TrainingPlan(
         id = TrainingPlanId("tp-repo-$op-$suf"),
         clientCardId = clientCardId,
-        ownerId = "owner-123",
+        ownerUserId = ownerUserId,
+        createdByUserId = ownerUserId,
         title = "$suf stub",
         lock = TrainingPlanLock("lock-$op-$suf"),
         planItems =

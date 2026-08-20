@@ -47,6 +47,14 @@ abstract class RepoTrainingPlanSearchTest {
         }
 
     @Test
+    fun searchByOwnerUserId() =
+        runRepoTest {
+            val result = repo.searchTrainingPlans(DbTrainingPlanFilterRequest(ownerUserId = "owner-124"))
+            assertIs<DbTrainingPlansResponseOk>(result)
+            assertEquals(setOf(initializedObjects[1].id, initializedObjects[3].id), result.data.map { it.id }.toSet())
+        }
+
+    @Test
     fun searchAll() =
         runRepoTest {
             val result = repo.searchTrainingPlans(DbTrainingPlanFilterRequest())
@@ -59,9 +67,9 @@ abstract class RepoTrainingPlanSearchTest {
         override val initObjects: List<TrainingPlan> =
             listOf(
                 createInitTestModel("ad1"),
-                createInitTestModel("ad2", clientCardId = searchClientCardId),
+                createInitTestModel("ad2", clientCardId = searchClientCardId, ownerUserId = "owner-124"),
                 createInitTestModel("ad3"),
-                createInitTestModel("ad4", clientCardId = searchClientCardId),
+                createInitTestModel("ad4", clientCardId = searchClientCardId, ownerUserId = "owner-124"),
                 createInitTestModel("ad5"),
             )
     }

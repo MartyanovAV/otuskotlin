@@ -21,6 +21,7 @@ fun ICorChainDsl<IFBContext>.clientCardRepoSearch(title: String) =
                 DbClientCardFilterRequest(
                     searchString = ctx.clientCardFilterValidated.searchString,
                     status = ctx.clientCardFilterValidated.status,
+                    ownerUserId = ctx.principal.userId,
                     pageNumber = ctx.clientCardFilterValidated.pageNumber,
                     pageSize = ctx.clientCardFilterValidated.pageSize,
                 )

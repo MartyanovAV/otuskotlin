@@ -3,6 +3,7 @@ package com.github.martyanovav.otuskotlin.fitbridge.training.biz
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.CorSettings
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.TrainingPlanContext
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.AuthPrincipal
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
@@ -173,6 +174,7 @@ class TrainingProcessorTest {
                 ClientCardContext(
                     command = ClientCardCommand.CREATE,
                     clientCardRequest = ClientCard(displayName = "Клиент"),
+                    principal = AuthPrincipal(userId = "user-1", roles = setOf(AuthPrincipal.TRAINER_ROLE)),
                 )
 
             processor.exec(ctx)
@@ -180,6 +182,8 @@ class TrainingProcessorTest {
             assertEquals(State.FINISHING, ctx.state)
             assertTrue(ctx.errors.isEmpty())
             assertEquals("Клиент", ctx.clientCardValidated.displayName)
+            assertEquals("user-1", ctx.clientCardResponse.ownerUserId)
+            assertEquals("user-1", ctx.clientCardResponse.createdByUserId)
         }
 
     private suspend fun assertClientCardStubFailure(

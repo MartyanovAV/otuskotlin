@@ -30,13 +30,15 @@ fun ICorChainDsl<IFBContext>.prepareClientCardValidation(
         ctx.clientCardValidating =
             ctx.clientCardRequest.deepCopy().apply {
                 id = ClientCardId(id.asString().trim())
-                ownerId = ownerId.trim()
+                ownerUserId = ownerUserId.trim()
+                createdByUserId = createdByUserId.trim()
                 displayName = displayName.trim()
                 note = note.trim()
                 lock = ClientCardLock(lock.asString().trim())
                 if (resetIdentity) {
                     id = ClientCardId.NONE
-                    ownerId = ""
+                    ownerUserId = ""
+                    createdByUserId = ""
                     isArchived = false
                     lock = ClientCardLock.NONE
                 }

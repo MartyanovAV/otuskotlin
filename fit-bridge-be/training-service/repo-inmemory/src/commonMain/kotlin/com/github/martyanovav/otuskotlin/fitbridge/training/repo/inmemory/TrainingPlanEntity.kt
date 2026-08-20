@@ -10,7 +10,8 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Traini
 data class TrainingPlanEntity(
     val id: String? = null,
     val clientCardId: String? = null,
-    val ownerId: String? = null,
+    val ownerUserId: String? = null,
+    val createdByUserId: String? = null,
     val title: String? = null,
     val status: String? = null,
     val lock: String? = null,
@@ -22,7 +23,8 @@ data class TrainingPlanEntity(
     constructor(model: TrainingPlan) : this(
         id = model.id.asString().takeIf { it.isNotBlank() },
         clientCardId = model.clientCardId.asString().takeIf { it.isNotBlank() },
-        ownerId = model.ownerId.takeIf { it.isNotBlank() },
+        ownerUserId = model.ownerUserId.takeIf { it.isNotBlank() },
+        createdByUserId = model.createdByUserId.takeIf { it.isNotBlank() },
         title = model.title.takeIf { it.isNotBlank() },
         status = model.status.takeIf { it != TrainingPlanStatus.NONE }?.name,
         lock = model.lock.asString().takeIf { it.isNotBlank() },
@@ -36,7 +38,8 @@ data class TrainingPlanEntity(
         TrainingPlan(
             id = id?.let { TrainingPlanId(it) } ?: TrainingPlanId.NONE,
             clientCardId = clientCardId?.let { ClientCardId(it) } ?: ClientCardId.NONE,
-            ownerId = ownerId ?: "",
+            ownerUserId = ownerUserId ?: "",
+            createdByUserId = createdByUserId ?: "",
             title = title ?: "",
             status = status?.let { TrainingPlanStatus.valueOf(it) } ?: TrainingPlanStatus.NONE,
             lock = TrainingPlanLock(lock ?: ""),

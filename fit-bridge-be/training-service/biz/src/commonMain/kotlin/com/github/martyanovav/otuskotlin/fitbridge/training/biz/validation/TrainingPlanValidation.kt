@@ -157,12 +157,14 @@ fun ICorChainDsl<IFBContext>.prepareTrainingPlanValidation(
             ).apply {
                 id = TrainingPlanId(id.asString().trim())
                 clientCardId = ClientCardId(clientCardId.asString().trim())
-                ownerId = ownerId.trim()
+                ownerUserId = ownerUserId.trim()
+                createdByUserId = createdByUserId.trim()
                 this.title = this.title.trim()
                 lock = TrainingPlanLock(lock.asString().trim())
                 if (resetIdentity) {
                     id = TrainingPlanId.NONE
-                    ownerId = ""
+                    ownerUserId = ""
+                    createdByUserId = ""
                     status = TrainingPlanStatus.ACTIVE
                     lock = TrainingPlanLock.NONE
                 }

@@ -20,7 +20,8 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoTrain
 private val parentClientCard =
     ClientCard(
         id = ClientCardId("cc-123"),
-        ownerId = "owner-123",
+        ownerUserId = "owner-123",
+        createdByUserId = "owner-123",
         displayName = "parent card for TP tests",
         lock = ClientCardLock("lock-parent"),
     )
@@ -28,7 +29,8 @@ private val parentClientCard =
 private val searchParentClientCard =
     ClientCard(
         id = ClientCardId("cc-search-owner"),
-        ownerId = "owner-search",
+        ownerUserId = "owner-search",
+        createdByUserId = "owner-search",
         displayName = "search parent card",
         lock = ClientCardLock("lock-search-parent"),
     )
@@ -72,9 +74,9 @@ class RepoClientCardPgSearchTest : RepoClientCardSearchTest() {
         override val initObjects: List<ClientCard> =
             listOf(
                 createInitTestModel("ad1"),
-                createInitTestModel("ad2", ownerId = "owner-124"),
+                createInitTestModel("ad2", ownerUserId = "owner-124"),
                 createInitTestModel("ad3"),
-                createInitTestModel("ad4", ownerId = "owner-124"),
+                createInitTestModel("ad4", ownerUserId = "owner-124"),
                 createInitTestModel("ad5"),
             )
     }
@@ -123,9 +125,9 @@ class RepoTrainingPlanPgSearchTest : RepoTrainingPlanSearchTest() {
         override val initObjects: List<TrainingPlan> =
             listOf(
                 createInitTestModel("ad1"),
-                createInitTestModel("ad2", clientCardId = searchClientCardId),
+                createInitTestModel("ad2", clientCardId = searchClientCardId, ownerUserId = "owner-124"),
                 createInitTestModel("ad3"),
-                createInitTestModel("ad4", clientCardId = searchClientCardId),
+                createInitTestModel("ad4", clientCardId = searchClientCardId, ownerUserId = "owner-124"),
                 createInitTestModel("ad5"),
             )
     }

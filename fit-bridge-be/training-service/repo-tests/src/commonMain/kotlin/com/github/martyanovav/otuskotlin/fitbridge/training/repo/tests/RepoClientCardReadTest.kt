@@ -22,7 +22,8 @@ abstract class RepoClientCardReadTest {
 
             assertIs<DbClientCardResponseOk>(result)
             assertEquals(readSucc.id, result.data.id)
-            assertEquals(readSucc.ownerId, result.data.ownerId)
+            assertEquals(readSucc.ownerUserId, result.data.ownerUserId)
+            assertEquals(readSucc.createdByUserId, result.data.createdByUserId)
             assertEquals(readSucc.displayName, result.data.displayName)
             assertEquals(readSucc.note, result.data.note)
             assertEquals(readSucc.isArchived, result.data.isArchived)

@@ -7,10 +7,11 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Client
 abstract class BaseInitClientCards(private val op: String) : IInitObjects<ClientCard> {
     fun createInitTestModel(
         suf: String,
-        ownerId: String = "owner-123",
+        ownerUserId: String = "owner-123",
     ) = ClientCard(
         id = ClientCardId("cc-repo-$op-$suf"),
-        ownerId = ownerId,
+        ownerUserId = ownerUserId,
+        createdByUserId = ownerUserId,
         displayName = "$suf stub",
         note = "$suf stub description",
         lock = ClientCardLock("lock-$op-$suf"),

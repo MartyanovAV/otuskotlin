@@ -10,6 +10,8 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Traini
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanFilter
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.WorkMode
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.permissions.FtcPrincipalRelation
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.IRepoClientCard
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.IRepoTrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.stubs.Stubs
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.ws.IFBWsSession
@@ -24,6 +26,7 @@ data class TrainingPlanContext(
     override var requestId: RequestId = RequestId.NONE,
     override var timeStart: Instant = Instant.DISTANT_PAST,
     override var principal: AuthPrincipal = AuthPrincipal.NONE,
+    override var principalRelation: FtcPrincipalRelation = FtcPrincipalRelation.NONE,
     override var wsSession: IFBWsSession = IFBWsSession.NONE,
     override var corSettings: CorSettings = CorSettings(),
     var trainingPlanRequest: TrainingPlan = TrainingPlan(),
@@ -33,6 +36,7 @@ data class TrainingPlanContext(
     var trainingPlanFilterValidating: TrainingPlanFilter = TrainingPlanFilter(),
     var trainingPlanFilterValidated: TrainingPlanFilter = TrainingPlanFilter(),
     var trainingPlanRepo: IRepoTrainingPlan = IRepoTrainingPlan.NONE,
+    var clientCardRepo: IRepoClientCard = IRepoClientCard.NONE,
     var trainingPlanRepoRead: TrainingPlan = TrainingPlan(),
     var trainingPlanRepoPrepare: TrainingPlan = TrainingPlan(),
     var trainingPlanRepoDone: TrainingPlan = TrainingPlan(),

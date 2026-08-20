@@ -1,5 +1,7 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor
 
+import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.base.AUTH_HEADER
+import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.base.jwt2principal
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.plugins.initAppSettings
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.plugins.initPlugins
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.v2.v2Training
@@ -8,6 +10,7 @@ import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.request.header
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import io.ktor.server.websocket.WebSockets
@@ -29,7 +32,7 @@ fun Application.module(appSettings: AppSettings = initAppSettings()) {
             }
             v2Training(appSettings)
             webSocket("ws") {
-                wsHandlerV2(appSettings)
+                wsHandlerV2(appSettings, call.request.header(AUTH_HEADER).jwt2principal())
             }
         }
     }

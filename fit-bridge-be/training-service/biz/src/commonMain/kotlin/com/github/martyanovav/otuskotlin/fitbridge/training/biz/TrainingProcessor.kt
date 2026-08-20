@@ -2,6 +2,13 @@ package com.github.martyanovav.otuskotlin.fitbridge.training.biz
 
 import com.github.martyanovav.otuskotlin.fitbridge.cor.chain
 import com.github.martyanovav.otuskotlin.fitbridge.cor.rootChain
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.access.accessValidationClientCard
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.access.accessValidationTrainingPlan
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.access.checkClientCardOwner
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.access.initClientCardUserIds
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.access.initTrainingPlanUserIds
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.access.resolveClientCardRelation
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.access.resolveTrainingPlanRelation
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.general.clientCardOperation
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.general.initStatus
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.general.stubs
@@ -114,6 +121,9 @@ class TrainingProcessor(
                 }
                 chain {
                     title = "Логика сохранения"
+                    resolveClientCardRelation("Вычисление прав доступа")
+                    accessValidationClientCard("Проверка прав доступа")
+                    initClientCardUserIds("Установка владельца и автора")
                     clientCardRepoPrepareCreate("Подготовка объекта для сохранения")
                     clientCardRepoCreate("Создание карточки клиента в БД")
                 }
@@ -136,6 +146,8 @@ class TrainingProcessor(
                 chain {
                     title = "Логика чтения"
                     clientCardRepoRead("Чтение карточки клиента из БД")
+                    resolveClientCardRelation("Вычисление прав доступа")
+                    accessValidationClientCard("Проверка прав доступа")
                 }
                 prepareRepoResult("Подготовка ответа")
             }
@@ -162,6 +174,8 @@ class TrainingProcessor(
                 chain {
                     title = "Логика сохранения"
                     clientCardRepoRead("Чтение карточки клиента из БД")
+                    resolveClientCardRelation("Вычисление прав доступа")
+                    accessValidationClientCard("Проверка прав доступа")
                     clientCardRepoPrepareUpdate("Подготовка объекта для обновления")
                     clientCardRepoUpdate("Обновление карточки клиента в БД")
                 }
@@ -187,6 +201,8 @@ class TrainingProcessor(
                 chain {
                     title = "Логика архивирования"
                     clientCardRepoRead("Чтение карточки клиента из БД")
+                    resolveClientCardRelation("Вычисление прав доступа")
+                    accessValidationClientCard("Проверка прав доступа")
                     clientCardRepoPrepareArchive("Подготовка объекта для архивирования")
                     clientCardRepoArchive("Архивирование карточки клиента в БД")
                 }
@@ -206,6 +222,8 @@ class TrainingProcessor(
                     validateClientCardPageSize("Проверка размера страницы")
                     finishClientCardFilterValidation("Завершение валидации фильтра карточек")
                 }
+                resolveClientCardRelation("Вычисление прав доступа")
+                accessValidationClientCard("Проверка прав доступа")
                 clientCardRepoSearch("Поиск карточек клиентов в БД по фильтру")
                 prepareRepoResult("Подготовка ответа")
             }
@@ -241,6 +259,10 @@ class TrainingProcessor(
                 }
                 chain {
                     title = "Логика сохранения"
+                    resolveTrainingPlanRelation("Вычисление прав доступа")
+                    accessValidationTrainingPlan("Проверка прав доступа")
+                    checkClientCardOwner("Проверка владельца ClientCard")
+                    initTrainingPlanUserIds("Установка владельца и автора")
                     trainingPlanRepoPrepareCreate("Подготовка объекта для сохранения")
                     trainingPlanRepoCreate("Создание тренировочного плана в БД")
                 }
@@ -263,6 +285,8 @@ class TrainingProcessor(
                 chain {
                     title = "Логика чтения"
                     trainingPlanRepoRead("Чтение тренировочного плана из БД")
+                    resolveTrainingPlanRelation("Вычисление прав доступа")
+                    accessValidationTrainingPlan("Проверка прав доступа")
                 }
                 prepareRepoResult("Подготовка ответа")
             }
@@ -301,6 +325,8 @@ class TrainingProcessor(
                 chain {
                     title = "Логика сохранения"
                     trainingPlanRepoRead("Чтение тренировочного плана из БД")
+                    resolveTrainingPlanRelation("Вычисление прав доступа")
+                    accessValidationTrainingPlan("Проверка прав доступа")
                     trainingPlanRepoPrepareUpdate("Подготовка объекта для обновления")
                     trainingPlanRepoUpdate("Обновление тренировочного плана в БД")
                 }
@@ -326,6 +352,8 @@ class TrainingProcessor(
                 chain {
                     title = "Логика архивирования"
                     trainingPlanRepoRead("Чтение тренировочного плана из БД")
+                    resolveTrainingPlanRelation("Вычисление прав доступа")
+                    accessValidationTrainingPlan("Проверка прав доступа")
                     trainingPlanRepoPrepareArchive("Подготовка объекта для архивирования")
                     trainingPlanRepoArchive("Архивирование тренировочного плана в БД")
                 }
@@ -346,6 +374,8 @@ class TrainingProcessor(
                     validateTrainingPlanPageSize("Проверка размера страницы")
                     finishTrainingPlanFilterValidation("Завершение валидации фильтра планов")
                 }
+                resolveTrainingPlanRelation("Вычисление прав доступа")
+                accessValidationTrainingPlan("Проверка прав доступа")
                 trainingPlanRepoSearch("Поиск тренировочных планов в БД по фильтру")
                 prepareRepoResult("Подготовка ответа")
             }

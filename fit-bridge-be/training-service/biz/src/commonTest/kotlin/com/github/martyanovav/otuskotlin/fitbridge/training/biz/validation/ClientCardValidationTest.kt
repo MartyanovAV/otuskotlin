@@ -3,6 +3,7 @@ package com.github.martyanovav.otuskotlin.fitbridge.training.biz.validation
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.TrainingProcessor
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.CorSettings
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.AuthPrincipal
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardFilter
@@ -32,6 +33,7 @@ class ClientCardValidationTest {
                 ClientCardContext(
                     command = ClientCardCommand.CREATE,
                     workMode = WorkMode.TEST,
+                    principal = AuthPrincipal(userId = "user-1", roles = setOf(AuthPrincipal.TRAINER_ROLE)),
                     clientCardRequest = request,
                 )
 
@@ -51,6 +53,7 @@ class ClientCardValidationTest {
                 ClientCardContext(
                     command = ClientCardCommand.UPDATE,
                     workMode = WorkMode.TEST,
+                    principal = AuthPrincipal(userId = "user-1", roles = setOf(AuthPrincipal.TRAINER_ROLE)),
                     clientCardRequest = ClientCard(),
                 )
 
@@ -70,6 +73,7 @@ class ClientCardValidationTest {
                 ClientCardContext(
                     command = ClientCardCommand.SEARCH,
                     workMode = WorkMode.TEST,
+                    principal = AuthPrincipal(userId = "user-1", roles = setOf(AuthPrincipal.TRAINER_ROLE)),
                     clientCardFilter =
                         ClientCardFilter(
                             searchString = "a".repeat(121),

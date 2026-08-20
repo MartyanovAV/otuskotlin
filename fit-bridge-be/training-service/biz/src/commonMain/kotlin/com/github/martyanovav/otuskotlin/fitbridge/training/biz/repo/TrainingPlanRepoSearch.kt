@@ -22,6 +22,7 @@ fun ICorChainDsl<IFBContext>.trainingPlanRepoSearch(title: String) =
                     clientCardId = ctx.trainingPlanFilterValidated.clientCardId,
                     searchString = ctx.trainingPlanFilterValidated.searchString,
                     status = ctx.trainingPlanFilterValidated.status,
+                    ownerUserId = ctx.principal.userId,
                     pageNumber = ctx.trainingPlanFilterValidated.pageNumber,
                     pageSize = ctx.trainingPlanFilterValidated.pageSize,
                 )

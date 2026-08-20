@@ -13,7 +13,8 @@ object ClientCardStub {
     private val card =
         ClientCard(
             id = ClientCardId("00000000-0000-0000-0000-000000000101"),
-            ownerId = "00000000-0000-0000-0000-000000000001",
+            ownerUserId = "00000000-0000-0000-0000-000000000001",
+            createdByUserId = "00000000-0000-0000-0000-000000000001",
             displayName = "Анна Смирнова",
             note = "Учебная карточка клиента",
             lock = ClientCardLock("stub-lock-client-card"),
@@ -31,7 +32,8 @@ object TrainingPlanStub {
         TrainingPlan(
             id = TrainingPlanId("00000000-0000-0000-0000-000000000201"),
             clientCardId = ClientCardId("00000000-0000-0000-0000-000000000101"),
-            ownerId = "00000000-0000-0000-0000-000000000001",
+            ownerUserId = "00000000-0000-0000-0000-000000000001",
+            createdByUserId = "00000000-0000-0000-0000-000000000001",
             title = "Базовая тренировка",
             lock = TrainingPlanLock("stub-lock-training-plan"),
             version = 1,

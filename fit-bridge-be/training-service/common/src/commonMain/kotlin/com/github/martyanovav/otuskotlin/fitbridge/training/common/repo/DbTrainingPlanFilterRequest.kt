@@ -7,6 +7,7 @@ data class DbTrainingPlanFilterRequest(
     val clientCardId: ClientCardId = ClientCardId.NONE,
     val searchString: String = "",
     val status: TrainingPlanStatus = TrainingPlanStatus.NONE,
+    val ownerUserId: String = "",
     val pageNumber: Int = 1,
     val pageSize: Int = 10,
 )

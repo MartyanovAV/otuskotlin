@@ -22,8 +22,9 @@ abstract class RepoTrainingPlanUpdateTest {
     private val reqUpdateSucc by lazy {
         TrainingPlan(
             id = updateSucc.id,
-            clientCardId = ClientCardId("cc-123"),
-            ownerId = "owner-123",
+            clientCardId = ClientCardId("another-client-card"),
+            ownerUserId = "another-owner",
+            createdByUserId = "another-creator",
             title = "update object",
             lock = updateSucc.lock,
             planItems = listOf(ExerciseItem(id = "ex-update", title = "Update Exercise", exerciseId = "ex-1")),
@@ -33,14 +34,16 @@ abstract class RepoTrainingPlanUpdateTest {
         TrainingPlan(
             id = updateIdNotFound,
             clientCardId = ClientCardId("cc-123"),
-            ownerId = "owner-123",
+            ownerUserId = "owner-123",
+            createdByUserId = "owner-123",
             title = "update object not found",
         )
     private val reqUpdateConc by lazy {
         TrainingPlan(
             id = updateSucc.id,
             clientCardId = ClientCardId("cc-123"),
-            ownerId = "owner-123",
+            ownerUserId = "owner-123",
+            createdByUserId = "owner-123",
             title = "update object",
             lock = TrainingPlanLock("bad-lock"),
             planItems = listOf(ExerciseItem(id = "ex-update", title = "Update Exercise", exerciseId = "ex-1")),
@@ -54,6 +57,9 @@ abstract class RepoTrainingPlanUpdateTest {
             assertIs<DbTrainingPlanResponseOk>(result)
             assertEquals(reqUpdateSucc.id, result.data.id)
             assertEquals(reqUpdateSucc.title, result.data.title)
+            assertEquals(updateSucc.clientCardId, result.data.clientCardId)
+            assertEquals(updateSucc.ownerUserId, result.data.ownerUserId)
+            assertEquals(updateSucc.createdByUserId, result.data.createdByUserId)
         }
 
     @Test

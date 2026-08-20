@@ -80,7 +80,14 @@ class RepoTrainingPlanInMemory(
                     oldPlan.lock != TrainingPlanLock.NONE && oldPlan.lock != rqPlan.lock ->
                         errorRepoConcurrencyTrainingPlan(oldPlan, rqPlan.lock)
                     else -> {
-                        val newPlan = rqPlan.copy(lock = TrainingPlanLock(randomUuid()))
+                        val newPlan =
+                            rqPlan.copy(
+                                clientCardId = oldPlan.clientCardId,
+                                ownerUserId = oldPlan.ownerUserId,
+                                createdByUserId = oldPlan.createdByUserId,
+                                createdAt = oldPlan.createdAt,
+                                lock = TrainingPlanLock(randomUuid()),
+                            )
                         val entity = TrainingPlanEntity(newPlan)
                         cache.put(key, entity)
                         DbTrainingPlanResponseOk(newPlan)
@@ -115,6 +122,11 @@ class RepoTrainingPlanInMemory(
         tryTrainingPlansMethod {
             val result: List<TrainingPlan> =
                 cache.asMap().asSequence()
+                    .filter { entry ->
+                        rq.ownerUserId.takeIf { it.isNotBlank() }?.let {
+                            it == entry.value.ownerUserId
+                        } ?: true
+                    }
                     .filter { entry ->
                         rq.clientCardId.takeIf { it != ClientCardId.NONE }?.let {
                             it.asString() == entry.value.clientCardId

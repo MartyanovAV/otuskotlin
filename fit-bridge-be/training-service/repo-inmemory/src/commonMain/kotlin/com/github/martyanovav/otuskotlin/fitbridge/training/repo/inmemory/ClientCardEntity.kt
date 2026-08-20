@@ -6,7 +6,8 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Client
 
 data class ClientCardEntity(
     val id: String? = null,
-    val ownerId: String? = null,
+    val ownerUserId: String? = null,
+    val createdByUserId: String? = null,
     val displayName: String? = null,
     val isArchived: Boolean = false,
     val note: String? = null,
@@ -16,7 +17,8 @@ data class ClientCardEntity(
 ) {
     constructor(model: ClientCard) : this(
         id = model.id.asString().takeIf { it.isNotBlank() },
-        ownerId = model.ownerId.takeIf { it.isNotBlank() },
+        ownerUserId = model.ownerUserId.takeIf { it.isNotBlank() },
+        createdByUserId = model.createdByUserId.takeIf { it.isNotBlank() },
         displayName = model.displayName.takeIf { it.isNotBlank() },
         isArchived = model.isArchived,
         note = model.note.takeIf { it.isNotBlank() },
@@ -28,7 +30,8 @@ data class ClientCardEntity(
     fun toInternal() =
         ClientCard(
             id = id?.let { ClientCardId(it) } ?: ClientCardId.NONE,
-            ownerId = ownerId ?: "",
+            ownerUserId = ownerUserId ?: "",
+            createdByUserId = createdByUserId ?: "",
             displayName = displayName ?: "",
             isArchived = isArchived,
             note = note ?: "",

@@ -50,6 +50,7 @@ services:
       envoy:
         condition: service_healthy
     environment:
+      DB_TYPE_PROD: postgres
       DB_HOST: postgresql
       DB_PORT: 5432
       DB_NAME: training_db
@@ -91,7 +92,7 @@ services:
 
   greptimedb:
     container_name: greptimedb
-    image: greptime/greptimedb:v0.14.4
+    image: greptime/greptimedb:v1.1.4
     command:
       - standalone
       - start

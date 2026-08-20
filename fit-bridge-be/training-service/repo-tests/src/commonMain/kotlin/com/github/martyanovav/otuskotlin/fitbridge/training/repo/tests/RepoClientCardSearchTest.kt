@@ -39,6 +39,14 @@ abstract class RepoClientCardSearchTest {
         }
 
     @Test
+    fun searchByOwnerUserId() =
+        runRepoTest {
+            val result = repo.searchClientCards(DbClientCardFilterRequest(ownerUserId = "owner-124"))
+            assertIs<DbClientCardsResponseOk>(result)
+            assertEquals(setOf(initializedObjects[1].id, initializedObjects[3].id), result.data.map { it.id }.toSet())
+        }
+
+    @Test
     fun searchAll() =
         runRepoTest {
             val result = repo.searchClientCards(DbClientCardFilterRequest())
@@ -50,9 +58,9 @@ abstract class RepoClientCardSearchTest {
         override val initObjects: List<ClientCard> =
             listOf(
                 createInitTestModel("ad1"),
-                createInitTestModel("ad2", ownerId = "owner-124"),
+                createInitTestModel("ad2", ownerUserId = "owner-124"),
                 createInitTestModel("ad3"),
-                createInitTestModel("ad4", ownerId = "owner-124"),
+                createInitTestModel("ad4", ownerUserId = "owner-124"),
                 createInitTestModel("ad5"),
             )
     }

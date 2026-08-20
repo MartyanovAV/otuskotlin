@@ -33,7 +33,7 @@ import org.jetbrains.exposed.v1.jdbc.insertReturning
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
-import java.time.OffsetDateTime
+import java.time.Instant
 import java.util.UUID
 
 class RepoTrainingPlanPg(
@@ -42,21 +42,27 @@ class RepoTrainingPlanPg(
     private val randomUuid: () -> String = { UUID.randomUUID().toString() },
 ) : RepoTrainingPlanBase(), IRepoTrainingPlanInitializable {
     private var dsRef: HikariDataSource? = null
+
     private val database: Database by lazy {
         if (db != null) {
             db
         } else {
-            val dataSource =
-                HikariConfig().apply {
-                    jdbcUrl = properties.url
-                    username = properties.user
-                    password = properties.password
-                    maximumPoolSize = properties.maxConnections
-                    isAutoCommit = true
-                }.let { HikariDataSource(it) }
+            val dataSource = buildDataSource()
             dsRef = dataSource
             Database.connect(dataSource)
         }
+    }
+
+    private fun buildDataSource(): HikariDataSource {
+        val config =
+            HikariConfig().apply {
+                jdbcUrl = properties.url
+                username = properties.user
+                password = properties.password
+                maximumPoolSize = properties.maxConnections
+                isAutoCommit = true
+            }
+        return HikariDataSource(config)
     }
 
     override suspend fun createTrainingPlan(rq: DbTrainingPlanRequest): IDbTrainingPlanResponse =
@@ -66,14 +72,15 @@ class RepoTrainingPlanPg(
                     id = TrainingPlanId(randomUuid()),
                     lock = TrainingPlanLock(randomUuid()),
                 )
-            val now = OffsetDateTime.now()
+            val now = Instant.now()
             val status = statusToString(plan.status)
             val result =
                 transaction(database) {
                     TrainingPlanTable.insertReturning {
                         it[id] = plan.id.asString()
                         it[clientCardId] = plan.clientCardId.asString()
-                        it[ownerId] = plan.ownerId
+                        it[ownerUserId] = plan.ownerUserId
+                        it[createdByUserId] = plan.createdByUserId
                         it[title] = plan.title
                         it[planItems] = plan.planItems
                         it[TrainingPlanTable.status] = status
@@ -106,7 +113,7 @@ class RepoTrainingPlanPg(
     override suspend fun updateTrainingPlan(rq: DbTrainingPlanRequest): IDbTrainingPlanResponse =
         tryMethod {
             val newPlan = rq.trainingPlan.copy(lock = TrainingPlanLock(randomUuid()))
-            val now = OffsetDateTime.now()
+            val now = Instant.now()
             val status = statusToString(newPlan.status)
             val result =
                 transaction(database) {
@@ -125,7 +132,12 @@ class RepoTrainingPlanPg(
                             it[updatedAt] = now
                         }
                     if (affected > 0) {
-                        val returned = newPlan.copy(updatedAt = now.toString())
+                        val returned =
+                            TrainingPlanTable
+                                .selectAll()
+                                .where { TrainingPlanTable.id eq newPlan.id.asString() }
+                                .single()
+                                .toTrainingPlan()
                         DbTrainingPlanResponseOk(returned)
                     } else {
                         val current =
@@ -149,7 +161,7 @@ class RepoTrainingPlanPg(
             val id = rq.id.takeIf { it != TrainingPlanId.NONE } ?: return@tryMethod errorEmptyTrainingPlanId
             val oldLock = rq.lock.takeIf { it != TrainingPlanLock.NONE } ?: return@tryMethod errorEmptyTrainingPlanLock(id)
             val newLock = TrainingPlanLock(randomUuid())
-            val now = OffsetDateTime.now()
+            val now = Instant.now()
             val result =
                 transaction(database) {
                     val affected =
@@ -198,6 +210,7 @@ class RepoTrainingPlanPg(
             val hasClientCardId = rq.clientCardId != ClientCardId.NONE
             val hasTitle = rq.searchString.isNotBlank()
             val hasStatus = rq.status != TrainingPlanStatus.NONE
+            val hasOwnerUserId = rq.ownerUserId.isNotBlank()
             val result =
                 transaction(database) {
                     val conditions = mutableListOf<Op<Boolean>>()
@@ -213,6 +226,9 @@ class RepoTrainingPlanPg(
                         conditions +=
                             TrainingPlanTable.title like "%${rq.searchString}%"
                     }
+                    if (hasOwnerUserId) {
+                        conditions += TrainingPlanTable.ownerUserId eq rq.ownerUserId
+                    }
                     val query =
                         if (conditions.isNotEmpty()) {
                             TrainingPlanTable.selectAll().where { conditions.reduce { acc, op -> acc and op } }
@@ -225,7 +241,7 @@ class RepoTrainingPlanPg(
         }
 
     override fun save(plans: Collection<TrainingPlan>): Collection<TrainingPlan> {
-        val now = OffsetDateTime.now()
+        val now = Instant.now()
         return transaction(database) {
             plans.map { plan ->
                 val savedPlan =
@@ -236,7 +252,8 @@ class RepoTrainingPlanPg(
                 TrainingPlanTable.insertReturning {
                     it[id] = savedPlan.id.asString()
                     it[clientCardId] = savedPlan.clientCardId.asString()
-                    it[ownerId] = savedPlan.ownerId
+                    it[ownerUserId] = savedPlan.ownerUserId
+                    it[createdByUserId] = savedPlan.createdByUserId
                     it[title] = savedPlan.title
                     it[planItems] = savedPlan.planItems
                     it[TrainingPlanTable.status] = statusToString(savedPlan.status)
@@ -289,7 +306,8 @@ private fun ResultRow.toTrainingPlan(): TrainingPlan =
     TrainingPlan(
         id = TrainingPlanId(this[TrainingPlanTable.id]),
         clientCardId = ClientCardId(this[TrainingPlanTable.clientCardId]),
-        ownerId = this[TrainingPlanTable.ownerId],
+        ownerUserId = this[TrainingPlanTable.ownerUserId],
+        createdByUserId = this[TrainingPlanTable.createdByUserId],
         title = this[TrainingPlanTable.title],
         status =
             when (this[TrainingPlanTable.status]) {

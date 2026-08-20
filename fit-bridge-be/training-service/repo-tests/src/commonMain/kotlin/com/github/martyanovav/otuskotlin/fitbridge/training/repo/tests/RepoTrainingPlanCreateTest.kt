@@ -19,7 +19,8 @@ abstract class RepoTrainingPlanCreateTest {
     private val createObj =
         TrainingPlan(
             clientCardId = ClientCardId("cc-123"),
-            ownerId = "owner-123",
+            ownerUserId = "owner-123",
+            createdByUserId = "owner-123",
             title = "create object",
             planItems = listOf(ExerciseItem(id = "ex-create", title = "Create Exercise", exerciseId = "ex-1")),
         )

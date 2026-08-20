@@ -24,20 +24,24 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardCon
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.IFBContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.TrainingPlanContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.helpers.executePipeline
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.AuthPrincipal
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBCommandBase
 import io.ktor.websocket.Frame
 import io.ktor.websocket.WebSocketSession
 import io.ktor.websocket.readText
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.Error as ApiError
 
-suspend fun WebSocketSession.wsHandlerV2(appSettings: AppSettings) {
-    val wsSession = KtorWsSessionV2(this)
+suspend fun WebSocketSession.wsHandlerV2(
+    appSettings: AppSettings,
+    principal: AuthPrincipal,
+) {
+    val wsSession = KtorWsSessionV2(this, principal)
     val sessions = appSettings.wsSessionsV2
     sessions.add(wsSession)
 
     try {
         appSettings.processor.exec(
-            ClientCardContext(command = FBCommandBase.INIT, wsSession = wsSession),
+            ClientCardContext(command = FBCommandBase.INIT, wsSession = wsSession, principal = principal),
         )
         wsSession.send(InitResponse(apiVersion = "v2", result = ResponseResult.SUCCESS))
         for (frame in incoming) {
@@ -56,7 +60,7 @@ suspend fun WebSocketSession.wsHandlerV2(appSettings: AppSettings) {
         }
     } finally {
         appSettings.processor.exec(
-            ClientCardContext(command = FBCommandBase.FINISH, wsSession = wsSession),
+            ClientCardContext(command = FBCommandBase.FINISH, wsSession = wsSession, principal = principal),
         )
         sessions.remove(wsSession)
     }
@@ -84,7 +88,12 @@ private suspend inline fun <reified Q : IRequest, C : IFBContext> processWsReq(
 ): IResponse {
     val logger = appSettings.corSettings.loggerProvider.logger(logId)
     return executePipeline(
-        getContext = { makeCtx().apply { this.wsSession = wsSession } },
+        getContext = {
+            makeCtx().apply {
+                this.wsSession = wsSession
+                principal = wsSession.principal
+            }
+        },
         logger = logger,
         logId = logId,
         receive = { fromTransport(request) },

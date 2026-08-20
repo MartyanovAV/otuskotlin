@@ -16,7 +16,6 @@ fun ICorChainDsl<IFBContext>.trainingPlanRepoPrepareUpdate(title: String) =
             ctx.trainingPlanRepoPrepare =
                 ctx.trainingPlanRepoRead.deepCopy().apply {
                     this.title = ctx.trainingPlanValidated.title
-                    clientCardId = ctx.trainingPlanValidated.clientCardId
                     planItems = ctx.trainingPlanValidated.planItems
                     version = ctx.trainingPlanValidated.version
                     lock = ctx.trainingPlanValidated.lock

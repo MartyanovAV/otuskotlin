@@ -10,6 +10,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.RequestId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.WorkMode
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.permissions.FtcPrincipalRelation
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.IRepoClientCard
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.stubs.Stubs
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.ws.IFBWsSession
@@ -24,6 +25,7 @@ data class ClientCardContext(
     override var requestId: RequestId = RequestId.NONE,
     override var timeStart: Instant = Instant.DISTANT_PAST,
     override var principal: AuthPrincipal = AuthPrincipal.NONE,
+    override var principalRelation: FtcPrincipalRelation = FtcPrincipalRelation.NONE,
     override var wsSession: IFBWsSession = IFBWsSession.NONE,
     override var corSettings: CorSettings = CorSettings(),
     var clientCardRequest: ClientCard = ClientCard(),

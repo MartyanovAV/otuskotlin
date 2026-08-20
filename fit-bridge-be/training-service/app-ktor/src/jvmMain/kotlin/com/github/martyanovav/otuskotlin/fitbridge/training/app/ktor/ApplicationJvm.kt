@@ -3,6 +3,8 @@ package com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.apiV1Mapper
 import com.github.martyanovav.otuskotlin.fitbridge.logging.common.FbLoggerProvider
 import com.github.martyanovav.otuskotlin.fitbridge.logging.jvm.FbLoggerLogback
+import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.base.AUTH_HEADER
+import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.base.jwt2principal
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.plugins.initAppSettings
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.v1.v1Training
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.v1.wsHandlerV1
@@ -15,6 +17,7 @@ import io.ktor.server.application.install
 import io.ktor.server.metrics.micrometer.MicrometerMetrics
 import io.ktor.server.plugins.calllogging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.request.header
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
@@ -85,7 +88,7 @@ fun Application.moduleJvm(
             }
             v1Training(appSettings)
             webSocket("ws") {
-                wsHandlerV1(appSettings)
+                wsHandlerV1(appSettings, call.request.header(AUTH_HEADER).jwt2principal())
             }
         }
     }

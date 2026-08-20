@@ -29,6 +29,7 @@ services:
       liquibase-training:
         condition: service_completed_successfully
     environment:
+      DB_TYPE_PROD: postgres
       DB_HOST: postgresql
       DB_PORT: 5432
       DB_NAME: training_db

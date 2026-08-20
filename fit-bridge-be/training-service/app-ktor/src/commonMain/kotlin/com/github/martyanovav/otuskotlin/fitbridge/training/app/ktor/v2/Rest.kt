@@ -18,6 +18,8 @@ import com.github.martyanovav.otuskotlin.fitbridge.mappers.v2.fromTransport
 import com.github.martyanovav.otuskotlin.fitbridge.mappers.v2.toTransport
 import com.github.martyanovav.otuskotlin.fitbridge.training.api.log1.mapper.toLog
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.AppSettings
+import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.base.AUTH_HEADER
+import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.base.jwt2principal
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.IFBContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.TrainingPlanContext
@@ -25,6 +27,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.helpers.execu
 import io.ktor.http.ContentType
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
+import io.ktor.server.request.header
 import io.ktor.server.request.receiveText
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
@@ -46,8 +49,9 @@ suspend inline fun <
 ) {
     val logger = appSettings.corSettings.loggerProvider.logger(logId)
     val request = apiV2RequestDeserialize<Q>(receiveText())
+    val principal = this.request.header(AUTH_HEADER).jwt2principal()
     executePipeline(
-        getContext = makeContext,
+        getContext = { makeContext().apply { this.principal = principal } },
         logger = logger,
         logId = logId,
         receive = { fromTransport(request) },

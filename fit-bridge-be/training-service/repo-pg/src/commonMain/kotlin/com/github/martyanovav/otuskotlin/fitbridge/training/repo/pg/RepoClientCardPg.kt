@@ -32,7 +32,7 @@ import org.jetbrains.exposed.v1.jdbc.insertReturning
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
-import java.time.OffsetDateTime
+import java.time.Instant
 import java.util.UUID
 
 class RepoClientCardPg(
@@ -45,17 +45,22 @@ class RepoClientCardPg(
         if (db != null) {
             db
         } else {
-            val dataSource =
-                HikariConfig().apply {
-                    jdbcUrl = properties.url
-                    username = properties.user
-                    password = properties.password
-                    maximumPoolSize = properties.maxConnections
-                    isAutoCommit = true
-                }.let { HikariDataSource(it) }
+            val dataSource = buildDataSource()
             dsRef = dataSource
             Database.connect(dataSource)
         }
+    }
+
+    private fun buildDataSource(): HikariDataSource {
+        val config =
+            HikariConfig().apply {
+                jdbcUrl = properties.url
+                username = properties.user
+                password = properties.password
+                maximumPoolSize = properties.maxConnections
+                isAutoCommit = true
+            }
+        return HikariDataSource(config)
     }
 
     override suspend fun createClientCard(rq: DbClientCardRequest): IDbClientCardResponse =
@@ -65,13 +70,14 @@ class RepoClientCardPg(
                     id = ClientCardId(randomUuid()),
                     lock = ClientCardLock(randomUuid()),
                 )
-            val now = OffsetDateTime.now()
+            val now = Instant.now()
             val status = statusToString(card.isArchived)
             val result =
                 transaction(database) {
                     ClientCardTable.insertReturning {
                         it[id] = card.id.asString()
-                        it[ownerId] = card.ownerId
+                        it[ownerUserId] = card.ownerUserId
+                        it[createdByUserId] = card.createdByUserId
                         it[displayName] = card.displayName
                         it[note] = card.note
                         it[ClientCardTable.status] = status
@@ -103,7 +109,7 @@ class RepoClientCardPg(
     override suspend fun updateClientCard(rq: DbClientCardRequest): IDbClientCardResponse =
         tryMethod {
             val newCard = rq.clientCard.copy(lock = ClientCardLock(randomUuid()))
-            val now = OffsetDateTime.now()
+            val now = Instant.now()
             val status = statusToString(newCard.isArchived)
             val result =
                 transaction(database) {
@@ -121,7 +127,12 @@ class RepoClientCardPg(
                             it[updatedAt] = now
                         }
                     if (affected > 0) {
-                        val returned = newCard.copy(updatedAt = now.toString())
+                        val returned =
+                            ClientCardTable
+                                .selectAll()
+                                .where { ClientCardTable.id eq newCard.id.asString() }
+                                .single()
+                                .toClientCard()
                         DbClientCardResponseOk(returned)
                     } else {
                         val current =
@@ -145,7 +156,7 @@ class RepoClientCardPg(
             val id = rq.id.takeIf { it != ClientCardId.NONE } ?: return@tryMethod errorEmptyClientCardId
             val oldLock = rq.lock.takeIf { it != ClientCardLock.NONE } ?: return@tryMethod errorEmptyClientCardLock(id)
             val newLock = ClientCardLock(randomUuid())
-            val now = OffsetDateTime.now()
+            val now = Instant.now()
             val result =
                 transaction(database) {
                     val affected =
@@ -193,6 +204,7 @@ class RepoClientCardPg(
         tryListMethod {
             val hasDisplayName = rq.searchString.isNotBlank()
             val hasStatus = rq.status != ClientCardStatus.NONE
+            val hasOwnerUserId = rq.ownerUserId.isNotBlank()
             val result =
                 transaction(database) {
                     val conditions = mutableListOf<Op<Boolean>>()
@@ -204,6 +216,9 @@ class RepoClientCardPg(
                     if (hasDisplayName) {
                         conditions +=
                             ClientCardTable.displayName like "%${rq.searchString}%"
+                    }
+                    if (hasOwnerUserId) {
+                        conditions += ClientCardTable.ownerUserId eq rq.ownerUserId
                     }
                     val query =
                         if (conditions.isNotEmpty()) {
@@ -217,7 +232,7 @@ class RepoClientCardPg(
         }
 
     override fun save(cards: Collection<ClientCard>): Collection<ClientCard> {
-        val now = OffsetDateTime.now()
+        val now = Instant.now()
         return transaction(database) {
             cards.map { card ->
                 val savedCard =
@@ -227,7 +242,8 @@ class RepoClientCardPg(
                     )
                 ClientCardTable.insertReturning {
                     it[id] = savedCard.id.asString()
-                    it[ownerId] = savedCard.ownerId
+                    it[ownerUserId] = savedCard.ownerUserId
+                    it[createdByUserId] = savedCard.createdByUserId
                     it[displayName] = savedCard.displayName
                     it[note] = savedCard.note
                     it[ClientCardTable.status] = statusToString(savedCard.isArchived)
@@ -275,7 +291,8 @@ class RepoClientCardPg(
 private fun ResultRow.toClientCard(): ClientCard =
     ClientCard(
         id = ClientCardId(this[ClientCardTable.id]),
-        ownerId = this[ClientCardTable.ownerId],
+        ownerUserId = this[ClientCardTable.ownerUserId],
+        createdByUserId = this[ClientCardTable.createdByUserId],
         displayName = this[ClientCardTable.displayName],
         isArchived = this[ClientCardTable.status] == "ARCHIVED",
         note = this[ClientCardTable.note],

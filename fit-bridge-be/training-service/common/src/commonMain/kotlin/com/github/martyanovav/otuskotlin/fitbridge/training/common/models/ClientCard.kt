@@ -2,7 +2,8 @@ package com.github.martyanovav.otuskotlin.fitbridge.training.common.models
 
 data class ClientCard(
     var id: ClientCardId = ClientCardId.NONE,
-    var ownerId: String = "",
+    var ownerUserId: String = "",
+    var createdByUserId: String = "",
     var displayName: String = "",
     var isArchived: Boolean = false,
     var note: String = "",

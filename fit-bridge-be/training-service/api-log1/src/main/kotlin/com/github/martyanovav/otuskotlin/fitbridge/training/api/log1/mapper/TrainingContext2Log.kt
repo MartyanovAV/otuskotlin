@@ -67,7 +67,7 @@ private fun TrainingPlanFilter.toLog() =
     TrainingFilterLog(
         searchString = searchString.takeIf { it.isNotBlank() },
         clientId = null,
-        ownerId = null,
+        ownerUserId = null,
         cardId = null
     )
 
@@ -75,7 +75,7 @@ private fun ClientCardFilter.toLog() =
     TrainingFilterLog(
         searchString = searchString.takeIf { it.isNotBlank() },
         clientId = null,
-        ownerId = null,
+        ownerUserId = null,
         cardId = null
     )
 
@@ -91,12 +91,15 @@ private fun TrainingPlan.toLog() =
     TrainingPlanLog(
         id = id.takeIf { it != TrainingPlanId.NONE }?.asString(),
         cardId = clientCardId.takeIf { it != ClientCardId.NONE }?.asString(),
+        ownerUserId = ownerUserId.takeIf { it.isNotBlank() },
+        createdByUserId = createdByUserId.takeIf { it.isNotBlank() },
         title = title.takeIf { it.isNotBlank() }
     )
 
 private fun ClientCard.toLog() =
     ClientCardLog(
         id = id.takeIf { it != ClientCardId.NONE }?.asString(),
-        ownerId = ownerId.takeIf { it.isNotBlank() },
+        ownerUserId = ownerUserId.takeIf { it.isNotBlank() },
+        createdByUserId = createdByUserId.takeIf { it.isNotBlank() },
         goals = note.takeIf { it.isNotBlank() },
     )

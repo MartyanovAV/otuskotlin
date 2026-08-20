@@ -20,7 +20,8 @@ abstract class RepoClientCardUpdateTest {
     private val reqUpdateSucc by lazy {
         ClientCard(
             id = updateSucc.id,
-            ownerId = "owner-123",
+            ownerUserId = "another-owner",
+            createdByUserId = "another-creator",
             displayName = "update object",
             note = "update object description",
             lock = updateSucc.lock,
@@ -29,14 +30,16 @@ abstract class RepoClientCardUpdateTest {
     private val reqUpdateNotFound =
         ClientCard(
             id = updateIdNotFound,
-            ownerId = "owner-123",
+            ownerUserId = "owner-123",
+            createdByUserId = "owner-123",
             displayName = "update object not found",
             note = "update object not found description",
         )
     private val reqUpdateConc by lazy {
         ClientCard(
             id = updateSucc.id,
-            ownerId = "owner-123",
+            ownerUserId = "owner-123",
+            createdByUserId = "owner-123",
             displayName = "update object",
             note = "update object description",
             lock = ClientCardLock("bad-lock"),
@@ -51,6 +54,8 @@ abstract class RepoClientCardUpdateTest {
             assertEquals(reqUpdateSucc.id, result.data.id)
             assertEquals(reqUpdateSucc.displayName, result.data.displayName)
             assertEquals(reqUpdateSucc.note, result.data.note)
+            assertEquals(updateSucc.ownerUserId, result.data.ownerUserId)
+            assertEquals(updateSucc.createdByUserId, result.data.createdByUserId)
         }
 
     @Test

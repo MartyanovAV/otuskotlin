@@ -23,7 +23,8 @@ abstract class RepoTrainingPlanReadTest {
             assertIs<DbTrainingPlanResponseOk>(result)
             assertEquals(readSucc.id, result.data.id)
             assertEquals(readSucc.clientCardId, result.data.clientCardId)
-            assertEquals(readSucc.ownerId, result.data.ownerId)
+            assertEquals(readSucc.ownerUserId, result.data.ownerUserId)
+            assertEquals(readSucc.createdByUserId, result.data.createdByUserId)
             assertEquals(readSucc.title, result.data.title)
             assertEquals(readSucc.status, result.data.status)
         }

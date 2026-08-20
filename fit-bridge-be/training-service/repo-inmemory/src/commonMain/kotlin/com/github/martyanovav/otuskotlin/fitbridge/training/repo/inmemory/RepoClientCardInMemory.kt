@@ -79,7 +79,13 @@ class RepoClientCardInMemory(
                     oldCard.lock != ClientCardLock.NONE && oldCard.lock != rqCard.lock ->
                         errorRepoConcurrencyClientCard(oldCard, rqCard.lock)
                     else -> {
-                        val newCard = rqCard.copy(lock = ClientCardLock(randomUuid()))
+                        val newCard =
+                            rqCard.copy(
+                                ownerUserId = oldCard.ownerUserId,
+                                createdByUserId = oldCard.createdByUserId,
+                                createdAt = oldCard.createdAt,
+                                lock = ClientCardLock(randomUuid()),
+                            )
                         val entity = ClientCardEntity(newCard)
                         cache.put(key, entity)
                         DbClientCardResponseOk(newCard)
@@ -114,6 +120,11 @@ class RepoClientCardInMemory(
         tryClientCardsMethod {
             val result: List<ClientCard> =
                 cache.asMap().asSequence()
+                    .filter { entry ->
+                        rq.ownerUserId.takeIf { it.isNotBlank() }?.let {
+                            it == entry.value.ownerUserId
+                        } ?: true
+                    }
                     .filter { entry ->
                         rq.status.takeIf { it != ClientCardStatus.NONE }?.let {
                             val card = entry.value.toInternal()
