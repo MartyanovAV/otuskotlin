@@ -183,3 +183,50 @@ docker compose down
 ```
 
 `docker compose down -v` дополнительно удаляет данные PostgreSQL и GreptimeDB и используется только для намеренного чистого старта.
+
+## Деплой на стенд через GitHub Actions
+
+В проекте настроен автоматизированный CI/CD пайплайн (`.github/workflows/build.yml`), который собирает Docker-образы и публикует их в GitHub Container Registry, после чего запускает процесс обновления на удаленном сервере (стенде).
+
+> [!NOTE]
+> Пайплайн настроен так, что он автоматически срабатывает при пуше (или мерже) в ветку `main`. Но шаг деплоя защищен механизмом **GitHub Environments**, поэтому он дойдет до конца, встанет на паузу и будет ждать ручного нажатия кнопки "Approve" владельцем репозитория.
+
+### Подготовка репозитория (Один раз)
+
+Для того чтобы деплой заработал, нужно настроить доступы в GitHub:
+
+#### 1. Настройка Environment (Ручное подтверждение деплоя)
+1. В репозитории зайдите в **Settings** -> **Environments**.
+2. Нажмите **New environment** и назовите его строго **`stand`**.
+3. В настройках `stand` поставьте галочку **Required reviewers** и добавьте себя.
+
+#### 2. Получение токена для GHCR
+Серверу понадобится право скачивать собранные образы из GitHub.
+1. В настройках вашего **аккаунта** GitHub зайдите в **Developer settings** -> **Personal access tokens** -> **Tokens (classic)**.
+2. Создайте новый токен (Generate new token) без срока действия (No expiration).
+3. Выдайте права: **`read:packages`** (и `write:packages`).
+4. Скопируйте токен.
+
+#### 3. Настройка Секретов
+1. В настройках репозитория зайдите в **Settings** -> **Secrets and variables** -> **Actions**.
+2. Создайте следующие **Repository secrets** (или *Environment secrets* внутри `stand`):
+   - `SSH_HOST`: Публичный IP-адрес вашего стенда (например, `192.168.1.100`).
+   - `SSH_USERNAME`: Имя пользователя (например, `root` или `ubuntu`).
+   - `SSH_PRIVATE_KEY`: Приватный SSH ключ (содержимое файла `~/.ssh/id_rsa` или `~/.ssh/id_ed25519`). Убедитесь, что публичная часть (`.pub`) добавлена в файл `~/.ssh/authorized_keys` на стенде.
+   - `CR_PAT`: Скопированный токен из предыдущего шага.
+
+> [!TIP]
+> **Приватные секреты (Опционально)**
+> Чтобы не использовать стандартные (уязвимые) логины и пароли для баз данных на сервере, вы можете задать дополнительные секреты. GitHub Actions автоматически подхватит их и прокинет в `.env` файл на сервере:
+> - Для суперпользователя PostgreSQL: `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
+> - Для БД Keycloak: `KC_DB_NAME`, `KC_DB_USERNAME`, `KC_DB_PASSWORD`
+> - Для админа Keycloak: `KC_BOOTSTRAP_ADMIN_USERNAME`, `KC_BOOTSTRAP_ADMIN_PASSWORD`
+> - Для Liquibase (владелец схемы): `LIQUIBASE_DB_USERNAME`, `LIQUIBASE_DB_PASSWORD`
+> - Для БД микросервиса (только чтение/запись данных): `DB_NAME`, `DB_USER`, `DB_PASSWORD`
+> - Для GreptimeDB: `GREPTIMEDB_USER`, `GREPTIMEDB_PASS`
+
+### Как происходит деплой
+- При успешном мерже в `main`, GitHub Action прогоняет E2E тесты.
+- Образы `training-service` и `liquibase-training` получают тег с коротким хэшем коммита (Git SHA) и публикуются в GHCR.
+- Экшен подключается по SSH к стенду, скачивает актуальные конфиги (`docker-compose.yml` и `docker-compose.stand.yml`).
+- Выполняется `docker compose pull` и `docker compose up -d` с указанием конкретного `APP_VERSION`, гарантируя запуск именно той сборки, которая прошла тесты.

@@ -1,8 +1,9 @@
-# This is a basic workflow to help you get started with Actions
-
 name: 'CI-build'
 
 on:
+  push:
+    branches:
+      - 'main'
   pull_request:
     types:
       - opened
@@ -45,6 +46,9 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v5
 
@@ -65,3 +69,100 @@ jobs:
 
       - name: Run containerized E2E tests
         run: ./gradlew --no-daemon e2eTests --rerun-tasks --console=plain
+
+      - name: Log in to the Container registry
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tag and push images
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        run: |
+          GHCR_USERNAME=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          COMMIT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+
+          # training-service
+          docker tag fitbridge-training-service:local ghcr.io/$GHCR_USERNAME/fitbridge-training-service:$COMMIT_SHA
+          docker tag fitbridge-training-service:local ghcr.io/$GHCR_USERNAME/fitbridge-training-service:latest
+          docker push ghcr.io/$GHCR_USERNAME/fitbridge-training-service:$COMMIT_SHA
+          docker push ghcr.io/$GHCR_USERNAME/fitbridge-training-service:latest
+
+          # liquibase-training
+          docker tag fit-bridge-migration-pg-training:0.1.0 ghcr.io/$GHCR_USERNAME/fitbridge-migration-pg-training:$COMMIT_SHA
+          docker tag fit-bridge-migration-pg-training:0.1.0 ghcr.io/$GHCR_USERNAME/fitbridge-migration-pg-training:latest
+          docker push ghcr.io/$GHCR_USERNAME/fitbridge-migration-pg-training:$COMMIT_SHA
+          docker push ghcr.io/$GHCR_USERNAME/fitbridge-migration-pg-training:latest
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-22.04
+    environment: stand
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Copy deploy folder to VPS
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "deploy/*"
+          target: "~/otuskotlin"
+
+      - name: Start containers via SSH
+        uses: appleboy/ssh-action@v1
+        env:
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          KC_DB_NAME: ${{ secrets.KC_DB_NAME }}
+          KC_DB_USERNAME: ${{ secrets.KC_DB_USERNAME }}
+          KC_DB_PASSWORD: ${{ secrets.KC_DB_PASSWORD }}
+          LIQUIBASE_DB_USERNAME: ${{ secrets.LIQUIBASE_DB_USERNAME }}
+          LIQUIBASE_DB_PASSWORD: ${{ secrets.LIQUIBASE_DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          KC_BOOTSTRAP_ADMIN_USERNAME: ${{ secrets.KC_BOOTSTRAP_ADMIN_USERNAME }}
+          KC_BOOTSTRAP_ADMIN_PASSWORD: ${{ secrets.KC_BOOTSTRAP_ADMIN_PASSWORD }}
+          GREPTIMEDB_USER: ${{ secrets.GREPTIMEDB_USER }}
+          GREPTIMEDB_PASS: ${{ secrets.GREPTIMEDB_PASS }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD,KC_DB_NAME,KC_DB_USERNAME,KC_DB_PASSWORD,LIQUIBASE_DB_USERNAME,LIQUIBASE_DB_PASSWORD,DB_NAME,DB_USER,DB_PASSWORD,KC_BOOTSTRAP_ADMIN_USERNAME,KC_BOOTSTRAP_ADMIN_PASSWORD,GREPTIMEDB_USER,GREPTIMEDB_PASS
+          script: |
+            GHCR_USERNAME=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+            COMMIT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+
+            cd ~/otuskotlin/deploy
+            echo "GHCR_USERNAME=$GHCR_USERNAME" > .env
+            echo "APP_VERSION=$COMMIT_SHA" >> .env
+
+            [ -n "$POSTGRES_DB" ] && echo "POSTGRES_DB=$POSTGRES_DB" >> .env
+            [ -n "$POSTGRES_USER" ] && echo "POSTGRES_USER=$POSTGRES_USER" >> .env
+            [ -n "$POSTGRES_PASSWORD" ] && echo "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" >> .env
+            [ -n "$KC_DB_NAME" ] && echo "KC_DB_NAME=$KC_DB_NAME" >> .env
+            [ -n "$KC_DB_USERNAME" ] && echo "KC_DB_USERNAME=$KC_DB_USERNAME" >> .env
+            [ -n "$KC_DB_PASSWORD" ] && echo "KC_DB_PASSWORD=$KC_DB_PASSWORD" >> .env
+            [ -n "$LIQUIBASE_DB_USERNAME" ] && echo "LIQUIBASE_DB_USERNAME=$LIQUIBASE_DB_USERNAME" >> .env
+            [ -n "$LIQUIBASE_DB_PASSWORD" ] && echo "LIQUIBASE_DB_PASSWORD=$LIQUIBASE_DB_PASSWORD" >> .env
+            [ -n "$DB_NAME" ] && echo "DB_NAME=$DB_NAME" >> .env
+            [ -n "$DB_USER" ] && echo "DB_USER=$DB_USER" >> .env
+            [ -n "$DB_PASSWORD" ] && echo "DB_PASSWORD=$DB_PASSWORD" >> .env
+            [ -n "$KC_BOOTSTRAP_ADMIN_USERNAME" ] && echo "KC_BOOTSTRAP_ADMIN_USERNAME=$KC_BOOTSTRAP_ADMIN_USERNAME" >> .env
+            [ -n "$KC_BOOTSTRAP_ADMIN_PASSWORD" ] && echo "KC_BOOTSTRAP_ADMIN_PASSWORD=$KC_BOOTSTRAP_ADMIN_PASSWORD" >> .env
+            [ -n "$GREPTIMEDB_USER" ] && echo "GREPTIMEDB_USER=$GREPTIMEDB_USER" >> .env
+            [ -n "$GREPTIMEDB_PASS" ] && echo "GREPTIMEDB_PASS=$GREPTIMEDB_PASS" >> .env
+
+            # Login to GHCR to pull images
+            echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            docker compose -f docker-compose.yml -f docker-compose.stand.yml pull
+            docker compose -f docker-compose.yml -f docker-compose.stand.yml up -d
