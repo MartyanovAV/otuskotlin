@@ -5,12 +5,19 @@ import type { KeycloakProfile } from 'keycloak-js';
 
 export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = ref(false);
+  const isInitialized = ref(false);
+  const initializationError = ref<string | null>(null);
   const userProfile = ref<KeycloakProfile | null>(null);
   // Токен хранить в store не нужно — он всегда актуален через keycloak.token
   // (keycloak-js сам обновляет его через onTokenExpired)
   const roles = ref<string[]>([]);
 
+  const syncRoles = () => {
+    roles.value = keycloak.realmAccess?.roles ?? [];
+  };
+
   const initKeycloak = async () => {
+    initializationError.value = null;
     try {
       const authenticated = await keycloak.init({
         onLoad: 'login-required',
@@ -20,6 +27,7 @@ export const useAuthStore = defineStore('auth', () => {
       });
 
       isAuthenticated.value = authenticated;
+      isInitialized.value = true;
 
       if (authenticated) {
         try {
@@ -33,9 +41,7 @@ export const useAuthStore = defineStore('auth', () => {
           };
         }
 
-        if (keycloak.realmAccess?.roles) {
-          roles.value = keycloak.realmAccess.roles;
-        }
+        syncRoles();
 
         // Автоматическое обновление токена за 30 секунд до истечения
         keycloak.onTokenExpired = async () => {
@@ -46,9 +52,14 @@ export const useAuthStore = defineStore('auth', () => {
             logout();
           }
         };
+
+        keycloak.onAuthRefreshSuccess = syncRoles;
       }
     } catch (error) {
       console.error('Keycloak initialization failed', error);
+      isAuthenticated.value = false;
+      isInitialized.value = true;
+      initializationError.value = 'Не удалось подключиться к сервису аутентификации';
     }
   };
 
@@ -64,6 +75,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     isAuthenticated,
+    isInitialized,
+    initializationError,
     userProfile,
     roles,
     initKeycloak,

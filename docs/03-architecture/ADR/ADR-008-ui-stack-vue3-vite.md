@@ -10,7 +10,7 @@ FitBridge — приватная CRM для фитнес-тренеров, за�
 1. **Платформы:** responsive web-приложение для телефонов, планшетов и ПК сейчас; нативное мобильное приложение в будущем — отдельной кодовой базой (стратегия «web сейчас, native потом»).
 2. **Язык frontend-разработки:** TypeScript + JS-фреймворк (Kotlin/JS-варианты сознательно отклонены).
 3. **PWA — уровень 1:** установка на домашний экран + precache оболочки приложения. Офлайн-синхронизация данных (уровень 2) отклонена как чрезмерно сложная; Web Push (уровень 3) — в бэклоге. При развитии продукта вместо углубления PWA планируется переход к нативным приложениям.
-4. **Браузерная матрица:** гарантированная modern-поддержка — evergreen-браузеры последних ~2–3 лет (Chrome/Edge/Firefox/Yandex Browser) и Safari 16.4+. Для iOS Safari 13–15, десктопного Safari 13–15, Chrome 80+ и Samsung Internet 13+ обеспечивается функциональная совместимость best effort без гарантии визуального соответствия modern-версии. JavaScript для legacy-матрицы поставляется через `@vitejs/plugin-legacy` (двойная сборка: modern ES-module чанки + legacy чанки с usage-based полифилами core-js); совместимость CSS обеспечивается явными фолбэками и graceful degradation.
+4. **Браузерная матрица:** гарантированная modern-поддержка — evergreen-браузеры последних ~2–3 лет (Chrome/Edge/Firefox/Yandex Browser) и Safari 16.4+. Legacy-браузеры поддерживаются best effort; отдельная legacy-сборка через `@vitejs/plugin-legacy` остаётся следующим этапом.
 5. **Характер продукта:** приватная CRM за JWT-аутентификацией → SPA, требования к SEO/SSR отсутствуют.
 6. **Backend-контракт:** существуют OpenAPI-спеки (модуль `specs`, используются для генерации `api-v2-kmp`) → TS-клиент генерируется из спеки, дрейф DTO исключён.
 7. **Дизайн-система:** существует `docs/04-ui-ux/DESIGN_STYLE_GUIDE.md` (дизайн-токены, светлая/тёмная темы через `data-theme`, адаптивная типографика на `clamp()`) и статический прототип `ux-prototype/` (mobile-first, роли клиент/тренер) — референс-макеты.
@@ -25,7 +25,7 @@ FitBridge — приватная CRM для фитнес-тренеров, за�
 
 ## Comparison
 
-Рассмотрены три варианта JS-фреймворка на единой платформенной базе (Vite + `@vitejs/plugin-legacy`, PWA-уровень 1, сгенерированный из OpenAPI TS-клиент, Playwright). Разница между вариантами — только в framework-ядре; общая база одинакова.
+Рассмотрены три варианта JS-фреймворка на единой платформенной базе (Vite, PWA-уровень 1, сгенерированный из OpenAPI TS-клиент, Playwright). Разница между вариантами — только в framework-ядре; общая база одинакова.
 
 | Критерий | React 18 + Vite | Vue 3 + Vite (ВЫБРАН) | Svelte 5 + Vite |
 |---|:---:|:---:|:---:|
@@ -47,16 +47,16 @@ FitBridge — приватная CRM для фитнес-тренеров, за�
 
 - **Ядро:** Vue 3 (Composition API + `<script setup>`) + TypeScript (strict).
 - **Скаффолдинг:** `create-vue` (официальный шаблон на Vite с ESLint 9, Prettier, Vitest, Playwright).
-- **Сборка:** Vite (актуальная стабильная major-версия) + `@vitejs/plugin-legacy`; `browserslist` в корне проекта; Node LTS (фиксация в `.nvmrc`), пакетный менеджер npm (pnpm как альтернатива); dev-режим — `server.proxy` на локальные порты Ktor-сервисов.
+- **Сборка:** Vite (актуальная стабильная major-версия), Node.js согласно `engines` в `package.json`, пакетный менеджер npm; dev-режим — `server.proxy` на локальные порты Ktor-сервисов. Legacy-сборка и browserslist — отдельная задача.
 - **Маршрутизация:** Vue Router 4 (history-режим, route-guards для JWT).
 - **Клиентское состояние:** Pinia (сессия/auth, тема, UI-состояние).
 - **Серверное состояние:** TanStack Query Vue (кэш списков ClientCard/TrainingPlan, поиск, optimistic-обновления с обработкой конфликтов 409 — бэкенд уже использует optimistic lock).
 - **API-слой:** Orval генерирует типизированный TS-клиент и хуки TanStack Query из OpenAPI-спек; тонкая обёртка для JWT и обработки 401; целевая версия API (v1 vs v2) согласуется с бэкендом при реализации, рекомендована v2.
 - **Стили/UI:** дизайн-токены из `DESIGN_STYLE_GUIDE.md` переносятся в Tailwind CSS v4 (`@theme` — маппинг 1:1 на CSS custom properties); headless-примитивы Reka UI в подходе shadcn-vue (компоненты в проекте, стилизация своими токенами); тёмная тема — class-стратегия Tailwind, привязанная к `data-theme="dark"`; mobile-first breakpoints (телефон → планшет → ПК). Гарантированная визуальная совместимость Tailwind CSS v4 относится только к modern-матрице.
 - **CSS-политика для legacy-матрицы:** основной пользовательский сценарий должен оставаться читаемым и работоспособным, но visual parity с modern-версией не требуется; допустимы отличия цветов, теней, градиентов, анимаций и других декоративных эффектов. База — flexbox/grid; `:has`, container queries, `dvh` и другие современные CSS-возможности используются только с фолбэками либо graceful degradation.
-- **Формы:** VeeValidate 4 + Zod; схемы Zod могут генерироваться из OpenAPI (orval-zod).
-- **PWA:** `vite-plugin-pwa` — манифест (имя FitBridge, цвета из дизайн-гайда, иконки 192/512 + maskable), Workbox precache оболочки, `registerType: 'autoUpdate'`.
-- **Тестирование:** Vitest + `@vue/test-utils` (unit/компонентные); Playwright в актуальных Chromium, Firefox и WebKit для основного E2E-контура, включая desktop/mobile/tablet viewport, с запуском против поднятого бэкенда и перспективой переиспользования docker-compose инфраструктуры `fit-bridge-dcompose`. Playwright WebKit не считается проверкой Safari 13–15: функциональная legacy-совместимость best effort проверяется отдельным smoke-набором на реальных устройствах либо в browser cloud с зафиксированными версиями Safari/iOS Safari и Chrome; визуальное соответствие modern-версии не является критерием этого smoke-набора.
+- **Формы:** native HTML validation для MVP; VeeValidate 4 + Zod остаются опцией при усложнении форм.
+- **PWA:** `vite-plugin-pwa` — манифест с существующей favicon, Workbox precache оболочки, `registerType: 'autoUpdate'`; dedicated 192/512 maskable icons — backlog.
+- **Тестирование:** Vitest + `@vue/test-utils` (unit/компонентные); Playwright auth smoke против поднятых Keycloak, Envoy и Training Service. Расширение до полной browser/viewport matrix выполняется отдельным этапом.
 - **Размещение:** новый корневой каталог `fit-bridge-fe/` рядом с `fit-bridge-be/`; Node-проект, в Gradle не включается (CI — отдельная Node-джоба); feature-based структура по доменам бэкенда: `features/client-card`, `features/training-plan`, `features/auth` + `shared/ui`, `shared/api`, `router`, `stores`, `styles`; монорепо-инструменты не вводятся (YAGNI).
 
 ## Rationale
@@ -75,7 +75,7 @@ FitBridge — приватная CRM для фитнес-тренеров, за�
 - **Положительно:** дизайн-система переносится 1:1 в Tailwind CSS v4 `@theme`, сохраняя единый источник токенов.
 - **Положительно:** PWA-уровень 1 даёт «app-like» установку без существенных затрат на офлайн-синхронизацию.
 - **Положительно:** Playwright-тесты в актуальных Chromium, Firefox и WebKit дают быстрый кросс-движковый regression-контур для modern-матрицы и адаптивных viewport.
-- **Риск 1:** Tailwind CSS v4 и актуальные браузерные сборки Playwright не гарантируют полную совместимость с iOS Safari 13–15, десктопным Safari 13–15 и Chrome 80+. Митигация: legacy-матрица имеет статус functional best effort без visual parity; используются `@vitejs/plugin-legacy`, CSS-фолбэки, graceful degradation и отдельный smoke-набор на реальных устройствах либо в browser cloud с зафиксированными legacy-версиями. Playwright WebKit не используется как доказательство нижней границы Safari.
+- **Риск 1:** Tailwind CSS v4 и modern-only сборка не гарантируют полную совместимость со старыми браузерами. Митигация: legacy-сборка, CSS-фолбэки и расширенная browser matrix планируются отдельным этапом.
 - **Риск 2:** генерация TS-клиента требует публикации OpenAPI-спек из модуля `specs`. Митигация: механизм уже существует для KMP-генерации; переиспользуется для TS-генерации.
 - **Риск 3:** команде потребуется онбординг в Vue 3 Composition API + TanStack Query. Митигация: официальный скаффолд и русскоязычная документация снижают порог.
 - **Риск 4:** знания команды по web-стеку не перенесутся в будущее нативное приложение. Митигация: нативное приложение будет отдельным решением (отдельный ADR) при наступлении Phase 2.

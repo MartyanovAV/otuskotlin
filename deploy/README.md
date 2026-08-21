@@ -2,6 +2,8 @@
 
 `deploy/` — единственный источник Docker Compose, Envoy и Keycloak-конфигурации и каноническая операционная инструкция локального MVP-стенда. Архитектурные границы описаны в [03-arch.md](../docs/03-architecture/03-arch.md), [C4 Container source](../docs/03-architecture/c4/C4_CONTAINER.drawio), [Security Architecture](../docs/03-architecture/SECURITY_ARCHITECTURE.md) и [ADR-006](../docs/03-architecture/ADR/ADR-006-use-greptimedb-fluent-bit-observability.md).
 
+Пошаговая ручная приёмка UI, авторизации, CORS/JWT, ownership и lifecycle API описана в [Manual Test Scenarios](../docs/05-testing/MANUAL_TEST_SCENARIOS.md).
+
 ## Состав
 
 | Сервис | Назначение | Порт хоста |
@@ -9,7 +11,7 @@
 | `training-service` | Backend API для работы с клиентами и планами | REST через Envoy `/v1/clientCard/`, `/v1/trainingPlan/`, `/v2/clientCard/`, `/v2/trainingPlan/`; WS `/v1/training/ws`, `/v2/training/ws` |
 | `postgresql` | основное хранилище данных приложения | `5432` |
 | `liquibase-training` | применение схемы Training DB перед запуском приложения | без порта хоста |
-| `envoy` | входной proxy, JWT validation и WebSocket Upgrade для MVP `/v1/*`, `/v2/*` | `8080` |
+| `envoy` | входной proxy, CORS/preflight, JWT validation и WebSocket Upgrade для MVP `/v1/*`, `/v2/*` | `8080` |
 | `keycloak` | Identity Server, импорт realm `fit-bridge` | через Envoy `/admin`, `/realms` |
 | `greptimedb` | хранилище masked logs и метрик, встроенный Dashboard | `4000`–`4003` |
 | `fluent-bit` | доставка логов контейнеров в GreptimeDB | `24224`, `2020` |
@@ -19,7 +21,9 @@
 ## Keycloak realm
 
 - realm: `fit-bridge`;
-- client: `fit-bridge-service`;
+- browser client: `fit-bridge-web`;
+- API audience: `fit-bridge-service`;
+- local smoke client: `fit-bridge-smoke`;
 - регистрация явно оформлена как регистрация тренера;
 - username является логином и не редактируется пользователем;
 - новые пользователи автоматически получают `TRAINER`;
@@ -44,6 +48,12 @@ docker compose ps
 ```
 
 `buildInfra` собирает образ миграций. Затем Compose запускает Liquibase после готовности PostgreSQL и запускает Training Service только после успешного применения схемы. `training-service/app-ktor` публикуется только через Envoy.
+
+## CORS и граница API
+
+CORS настраивается только на внешней границе — в `volumes/envoy/envoy.yaml` для REST-маршрутов Training API. Envoy отвечает на разрешённые preflight-запросы до JWT-фильтра и добавляет CORS-заголовки к фактическим ответам. Внутренний Ktor-сервис не устанавливает CORS plugin и не публикует порт на хост, поэтому обращаться к нему в обход Envoy нельзя.
+
+Локальный allowlist содержит `http://localhost:5173` (Vite dev server) и `http://localhost:4173` (Vite preview). При развёртывании production origin фронтенда нужно явно добавить в `allow_origin_string_match`; wildcard использовать не следует. CORS не является механизмом авторизации: каждый прикладной запрос по-прежнему обязан пройти проверку JWT в Envoy и проверку владельца/роли в приложении.
 
 ## Миграции Training DB
 
@@ -136,6 +146,15 @@ realm_access.roles: [TRAINER]
 ```powershell
 docker compose config --quiet
 docker compose config --services
+```
+
+Проверить preflight без JWT (ожидается `access-control-allow-origin: http://localhost:5173`):
+
+```powershell
+curl.exe -i -X OPTIONS http://localhost:8080/v2/clientCard/search `
+  -H "Origin: http://localhost:5173" `
+  -H "Access-Control-Request-Method: POST" `
+  -H "Access-Control-Request-Headers: authorization,content-type"
 ```
 
 Список сервисов не должен содержать `profile-service`.

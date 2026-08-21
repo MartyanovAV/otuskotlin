@@ -589,6 +589,10 @@ components:
             $ref: '#/components/schemas/PlanItem'
     TrainingPlanCreateObject:
       type: object
+      required:
+      - title
+      - planItems
+      - clientCardId
       properties:
         title:
           type: string

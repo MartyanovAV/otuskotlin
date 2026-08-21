@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
+import { useDebounce } from '@vueuse/core'
 import { Card, CardContent } from '@/shared/ui/card'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import { Badge } from '@/shared/ui/badge'
@@ -14,30 +15,45 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/shared/ui/dialog'
-import { clientCardSearch, useClientCardCreate } from '@/shared/api/generated/client-card/client-card'
+import {
+  clientCardSearch,
+  useClientCardCreate,
+  useClientCardUpdate,
+} from '@/shared/api/generated/client-card/client-card'
 import type { ClientCardResponseObject } from '@/shared/api/generated/models/clientCardResponseObject'
 
 const queryClient = useQueryClient()
 const searchQuery = ref('')
+const debouncedSearchQuery = useDebounce(searchQuery, 300)
 const isCreateOpen = ref(false)
+const isEditOpen = ref(false)
 const selectedClient = ref<ClientCardResponseObject | null>(null)
 const isSubmitting = ref(false)
+const isUpdating = ref(false)
 const errorMessage = ref<string | null>(null)
+const editErrorMessage = ref<string | null>(null)
 
 const newClient = ref({
   displayName: '',
   note: '',
 })
 
+const editClient = ref({
+  id: '',
+  displayName: '',
+  note: '',
+  lock: '',
+})
+
 // Реальный запрос к бэкенду через TanStack Query
 const { data: searchResponse, isLoading, isError, error, refetch } = useQuery({
-  queryKey: ['clientCards', searchQuery],
+  queryKey: ['clientCards', debouncedSearchQuery],
   queryFn: () =>
     clientCardSearch({
       requestType: 'clientCard.search',
       requestId: crypto.randomUUID(),
       clientCardFilter: {
-        searchString: searchQuery.value.trim() || undefined,
+        searchString: debouncedSearchQuery.value.trim() || undefined,
         pageSize: 50,
         pageNumber: 1,
       },
@@ -49,6 +65,7 @@ const clientCards = computed<ClientCardResponseObject[]>(() => {
 })
 
 const createMutation = useClientCardCreate()
+const updateMutation = useClientCardUpdate()
 
 const handleCreateClient = async () => {
   if (!newClient.value.displayName.trim()) return
@@ -86,6 +103,62 @@ const handleCreateClient = async () => {
     errorMessage.value = err instanceof Error ? err.message : 'Не удалось связаться с сервером'
   } finally {
     isSubmitting.value = false
+  }
+}
+
+const openEditClient = (client: ClientCardResponseObject) => {
+  editErrorMessage.value = null
+  editClient.value = {
+    id: client.id ?? '',
+    displayName: client.displayName ?? '',
+    note: client.note ?? '',
+    lock: client.lock ?? '',
+  }
+  selectedClient.value = null
+  isEditOpen.value = true
+}
+
+const handleUpdateClient = async () => {
+  const { id, lock } = editClient.value
+  const displayName = editClient.value.displayName.trim()
+
+  if (!id || !lock || !displayName) {
+    editErrorMessage.value = 'Карточка не содержит id или optimistic lock. Обновите список и повторите.'
+    return
+  }
+
+  isUpdating.value = true
+  editErrorMessage.value = null
+
+  try {
+    const res = await updateMutation.mutateAsync({
+      data: {
+        requestType: 'clientCard.update',
+        requestId: crypto.randomUUID(),
+        clientCard: {
+          id,
+          lock,
+          displayName,
+          note: editClient.value.note.trim() || undefined,
+        },
+      },
+    })
+
+    if (res.data?.result === 'error') {
+      editErrorMessage.value =
+        res.data?.errors?.[0]?.message ?? 'Ошибка при обновлении карточки клиента'
+      return
+    }
+
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['clientCards'] }),
+      queryClient.invalidateQueries({ queryKey: ['clientCardsForPlans'] }),
+    ])
+    isEditOpen.value = false
+  } catch (err: unknown) {
+    editErrorMessage.value = err instanceof Error ? err.message : 'Не удалось связаться с сервером'
+  } finally {
+    isUpdating.value = false
   }
 }
 
@@ -279,8 +352,57 @@ const formatDate = (isoString?: string) => {
         </div>
 
         <DialogFooter>
-          <Button @click="selectedClient = null">Закрыть</Button>
+          <Button variant="outline" @click="selectedClient = null">Закрыть</Button>
+          <Button @click="openEditClient(selectedClient)">Редактировать</Button>
         </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <!-- Модальное окно редактирования с optimistic lock -->
+    <Dialog :open="isEditOpen" @update:open="isEditOpen = $event">
+      <DialogContent class="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Редактирование клиента</DialogTitle>
+          <DialogDescription>
+            Сохраняется актуальная версия карточки; при конфликте сервер попросит обновить список.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div v-if="editErrorMessage" class="p-3 bg-danger-soft text-danger text-xs rounded-md">
+          {{ editErrorMessage }}
+        </div>
+
+        <form @submit.prevent="handleUpdateClient" class="space-y-4 py-2">
+          <div class="space-y-1.5">
+            <label class="text-sm font-medium text-text-main" for="edit-client-name">Имя клиента *</label>
+            <Input
+              id="edit-client-name"
+              v-model="editClient.displayName"
+              required
+              maxlength="120"
+              class="bg-surface-2"
+            />
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="text-sm font-medium text-text-main" for="edit-client-note">Внутренняя заметка тренера</label>
+            <Input
+              id="edit-client-note"
+              v-model="editClient.note"
+              maxlength="1000"
+              class="bg-surface-2"
+            />
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" @click="isEditOpen = false">
+              Отмена
+            </Button>
+            <Button type="submit" :disabled="!editClient.displayName.trim() || isUpdating">
+              {{ isUpdating ? 'Сохранение...' : 'Сохранить изменения' }}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   </div>

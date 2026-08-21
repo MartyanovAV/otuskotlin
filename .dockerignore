@@ -12,10 +12,15 @@
 # Gradle
 .gradle
 **/.gradle
+.kotlin
 build
 **/build/
 !fit-bridge-be/*/app-ktor/build/libs/*-all.jar
 gradlew.bat
+
+# Frontend artifacts are not used by backend image builds
+fit-bridge-fe/node_modules
+fit-bridge-fe/dist
 
 # Docker volumes
 deploy/volumes/postgresql-data

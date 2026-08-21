@@ -17,6 +17,31 @@ on:
   workflow_dispatch:
 
 jobs:
+  frontend:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: fit-bridge-fe
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24.12.0'
+          cache: npm
+          cache-dependency-path: fit-bridge-fe/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Type-check and build frontend
+        run: npm run build
+
+      - name: Run frontend unit tests
+        run: npm run test:unit -- --run
+
   build:
     runs-on: ubuntu-22.04
     timeout-minutes: 20

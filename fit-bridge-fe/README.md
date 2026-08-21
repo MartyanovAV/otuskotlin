@@ -2,6 +2,22 @@
 
 This template should help get you started developing with Vue 3 in Vite.
 
+## FitBridge configuration
+
+The frontend uses the public `fit-bridge-web` Keycloak client with Authorization Code + PKCE.
+Local defaults are stored in `.env`; production values must be supplied by the deployment and
+must match the redirect URI configured in Keycloak:
+
+```dotenv
+VITE_API_BASE_URL=/api
+VITE_KEYCLOAK_URL=http://localhost:8080
+VITE_KEYCLOAK_REALM=fit-bridge
+VITE_KEYCLOAK_CLIENT_ID=fit-bridge-web
+```
+
+Run the local infrastructure from `deploy/` before opening the application. The direct grant
+client `fit-bridge-smoke` is reserved for local smoke checks and is not used by the browser UI.
+
 ## Recommended IDE Setup
 
 [VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
@@ -65,6 +81,9 @@ npm run test:e2e -- tests/example.spec.ts
 # Runs the tests in debug mode
 npm run test:e2e -- --debug
 ```
+
+Playwright tests require local Keycloak, Envoy and Training Service to be running. Override the
+test user or frontend origin with `E2E_AUTH_USERNAME`, `E2E_AUTH_PASSWORD` and `E2E_BASE_URL`.
 
 ### Lint with [ESLint](https://eslint.org/)
 

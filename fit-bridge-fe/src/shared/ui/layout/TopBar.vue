@@ -26,6 +26,7 @@ const toggleTheme = () => {
 
 <template>
   <header class="flex h-14 items-center gap-4 border-b border-border bg-surface px-6 lg:h-[60px]">
+    <slot name="leading" />
     <div class="flex-1">
       <h1 class="text-lg font-semibold md:text-2xl text-text-main">
         <slot name="title">Кабинет</slot>

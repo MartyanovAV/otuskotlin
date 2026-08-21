@@ -1,22 +1,9 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.plugins
 
-import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.AppSettings
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMethod
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
-import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.defaultheaders.DefaultHeaders
 
-fun Application.initPlugins(appSettings: AppSettings) {
+fun Application.initPlugins() {
     install(DefaultHeaders)
-    install(CORS) {
-        allowMethod(HttpMethod.Options)
-        allowMethod(HttpMethod.Put)
-        allowMethod(HttpMethod.Delete)
-        allowMethod(HttpMethod.Patch)
-        allowHeader(HttpHeaders.Authorization)
-        allowHeader("MyCustomHeader")
-        anyHost()
-    }
 }

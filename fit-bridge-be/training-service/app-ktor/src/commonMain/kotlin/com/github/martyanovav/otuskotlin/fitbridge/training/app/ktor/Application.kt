@@ -17,7 +17,7 @@ import io.ktor.server.websocket.WebSockets
 import io.ktor.server.websocket.webSocket
 
 fun Application.module(appSettings: AppSettings = initAppSettings()) {
-    initPlugins(appSettings)
+    initPlugins()
     install(WebSockets) {
         pingPeriodMillis = 15_000
         timeoutMillis = 15_000

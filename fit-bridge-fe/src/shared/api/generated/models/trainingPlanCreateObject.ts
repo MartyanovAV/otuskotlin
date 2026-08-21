@@ -13,12 +13,12 @@ export interface TrainingPlanCreateObject {
      * @minLength 3
      * @maxLength 120
      */
-  title?: string;
+  title: string;
   /**
      * Не более 200 элементов суммарно с вложенными, максимальная глубина вложенности — 5
      * @minItems 1
      * @maxItems 200
      */
-  planItems?: PlanItem[];
-  clientCardId?: ClientCardId;
+  planItems: PlanItem[];
+  clientCardId: ClientCardId;
 }

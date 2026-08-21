@@ -22,16 +22,16 @@ const { data: plansData, isLoading: isPlansLoading } = useQuery({
     trainingPlanSearch({
       requestType: 'trainingPlan.search',
       requestId: crypto.randomUUID(),
-      trainingPlanFilter: { pageSize: 100, pageNumber: 1 },
+      trainingPlanFilter: { pageSize: 100, pageNumber: 1, status: 'ACTIVE' },
     }),
 })
 
 const totalClients = computed(() => {
-  return clientsData.value?.data?.clientCards?.length ?? 0
+  return clientsData.value?.data?.totalSize ?? 0
 })
 
 const totalPlans = computed(() => {
-  return plansData.value?.data?.trainingPlans?.length ?? 0
+  return plansData.value?.data?.totalSize ?? 0
 })
 
 const recentClients = computed<ClientCardResponseObject[]>(() => {

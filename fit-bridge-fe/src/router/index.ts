@@ -8,7 +8,7 @@ const router = createRouter({
       // Корневой маршрут — layout-обёртка для всех защищённых страниц
       path: '/',
       component: () => import('../shared/ui/layout/AppLayout.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, role: 'TRAINER' },
       children: [
         {
           path: '',
@@ -36,7 +36,7 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to) => {
   const authStore = useAuthStore()
 
   if (to.meta.requiresAuth) {
@@ -45,15 +45,15 @@ router.beforeEach((to, from, next) => {
       // поэтому пользователь никогда не попадёт сюда неавторизованным.
       // Guard как последний рубеж защиты.
       authStore.login()
-      return next(false)
+      return false
     }
 
     if (to.meta.role && !authStore.hasRole(to.meta.role as string)) {
-      return next({ name: 'unauthorized' })
+      return { name: 'unauthorized' }
     }
   }
 
-  next()
+  return true
 })
 
 export default router

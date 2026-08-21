@@ -99,15 +99,30 @@ static_resources:
                       - name: client-card-rest-v1
                         match: { prefix: "/v1/clientCard/" }
                         route: { cluster: training-service, prefix_rewrite: "/v1/client-card/" }
+                        typed_per_filter_config:
+                          envoy.filters.http.cors: &training-api-cors
+                            "@type": type.googleapis.com/envoy.extensions.filters.http.cors.v3.CorsPolicy
+                            allow_origin_string_match:
+                              - exact: "http://localhost:5173"
+                              - exact: "http://localhost:4173"
+                            allow_methods: "POST,OPTIONS"
+                            allow_headers: "authorization,content-type"
+                            max_age: "600"
                       - name: client-card-rest-v2
                         match: { prefix: "/v2/clientCard/" }
                         route: { cluster: training-service, prefix_rewrite: "/v2/client-card/" }
+                        typed_per_filter_config:
+                          envoy.filters.http.cors: *training-api-cors
                       - name: training-plan-rest-v1
                         match: { prefix: "/v1/trainingPlan/" }
                         route: { cluster: training-service, prefix_rewrite: "/v1/training-plan/" }
+                        typed_per_filter_config:
+                          envoy.filters.http.cors: *training-api-cors
                       - name: training-plan-rest-v2
                         match: { prefix: "/v2/trainingPlan/" }
                         route: { cluster: training-service, prefix_rewrite: "/v2/training-plan/" }
+                        typed_per_filter_config:
+                          envoy.filters.http.cors: *training-api-cors
 
                       - name: keycloak-admin-redirect
                         match: { path: "/admin" }
@@ -122,6 +137,11 @@ static_resources:
                         match: { prefix: "/resources/" }
                         route: { cluster: keycloak }
               http_filters:
+                # Browser policy belongs to the public edge. The internal Ktor
+                # service deliberately has no CORS plugin.
+                - name: envoy.filters.http.cors
+                  typed_config:
+                    "@type": type.googleapis.com/envoy.extensions.filters.http.cors.v3.Cors
                 - name: envoy.filters.http.jwt_authn
                   typed_config:
                     "@type": type.googleapis.com/envoy.extensions.filters.http.jwt_authn.v3.JwtAuthentication

@@ -1,11 +1,11 @@
 import Keycloak from 'keycloak-js';
 
-// Конфигурация Keycloak
-// Мы используем Envoy Gateway на порту 8080, который проксирует запросы к Keycloak
+// Конфигурация Keycloak берётся из Vite environment.
+// Значения по умолчанию оставлены только для локального запуска без .env-файла.
 const keycloak = new Keycloak({
-  url: 'http://localhost:8080',
-  realm: 'fit-bridge',
-  clientId: 'fit-bridge-service',
+  url: import.meta.env.VITE_KEYCLOAK_URL || 'http://localhost:8080',
+  realm: import.meta.env.VITE_KEYCLOAK_REALM || 'fit-bridge',
+  clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID || 'fit-bridge-web',
 });
 
 export default keycloak;

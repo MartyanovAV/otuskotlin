@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
+import { useDebounce } from '@vueuse/core'
 import { Card, CardContent } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
@@ -20,6 +21,7 @@ import type { ClientCardResponseObject } from '@/shared/api/generated/models/cli
 
 const queryClient = useQueryClient()
 const searchQuery = ref('')
+const debouncedSearchQuery = useDebounce(searchQuery, 300)
 const isCreateOpen = ref(false)
 const selectedPlan = ref<TrainingPlanResponseObject | null>(null)
 const isSubmitting = ref(false)
@@ -42,13 +44,13 @@ const clientOptions = computed<ClientCardResponseObject[]>(() => {
 
 // Загружаем тренировочные планы из бэкенда через TanStack Query
 const { data: plansRawData, isLoading, isError, error, refetch } = useQuery({
-  queryKey: ['trainingPlans', searchQuery],
+  queryKey: ['trainingPlans', debouncedSearchQuery],
   queryFn: () =>
     trainingPlanSearch({
       requestType: 'trainingPlan.search',
       requestId: crypto.randomUUID(),
       trainingPlanFilter: {
-        searchString: searchQuery.value.trim() || undefined,
+        searchString: debouncedSearchQuery.value.trim() || undefined,
         pageSize: 50,
         pageNumber: 1,
       },
@@ -69,16 +71,21 @@ interface ExerciseDraft {
 const newPlan = ref({
   title: '',
   clientCardId: '',
-  exercises: [
-    { name: 'Приседания со штангой', sets: 4, reps: 10, weight: 80 },
-    { name: 'Жим лёжа на скамье', sets: 4, reps: 8, weight: 70 },
-  ] as ExerciseDraft[],
+  exercises: [] as ExerciseDraft[],
 })
 
 const newExerciseName = ref('')
 const newExerciseSets = ref(3)
 const newExerciseReps = ref(10)
-const newExerciseWeight = ref(50)
+const newExerciseWeight = ref(0)
+
+const canSubmitPlan = computed(
+  () =>
+    newPlan.value.title.trim().length >= 3 &&
+    newPlan.value.clientCardId.trim().length > 0 &&
+    newPlan.value.exercises.length > 0 &&
+    !isSubmitting.value,
+)
 
 const addExerciseToForm = () => {
   if (!newExerciseName.value.trim()) return
@@ -98,7 +105,7 @@ const removeExercise = (index: number) => {
 const createMutation = useTrainingPlanCreate()
 
 const handleCreatePlan = async () => {
-  if (!newPlan.value.title.trim()) return
+  if (!canSubmitPlan.value) return
   isSubmitting.value = true
   errorMessage.value = null
 
@@ -109,7 +116,7 @@ const handleCreatePlan = async () => {
         requestId: crypto.randomUUID(),
         trainingPlan: {
           title: newPlan.value.title.trim(),
-          clientCardId: newPlan.value.clientCardId || undefined,
+          clientCardId: newPlan.value.clientCardId,
           planItems: newPlan.value.exercises.map((e) => ({
             id: crypto.randomUUID(),
             itemType: 'EXERCISE',
@@ -133,10 +140,7 @@ const handleCreatePlan = async () => {
     newPlan.value = {
       title: '',
       clientCardId: '',
-      exercises: [
-        { name: 'Приседания со штангой', sets: 4, reps: 10, weight: 80 },
-        { name: 'Жим лёжа на скамье', sets: 4, reps: 8, weight: 70 },
-      ],
+      exercises: [],
     }
     isCreateOpen.value = false
   } catch (err: unknown) {
@@ -277,13 +281,14 @@ const formatDate = (isoString?: string) => {
           </div>
 
           <div class="space-y-1.5">
-            <label class="text-sm font-medium text-text-main" for="plan-client-select">Привязать к клиенту (опционально)</label>
+            <label class="text-sm font-medium text-text-main" for="plan-client-select">Клиент *</label>
             <select
               id="plan-client-select"
               v-model="newPlan.clientCardId"
+              required
               class="flex h-9 w-full rounded-md border border-border bg-surface-2 px-3 py-1 text-sm shadow-sm transition-colors text-text-main focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
             >
-              <option value="">Без привязки (Общий шаблон)</option>
+              <option value="" disabled>Выберите клиента</option>
               <option v-for="c in clientOptions" :key="c.id" :value="c.id">
                 {{ c.displayName }} ({{ (c.id ?? '').substring(0, 6) }}...)
               </option>
@@ -339,6 +344,7 @@ const formatDate = (isoString?: string) => {
                   <Input
                     type="number"
                     v-model="newExerciseSets"
+                    min="1"
                     class="w-14 bg-surface h-7 text-xs"
                   />
                 </div>
@@ -347,6 +353,7 @@ const formatDate = (isoString?: string) => {
                   <Input
                     type="number"
                     v-model="newExerciseReps"
+                    min="1"
                     class="w-14 bg-surface h-7 text-xs"
                   />
                 </div>
@@ -355,6 +362,7 @@ const formatDate = (isoString?: string) => {
                   <Input
                     type="number"
                     v-model="newExerciseWeight"
+                    min="0"
                     class="w-14 bg-surface h-7 text-xs"
                   />
                 </div>
@@ -376,7 +384,7 @@ const formatDate = (isoString?: string) => {
             <Button type="button" variant="outline" @click="isCreateOpen = false">
               Отмена
             </Button>
-            <Button type="submit" :disabled="!newPlan.title.trim() || isSubmitting" id="submit-plan-btn">
+            <Button type="submit" :disabled="!canSubmitPlan" id="submit-plan-btn">
               {{ isSubmitting ? 'Сохранение в базу...' : 'Создать в базе' }}
             </Button>
           </DialogFooter>

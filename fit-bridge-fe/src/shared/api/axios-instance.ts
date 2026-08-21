@@ -14,14 +14,18 @@ AXIOS_INSTANCE.interceptors.request.use(async (config) => {
     try {
       // Обновляем токен, если он истекает в течение 30 секунд
       await keycloak.updateToken(30);
-    } catch {
-      // Игнорируем ошибку здесь, при 401 сработает response interceptor
+    } catch (error) {
+      // Не отправляем заведомо просроченный JWT и завершаем повреждённую сессию.
+      void keycloak.logout();
+      return Promise.reject(error);
     }
   }
   const token = keycloak.token;
-  if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
+  if (!token) {
+    void keycloak.logout();
+    return Promise.reject(new Error('Access token is unavailable'));
   }
+  config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
@@ -30,7 +34,7 @@ AXIOS_INSTANCE.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      keycloak.logout();
+      void keycloak.logout();
     }
     return Promise.reject(error);
   }
@@ -41,6 +45,21 @@ export type PromiseWithCancel<T> = Promise<T> & { cancel: () => void };
 
 export interface CustomInstanceOptions extends AxiosRequestConfig {
   body?: unknown;
+}
+
+type ApiErrorPayload = {
+  result?: string;
+  errors?: Array<{ message?: string }>;
+};
+
+export class ApiResponseError extends Error {
+  readonly payload: ApiErrorPayload;
+
+  constructor(payload: ApiErrorPayload) {
+    super(payload.errors?.[0]?.message ?? 'Сервис вернул ошибку');
+    this.name = 'ApiResponseError';
+    this.payload = payload;
+  }
 }
 
 export const customInstance = <T>(
@@ -68,11 +87,18 @@ export const customInstance = <T>(
     data,
     ...restOptions,
     signal: controller.signal,
-  }).then((res) => ({
-    data: res.data,
-    status: res.status,
-    headers: res.headers,
-  })) as PromiseWithCancel<T>;
+  }).then((res) => {
+    const payload = res.data as ApiErrorPayload | undefined;
+    if (payload?.result === 'error') {
+      throw new ApiResponseError(payload);
+    }
+
+    return {
+      data: res.data,
+      status: res.status,
+      headers: res.headers,
+    };
+  }) as PromiseWithCancel<T>;
 
   promise.cancel = () => {
     controller.abort('Query was cancelled');
