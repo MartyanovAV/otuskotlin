@@ -10,6 +10,8 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.RequestId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.WorkMode
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.permissions.FtcPrincipalRelation
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.IRepoClientCard
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.stubs.Stubs
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.ws.IFBWsSession
 import kotlin.time.Instant
@@ -23,7 +25,9 @@ data class ClientCardContext(
     override var requestId: RequestId = RequestId.NONE,
     override var timeStart: Instant = Instant.DISTANT_PAST,
     override var principal: AuthPrincipal = AuthPrincipal.NONE,
+    override var principalRelation: FtcPrincipalRelation = FtcPrincipalRelation.NONE,
     override var wsSession: IFBWsSession = IFBWsSession.NONE,
+    override var corSettings: CorSettings = CorSettings(),
     var clientCardRequest: ClientCard = ClientCard(),
     var clientCardValidating: ClientCard = ClientCard(),
     var clientCardValidated: ClientCard = ClientCard(),
@@ -32,6 +36,11 @@ data class ClientCardContext(
     var clientCardFilter: ClientCardFilter = ClientCardFilter(),
     var clientCardFilterValidating: ClientCardFilter = ClientCardFilter(),
     var clientCardFilterValidated: ClientCardFilter = ClientCardFilter(),
+    var clientCardRepo: IRepoClientCard = IRepoClientCard.NONE,
+    var clientCardRepoRead: ClientCard = ClientCard(),
+    var clientCardRepoPrepare: ClientCard = ClientCard(),
+    var clientCardRepoDone: ClientCard = ClientCard(),
+    var clientCardsRepoDone: MutableList<ClientCard> = mutableListOf(),
 ) : IFBContext {
     override fun addError(error: FBError) {
         errors.add(error)

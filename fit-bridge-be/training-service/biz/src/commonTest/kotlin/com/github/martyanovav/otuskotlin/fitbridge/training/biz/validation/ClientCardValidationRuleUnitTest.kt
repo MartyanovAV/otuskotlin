@@ -7,6 +7,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.IFBContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardFilter
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -71,7 +72,7 @@ class ClientCardValidationRuleUnitTest {
     fun `lock must not be empty`() =
         runTest {
             assertRule(
-                card = ClientCard(lock = ""),
+                card = ClientCard(lock = ClientCardLock.NONE),
                 expectedCode = "validation-lock-empty",
             ) { validateClientCardLockNotEmpty("validate lock") }
         }
@@ -80,7 +81,7 @@ class ClientCardValidationRuleUnitTest {
     fun `lock must have valid format`() =
         runTest {
             assertRule(
-                card = ClientCard(lock = "bad lock"),
+                card = ClientCard(lock = ClientCardLock("bad lock")),
                 expectedCode = "validation-lock-badFormat",
             ) { validateClientCardLockFormat("validate lock") }
         }

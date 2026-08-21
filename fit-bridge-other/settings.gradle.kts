@@ -23,3 +23,4 @@ pluginManagement {
 
 
 include(":fit-bridge-dcompose")
+include(":fit-bridge-migration-pg")

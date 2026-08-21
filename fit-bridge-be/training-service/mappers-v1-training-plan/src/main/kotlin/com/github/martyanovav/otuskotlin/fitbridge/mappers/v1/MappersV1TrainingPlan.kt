@@ -23,6 +23,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Client
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ExerciseItem
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ExerciseSet
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBCommandBase
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.PlanItem
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.RequestId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
@@ -31,6 +32,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Traini
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanFilter
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus
 import java.util.UUID
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.CircuitItem as CircuitItemV1
@@ -93,7 +95,7 @@ fun TrainingPlanContext.fromTransport(request: TrainingPlanSearchRequest) {
     fromTransportBase(request.requestId, request.debug)
     trainingPlanFilter = request.trainingPlanFilter.toInternal()
     trainingPlansResponse =
-        com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page(
+        Page(
             pageNumber = trainingPlanFilter.pageNumber,
             pageSize = trainingPlanFilter.pageSize,
         )
@@ -258,14 +260,14 @@ private fun TrainingPlanUpdateObject?.toInternal() =
     TrainingPlan(
         id = this?.id.toTrainingPlanId(),
         title = this?.title.orEmpty(),
-        lock = this?.lock.orEmpty(),
+        lock = TrainingPlanLock(this?.lock.orEmpty()),
         planItems = this?.planItems?.map { it.toInternal() } ?: emptyList()
     )
 
 private fun TrainingPlanArchiveObject?.toInternal() =
     TrainingPlan(
         id = this?.id.toTrainingPlanId(),
-        lock = this?.lock.orEmpty()
+        lock = TrainingPlanLock(this?.lock.orEmpty())
     )
 
 private fun TrainingPlanSearchFilter?.toInternal() =

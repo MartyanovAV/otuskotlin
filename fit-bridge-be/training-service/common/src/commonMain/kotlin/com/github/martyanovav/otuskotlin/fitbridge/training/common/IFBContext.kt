@@ -6,6 +6,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBErro
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.RequestId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.WorkMode
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.permissions.FtcPrincipalRelation
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.stubs.Stubs
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.ws.IFBWsSession
 import kotlin.time.Instant
@@ -19,7 +20,9 @@ interface IFBContext {
     var requestId: RequestId
     var timeStart: Instant
     var principal: AuthPrincipal
+    var principalRelation: FtcPrincipalRelation
     var wsSession: IFBWsSession
+    var corSettings: CorSettings
 
     fun addError(error: FBError)
 }

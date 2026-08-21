@@ -22,6 +22,18 @@ services:
     networks:
       - fitbridge-network
 
+  liquibase-training:
+    image: fit-bridge-migration-pg-training:0.1.0
+    environment:
+      LIQUIBASE_COMMAND_URL: jdbc:postgresql://postgresql:5432/training_db
+      LIQUIBASE_COMMAND_USERNAME: training_user
+      LIQUIBASE_COMMAND_PASSWORD: training-password
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    networks:
+      - fitbridge-network
+
   training-service:
     build:
       context: ..
@@ -31,13 +43,14 @@ services:
         SERVICE_PORT: 8081
     image: fitbridge-training-service:local
     depends_on:
-      postgresql:
-        condition: service_healthy
+      liquibase-training:
+        condition: service_completed_successfully
       fluent-bit:
         condition: service_started
       envoy:
         condition: service_healthy
     environment:
+      DB_TYPE_PROD: postgres
       DB_HOST: postgresql
       DB_PORT: 5432
       DB_NAME: training_db
@@ -56,8 +69,6 @@ services:
       start_period: 10s
     networks:
       - fitbridge-network
-
-
 
   fluent-bit:
     container_name: fluent-bit
@@ -81,7 +92,7 @@ services:
 
   greptimedb:
     container_name: greptimedb
-    image: greptime/greptimedb:v0.14.4
+    image: greptime/greptimedb:v1.1.4
     command:
       - standalone
       - start

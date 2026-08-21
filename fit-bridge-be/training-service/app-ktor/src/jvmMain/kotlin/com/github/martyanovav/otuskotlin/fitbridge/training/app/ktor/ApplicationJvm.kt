@@ -1,5 +1,10 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor
 
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.apiV1Mapper
+import com.github.martyanovav.otuskotlin.fitbridge.logging.common.FbLoggerProvider
+import com.github.martyanovav.otuskotlin.fitbridge.logging.jvm.FbLoggerLogback
+import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.base.AUTH_HEADER
+import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.base.jwt2principal
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.plugins.initAppSettings
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.v1.v1Training
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.v1.wsHandlerV1
@@ -10,24 +15,35 @@ import io.ktor.server.application.Application
 import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.metrics.micrometer.MicrometerMetrics
+import io.ktor.server.plugins.calllogging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.request.header
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import io.ktor.server.tomcat.jakarta.EngineMain
 import io.ktor.server.websocket.webSocket
 import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics
 import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics
+import io.micrometer.core.instrument.distribution.DistributionStatisticConfig
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import org.slf4j.event.Level
 import java.time.Duration
 
-fun main(args: Array<String>): Unit = io.ktor.server.tomcat.jakarta.EngineMain.main(args)
+fun main(args: Array<String>): Unit = EngineMain.main(args)
 
 @Suppress("unused") // Referenced in application.yaml
-fun Application.moduleJvm(appSettings: AppSettings = initAppSettings()) {
+fun Application.moduleJvm(
+    appSettings: AppSettings = initAppSettings(FbLoggerProvider { FbLoggerLogback(it) })
+) {
+    install(CallLogging) {
+        level = Level.INFO
+    }
+
     val appMicrometerRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
 
     install(MicrometerMetrics) {
@@ -36,27 +52,24 @@ fun Application.moduleJvm(appSettings: AppSettings = initAppSettings()) {
             listOf(
                 JvmMemoryMetrics(),
                 JvmGcMetrics(),
+                ProcessorMetrics(),
                 JvmThreadMetrics(),
-                ProcessorMetrics()
             )
         distributionStatisticConfig =
-            io.micrometer.core.instrument.distribution.DistributionStatisticConfig.builder()
+            DistributionStatisticConfig
+                .builder()
                 .percentilesHistogram(true)
+                .maximumExpectedValue(Duration.ofSeconds(20).toNanos().toDouble())
                 .serviceLevelObjectives(
                     Duration.ofMillis(100).toNanos().toDouble(),
-                    Duration.ofMillis(300).toNanos().toDouble(),
-                    Duration.ofSeconds(1).toNanos().toDouble()
-                )
-                .build()
+                    Duration.ofMillis(500).toNanos().toDouble(),
+                ).build()
     }
 
     routing {
         get("/metrics") {
             try {
-                call.respondText(
-                    text = appMicrometerRegistry.scrape(),
-                    contentType = ContentType.Text.Plain
-                )
+                call.respondText(appMicrometerRegistry.scrape(), ContentType.parse("text/plain; version=0.0.4"))
             } catch (e: Exception) {
                 call.respondText("Error", status = HttpStatusCode.InternalServerError)
             }
@@ -69,13 +82,13 @@ fun Application.moduleJvm(appSettings: AppSettings = initAppSettings()) {
         route("v1") {
             install(ContentNegotiation) {
                 jackson {
-                    setConfig(com.github.martyanovav.otuskotlin.fitbridge.api.v1.apiV1Mapper.serializationConfig)
-                    setConfig(com.github.martyanovav.otuskotlin.fitbridge.api.v1.apiV1Mapper.deserializationConfig)
+                    setConfig(apiV1Mapper.serializationConfig)
+                    setConfig(apiV1Mapper.deserializationConfig)
                 }
             }
             v1Training(appSettings)
             webSocket("ws") {
-                wsHandlerV1(appSettings)
+                wsHandlerV1(appSettings, call.request.header(AUTH_HEADER).jwt2principal())
             }
         }
     }

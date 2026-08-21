@@ -3,7 +3,9 @@ package com.github.martyanovav.otuskotlin.fitbridge.training.biz.validation
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.TrainingProcessor
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.CorSettings
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.TrainingPlanContext
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.AuthPrincipal
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.CircuitItem
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ExerciseItem
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ExerciseSet
@@ -14,13 +16,26 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Traini
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanFilter
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.WorkMode
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.inmemory.RepoClientCardInMemory
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.inmemory.RepoTrainingPlanInMemory
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.stubs.RepoTrainingPlanStub
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TrainingPlanValidationTest {
-    private val processor = TrainingProcessor(CorSettings())
+    private val processor =
+        TrainingProcessor(
+            CorSettings(
+                repoTrainingPlanTest = RepoTrainingPlanInMemory(),
+                repoTrainingPlanStub = RepoTrainingPlanStub(),
+                repoClientCardTest =
+                    RepoClientCardInMemory().apply {
+                        save(listOf(ClientCard(id = ClientCardId("client-1"), ownerUserId = "user-1", createdByUserId = "user-1")))
+                    },
+            ),
+        )
 
     @Test
     fun validCreateRequestIsDeepCopiedNormalizedAndValidated() =
@@ -41,17 +56,20 @@ class TrainingPlanValidationTest {
                 TrainingPlanContext(
                     command = TrainingPlanCommand.CREATE,
                     workMode = WorkMode.TEST,
+                    principal = AuthPrincipal(userId = "user-1", roles = setOf(AuthPrincipal.TRAINER_ROLE)),
                     trainingPlanRequest = request,
                 )
 
             processor.exec(ctx)
 
-            assertEquals(State.RUNNING, ctx.state)
+            assertEquals(State.FINISHING, ctx.state)
             assertTrue(ctx.errors.isEmpty())
             assertEquals("client-1", ctx.trainingPlanValidated.clientCardId.asString())
             assertEquals("План", ctx.trainingPlanValidated.title)
             assertEquals("Приседания", ctx.trainingPlanValidated.planItems.single().title)
             assertEquals("  Приседания  ", request.planItems.single().title)
+            assertEquals("user-1", ctx.trainingPlanResponse.ownerUserId)
+            assertEquals("user-1", ctx.trainingPlanResponse.createdByUserId)
         }
 
     @Test
@@ -165,6 +183,7 @@ class TrainingPlanValidationTest {
                 TrainingPlanContext(
                     command = TrainingPlanCommand.UPDATE,
                     workMode = WorkMode.TEST,
+                    principal = AuthPrincipal(userId = "user-1", roles = setOf(AuthPrincipal.TRAINER_ROLE)),
                     trainingPlanRequest = TrainingPlan(),
                 )
 
@@ -189,6 +208,7 @@ class TrainingPlanValidationTest {
                 TrainingPlanContext(
                     command = TrainingPlanCommand.SEARCH,
                     workMode = WorkMode.TEST,
+                    principal = AuthPrincipal(userId = "user-1", roles = setOf(AuthPrincipal.TRAINER_ROLE)),
                     trainingPlanFilter =
                         TrainingPlanFilter(
                             clientCardId = ClientCardId("bad id"),
@@ -216,6 +236,7 @@ class TrainingPlanValidationTest {
         TrainingPlanContext(
             command = TrainingPlanCommand.CREATE,
             workMode = WorkMode.TEST,
+            principal = AuthPrincipal(userId = "user-1", roles = setOf(AuthPrincipal.TRAINER_ROLE)),
             trainingPlanRequest =
                 TrainingPlan(
                     clientCardId = ClientCardId("client-1"),

@@ -41,3 +41,10 @@ include(":mappers-v2-training-plan")
 include(":app-ktor")
 include(":training-swagger")
 project(":training-swagger").projectDir = file("swagger")
+
+// DB
+include(":repo-common")
+include(":repo-inmemory")
+include(":repo-stubs")
+include(":repo-tests")
+include(":repo-pg")

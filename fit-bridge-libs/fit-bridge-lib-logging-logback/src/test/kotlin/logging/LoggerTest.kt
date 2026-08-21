@@ -1,6 +1,6 @@
 package com.github.martyanovav.otuskotlin.fitbridge.logging
 
-import com.github.martyanovav.otuskotlin.fitbridge.logging.jvm.mpLoggerLogback
+import com.github.martyanovav.otuskotlin.fitbridge.logging.jvm.FbLoggerLogback
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayOutputStream
@@ -50,7 +50,7 @@ class LoggerTest {
 
         try {
             runBlocking {
-                val logger = mpLoggerLogback(this::class)
+                val logger = FbLoggerLogback(this::class)
                 logger.doWithLogging(logId, block = block)
             }
         } catch (ignore: RuntimeException) {

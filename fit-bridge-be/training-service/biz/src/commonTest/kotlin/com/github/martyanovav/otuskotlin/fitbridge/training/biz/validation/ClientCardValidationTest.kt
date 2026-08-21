@@ -3,18 +3,27 @@ package com.github.martyanovav.otuskotlin.fitbridge.training.biz.validation
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.TrainingProcessor
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.CorSettings
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.AuthPrincipal
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardFilter
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.WorkMode
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.inmemory.RepoClientCardInMemory
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.stubs.RepoClientCardStub
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class ClientCardValidationTest {
-    private val processor = TrainingProcessor(CorSettings())
+    private val processor =
+        TrainingProcessor(
+            CorSettings(
+                repoClientCardTest = RepoClientCardInMemory(),
+                repoClientCardStub = RepoClientCardStub(),
+            ),
+        )
 
     @Test
     fun validCreateRequestIsNormalizedAndValidated() =
@@ -24,12 +33,13 @@ class ClientCardValidationTest {
                 ClientCardContext(
                     command = ClientCardCommand.CREATE,
                     workMode = WorkMode.TEST,
+                    principal = AuthPrincipal(userId = "user-1", roles = setOf(AuthPrincipal.TRAINER_ROLE)),
                     clientCardRequest = request,
                 )
 
             processor.exec(ctx)
 
-            assertEquals(State.RUNNING, ctx.state)
+            assertEquals(State.FINISHING, ctx.state)
             assertTrue(ctx.errors.isEmpty())
             assertEquals("Анна", ctx.clientCardValidated.displayName)
             assertEquals("Заметка", ctx.clientCardValidated.note)
@@ -43,6 +53,7 @@ class ClientCardValidationTest {
                 ClientCardContext(
                     command = ClientCardCommand.UPDATE,
                     workMode = WorkMode.TEST,
+                    principal = AuthPrincipal(userId = "user-1", roles = setOf(AuthPrincipal.TRAINER_ROLE)),
                     clientCardRequest = ClientCard(),
                 )
 
@@ -62,6 +73,7 @@ class ClientCardValidationTest {
                 ClientCardContext(
                     command = ClientCardCommand.SEARCH,
                     workMode = WorkMode.TEST,
+                    principal = AuthPrincipal(userId = "user-1", roles = setOf(AuthPrincipal.TRAINER_ROLE)),
                     clientCardFilter =
                         ClientCardFilter(
                             searchString = "a".repeat(121),

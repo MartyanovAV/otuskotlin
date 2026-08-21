@@ -1,5 +1,6 @@
 plugins {
     id("build-kmp")
+    alias(libs.plugins.kotlinx.serialization)
 }
 
 kotlin {
@@ -8,6 +9,8 @@ kotlin {
             dependencies {
                 api(libs.kotlinx.datetime)
                 api("com.github.martyanovav.otuskotlin.fitbridge.libs:fit-bridge-lib-logging-common")
+                implementation(libs.coroutines.core)
+                implementation(libs.kotlinx.serialization.json)
             }
         }
         commonTest {

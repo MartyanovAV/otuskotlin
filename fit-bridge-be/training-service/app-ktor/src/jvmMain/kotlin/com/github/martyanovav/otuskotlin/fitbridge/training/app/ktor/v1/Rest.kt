@@ -14,19 +14,21 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanSea
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanUpdateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.mappers.v1.fromTransport
 import com.github.martyanovav.otuskotlin.fitbridge.mappers.v1.toTransport
+import com.github.martyanovav.otuskotlin.fitbridge.training.api.log1.mapper.toLog
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.AppSettings
+import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.base.AUTH_HEADER
+import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.base.jwt2principal
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.IFBContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.TrainingPlanContext
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.helpers.executePipeline
 import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.call
+import io.ktor.server.request.header
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import kotlin.reflect.KClass
 
 suspend inline fun <
     reified Q : IRequest,
@@ -35,20 +37,23 @@ suspend inline fun <
     C : IFBContext
     > ApplicationCall.processV1(
     appSettings: AppSettings,
-    clazz: KClass<*>,
     logId: String,
     crossinline makeContext: () -> C,
     crossinline fromTransport: suspend C.(Q) -> Unit,
-    crossinline toTransport: suspend C.() -> R
+    crossinline toTransport: suspend C.() -> R,
+    crossinline toLog: (C, String) -> Any
 ) {
+    val logger = appSettings.corSettings.loggerProvider.logger(logId)
     val request = receive<Q>()
+    val principal = this.request.header(AUTH_HEADER).jwt2principal()
     executePipeline(
-        getContext = makeContext,
-        clazz = clazz,
+        getContext = { makeContext().apply { this.principal = principal } },
+        logger = logger,
+        logId = logId,
         receive = { fromTransport(request) },
         exec = { appSettings.processor.exec(this) },
         respond = { respond(toTransport()) },
-        toLog = { /* toLog */ },
+        toLog = { toLog(it, logId) },
     )
 }
 
@@ -56,64 +61,74 @@ fun Route.v1Training(appSettings: AppSettings) {
     route("client-card") {
         post("create") {
             call.processV1<ClientCardCreateRequest, IResponse, ClientCardContext>(
-                appSettings, this::class, "clientCard-create",
-                { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse }
+                appSettings, "clientCard-create",
+                { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+                { ctx, id -> ctx.toLog(id) }
             )
         }
         post("read") {
             call.processV1<ClientCardReadRequest, IResponse, ClientCardContext>(
-                appSettings, this::class, "clientCard-read",
-                { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse }
+                appSettings, "clientCard-read",
+                { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+                { ctx, id -> ctx.toLog(id) }
             )
         }
         post("update") {
             call.processV1<ClientCardUpdateRequest, IResponse, ClientCardContext>(
-                appSettings, this::class, "clientCard-update",
-                { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse }
+                appSettings, "clientCard-update",
+                { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+                { ctx, id -> ctx.toLog(id) }
             )
         }
         post("archive") {
             call.processV1<ClientCardArchiveRequest, IResponse, ClientCardContext>(
-                appSettings, this::class, "clientCard-archive",
-                { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse }
+                appSettings, "clientCard-archive",
+                { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+                { ctx, id -> ctx.toLog(id) }
             )
         }
         post("search") {
             call.processV1<ClientCardSearchRequest, IResponse, ClientCardContext>(
-                appSettings, this::class, "clientCard-search",
-                { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse }
+                appSettings, "clientCard-search",
+                { ClientCardContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+                { ctx, id -> ctx.toLog(id) }
             )
         }
     }
     route("training-plan") {
         post("create") {
             call.processV1<TrainingPlanCreateRequest, IResponse, TrainingPlanContext>(
-                appSettings, this::class, "trainingPlan-create",
-                { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse }
+                appSettings, "trainingPlan-create",
+                { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+                { ctx, id -> ctx.toLog(id) }
             )
         }
         post("read") {
             call.processV1<TrainingPlanReadRequest, IResponse, TrainingPlanContext>(
-                appSettings, this::class, "trainingPlan-read",
-                { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse }
+                appSettings, "trainingPlan-read",
+                { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+                { ctx, id -> ctx.toLog(id) }
             )
         }
         post("update") {
             call.processV1<TrainingPlanUpdateRequest, IResponse, TrainingPlanContext>(
-                appSettings, this::class, "trainingPlan-update",
-                { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse }
+                appSettings, "trainingPlan-update",
+                { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+                { ctx, id -> ctx.toLog(id) }
             )
         }
         post("archive") {
             call.processV1<TrainingPlanArchiveRequest, IResponse, TrainingPlanContext>(
-                appSettings, this::class, "trainingPlan-archive",
-                { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse }
+                appSettings, "trainingPlan-archive",
+                { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+                { ctx, id -> ctx.toLog(id) }
             )
         }
         post("search") {
             call.processV1<TrainingPlanSearchRequest, IResponse, TrainingPlanContext>(
-                appSettings, this::class, "trainingPlan-search",
-                { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse }
+                appSettings, "trainingPlan-search",
+                { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+                { ctx, id -> ctx.toLog(id) }
             )
         }
     }

@@ -87,7 +87,9 @@ components:
           type: string
         clientId:
           type: string
-        ownerId:
+        ownerUserId:
+          type: string
+        createdByUserId:
           type: string
         goals:
           type: string
@@ -101,6 +103,10 @@ components:
         id:
           type: string
         cardId:
+          type: string
+        ownerUserId:
+          type: string
+        createdByUserId:
           type: string
         title:
           type: string
@@ -116,7 +122,7 @@ components:
           type: string
         clientId:
           type: string
-        ownerId:
+        ownerUserId:
           type: string
         cardId:
           type: string

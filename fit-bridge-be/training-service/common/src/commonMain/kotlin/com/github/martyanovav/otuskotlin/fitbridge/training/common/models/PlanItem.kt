@@ -1,42 +1,53 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.common.models
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
 sealed interface PlanItem {
     val id: String
     val title: String
     val description: String
 }
 
+@Serializable
 data class ExerciseSet(
-    var reps: String = "",
-    var weight: String = "",
-    var weightUnit: String = "KG",
-    var durationSeconds: Int = 0
+    val reps: String = "",
+    val weight: String = "",
+    val weightUnit: String = "KG",
+    val durationSeconds: Int = 0,
 )
 
+@Serializable
+@SerialName("exercise")
 data class ExerciseItem(
     override val id: String = "",
     override val title: String = "",
     override val description: String = "",
-    var exerciseId: String = "",
-    var sets: List<ExerciseSet> = emptyList(),
-    var restBetweenSetsSeconds: Int = 0
+    val exerciseId: String = "",
+    val sets: List<ExerciseSet> = emptyList(),
+    val restBetweenSetsSeconds: Int = 0,
 ) : PlanItem
 
+@Serializable
+@SerialName("circuit")
 data class CircuitItem(
     override val id: String = "",
     override val title: String = "",
     override val description: String = "",
-    var rounds: Int = 1,
-    var items: List<PlanItem> = emptyList(),
-    var restBetweenRoundsSeconds: Int = 0
+    val rounds: Int = 1,
+    val items: List<PlanItem> = emptyList(),
+    val restBetweenRoundsSeconds: Int = 0,
 ) : PlanItem
 
+@Serializable
+@SerialName("superset")
 data class SupersetItem(
     override val id: String = "",
     override val title: String = "",
     override val description: String = "",
-    var items: List<PlanItem> = emptyList(),
-    var restBetweenSetsSeconds: Int = 0
+    val items: List<PlanItem> = emptyList(),
+    val restBetweenSetsSeconds: Int = 0,
 ) : PlanItem
 
 fun PlanItem.deepCopy(): PlanItem =
