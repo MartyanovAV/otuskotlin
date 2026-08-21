@@ -7,3 +7,4 @@
 5. [ADR-005: Использовать PostgreSQL как основное хранилище приложения](ADR/ADR-005-use-postgresql.md)
 6. [ADR-006: Использовать GreptimeDB и Fluent Bit для observability MVP](ADR/ADR-006-use-greptimedb-fluent-bit-observability.md)
 7. [ADR-007: Использовать Keycloak как источник identity-профиля MVP](ADR/ADR-007-use-keycloak-as-mvp-user-profile.md)
+8. [ADR-008: Использовать Vue 3 + Vite как основу UI-стека](ADR/ADR-008-ui-stack-vue3-vite.md)
