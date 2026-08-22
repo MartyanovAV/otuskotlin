@@ -35,7 +35,9 @@ class RestAuthTest {
                     header(HttpHeaders.Origin, "https://untrusted.example")
                     header(AUTH_HEADER, principalHeader("browser-user"))
                     setBody(
-                        """{"requestType":"clientCard.search","requestId":"cors-at-gateway","clientCardFilter":{"pageSize":50,"pageNumber":1}}"""
+                        """
+                        {"requestType":"clientCard.search","requestId":"cors-at-gateway","clientCardFilter":{"pageSize":50,"pageNumber":1}}
+                        """.trimIndent(),
                     )
                 }
 

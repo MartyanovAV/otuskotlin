@@ -2,7 +2,6 @@
 import { ref, computed } from 'vue'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useDebounce } from '@vueuse/core'
-import { Card, CardContent } from '@/shared/ui/card'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
@@ -20,7 +19,19 @@ import {
   useClientCardCreate,
   useClientCardUpdate,
 } from '@/shared/api/generated/client-card/client-card'
+import {
+  trainingPlanSearch,
+  useTrainingPlanCreate,
+} from '@/shared/api/generated/training-plan/training-plan'
 import type { ClientCardResponseObject } from '@/shared/api/generated/models/clientCardResponseObject'
+import type { TrainingPlanResponseObject } from '@/shared/api/generated/models/trainingPlanResponseObject'
+import PlanItemBuilder from '@/features/training-plan/ui/PlanItemBuilder.vue'
+import PlanItemCard from '@/features/training-plan/ui/PlanItemCard.vue'
+import {
+  type PlanItemDraft,
+  mapDraftToPlanItem,
+  formatPlanStructureSummary,
+} from '@/features/training-plan/model/types'
 
 const queryClient = useQueryClient()
 const searchQuery = ref('')
@@ -32,6 +43,17 @@ const isSubmitting = ref(false)
 const isUpdating = ref(false)
 const errorMessage = ref<string | null>(null)
 const editErrorMessage = ref<string | null>(null)
+
+// Состояние для создания и просмотра планов клиента
+const isCreatePlanOpen = ref(false)
+const selectedPlanDetails = ref<TrainingPlanResponseObject | null>(null)
+const isPlanSubmitting = ref(false)
+const planErrorMessage = ref<string | null>(null)
+
+const newClientPlan = ref({
+  title: '',
+  items: [] as PlanItemDraft[],
+})
 
 const newClient = ref({
   displayName: '',
@@ -64,8 +86,30 @@ const clientCards = computed<ClientCardResponseObject[]>(() => {
   return searchResponse.value?.data?.clientCards ?? []
 })
 
+// Запрос тренировочных планов для выбранного клиента
+const selectedClientId = computed(() => selectedClient.value?.id)
+const { data: clientPlansData, isLoading: isClientPlansLoading } = useQuery({
+  queryKey: computed(() => ['clientPlans', selectedClientId.value]),
+  queryFn: () =>
+    trainingPlanSearch({
+      requestType: 'trainingPlan.search',
+      requestId: crypto.randomUUID(),
+      trainingPlanFilter: {
+        clientCardId: selectedClientId.value,
+        pageSize: 50,
+        pageNumber: 1,
+      },
+    }),
+  enabled: computed(() => !!selectedClientId.value),
+})
+
+const clientPlans = computed<TrainingPlanResponseObject[]>(() => {
+  return clientPlansData.value?.data?.trainingPlans ?? []
+})
+
 const createMutation = useClientCardCreate()
 const updateMutation = useClientCardUpdate()
+const createPlanMutation = useTrainingPlanCreate()
 
 const handleCreateClient = async () => {
   if (!newClient.value.displayName.trim()) return
@@ -155,6 +199,60 @@ const handleUpdateClient = async () => {
   }
 }
 
+// Создание плана для выбранного клиента
+const canSubmitClientPlan = computed(
+  () =>
+    newClientPlan.value.title.trim().length >= 3 &&
+    newClientPlan.value.items.length > 0 &&
+    !isPlanSubmitting.value,
+)
+
+const openCreatePlanForClient = () => {
+  planErrorMessage.value = null
+  newClientPlan.value = {
+    title: '',
+    items: [],
+  }
+  isCreatePlanOpen.value = true
+}
+
+const handleCreateClientPlan = async () => {
+  if (!selectedClient.value?.id || !canSubmitClientPlan.value) return
+  isPlanSubmitting.value = true
+  planErrorMessage.value = null
+
+  try {
+    await createPlanMutation.mutateAsync({
+      data: {
+        requestType: 'trainingPlan.create',
+        requestId: crypto.randomUUID(),
+        trainingPlan: {
+          title: newClientPlan.value.title.trim(),
+          clientCardId: selectedClient.value.id,
+          planItems: newClientPlan.value.items.map(mapDraftToPlanItem),
+        },
+      },
+    })
+
+    // Инвалидируем кэши планов
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['clientPlans', selectedClient.value.id] }),
+      queryClient.invalidateQueries({ queryKey: ['trainingPlans'] }),
+      queryClient.invalidateQueries({ queryKey: ['trainingPlansCount'] }),
+    ])
+
+    newClientPlan.value = {
+      title: '',
+      items: [],
+    }
+    isCreatePlanOpen.value = false
+  } catch (err: unknown) {
+    planErrorMessage.value = err instanceof Error ? err.message : 'Произошла ошибка при создании плана'
+  } finally {
+    isPlanSubmitting.value = false
+  }
+}
+
 const formatDate = (isoString?: string) => {
   if (!isoString) return '—'
   try {
@@ -219,39 +317,83 @@ const formatDate = (isoString?: string) => {
       <Button v-if="!searchQuery" @click="isCreateOpen = true">Добавить клиента</Button>
     </div>
 
-    <!-- Сетка клиентов -->
-    <div v-else class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <Card
-        v-for="client in clientCards"
-        :key="client.id"
-        class="cursor-pointer transition-all hover:border-primary/50 hover:shadow-md"
-        @click="selectedClient = client"
-      >
-        <CardContent class="p-6">
-          <div class="flex items-start justify-between">
-            <div class="flex items-center gap-4">
-              <Avatar>
-                <AvatarFallback>{{ (client.displayName ?? 'КЛ').substring(0, 2).toUpperCase() }}</AvatarFallback>
-              </Avatar>
-              <div>
-                <h3 class="font-semibold leading-none text-text-main">{{ client.displayName ?? 'Без имени' }}</h3>
-              </div>
-            </div>
-            <Badge :variant="client.status === 'ACTIVE' ? 'default' : 'secondary'">
-              {{ client.status === 'ACTIVE' ? 'Активен' : 'В архиве' }}
-            </Badge>
-          </div>
-
-          <div v-if="client.note" class="mt-3 text-xs text-text-muted line-clamp-2 bg-surface-2 p-2.5 rounded-md">
-            📝 {{ client.note }}
-          </div>
-
-          <div class="mt-4 text-xs text-text-faint flex items-center justify-between border-t border-border pt-3">
-            <span>Создан:</span>
-            <span class="font-medium text-text-muted">{{ formatDate(client.createdAt) }}</span>
-          </div>
-        </CardContent>
-      </Card>
+    <!-- Таблица клиентов -->
+    <div v-else class="rounded-xl border border-border bg-surface overflow-hidden shadow-xs">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead class="border-b border-border bg-surface-2/60 text-xs font-semibold uppercase tracking-wider text-text-muted">
+            <tr>
+              <th scope="col" class="py-3.5 pl-6 pr-4">Клиент</th>
+              <th scope="col" class="px-4 py-3.5">Статус</th>
+              <th scope="col" class="px-4 py-3.5">Заметка тренера</th>
+              <th scope="col" class="px-4 py-3.5">Дата создания</th>
+              <th scope="col" class="py-3.5 pl-4 pr-6 text-right">Действия</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border text-text-main">
+            <tr
+              v-for="client in clientCards"
+              :key="client.id"
+              class="hover:bg-surface-2/70 transition-colors cursor-pointer group"
+              @click="selectedClient = client"
+              :id="`client-row-${client.id}`"
+            >
+              <td class="py-4 pl-6 pr-4 font-medium">
+                <div class="flex items-center gap-3">
+                  <Avatar class="h-9 w-9 text-xs">
+                    <AvatarFallback>{{ (client.displayName ?? 'КЛ').substring(0, 2).toUpperCase() }}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <span class="font-semibold text-text-main group-hover:text-primary transition-colors">
+                      {{ client.displayName ?? 'Без имени' }}
+                    </span>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <Badge :variant="client.status === 'ACTIVE' ? 'default' : 'secondary'">
+                  {{ client.status === 'ACTIVE' ? 'Активен' : 'В архиве' }}
+                </Badge>
+              </td>
+              <td class="px-4 py-4 max-w-xs truncate text-xs text-text-muted">
+                <span v-if="client.note" class="truncate block">
+                  📝 {{ client.note }}
+                </span>
+                <span v-else class="text-text-faint italic">
+                  —
+                </span>
+              </td>
+              <td class="px-4 py-4 text-xs text-text-muted whitespace-nowrap">
+                {{ formatDate(client.createdAt) }}
+              </td>
+              <td class="py-4 pl-4 pr-6 text-right whitespace-nowrap">
+                <div class="flex items-center justify-end gap-2" @click.stop>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    class="h-8 text-xs group-hover:border-primary/50 group-hover:text-primary"
+                    @click="selectedClient = client"
+                    :id="`open-client-btn-${client.id}`"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Карточка
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    class="h-8 w-8 p-0 text-text-muted hover:text-text-main"
+                    title="Редактировать"
+                    @click="openEditClient(client)"
+                    :id="`edit-client-btn-${client.id}`"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  </Button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Модальное окно добавления клиента -->
@@ -302,9 +444,9 @@ const formatDate = (isoString?: string) => {
       </DialogContent>
     </Dialog>
 
-    <!-- Модальное окно просмотра деталей клиента -->
+    <!-- Модальное окно просмотра деталей клиента (с планами тренировок) -->
     <Dialog :open="!!selectedClient" @update:open="(val) => { if (!val) selectedClient = null }">
-      <DialogContent v-if="selectedClient" class="sm:max-w-[460px]">
+      <DialogContent v-if="selectedClient" class="sm:max-w-[560px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div class="flex items-center gap-3 mb-2">
             <Avatar class="h-12 w-12 text-lg">
@@ -312,6 +454,7 @@ const formatDate = (isoString?: string) => {
             </Avatar>
             <div>
               <DialogTitle>{{ selectedClient.displayName }}</DialogTitle>
+              <DialogDescription>Информация о клиенте и назначенных программах</DialogDescription>
             </div>
           </div>
         </DialogHeader>
@@ -335,18 +478,163 @@ const formatDate = (isoString?: string) => {
             <span>Дата создания:</span>
             <span class="font-medium text-text-muted">{{ formatDate(selectedClient.createdAt) }}</span>
           </div>
+
+          <!-- Секция назначенных тренировочных планов -->
+          <div class="border-t border-border pt-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <h4 class="font-semibold text-sm text-text-main">Назначенные планы тренировок</h4>
+                <Badge variant="outline" class="text-xs" id="client-plans-count-badge">
+                  {{ isClientPlansLoading ? '...' : clientPlans.length }}
+                </Badge>
+              </div>
+              <Button size="sm" variant="secondary" @click="openCreatePlanForClient" id="add-plan-to-client-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                Добавить план
+              </Button>
+            </div>
+
+            <!-- Загрузка планов -->
+            <div v-if="isClientPlansLoading" class="py-6 text-center text-xs text-text-muted">
+              <div class="inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-primary border-r-transparent mr-2 align-middle"></div>
+              Загрузка планов...
+            </div>
+
+            <!-- Пустой список планов -->
+            <div v-else-if="clientPlans.length === 0" class="p-5 text-center border border-dashed border-border rounded-lg bg-surface-2/50 space-y-2">
+              <p class="text-xs text-text-muted">У этого клиента пока нет назначенных тренировочных планов</p>
+              <Button size="sm" variant="outline" class="text-xs h-8" @click="openCreatePlanForClient">
+                Создать первый план
+              </Button>
+            </div>
+
+            <!-- Список планов клиента -->
+            <div v-else class="space-y-2 max-h-56 overflow-y-auto pr-1">
+              <div
+                v-for="plan in clientPlans"
+                :key="plan.id"
+                class="p-3 rounded-lg bg-surface-2 border border-border/60 hover:border-primary/50 transition-all cursor-pointer flex items-center justify-between group"
+                @click="selectedPlanDetails = plan"
+                :id="`client-plan-item-${plan.id}`"
+              >
+                <div class="space-y-1">
+                  <div class="flex items-center gap-2">
+                    <span class="font-medium text-sm text-text-main group-hover:text-primary transition-colors">
+                      {{ plan.title }}
+                    </span>
+                    <Badge :variant="plan.status === 'ACTIVE' ? 'default' : 'secondary'" class="text-[10px] px-1.5 py-0">
+                      {{ plan.status === 'ACTIVE' ? 'Активен' : (plan.status ?? 'Черновик') }}
+                    </Badge>
+                  </div>
+                  <div class="text-xs text-text-muted flex items-center gap-3">
+                    <span>{{ (plan.planItems ?? []).length }} эл. ({{ formatPlanStructureSummary(plan.planItems) }})</span>
+                    <span>•</span>
+                    <span>{{ formatDate(plan.createdAt) }}</span>
+                  </div>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-text-muted group-hover:text-primary transition-colors"><path d="m9 18 6-6-6-6"/></svg>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter class="mt-2">
           <Button variant="outline" @click="selectedClient = null">Закрыть</Button>
           <Button @click="openEditClient(selectedClient)">Редактировать</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
 
+    <!-- Модальное окно создания плана для выбранного клиента -->
+    <Dialog :open="isCreatePlanOpen" @update:open="isCreatePlanOpen = $event">
+      <DialogContent class="sm:max-w-[550px] max-h-[90vh] overflow-y-auto z-[60]" overlay-class="z-[55]">
+        <DialogHeader>
+          <DialogTitle>Новый план тренировки</DialogTitle>
+          <DialogDescription>
+            Назначение плана для клиента: <span class="font-semibold text-text-main">{{ selectedClient?.displayName }}</span>
+          </DialogDescription>
+        </DialogHeader>
+
+        <div v-if="planErrorMessage" class="p-3 bg-danger-soft text-danger text-xs rounded-md">
+          {{ planErrorMessage }}
+        </div>
+
+        <form @submit.prevent="handleCreateClientPlan" class="space-y-4 py-2">
+          <div class="space-y-1.5">
+            <label class="text-sm font-medium text-text-main" for="client-plan-name">Название плана *</label>
+            <Input
+              id="client-plan-name"
+              v-model="newClientPlan.title"
+              placeholder="например, Силовой сплит на 4 недели"
+              required
+              class="bg-surface-2"
+            />
+          </div>
+
+          <!-- Конструктор элементов плана (Упражнения, Круговые, Суперсеты) -->
+          <PlanItemBuilder v-model:items="newClientPlan.items" />
+
+          <DialogFooter>
+            <Button type="button" variant="outline" @click="isCreatePlanOpen = false">
+              Отмена
+            </Button>
+            <Button type="submit" :disabled="!canSubmitClientPlan" id="submit-client-plan-btn">
+              {{ isPlanSubmitting ? 'Создание...' : 'Создать и назначить' }}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+
+    <!-- Модальное окно просмотра деталей плана из карточки клиента -->
+    <Dialog :open="!!selectedPlanDetails" @update:open="(val) => { if (!val) selectedPlanDetails = null }">
+      <DialogContent v-if="selectedPlanDetails" class="sm:max-w-[550px] max-h-[90vh] overflow-y-auto z-[60]" overlay-class="z-[55]">
+        <DialogHeader>
+          <div class="flex justify-between items-start">
+            <div>
+              <DialogTitle>{{ selectedPlanDetails.title }}</DialogTitle>
+              <DialogDescription class="mt-1">
+                Назначен: {{ selectedClient?.displayName }}
+              </DialogDescription>
+            </div>
+            <Badge :variant="selectedPlanDetails.status === 'ACTIVE' ? 'default' : 'secondary'">
+              {{ selectedPlanDetails.status === 'ACTIVE' ? 'Активен' : (selectedPlanDetails.status ?? 'Черновик') }}
+            </Badge>
+          </div>
+        </DialogHeader>
+
+        <div class="space-y-3 py-2">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-semibold text-text-muted uppercase tracking-wider">
+              Состав плана ({{ (selectedPlanDetails.planItems ?? []).length }}):
+            </h4>
+            <span class="text-xs text-text-muted">
+              {{ formatPlanStructureSummary(selectedPlanDetails.planItems) }}
+            </span>
+          </div>
+
+          <div v-if="(selectedPlanDetails.planItems ?? []).length === 0" class="text-sm text-text-muted italic">
+            В плане нет элементов
+          </div>
+          <div v-else class="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+            <PlanItemCard
+              v-for="(item, idx) in selectedPlanDetails.planItems"
+              :key="item.id || idx"
+              :item="item"
+              :index="idx"
+            />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button @click="selectedPlanDetails = null">Закрыть</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
     <!-- Модальное окно редактирования клиента -->
     <Dialog :open="isEditOpen" @update:open="isEditOpen = $event">
-      <DialogContent class="sm:max-w-[425px]">
+      <DialogContent class="sm:max-w-[425px] z-[60]" overlay-class="z-[55]">
         <DialogHeader>
           <DialogTitle>Редактирование клиента</DialogTitle>
           <DialogDescription>
@@ -393,3 +681,4 @@ const formatDate = (isoString?: string) => {
     </Dialog>
   </div>
 </template>
+

@@ -2,7 +2,6 @@
 import { ref, computed } from 'vue'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useDebounce } from '@vueuse/core'
-import { Card, CardContent } from '@/shared/ui/card'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
@@ -18,16 +17,26 @@ import { trainingPlanSearch, useTrainingPlanCreate } from '@/shared/api/generate
 import { clientCardSearch } from '@/shared/api/generated/client-card/client-card'
 import type { TrainingPlanResponseObject } from '@/shared/api/generated/models/trainingPlanResponseObject'
 import type { ClientCardResponseObject } from '@/shared/api/generated/models/clientCardResponseObject'
+import type { TrainingPlanStatus } from '@/shared/api/generated/models/trainingPlanStatus'
+import PlanItemBuilder from './ui/PlanItemBuilder.vue'
+import PlanItemCard from './ui/PlanItemCard.vue'
+import {
+  type PlanItemDraft,
+  mapDraftToPlanItem,
+  formatPlanStructureSummary,
+} from './model/types'
 
 const queryClient = useQueryClient()
 const searchQuery = ref('')
 const debouncedSearchQuery = useDebounce(searchQuery, 300)
+const selectedClientFilter = ref('')
+const selectedStatusFilter = ref<TrainingPlanStatus | ''>('')
 const isCreateOpen = ref(false)
 const selectedPlan = ref<TrainingPlanResponseObject | null>(null)
 const isSubmitting = ref(false)
 const errorMessage = ref<string | null>(null)
 
-// Загружаем список клиентов для привязки к плану
+// Загружаем список клиентов для привязки к плану и фильтрации
 const { data: clientsRawData } = useQuery({
   queryKey: ['clientCardsForPlans'],
   queryFn: () =>
@@ -42,15 +51,17 @@ const clientOptions = computed<ClientCardResponseObject[]>(() => {
   return clientsRawData.value?.data?.clientCards ?? []
 })
 
-// Загружаем тренировочные планы через TanStack Query
+// Загружаем тренировочные планы через TanStack Query с учетом фильтров
 const { data: plansRawData, isLoading, isError, error, refetch } = useQuery({
-  queryKey: ['trainingPlans', debouncedSearchQuery],
+  queryKey: ['trainingPlans', debouncedSearchQuery, selectedClientFilter, selectedStatusFilter],
   queryFn: () =>
     trainingPlanSearch({
       requestType: 'trainingPlan.search',
       requestId: crypto.randomUUID(),
       trainingPlanFilter: {
         searchString: debouncedSearchQuery.value.trim() || undefined,
+        clientCardId: selectedClientFilter.value || undefined,
+        status: (selectedStatusFilter.value || undefined) as TrainingPlanStatus | undefined,
         pageSize: 50,
         pageNumber: 1,
       },
@@ -61,46 +72,29 @@ const plans = computed<TrainingPlanResponseObject[]>(() => {
   return plansRawData.value?.data?.trainingPlans ?? []
 })
 
-interface ExerciseDraft {
-  name: string
-  sets: number
-  reps: number
-  weight?: number
+const hasActiveFilters = computed(
+  () => !!searchQuery.value.trim() || !!selectedClientFilter.value || !!selectedStatusFilter.value,
+)
+
+const resetFilters = () => {
+  searchQuery.value = ''
+  selectedClientFilter.value = ''
+  selectedStatusFilter.value = ''
 }
 
 const newPlan = ref({
   title: '',
   clientCardId: '',
-  exercises: [] as ExerciseDraft[],
+  items: [] as PlanItemDraft[],
 })
-
-const newExerciseName = ref('')
-const newExerciseSets = ref(3)
-const newExerciseReps = ref(10)
-const newExerciseWeight = ref(0)
 
 const canSubmitPlan = computed(
   () =>
     newPlan.value.title.trim().length >= 3 &&
     newPlan.value.clientCardId.trim().length > 0 &&
-    newPlan.value.exercises.length > 0 &&
+    newPlan.value.items.length > 0 &&
     !isSubmitting.value,
 )
-
-const addExerciseToForm = () => {
-  if (!newExerciseName.value.trim()) return
-  newPlan.value.exercises.push({
-    name: newExerciseName.value.trim(),
-    sets: Number(newExerciseSets.value) || 3,
-    reps: Number(newExerciseReps.value) || 10,
-    weight: Number(newExerciseWeight.value) || 0,
-  })
-  newExerciseName.value = ''
-}
-
-const removeExercise = (index: number) => {
-  newPlan.value.exercises.splice(index, 1)
-}
 
 const createMutation = useTrainingPlanCreate()
 
@@ -117,12 +111,7 @@ const handleCreatePlan = async () => {
         trainingPlan: {
           title: newPlan.value.title.trim(),
           clientCardId: newPlan.value.clientCardId,
-          planItems: newPlan.value.exercises.map((e) => ({
-            id: crypto.randomUUID(),
-            itemType: 'EXERCISE',
-            title: e.name,
-            description: `${e.sets} подх. × ${e.reps} повт.${e.weight ? ` (${e.weight} кг)` : ''}`,
-          })),
+          planItems: newPlan.value.items.map(mapDraftToPlanItem),
         },
       },
     })
@@ -137,7 +126,7 @@ const handleCreatePlan = async () => {
     newPlan.value = {
       title: '',
       clientCardId: '',
-      exercises: [],
+      items: [],
     }
     isCreateOpen.value = false
   } catch (err: unknown) {
@@ -151,19 +140,6 @@ const getClientNameById = (clientCardId?: string) => {
   if (!clientCardId) return 'Общий план'
   const found = clientOptions.value.find((c: ClientCardResponseObject) => c.id === clientCardId)
   return found?.displayName ?? 'Клиент'
-}
-
-const getItemTypeLabel = (type?: string) => {
-  switch (type) {
-    case 'EXERCISE':
-      return 'Упражнение'
-    case 'CIRCUIT':
-      return 'Круговая'
-    case 'SUPERSET':
-      return 'Суперсет'
-    default:
-      return type ?? 'Упражнение'
-  }
 }
 
 const formatDate = (isoString?: string) => {
@@ -189,16 +165,64 @@ const formatDate = (isoString?: string) => {
         <p class="text-sm text-text-muted">Программы тренировок</p>
       </div>
       <div class="flex items-center gap-3">
-        <Input
-          v-model="searchQuery"
-          placeholder="Поиск по названию..."
-          class="w-64 bg-surface"
-        />
         <Button @click="isCreateOpen = true" id="create-plan-btn">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
           Создать план
         </Button>
       </div>
+    </div>
+
+    <!-- Панель фильтров: поиск, выбор клиента, выбор статуса -->
+    <div class="flex flex-wrap items-center gap-3 p-3 rounded-xl bg-surface border border-border">
+      <!-- Поиск по названию -->
+      <div class="flex-1 min-w-[200px]">
+        <Input
+          v-model="searchQuery"
+          placeholder="Поиск по названию..."
+          class="bg-surface-2 h-9 text-sm"
+          id="plan-search-input"
+        />
+      </div>
+
+      <!-- Фильтр по клиенту -->
+      <div class="w-full sm:w-56">
+        <select
+          v-model="selectedClientFilter"
+          class="flex h-9 w-full rounded-md border border-border bg-surface-2 px-3 py-1 text-sm shadow-xs transition-colors text-text-main focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+          id="plan-client-filter"
+        >
+          <option value="">Все клиенты</option>
+          <option v-for="c in clientOptions" :key="c.id" :value="c.id">
+            {{ c.displayName }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Фильтр по статусу -->
+      <div class="w-full sm:w-44">
+        <select
+          v-model="selectedStatusFilter"
+          class="flex h-9 w-full rounded-md border border-border bg-surface-2 px-3 py-1 text-sm shadow-xs transition-colors text-text-main focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+          id="plan-status-filter"
+        >
+          <option value="">Все статусы</option>
+          <option value="ACTIVE">Активные</option>
+          <option value="ARCHIVED">В архиве</option>
+        </select>
+      </div>
+
+      <!-- Кнопка сброса фильтров -->
+      <Button
+        v-if="hasActiveFilters"
+        variant="ghost"
+        size="sm"
+        class="h-9 text-xs text-text-muted hover:text-text-main"
+        @click="resetFilters"
+        id="reset-plan-filters-btn"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        Сбросить
+      </Button>
     </div>
 
     <!-- Состояние загрузки -->
@@ -224,44 +248,92 @@ const formatDate = (isoString?: string) => {
       <div>
         <h3 class="font-semibold text-text-main text-lg">Тренировочные планы не найдены</h3>
         <p class="text-sm text-text-muted mt-1 max-w-sm mx-auto">
-          {{ searchQuery ? 'По вашему поисковому запросу ничего не найдено.' : 'У вас пока нет тренировочных планов. Создайте первый план!' }}
+          {{ hasActiveFilters ? 'По выбранным фильтрам ничего не найдено.' : 'У вас пока нет тренировочных планов. Создайте первый план!' }}
         </p>
       </div>
-      <Button v-if="!searchQuery" @click="isCreateOpen = true">Создать первый план</Button>
+      <Button v-if="hasActiveFilters" variant="outline" @click="resetFilters" id="empty-state-reset-btn">
+        Сбросить фильтры
+      </Button>
+      <Button v-else @click="isCreateOpen = true">Создать первый план</Button>
     </div>
 
-    <!-- Сетка тренировочных планов -->
-    <div v-else class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <Card
-        v-for="plan in plans"
-        :key="plan.id"
-        class="cursor-pointer transition-all hover:border-primary/50 hover:shadow-md"
-        @click="selectedPlan = plan"
-      >
-        <CardContent class="p-6">
-          <div class="flex items-start justify-between">
-            <div>
-              <h3 class="font-semibold leading-snug text-text-main">{{ plan.title }}</h3>
-              <p class="text-xs font-medium text-primary mt-1">
-                {{ getClientNameById(plan.clientCardId) }}
-              </p>
-            </div>
-            <Badge :variant="plan.status === 'ACTIVE' ? 'default' : 'secondary'">
-              {{ plan.status === 'ACTIVE' ? 'Активен' : (plan.status ?? 'Черновик') }}
-            </Badge>
-          </div>
-
-          <div class="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs text-text-muted">
-            <span>Упражнений:</span>
-            <span class="font-bold text-text-main">{{ (plan.planItems ?? []).length }}</span>
-          </div>
-
-          <div class="mt-2 text-xs text-text-faint flex items-center justify-between">
-            <span>Создан:</span>
-            <span>{{ formatDate(plan.createdAt) }}</span>
-          </div>
-        </CardContent>
-      </Card>
+    <!-- Таблица тренировочных планов -->
+    <div v-else class="rounded-xl border border-border bg-surface overflow-hidden shadow-xs">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead class="border-b border-border bg-surface-2/60 text-xs font-semibold uppercase tracking-wider text-text-muted">
+            <tr>
+              <th scope="col" class="py-3.5 pl-6 pr-4">Название плана</th>
+              <th scope="col" class="px-4 py-3.5">Клиент</th>
+              <th scope="col" class="px-4 py-3.5">Статус</th>
+              <th scope="col" class="px-4 py-3.5 text-center">Упражнений</th>
+              <th scope="col" class="px-4 py-3.5">Дата создания</th>
+              <th scope="col" class="py-3.5 pl-4 pr-6 text-right">Действия</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border text-text-main">
+            <tr
+              v-for="plan in plans"
+              :key="plan.id"
+              class="hover:bg-surface-2/70 transition-colors cursor-pointer group"
+              @click="selectedPlan = plan"
+              :id="`plan-row-${plan.id}`"
+            >
+              <td class="py-4 pl-6 pr-4 font-medium">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-primary-soft text-primary flex items-center justify-center shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+                  </div>
+                  <div>
+                    <span class="font-semibold text-text-main group-hover:text-primary transition-colors">
+                      {{ plan.title }}
+                    </span>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4">
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-surface-3 text-[11px] font-medium text-text-muted">
+                    {{ getClientNameById(plan.clientCardId).substring(0, 1).toUpperCase() }}
+                  </span>
+                  <span class="text-sm text-text-main">
+                    {{ getClientNameById(plan.clientCardId) }}
+                  </span>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <Badge :variant="plan.status === 'ACTIVE' ? 'default' : 'secondary'">
+                  {{ plan.status === 'ACTIVE' ? 'Активен' : (plan.status ?? 'Черновик') }}
+                </Badge>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="flex items-center gap-1.5">
+                  <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-md bg-surface-2 text-xs font-semibold text-text-main border border-border/80">
+                    {{ (plan.planItems ?? []).length }} эл.
+                  </span>
+                  <span class="text-[11px] text-text-muted hidden md:inline">
+                    ({{ formatPlanStructureSummary(plan.planItems) }})
+                  </span>
+                </div>
+              </td>
+              <td class="px-4 py-4 text-xs text-text-muted whitespace-nowrap">
+                {{ formatDate(plan.createdAt) }}
+              </td>
+              <td class="py-4 pl-4 pr-6 text-right whitespace-nowrap">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  class="h-8 text-xs group-hover:border-primary/50 group-hover:text-primary"
+                  @click.stop="selectedPlan = plan"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  Состав
+                </Button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Модальное окно создания тренировочного плана -->
@@ -270,7 +342,7 @@ const formatDate = (isoString?: string) => {
         <DialogHeader>
           <DialogTitle>Новый план</DialogTitle>
           <DialogDescription>
-            Заполните параметры плана
+            Заполните параметры плана и состав тренировки
           </DialogDescription>
         </DialogHeader>
 
@@ -305,93 +377,8 @@ const formatDate = (isoString?: string) => {
             </select>
           </div>
 
-          <!-- Список добавленных упражнений -->
-          <div class="space-y-2 border-t border-border pt-3">
-            <div class="flex items-center justify-between">
-              <label class="text-sm font-semibold text-text-main">
-                Упражнения в плане ({{ newPlan.exercises.length }})
-              </label>
-            </div>
-
-            <div class="space-y-2 max-h-40 overflow-y-auto pr-1">
-              <div
-                v-for="(exercise, index) in newPlan.exercises"
-                :key="index"
-                class="flex items-center justify-between bg-surface-2 p-2.5 rounded-lg text-xs"
-              >
-                <div>
-                  <span class="font-semibold text-text-main">{{ exercise.name }}</span>
-                  <span class="text-text-muted ml-2">
-                    {{ exercise.sets }} подх. × {{ exercise.reps }} повт.
-                    <span v-if="exercise.weight">({{ exercise.weight }} кг)</span>
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  @click="removeExercise(index)"
-                  class="text-danger hover:text-danger/80 p-1"
-                  title="Удалить"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-
-            <!-- Добавление нового упражнения -->
-            <div class="bg-surface-3 p-3 rounded-lg space-y-2 mt-2">
-              <span class="text-xs font-medium text-text-muted">Добавить упражнение в план:</span>
-              <div class="flex gap-2">
-                <Input
-                  v-model="newExerciseName"
-                  placeholder="Название упражнения..."
-                  class="flex-1 bg-surface h-8 text-xs"
-                  id="exercise-name-input"
-                />
-              </div>
-              <div class="flex items-center gap-2">
-                <div class="flex-1 flex items-center gap-1">
-                  <label for="exercise-sets" class="text-xs text-text-muted cursor-pointer">Подходы:</label>
-                  <Input
-                    id="exercise-sets"
-                    type="number"
-                    v-model="newExerciseSets"
-                    min="1"
-                    class="w-14 bg-surface h-7 text-xs"
-                  />
-                </div>
-                <div class="flex-1 flex items-center gap-1">
-                  <label for="exercise-reps" class="text-xs text-text-muted cursor-pointer">Повт:</label>
-                  <Input
-                    id="exercise-reps"
-                    type="number"
-                    v-model="newExerciseReps"
-                    min="1"
-                    class="w-14 bg-surface h-7 text-xs"
-                  />
-                </div>
-                <div class="flex-1 flex items-center gap-1">
-                  <label for="exercise-weight" class="text-xs text-text-muted cursor-pointer">Вес(кг):</label>
-                  <Input
-                    id="exercise-weight"
-                    type="number"
-                    v-model="newExerciseWeight"
-                    min="0"
-                    class="w-14 bg-surface h-7 text-xs"
-                  />
-                </div>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  class="h-7 text-xs"
-                  @click="addExerciseToForm"
-                  id="add-exercise-btn"
-                >
-                  + Добавить
-                </Button>
-              </div>
-            </div>
-          </div>
+          <!-- Конструктор элементов плана (Упражнения, Круговые, Суперсеты) -->
+          <PlanItemBuilder v-model:items="newPlan.items" />
 
           <DialogFooter>
             <Button type="button" variant="outline" @click="isCreateOpen = false">
@@ -407,7 +394,7 @@ const formatDate = (isoString?: string) => {
 
     <!-- Модальное окно деталей плана -->
     <Dialog :open="!!selectedPlan" @update:open="(val) => { if (!val) selectedPlan = null }">
-      <DialogContent v-if="selectedPlan" class="sm:max-w-[500px]">
+      <DialogContent v-if="selectedPlan" class="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div class="flex justify-between items-start">
             <div>
@@ -423,24 +410,25 @@ const formatDate = (isoString?: string) => {
         </DialogHeader>
 
         <div class="space-y-3 py-2">
-          <h4 class="text-xs font-semibold text-text-muted uppercase tracking-wider">Состав тренировки:</h4>
-          <div v-if="(selectedPlan.planItems ?? []).length === 0" class="text-sm text-text-muted italic">
-            В плане нет упражнений
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-semibold text-text-muted uppercase tracking-wider">
+              Состав плана ({{ (selectedPlan.planItems ?? []).length }}):
+            </h4>
+            <span class="text-xs text-text-muted">
+              {{ formatPlanStructureSummary(selectedPlan.planItems) }}
+            </span>
           </div>
-          <div v-else class="space-y-2">
-            <div
+
+          <div v-if="(selectedPlan.planItems ?? []).length === 0" class="text-sm text-text-muted italic">
+            В плане нет элементов
+          </div>
+          <div v-else class="space-y-2.5 max-h-[60vh] overflow-y-auto pr-1">
+            <PlanItemCard
               v-for="(item, idx) in selectedPlan.planItems"
-              :key="idx"
-              class="flex items-center justify-between bg-surface-2 p-3 rounded-lg"
-            >
-              <div>
-                <p class="font-medium text-sm text-text-main">{{ item.title ?? 'Упражнение' }}</p>
-                <p class="text-xs text-text-muted mt-0.5">{{ item.description }}</p>
-              </div>
-              <Badge variant="outline" class="text-xs">
-                {{ getItemTypeLabel(item.itemType) }}
-              </Badge>
-            </div>
+              :key="item.id || idx"
+              :item="item"
+              :index="idx"
+            />
           </div>
         </div>
 

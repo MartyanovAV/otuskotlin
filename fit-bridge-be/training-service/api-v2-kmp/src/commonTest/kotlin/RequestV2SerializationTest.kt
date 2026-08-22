@@ -22,6 +22,7 @@ class RequestV2SerializationTest {
             trainingPlan =
                 TrainingPlanCreateObject(
                     title = "plan title",
+                    clientCardId = "client-123",
                     planItems = listOf(ExerciseItem(id = "550e8400-e29b-41d4-a716-446655440000", title = "Day 1")),
                 ),
         )
