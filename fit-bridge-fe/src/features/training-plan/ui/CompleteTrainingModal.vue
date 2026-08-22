@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useQueryClient } from '@tanstack/vue-query'
 import {
   Dialog,
@@ -47,7 +47,7 @@ const handleSubmit = async () => {
 
   try {
     const timestamp = new Date().toISOString()
-    
+
     await completeMutation.mutateAsync({
       data: {
         requestType: 'trainingPlan.complete',
@@ -57,17 +57,17 @@ const handleSubmit = async () => {
           lock: props.planLock,
           completedAt: timestamp,
           difficulty: difficulty.value,
-          coachComment: coachComment.value.trim()
+          coachComment: coachComment.value.trim(),
         },
       },
     })
 
     // Обновляем кэш
     await queryClient.invalidateQueries({ queryKey: ['trainingPlans'] })
-    
+
     emit('completed')
     emit('update:open', false)
-    
+
     // Сброс формы
     difficulty.value = 'NORMAL'
     coachComment.value = ''

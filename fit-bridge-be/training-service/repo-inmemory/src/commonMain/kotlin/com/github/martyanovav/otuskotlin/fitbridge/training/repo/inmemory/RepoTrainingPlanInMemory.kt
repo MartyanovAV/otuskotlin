@@ -17,6 +17,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.IDbTrain
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.IRepoTrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.RepoTrainingPlanBase
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorEmptyTrainingPlanId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorInvalidTrainingPlanStatus
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorNotFoundTrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorRepoConcurrencyTrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.common.IRepoTrainingPlanInitializable
@@ -132,6 +133,7 @@ class RepoTrainingPlanInMemory(
                     oldPlan == null -> errorNotFoundTrainingPlan(id)
                     oldPlan.lock != TrainingPlanLock.NONE && oldPlan.lock != rqPlan.lock ->
                         errorRepoConcurrencyTrainingPlan(oldPlan, rqPlan.lock)
+                    oldPlan.status != TrainingPlanStatus.ACTIVE -> errorInvalidTrainingPlanStatus(oldPlan)
                     else -> {
                         val completedPlan =
                             oldPlan.copy(
@@ -151,7 +153,7 @@ class RepoTrainingPlanInMemory(
 
     override suspend fun searchTrainingPlans(rq: DbTrainingPlanFilterRequest): IDbTrainingPlansResponse =
         tryTrainingPlansMethod {
-            val result: List<TrainingPlan> =
+            val filtered: List<TrainingPlan> =
                 cache.asMap().asSequence()
                     .filter { entry ->
                         rq.ownerUserId.takeIf { it.isNotBlank() }?.let {
@@ -174,11 +176,17 @@ class RepoTrainingPlanInMemory(
                         } ?: true
                     }
                     .map { it.value.toInternal() }
+                    .sortedWith(compareByDescending<TrainingPlan> { it.createdAt }.thenBy { it.id.asString() })
                     .toList()
+            val offset =
+                ((rq.pageNumber - 1).coerceAtLeast(0).toLong() * rq.pageSize)
+                    .coerceAtMost(filtered.size.toLong())
+                    .toInt()
+            val result = filtered.drop(offset).take(rq.pageSize)
             DbTrainingPlansResponseOk(
                 Page(
                     items = result,
-                    totalSize = result.size,
+                    totalSize = filtered.size,
                     pageNumber = rq.pageNumber,
                     pageSize = rq.pageSize,
                 ),

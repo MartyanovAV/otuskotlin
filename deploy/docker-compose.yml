@@ -18,7 +18,7 @@ services:
       DB_USER: ${DB_USER:-training_user}
       DB_PASSWORD: ${DB_PASSWORD:-training-password}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgresql-data:/var/lib/postgresql
       - ./volumes/postgres-init:/docker-entrypoint-initdb.d
@@ -104,9 +104,9 @@ services:
       greptimedb:
         condition: service_healthy
     ports:
-      - "24224:24224"
-      - "24224:24224/udp"
-      - "2020:2020"
+      - "127.0.0.1:24224:24224"
+      - "127.0.0.1:24224:24224/udp"
+      - "127.0.0.1:2020:2020"
     environment:
       - greptimedb_host=greptimedb
       - greptimedb_user=${GREPTIMEDB_USER:-admin}
@@ -128,10 +128,10 @@ services:
       - --rpc-bind-addr
       - 0.0.0.0:4001
     ports:
-      - "4000:4000"
-      - "4001:4001"
-      - "4002:4002"
-      - "4003:4003"
+      - "127.0.0.1:4000:4000"
+      - "127.0.0.1:4001:4001"
+      - "127.0.0.1:4002:4002"
+      - "127.0.0.1:4003:4003"
     volumes:
       - greptimedb-data:/tmp/greptimedb/
     healthcheck:
@@ -197,7 +197,7 @@ services:
       - --hostname-strict
       - "false"
       - --hostname
-      - "http://localhost:8080/"
+      - "${FITBRIDGE_PUBLIC_URL:-http://localhost:8080}"
       - --proxy-headers
       - forwarded
       - --hostname-backchannel-dynamic

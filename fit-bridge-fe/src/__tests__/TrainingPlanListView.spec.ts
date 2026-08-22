@@ -214,6 +214,7 @@ describe('TrainingPlanListView Table View and Plan Items', () => {
 
     expect(clientSelect.exists()).toBe(true)
     expect(statusSelect.exists()).toBe(true)
+    expect(statusSelect.find('option[value="COMPLETED"]').exists()).toBe(true)
 
     // Выбираем клиента и статус
     await clientSelect.setValue('client-1')

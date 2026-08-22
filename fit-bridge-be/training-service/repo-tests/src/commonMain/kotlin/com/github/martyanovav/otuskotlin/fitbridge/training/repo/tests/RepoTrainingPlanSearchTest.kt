@@ -8,6 +8,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.IRepoTra
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertTrue
 
 abstract class RepoTrainingPlanSearchTest {
     abstract val repo: IRepoTrainingPlan
@@ -60,6 +61,23 @@ abstract class RepoTrainingPlanSearchTest {
             val result = repo.searchTrainingPlans(DbTrainingPlanFilterRequest())
             assertIs<DbTrainingPlansResponseOk>(result)
             assertEquals(initializedObjects.size, result.data.items.size)
+        }
+
+    @Test
+    fun searchUsesPagination() =
+        runRepoTest {
+            val first = repo.searchTrainingPlans(DbTrainingPlanFilterRequest(pageNumber = 1, pageSize = 2))
+            val second = repo.searchTrainingPlans(DbTrainingPlanFilterRequest(pageNumber = 2, pageSize = 2))
+
+            assertIs<DbTrainingPlansResponseOk>(first)
+            assertIs<DbTrainingPlansResponseOk>(second)
+            assertEquals(2, first.data.items.size)
+            assertEquals(2, second.data.items.size)
+            assertEquals(initializedObjects.size, first.data.totalSize)
+            assertEquals(initializedObjects.size, second.data.totalSize)
+            assertEquals(1, first.data.pageNumber)
+            assertEquals(2, second.data.pageNumber)
+            assertTrue(first.data.items.map { it.id }.toSet().intersect(second.data.items.map { it.id }.toSet()).isEmpty())
         }
 
     companion object : BaseInitTrainingPlans("search") {

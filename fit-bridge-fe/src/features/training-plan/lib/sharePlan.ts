@@ -3,6 +3,29 @@ import type { ExerciseItem } from '@/shared/api/generated/models/exerciseItem'
 import type { CircuitItem } from '@/shared/api/generated/models/circuitItem'
 import type { SupersetItem } from '@/shared/api/generated/models/supersetItem'
 
+function appendExerciseDetails(
+  lines: string[],
+  exercise: ExerciseItem,
+  indent: string,
+  includeDescription = true,
+) {
+  if (includeDescription && exercise.description) {
+    lines.push(`${indent}• ${exercise.description}`)
+  }
+  for (const [index, set] of (exercise.sets ?? []).entries()) {
+    const parameters: string[] = []
+    if (set.reps?.trim()) parameters.push(`${set.reps.trim()} повт.`)
+    if (set.weight?.trim()) {
+      parameters.push(`${set.weight.trim()} ${set.weightUnit?.trim() || 'кг'}`)
+    }
+    if (set.durationSeconds) parameters.push(`${set.durationSeconds} сек`)
+    lines.push(`${indent}• Подход ${index + 1}: ${parameters.join(', ') || 'параметры не заданы'}`)
+  }
+  if (exercise.restBetweenSetsSeconds) {
+    lines.push(`${indent}• Отдых: ${exercise.restBetweenSetsSeconds} сек`)
+  }
+}
+
 /**
  * Преобразует тренировочный план в структурированный читаемый plain-text
  * для отправки клиенту в личные сообщения без лишних метаданных.
@@ -36,6 +59,7 @@ export function formatPlanToShareText(plan: TrainingPlanResponseObject): string 
           const subTitle = sub.title || 'Упражнение'
           const subDesc = sub.description ? ` (${sub.description})` : ''
           lines.push(`   ${letter}) ${subTitle}${subDesc}`)
+          appendExerciseDetails(lines, sub as ExerciseItem, '      ', false)
         })
         if (circuit.restBetweenRoundsSeconds) {
           lines.push(`   • Отдых между кругами: ${circuit.restBetweenRoundsSeconds} сек`)
@@ -52,6 +76,7 @@ export function formatPlanToShareText(plan: TrainingPlanResponseObject): string 
           const subTitle = sub.title || 'Упражнение'
           const subDesc = sub.description ? ` (${sub.description})` : ''
           lines.push(`   ${letter}) ${subTitle}${subDesc}`)
+          appendExerciseDetails(lines, sub as ExerciseItem, '      ', false)
         })
         if (superset.restBetweenSetsSeconds) {
           lines.push(`   • Отдых: ${superset.restBetweenSetsSeconds} сек`)
@@ -61,12 +86,7 @@ export function formatPlanToShareText(plan: TrainingPlanResponseObject): string 
         const exercise = item as ExerciseItem
         const exTitle = exercise.title || 'Упражнение'
         lines.push(`${num}. ${exTitle}`)
-        if (exercise.description) {
-          lines.push(`   • ${exercise.description}`)
-        }
-        if (exercise.restBetweenSetsSeconds) {
-          lines.push(`   • Отдых: ${exercise.restBetweenSetsSeconds} сек`)
-        }
+        appendExerciseDetails(lines, exercise, '   ')
       }
 
       // Пустая строка между блоками упражнений

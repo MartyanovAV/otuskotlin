@@ -214,19 +214,22 @@ docker compose down
    - `SSH_USERNAME`: Имя пользователя (например, `root` или `ubuntu`).
    - `SSH_PRIVATE_KEY`: Приватный SSH ключ (содержимое файла `~/.ssh/id_rsa` или `~/.ssh/id_ed25519`). Убедитесь, что публичная часть (`.pub`) добавлена в файл `~/.ssh/authorized_keys` на стенде.
    - `CR_PAT`: Скопированный токен из предыдущего шага.
+   - `FITBRIDGE_PUBLIC_URL`: Публичный HTTPS URL стенда без завершающего `/` (например, `https://stand.fitbridge.example`). TLS должен завершаться на внешнем reverse proxy перед Envoy.
+   - Пароли стенда: `POSTGRES_PASSWORD`, `KC_DB_PASSWORD`, `LIQUIBASE_DB_PASSWORD`, `DB_PASSWORD`, `KC_BOOTSTRAP_ADMIN_PASSWORD`, `GREPTIMEDB_PASS`. Деплой завершится ошибкой, если хотя бы один из них пуст.
 
 > [!TIP]
-> **Приватные секреты (Опционально)**
-> Чтобы не использовать стандартные (уязвимые) логины и пароли для баз данных на сервере, вы можете задать дополнительные секреты. GitHub Actions автоматически подхватит их и прокинет в `.env` файл на сервере:
-> - Для суперпользователя PostgreSQL: `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
-> - Для БД Keycloak: `KC_DB_NAME`, `KC_DB_USERNAME`, `KC_DB_PASSWORD`
-> - Для админа Keycloak: `KC_BOOTSTRAP_ADMIN_USERNAME`, `KC_BOOTSTRAP_ADMIN_PASSWORD`
-> - Для Liquibase (владелец схемы): `LIQUIBASE_DB_USERNAME`, `LIQUIBASE_DB_PASSWORD`
-> - Для БД микросервиса (только чтение/запись данных): `DB_NAME`, `DB_USER`, `DB_PASSWORD`
-> - Для GreptimeDB: `GREPTIMEDB_USER`, `GREPTIMEDB_PASS`
+> **Дополнительные имена (опционально)**
+> Имена баз и пользователей можно переопределить отдельными секретами. GitHub Actions передаёт все значения процессу `docker compose` через окружение и не сохраняет приватные данные в `.env` на сервере:
+> - Для суперпользователя PostgreSQL: `POSTGRES_DB`, `POSTGRES_USER`
+> - Для БД Keycloak: `KC_DB_NAME`, `KC_DB_USERNAME`
+> - Для админа Keycloak: `KC_BOOTSTRAP_ADMIN_USERNAME`
+> - Для Liquibase (владелец схемы): `LIQUIBASE_DB_USERNAME`
+> - Для БД микросервиса (только чтение/запись данных): `DB_NAME`, `DB_USER`
+> - Для GreptimeDB: `GREPTIMEDB_USER`
 
 ### Как происходит деплой
 - При успешном мерже в `main`, GitHub Action прогоняет E2E тесты.
-- Образы `training-service` и `liquibase-training` получают тег с коротким хэшем коммита (Git SHA) и публикуются в GHCR.
+- Образы `frontend`, `training-service` и `liquibase-training` получают тег с коротким хэшем коммита (Git SHA) и публикуются в GHCR.
 - Экшен подключается по SSH к стенду, скачивает актуальные конфиги (`docker-compose.yml` и `docker-compose.stand.yml`).
+- Перед запуском публичный URL подставляется в конфигурацию Keycloak и issuer JWT-провайдера Envoy.
 - Выполняется `docker compose pull` и `docker compose up -d` с указанием конкретного `APP_VERSION`, гарантируя запуск именно той сборки, которая прошла тесты.

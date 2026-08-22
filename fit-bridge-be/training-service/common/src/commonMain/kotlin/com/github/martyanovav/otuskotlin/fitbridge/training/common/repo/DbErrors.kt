@@ -94,6 +94,18 @@ fun errorRepoConcurrencyTrainingPlan(plan: TrainingPlan, oldLock: TrainingPlanLo
             ),
     )
 
+fun errorInvalidTrainingPlanStatus(plan: TrainingPlan) =
+    DbTrainingPlanResponseErrWithData(
+        plan = plan,
+        err =
+            FBError(
+                code = "$ERROR_GROUP_REPO-invalid-status",
+                group = ERROR_GROUP_REPO,
+                field = "status",
+                message = "TrainingPlan with ID: ${plan.id.asString()} must be ACTIVE",
+            ),
+    )
+
 fun errorRepoDbClientCard(e: Throwable) =
     DbClientCardResponseErr(
         FBError(

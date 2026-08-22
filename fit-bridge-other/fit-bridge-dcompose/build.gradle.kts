@@ -24,7 +24,7 @@ val resourcesZip = tasks.register<Zip>("resourcesZip") {
 
 val requiredResources = listOf(
     "docker-compose.yml",
-    "volumes/postgres-init/init.sql",
+    "volumes/postgres-init/init.sh",
     "volumes/envoy/envoy.yaml",
     "volumes/keycloak/import/fit-bridge-realm.json",
     "volumes/keycloak/import/fit-bridge-users-0.json",

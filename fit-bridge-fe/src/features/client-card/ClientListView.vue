@@ -26,6 +26,7 @@ import {
 } from '@/shared/api/generated/training-plan/training-plan'
 import type { ClientCardResponseObject } from '@/shared/api/generated/models/clientCardResponseObject'
 import type { TrainingPlanResponseObject } from '@/shared/api/generated/models/trainingPlanResponseObject'
+import type { TrainingPlanStatus } from '@/shared/api/generated/models/trainingPlanStatus'
 import PlanItemBuilder from '@/features/training-plan/ui/PlanItemBuilder.vue'
 import PlanItemCard from '@/features/training-plan/ui/PlanItemCard.vue'
 import PlanShareButton from '@/features/training-plan/ui/PlanShareButton.vue'
@@ -101,24 +102,48 @@ const totalClientsCount = computed(() => {
 
 // Запрос тренировочных планов для выбранного клиента
 const selectedClientId = computed(() => selectedClient.value?.id)
-const { data: clientPlansData, isLoading: isClientPlansLoading } = useQuery({
-  queryKey: computed(() => ['clientPlans', selectedClientId.value]),
-  queryFn: () =>
-    trainingPlanSearch({
+
+const loadAllClientPlans = async (): Promise<TrainingPlanResponseObject[]> => {
+  if (!selectedClientId.value) return []
+  const plans: TrainingPlanResponseObject[] = []
+  let page = 1
+
+  while (true) {
+    const response = await trainingPlanSearch({
       requestType: 'trainingPlan.search',
       requestId: crypto.randomUUID(),
       trainingPlanFilter: {
         clientCardId: selectedClientId.value,
-        pageSize: 50,
-        pageNumber: 1,
+        pageSize: 100,
+        pageNumber: page,
       },
-    }),
+    })
+    const currentPage = response.data.trainingPlans ?? []
+    plans.push(...currentPage)
+    const totalSize = response.data.totalSize ?? plans.length
+    if (currentPage.length === 0 || plans.length >= totalSize) break
+    page += 1
+  }
+
+  return plans
+}
+
+const { data: clientPlansData, isLoading: isClientPlansLoading } = useQuery({
+  queryKey: computed(() => ['clientPlans', selectedClientId.value]),
+  queryFn: loadAllClientPlans,
   enabled: computed(() => !!selectedClientId.value),
 })
 
 const clientPlans = computed<TrainingPlanResponseObject[]>(() => {
-  return clientPlansData.value?.data?.trainingPlans ?? []
+  return clientPlansData.value ?? []
 })
+
+const formatPlanStatus = (status?: TrainingPlanStatus) => {
+  if (status === 'ACTIVE') return 'Активен'
+  if (status === 'ARCHIVED') return 'В архиве'
+  if (status === 'COMPLETED') return 'Завершён'
+  return 'Черновик'
+}
 
 const createMutation = useClientCardCreate()
 const updateMutation = useClientCardUpdate()
@@ -545,7 +570,7 @@ const formatDate = (isoString?: string) => {
                       {{ plan.title }}
                     </span>
                     <Badge :variant="plan.status === 'ACTIVE' ? 'default' : 'secondary'" class="text-[10px] px-1.5 py-0">
-                      {{ plan.status === 'ACTIVE' ? 'Активен' : (plan.status ?? 'Черновик') }}
+                      {{ formatPlanStatus(plan.status) }}
                     </Badge>
                   </div>
                   <div class="text-xs text-text-muted flex items-center gap-3">
@@ -620,7 +645,7 @@ const formatDate = (isoString?: string) => {
               </DialogDescription>
             </div>
             <Badge :variant="selectedPlanDetails.status === 'ACTIVE' ? 'default' : 'secondary'">
-              {{ selectedPlanDetails.status === 'ACTIVE' ? 'Активен' : (selectedPlanDetails.status ?? 'Черновик') }}
+              {{ formatPlanStatus(selectedPlanDetails.status) }}
             </Badge>
           </div>
         </DialogHeader>
@@ -708,4 +733,3 @@ const formatDate = (isoString?: string) => {
     </Dialog>
   </div>
 </template>
-

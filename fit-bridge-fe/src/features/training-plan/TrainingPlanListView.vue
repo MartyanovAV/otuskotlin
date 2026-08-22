@@ -48,18 +48,33 @@ const isSubmitting = ref(false)
 const errorMessage = ref<string | null>(null)
 
 // Загружаем список клиентов для привязки к плану и фильтрации
-const { data: clientsRawData } = useQuery({
-  queryKey: ['clientCardsForPlans'],
-  queryFn: () =>
-    clientCardSearch({
+const loadAllClientCards = async (): Promise<ClientCardResponseObject[]> => {
+  const cards: ClientCardResponseObject[] = []
+  let page = 1
+
+  while (true) {
+    const response = await clientCardSearch({
       requestType: 'clientCard.search',
       requestId: crypto.randomUUID(),
-      clientCardFilter: { pageSize: 50, pageNumber: 1 },
-    }),
+      clientCardFilter: { pageSize: 100, pageNumber: page },
+    })
+    const currentPage = response.data.clientCards ?? []
+    cards.push(...currentPage)
+    const totalSize = response.data.totalSize ?? cards.length
+    if (currentPage.length === 0 || cards.length >= totalSize) break
+    page += 1
+  }
+
+  return cards
+}
+
+const { data: clientsRawData } = useQuery({
+  queryKey: ['clientCardsForPlans'],
+  queryFn: loadAllClientCards,
 })
 
 const clientOptions = computed<ClientCardResponseObject[]>(() => {
-  return clientsRawData.value?.data?.clientCards ?? []
+  return clientsRawData.value ?? []
 })
 
 // Загружаем тренировочные планы через TanStack Query с учетом фильтров и пагинации
@@ -90,6 +105,13 @@ const totalPlansCount = computed(() => {
 const hasActiveFilters = computed(
   () => !!searchQuery.value.trim() || !!selectedClientFilter.value || !!selectedStatusFilter.value,
 )
+
+const formatPlanStatus = (status?: TrainingPlanStatus) => {
+  if (status === 'ACTIVE') return 'Активен'
+  if (status === 'ARCHIVED') return 'В архиве'
+  if (status === 'COMPLETED') return 'Завершён'
+  return 'Черновик'
+}
 
 const resetFilters = () => {
   searchQuery.value = ''
@@ -233,6 +255,7 @@ const formatDifficulty = (diff?: string) => {
         >
           <option value="">Все статусы</option>
           <option value="ACTIVE">Активные</option>
+          <option value="COMPLETED">Завершённые</option>
           <option value="ARCHIVED">В архиве</option>
         </select>
       </div>
@@ -330,7 +353,7 @@ const formatDifficulty = (diff?: string) => {
               <td class="px-4 py-4 whitespace-nowrap">
                 <div class="flex flex-col gap-1">
                   <Badge :variant="plan.status === 'ACTIVE' ? 'default' : 'secondary'" class="w-fit">
-                    {{ plan.status === 'ACTIVE' ? 'Активен' : (plan.status ?? 'Черновик') }}
+                    {{ formatPlanStatus(plan.status) }}
                   </Badge>
                   <span v-if="plan.completedAt" class="text-[10px] font-medium text-primary">
                     Завершён
@@ -447,7 +470,7 @@ const formatDifficulty = (diff?: string) => {
               </DialogDescription>
             </div>
             <Badge :variant="selectedPlan.status === 'ACTIVE' ? 'default' : 'secondary'">
-              {{ selectedPlan.status === 'ACTIVE' ? 'Активен' : (selectedPlan.status ?? 'Черновик') }}
+              {{ formatPlanStatus(selectedPlan.status) }}
             </Badge>
           </div>
         </DialogHeader>
@@ -496,8 +519,8 @@ const formatDifficulty = (diff?: string) => {
             <PlanShareButton :plan="selectedPlan" variant="outline" placement="top-left" />
           </div>
           <div class="flex items-center justify-end gap-2">
-            <Button 
-              v-if="selectedPlan.status === 'ACTIVE' && !selectedPlan.completedAt" 
+            <Button
+              v-if="selectedPlan.status === 'ACTIVE' && !selectedPlan.completedAt"
               variant="default"
               @click="isCompleteOpen = true"
             >

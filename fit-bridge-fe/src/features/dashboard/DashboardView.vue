@@ -12,7 +12,7 @@ const { data: clientsData, isLoading: isClientsLoading } = useQuery({
     clientCardSearch({
       requestType: 'clientCard.search',
       requestId: crypto.randomUUID(),
-      clientCardFilter: { pageSize: 100, pageNumber: 1 },
+      clientCardFilter: { pageSize: 3, pageNumber: 1, status: 'ACTIVE' },
     }),
 })
 
@@ -22,7 +22,7 @@ const { data: plansData, isLoading: isPlansLoading } = useQuery({
     trainingPlanSearch({
       requestType: 'trainingPlan.search',
       requestId: crypto.randomUUID(),
-      trainingPlanFilter: { pageSize: 100, pageNumber: 1, status: 'ACTIVE' },
+      trainingPlanFilter: { pageSize: 1, pageNumber: 1, status: 'ACTIVE' },
     }),
 })
 

@@ -11,6 +11,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoClien
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoClientCardReadTest
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoClientCardSearchTest
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoClientCardUpdateTest
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoTrainingPlanCompleteTest
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoTrainingPlanCreateTest
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoTrainingPlanDeleteTest
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoTrainingPlanReadTest
@@ -91,6 +92,10 @@ class RepoTrainingPlanPgCreateTest : RepoTrainingPlanCreateTest() {
     companion object : BaseInitTrainingPlans("create") {
         override val initObjects: List<TrainingPlan> = emptyList()
     }
+}
+
+class RepoTrainingPlanPgCompleteTest : RepoTrainingPlanCompleteTest() {
+    override val repo = testTrainingPlanRepo(initObjects, parentClientCards = listOf(parentClientCard)).repo
 }
 
 class RepoTrainingPlanPgReadTest : RepoTrainingPlanReadTest() {

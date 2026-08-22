@@ -18,6 +18,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.IDbTrain
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.RepoTrainingPlanBase
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorEmptyTrainingPlanId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorEmptyTrainingPlanLock
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorInvalidTrainingPlanStatus
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorNotFoundTrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorRepoConcurrencyTrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorRepoDbTrainingPlan
@@ -26,6 +27,7 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.jetbrains.exposed.v1.core.Op
 import org.jetbrains.exposed.v1.core.ResultRow
+import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.like
@@ -224,7 +226,8 @@ class RepoTrainingPlanPg(
                         TrainingPlanTable.update(
                             where = {
                                 (TrainingPlanTable.id eq id.asString()) and
-                                    (TrainingPlanTable.lock eq oldLock.asString())
+                                    (TrainingPlanTable.lock eq oldLock.asString()) and
+                                    (TrainingPlanTable.status eq STATUS_ACTIVE)
                             },
                         ) {
                             it[status] = "COMPLETED"
@@ -254,7 +257,11 @@ class RepoTrainingPlanPg(
                                 .singleOrNull()
                                 ?.toTrainingPlan()
                         if (current != null) {
-                            errorRepoConcurrencyTrainingPlan(current, oldLock)
+                            when {
+                                current.lock != oldLock -> errorRepoConcurrencyTrainingPlan(current, oldLock)
+                                current.status != TrainingPlanStatus.ACTIVE -> errorInvalidTrainingPlanStatus(current)
+                                else -> errorRepoConcurrencyTrainingPlan(current, oldLock)
+                            }
                         } else {
                             errorNotFoundTrainingPlan(id)
                         }
@@ -269,7 +276,7 @@ class RepoTrainingPlanPg(
             val hasTitle = rq.searchString.isNotBlank()
             val hasStatus = rq.status != TrainingPlanStatus.NONE
             val hasOwnerUserId = rq.ownerUserId.isNotBlank()
-            val result =
+            val (result, totalSize) =
                 transaction(database) {
                     val conditions = mutableListOf<Op<Boolean>>()
                     if (hasClientCardId) {
@@ -293,12 +300,20 @@ class RepoTrainingPlanPg(
                         } else {
                             TrainingPlanTable.selectAll()
                         }
-                    query.map { it.toTrainingPlan() }
+                    val totalSize = query.count().toInt()
+                    val offset = (rq.pageNumber - 1).coerceAtLeast(0).toLong() * rq.pageSize
+                    val items =
+                        query
+                            .orderBy(TrainingPlanTable.createdAt to SortOrder.DESC, TrainingPlanTable.id to SortOrder.ASC)
+                            .limit(rq.pageSize)
+                            .offset(offset)
+                            .map { it.toTrainingPlan() }
+                    items to totalSize
                 }
             DbTrainingPlansResponseOk(
                 Page(
                     items = result,
-                    totalSize = result.size,
+                    totalSize = totalSize,
                     pageNumber = rq.pageNumber,
                     pageSize = rq.pageSize,
                 ),

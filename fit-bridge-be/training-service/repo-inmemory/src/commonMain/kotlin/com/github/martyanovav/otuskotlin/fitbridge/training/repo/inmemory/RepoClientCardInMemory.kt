@@ -119,7 +119,7 @@ class RepoClientCardInMemory(
 
     override suspend fun searchClientCards(rq: DbClientCardFilterRequest): IDbClientCardsResponse =
         tryClientCardsMethod {
-            val result: List<ClientCard> =
+            val filtered: List<ClientCard> =
                 cache.asMap().asSequence()
                     .filter { entry ->
                         rq.ownerUserId.takeIf { it.isNotBlank() }?.let {
@@ -138,11 +138,17 @@ class RepoClientCardInMemory(
                         } ?: true
                     }
                     .map { it.value.toInternal() }
+                    .sortedWith(compareByDescending<ClientCard> { it.createdAt }.thenBy { it.id.asString() })
                     .toList()
+            val offset =
+                ((rq.pageNumber - 1).coerceAtLeast(0).toLong() * rq.pageSize)
+                    .coerceAtMost(filtered.size.toLong())
+                    .toInt()
+            val result = filtered.drop(offset).take(rq.pageSize)
             DbClientCardsResponseOk(
                 Page(
                     items = result,
-                    totalSize = result.size,
+                    totalSize = filtered.size,
                     pageNumber = rq.pageNumber,
                     pageSize = rq.pageSize,
                 ),

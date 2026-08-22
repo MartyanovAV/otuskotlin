@@ -120,6 +120,30 @@ describe('sharePlan utility', () => {
     expect(text).toContain('В плане пока нет упражнений.')
   })
 
+  it('formats structured exercise sets when description is absent', () => {
+    const exercise: ExerciseItem = {
+      id: 'exercise-with-sets',
+      itemType: 'EXERCISE',
+      title: 'Тяга штанги',
+      sets: [
+        { reps: '12', weight: '40', weightUnit: 'кг' },
+        { durationSeconds: 45 },
+      ],
+      restBetweenSetsSeconds: 60,
+    }
+    const plan: TrainingPlanResponseObject = {
+      id: 'structured-sets',
+      title: 'Структурированные подходы',
+      planItems: [exercise],
+    }
+
+    const text = formatPlanToShareText(plan)
+
+    expect(text).toContain('• Подход 1: 12 повт., 40 кг')
+    expect(text).toContain('• Подход 2: 45 сек')
+    expect(text).toContain('• Отдых: 60 сек')
+  })
+
   it('generates correct encoded URLs for VK, Telegram, and WhatsApp', () => {
     const rawText = 'Привет! План:\n1. Приседания'
     const vkUrl = getVkShareUrl(rawText)
@@ -132,7 +156,7 @@ describe('sharePlan utility', () => {
   })
 
   it('copies text using navigator.clipboard when available', async () => {
-    const writeTextMock = vi.fn().mockResolvedValue(undefined)
+    const writeTextMock = vi.fn<(text: string) => Promise<void>>().mockResolvedValue(undefined)
     Object.assign(navigator, {
       clipboard: {
         writeText: writeTextMock,
