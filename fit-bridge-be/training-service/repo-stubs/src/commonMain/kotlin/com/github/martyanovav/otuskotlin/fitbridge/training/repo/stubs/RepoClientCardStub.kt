@@ -1,5 +1,6 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.repo.stubs
 
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardFilterRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardIdRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardRequest
@@ -28,6 +29,14 @@ class RepoClientCardStub : IRepoClientCard {
     }
 
     override suspend fun searchClientCards(rq: DbClientCardFilterRequest): IDbClientCardsResponse {
-        return DbClientCardsResponseOk(data = ClientCardStub.getList())
+        return DbClientCardsResponseOk(
+            data =
+                Page(
+                    items = ClientCardStub.getList(),
+                    totalSize = ClientCardStub.getList().size,
+                    pageNumber = rq.pageNumber,
+                    pageSize = rq.pageSize,
+                ),
+        )
     }
 }

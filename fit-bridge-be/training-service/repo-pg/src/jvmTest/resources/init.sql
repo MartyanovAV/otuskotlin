@@ -2,7 +2,8 @@
 
 --changeset martyanovav:1 labels:v0.0.1
 CREATE TYPE "client_card_status_type" AS ENUM ('ACTIVE', 'ARCHIVED');
-CREATE TYPE "training_plan_status_type" AS ENUM ('ACTIVE', 'ARCHIVED');
+CREATE TYPE "training_plan_status_type" AS ENUM ('ACTIVE', 'ARCHIVED', 'COMPLETED');
+CREATE TYPE "workout_difficulty_type" AS ENUM ('EASY', 'NORMAL', 'HARD', 'MAX');
 
 CREATE TABLE "client_card" (
     "id" text primary key constraint client_card_id_len check (length("id") between 1 and 64),
@@ -32,7 +33,10 @@ CREATE TABLE "training_plan" (
     "lock" text not null default gen_random_uuid()::text,
     "created_at" timestamp without time zone not null default (now() at time zone 'utc'),
     "updated_at" timestamp without time zone not null default (now() at time zone 'utc'),
-    "archived_at" timestamp without time zone
+    "archived_at" timestamp without time zone,
+    "completed_at" timestamp without time zone,
+    "difficulty" workout_difficulty_type,
+    "coach_comment" text not null default '' constraint training_plan_coach_comment_len check (length("coach_comment") <= 1000)
 );
 
 CREATE INDEX training_plan_client_card_id_idx ON "training_plan" ("client_card_id");

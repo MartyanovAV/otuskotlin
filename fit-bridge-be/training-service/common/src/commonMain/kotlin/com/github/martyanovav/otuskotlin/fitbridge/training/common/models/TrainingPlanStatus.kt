@@ -4,4 +4,5 @@ enum class TrainingPlanStatus {
     NONE,
     ACTIVE,
     ARCHIVED,
+    COMPLETED
 }

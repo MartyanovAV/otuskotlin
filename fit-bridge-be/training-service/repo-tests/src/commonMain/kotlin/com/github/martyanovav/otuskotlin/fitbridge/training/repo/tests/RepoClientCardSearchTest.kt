@@ -8,6 +8,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.IRepoCli
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertTrue
 
 abstract class RepoClientCardSearchTest {
     abstract val repo: IRepoClientCard
@@ -20,7 +21,7 @@ abstract class RepoClientCardSearchTest {
             val result = repo.searchClientCards(DbClientCardFilterRequest(searchString = "ad1"))
             assertIs<DbClientCardsResponseOk>(result)
             val expected = listOf(initializedObjects[0])
-            assertEquals(expected.size, result.data.size)
+            assertEquals(expected.size, result.data.items.size)
         }
 
     @Test
@@ -34,8 +35,8 @@ abstract class RepoClientCardSearchTest {
                     ),
                 )
             assertIs<DbClientCardsResponseOk>(result)
-            assertEquals(1, result.data.size)
-            assertEquals(initializedObjects[1].id, result.data[0].id)
+            assertEquals(1, result.data.items.size)
+            assertEquals(initializedObjects[1].id, result.data.items[0].id)
         }
 
     @Test
@@ -43,7 +44,7 @@ abstract class RepoClientCardSearchTest {
         runRepoTest {
             val result = repo.searchClientCards(DbClientCardFilterRequest(ownerUserId = "owner-124"))
             assertIs<DbClientCardsResponseOk>(result)
-            assertEquals(setOf(initializedObjects[1].id, initializedObjects[3].id), result.data.map { it.id }.toSet())
+            assertEquals(setOf(initializedObjects[1].id, initializedObjects[3].id), result.data.items.map { it.id }.toSet())
         }
 
     @Test
@@ -51,7 +52,24 @@ abstract class RepoClientCardSearchTest {
         runRepoTest {
             val result = repo.searchClientCards(DbClientCardFilterRequest())
             assertIs<DbClientCardsResponseOk>(result)
-            assertEquals(initializedObjects.size, result.data.size)
+            assertEquals(initializedObjects.size, result.data.items.size)
+        }
+
+    @Test
+    fun searchUsesPagination() =
+        runRepoTest {
+            val first = repo.searchClientCards(DbClientCardFilterRequest(pageNumber = 1, pageSize = 2))
+            val second = repo.searchClientCards(DbClientCardFilterRequest(pageNumber = 2, pageSize = 2))
+
+            assertIs<DbClientCardsResponseOk>(first)
+            assertIs<DbClientCardsResponseOk>(second)
+            assertEquals(2, first.data.items.size)
+            assertEquals(2, second.data.items.size)
+            assertEquals(initializedObjects.size, first.data.totalSize)
+            assertEquals(initializedObjects.size, second.data.totalSize)
+            assertEquals(1, first.data.pageNumber)
+            assertEquals(2, second.data.pageNumber)
+            assertTrue(first.data.items.map { it.id }.toSet().intersect(second.data.items.map { it.id }.toSet()).isEmpty())
         }
 
     companion object : BaseInitClientCards("search") {

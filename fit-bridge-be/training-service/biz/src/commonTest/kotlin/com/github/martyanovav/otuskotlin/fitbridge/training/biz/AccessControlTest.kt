@@ -14,6 +14,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Traini
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanLock
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.WorkMode
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.inmemory.RepoClientCardInMemory
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.inmemory.RepoTrainingPlanInMemory
@@ -28,8 +29,12 @@ class AccessControlTest {
     private val clientCardB = clientCard("client-b", userB.userId)
     private val trainingPlanA = trainingPlan("plan-a", clientCardA.id, userA.userId)
     private val trainingPlanB = trainingPlan("plan-b", clientCardB.id, userB.userId)
+    private val archivedTrainingPlan =
+        trainingPlan("plan-archived", clientCardA.id, userA.userId)
+            .copy(status = TrainingPlanStatus.ARCHIVED)
     private val clientCardRepo = RepoClientCardInMemory().apply { save(listOf(clientCardA, clientCardB)) }
-    private val trainingPlanRepo = RepoTrainingPlanInMemory().apply { save(listOf(trainingPlanA, trainingPlanB)) }
+    private val trainingPlanRepo =
+        RepoTrainingPlanInMemory().apply { save(listOf(trainingPlanA, trainingPlanB, archivedTrainingPlan)) }
     private val processor =
         TrainingProcessor(
             CorSettings(
@@ -58,7 +63,10 @@ class AccessControlTest {
             processor.exec(plansContext)
 
             assertEquals(listOf(clientCardA.id), cardsContext.clientCardsResponse.items.map { it.id })
-            assertEquals(listOf(trainingPlanA.id), plansContext.trainingPlansResponse.items.map { it.id })
+            assertEquals(
+                listOf(trainingPlanA.id, archivedTrainingPlan.id),
+                plansContext.trainingPlansResponse.items.map { it.id },
+            )
         }
 
     @Test
@@ -162,6 +170,51 @@ class AccessControlTest {
             assertEquals(clientCardA.id, context.trainingPlanResponse.clientCardId)
             assertEquals(userA.userId, context.trainingPlanResponse.ownerUserId)
             assertEquals(userA.userId, context.trainingPlanResponse.createdByUserId)
+        }
+
+    @Test
+    fun completingArchivedTrainingPlanIsRejected() =
+        runTest {
+            val context =
+                TrainingPlanContext(
+                    command = TrainingPlanCommand.COMPLETE,
+                    workMode = WorkMode.TEST,
+                    principal = userA,
+                    trainingPlanRequest = archivedTrainingPlan,
+                )
+
+            processor.exec(context)
+
+            assertEquals(State.FAILING, context.state)
+            assertEquals("invalid-status", context.errors.single().code)
+            assertEquals("status", context.errors.single().field)
+        }
+
+    @Test
+    fun completingTrainingPlanTwiceIsRejected() =
+        runTest {
+            val first =
+                TrainingPlanContext(
+                    command = TrainingPlanCommand.COMPLETE,
+                    workMode = WorkMode.TEST,
+                    principal = userA,
+                    trainingPlanRequest = trainingPlanA,
+                )
+            processor.exec(first)
+            assertEquals(State.FINISHING, first.state)
+            assertEquals(TrainingPlanStatus.COMPLETED, first.trainingPlanResponse.status)
+
+            val second =
+                TrainingPlanContext(
+                    command = TrainingPlanCommand.COMPLETE,
+                    workMode = WorkMode.TEST,
+                    principal = userA,
+                    trainingPlanRequest = first.trainingPlanResponse,
+                )
+            processor.exec(second)
+
+            assertEquals(State.FAILING, second.state)
+            assertEquals("invalid-status", second.errors.single().code)
         }
 
     private fun clientCard(

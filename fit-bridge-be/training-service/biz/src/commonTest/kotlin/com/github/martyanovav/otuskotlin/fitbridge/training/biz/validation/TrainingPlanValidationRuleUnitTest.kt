@@ -15,6 +15,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Traini
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanFilter
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanLock
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -324,6 +325,23 @@ class TrainingPlanValidationRuleUnitTest {
                 filter = TrainingPlanFilter(searchString = "a".repeat(121)),
                 expectedCode = "validation-searchString-tooLong",
             ) { validateTrainingPlanSearchStringLength("validate search string") }
+        }
+
+    @Test
+    fun `completed status is valid for search`() =
+        runTest {
+            val context =
+                TrainingPlanContext(
+                    state = State.RUNNING,
+                    trainingPlanFilterValidating = TrainingPlanFilter(status = TrainingPlanStatus.COMPLETED),
+                )
+
+            rootChain<IFBContext> {
+                validateTrainingPlanFilterStatus("validate status")
+            }.build().exec(context)
+
+            assertEquals(State.RUNNING, context.state)
+            assertEquals(emptyList(), context.errors)
         }
 
     @Test

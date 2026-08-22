@@ -2,11 +2,12 @@ package com.github.martyanovav.otuskotlin.fitbridge.training.common.repo
 
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBError
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 
-sealed interface IDbClientCardsResponse : IDbResponse<List<ClientCard>>
+sealed interface IDbClientCardsResponse : IDbResponse<Page<ClientCard>>
 
 data class DbClientCardsResponseOk(
-    val data: List<ClientCard>,
+    val data: Page<ClientCard>,
 ) : IDbClientCardsResponse
 
 @Suppress("unused")

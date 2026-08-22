@@ -6,5 +6,6 @@ enum class TrainingPlanCommand : FBCommand {
     READ,
     UPDATE,
     ARCHIVE,
-    SEARCH
+    SEARCH,
+    COMPLETE
 }

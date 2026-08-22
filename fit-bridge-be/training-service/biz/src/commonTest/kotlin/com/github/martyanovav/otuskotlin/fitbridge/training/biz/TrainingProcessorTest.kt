@@ -67,6 +67,7 @@ class TrainingProcessorTest {
                         val expectedStatus =
                             when (command) {
                                 TrainingPlanCommand.ARCHIVE -> TrainingPlanStatus.ARCHIVED
+                                TrainingPlanCommand.COMPLETE -> TrainingPlanStatus.COMPLETED
                                 else -> TrainingPlanStatus.ACTIVE
                             }
                         assertEquals(expectedStatus, ctx.trainingPlanResponse.status, command.name)

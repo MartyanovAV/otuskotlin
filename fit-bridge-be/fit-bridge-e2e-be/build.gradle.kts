@@ -28,7 +28,7 @@ dependencies {
     testImplementation(libs.testcontainers.core)
 }
 
-val extractLibResources = tasks.register<Copy>("extractLibResources") {
+val extractLibResources = tasks.register<Sync>("extractLibResources") {
     from(resourcesFromLib.elements.map { files -> files.map(::zipTree) })
     into(layout.buildDirectory.dir("dcompose"))
 }

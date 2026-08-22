@@ -11,6 +11,8 @@ interface IRepoTrainingPlan {
 
     suspend fun searchTrainingPlans(rq: DbTrainingPlanFilterRequest): IDbTrainingPlansResponse
 
+    suspend fun completeTrainingPlan(rq: DbTrainingPlanRequest): IDbTrainingPlanResponse
+
     companion object {
         val NONE =
             object : IRepoTrainingPlan {
@@ -31,6 +33,10 @@ interface IRepoTrainingPlan {
                 }
 
                 override suspend fun searchTrainingPlans(rq: DbTrainingPlanFilterRequest): IDbTrainingPlansResponse {
+                    throw NotImplementedError("Must not be used")
+                }
+
+                override suspend fun completeTrainingPlan(rq: DbTrainingPlanRequest): IDbTrainingPlanResponse {
                     throw NotImplementedError("Must not be used")
                 }
             }

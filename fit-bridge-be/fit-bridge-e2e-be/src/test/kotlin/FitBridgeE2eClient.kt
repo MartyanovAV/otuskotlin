@@ -7,6 +7,7 @@ import io.ktor.client.request.bearerAuth
 import io.ktor.http.contentType
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.options
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.request.forms.submitForm
@@ -14,6 +15,8 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import io.ktor.http.Parameters
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -28,7 +31,7 @@ internal class FitBridgeE2eClient : AutoCloseable {
         .trimEnd('/')
     private val username = configuration("fitbridge.e2e.username", "FITBRIDGE_E2E_USERNAME", "fitbridge-test")
     private val password = configuration("fitbridge.e2e.password", "FITBRIDGE_E2E_PASSWORD", "fitbridge")
-    private val clientId = configuration("fitbridge.e2e.clientId", "FITBRIDGE_E2E_CLIENT_ID", "fit-bridge-service")
+    private val clientId = configuration("fitbridge.e2e.clientId", "FITBRIDGE_E2E_CLIENT_ID", "fit-bridge-smoke")
     private val json = Json { ignoreUnknownKeys = true }
     private val client = HttpClient(OkHttp) {
         expectSuccess = false
@@ -41,12 +44,23 @@ internal class FitBridgeE2eClient : AutoCloseable {
         path: String,
         body: String,
         authenticated: Boolean = true,
+        origin: String? = null,
     ): E2eResponse = client.post("$baseUrl$path") {
         contentType(ContentType.Application.Json)
         accept(ContentType.Application.Json)
         requestId(body)?.let { header("X-Request-ID", it) }
+        origin?.let { header(HttpHeaders.Origin, it) }
         if (authenticated) bearerAuth(token())
         setBody(body)
+    }.toE2eResponse()
+
+    suspend fun preflight(
+        path: String,
+        origin: String,
+    ): E2eResponse = client.options("$baseUrl$path") {
+        header(HttpHeaders.Origin, origin)
+        header(HttpHeaders.AccessControlRequestMethod, "POST")
+        header(HttpHeaders.AccessControlRequestHeaders, "authorization,content-type")
     }.toE2eResponse()
 
     suspend fun requireHealthy(vararg paths: String) {
@@ -79,7 +93,7 @@ internal class FitBridgeE2eClient : AutoCloseable {
     }
 
     private suspend fun HttpResponse.toE2eResponse(): E2eResponse =
-        E2eResponse(status, bodyAsText())
+        E2eResponse(status, bodyAsText(), headers)
 
     override fun close() = client.close()
 
@@ -96,6 +110,7 @@ internal class FitBridgeE2eClient : AutoCloseable {
 internal data class E2eResponse(
     val status: HttpStatusCode,
     val body: String,
+    val headers: Headers,
 ) {
     val json: JsonObject by lazy {
         Json.parseToJsonElement(body).jsonObject

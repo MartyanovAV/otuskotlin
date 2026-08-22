@@ -26,7 +26,15 @@ fun ICorChainDsl<IFBContext>.clientCardRepoSearch(title: String) =
                     pageSize = ctx.clientCardFilterValidated.pageSize,
                 )
             when (val result = ctx.clientCardRepo.searchClientCards(request)) {
-                is DbClientCardsResponseOk -> ctx.clientCardsRepoDone = result.data.toMutableList()
+                is DbClientCardsResponseOk -> {
+                    ctx.clientCardsRepoDone = result.data.items.toMutableList()
+                    ctx.clientCardsResponse =
+                        ctx.clientCardsResponse.copy(
+                            totalSize = result.data.totalSize,
+                            pageNumber = result.data.pageNumber,
+                            pageSize = result.data.pageSize,
+                        )
+                }
                 is DbClientCardsResponseErr -> fail(result.errors)
             }
         }

@@ -1,10 +1,12 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.repo.pg
 
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.WorkoutDifficulty
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbTrainingPlanFilterRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbTrainingPlanIdRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbTrainingPlanRequest
@@ -16,6 +18,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.IDbTrain
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.RepoTrainingPlanBase
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorEmptyTrainingPlanId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorEmptyTrainingPlanLock
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorInvalidTrainingPlanStatus
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorNotFoundTrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorRepoConcurrencyTrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorRepoDbTrainingPlan
@@ -24,6 +27,7 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.jetbrains.exposed.v1.core.Op
 import org.jetbrains.exposed.v1.core.ResultRow
+import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.like
@@ -88,6 +92,9 @@ class RepoTrainingPlanPg(
                         it[lock] = plan.lock.asString()
                         it[createdAt] = now
                         it[updatedAt] = now
+                        it[completedAt] = if (plan.completedAt.isNotBlank()) Instant.parse(plan.completedAt) else null
+                        it[difficulty] = if (plan.difficulty != WorkoutDifficulty.NONE) plan.difficulty.name else null
+                        it[coachComment] = plan.coachComment
                     }.single().toTrainingPlan()
                 }
             DbTrainingPlanResponseOk(result)
@@ -205,13 +212,71 @@ class RepoTrainingPlanPg(
             result
         }
 
+    override suspend fun completeTrainingPlan(rq: DbTrainingPlanRequest): IDbTrainingPlanResponse =
+        tryMethod {
+            val plan = rq.trainingPlan
+            val id = plan.id.takeIf { it != TrainingPlanId.NONE } ?: return@tryMethod errorEmptyTrainingPlanId
+            val oldLock = plan.lock.takeIf { it != TrainingPlanLock.NONE } ?: return@tryMethod errorEmptyTrainingPlanLock(id)
+            val newLock = TrainingPlanLock(randomUuid())
+            val now = Instant.now()
+            val completedTime = if (plan.completedAt.isNotBlank()) Instant.parse(plan.completedAt) else now
+            val result =
+                transaction(database) {
+                    val affected =
+                        TrainingPlanTable.update(
+                            where = {
+                                (TrainingPlanTable.id eq id.asString()) and
+                                    (TrainingPlanTable.lock eq oldLock.asString()) and
+                                    (TrainingPlanTable.status eq STATUS_ACTIVE)
+                            },
+                        ) {
+                            it[status] = "COMPLETED"
+                            it[lock] = newLock.asString()
+                            it[completedAt] = completedTime
+                            it[difficulty] = if (plan.difficulty != WorkoutDifficulty.NONE) plan.difficulty.name else null
+                            it[coachComment] = plan.coachComment
+                            it[updatedAt] = now
+                        }
+                    if (affected > 0) {
+                        val returned =
+                            TrainingPlanTable
+                                .selectAll()
+                                .where { TrainingPlanTable.id eq id.asString() }
+                                .single()
+                                .toTrainingPlan()
+                        if (returned.lock == newLock) {
+                            DbTrainingPlanResponseOk(returned)
+                        } else {
+                            errorRepoConcurrencyTrainingPlan(returned, oldLock)
+                        }
+                    } else {
+                        val current =
+                            TrainingPlanTable
+                                .selectAll()
+                                .where { TrainingPlanTable.id eq id.asString() }
+                                .singleOrNull()
+                                ?.toTrainingPlan()
+                        if (current != null) {
+                            when {
+                                current.lock != oldLock -> errorRepoConcurrencyTrainingPlan(current, oldLock)
+                                current.status != TrainingPlanStatus.ACTIVE -> errorInvalidTrainingPlanStatus(current)
+                                else -> errorRepoConcurrencyTrainingPlan(current, oldLock)
+                            }
+                        } else {
+                            errorNotFoundTrainingPlan(id)
+                        }
+                    }
+                }
+            result
+        }
+
     override suspend fun searchTrainingPlans(rq: DbTrainingPlanFilterRequest): IDbTrainingPlansResponse =
         tryListMethod {
             val hasClientCardId = rq.clientCardId != ClientCardId.NONE
             val hasTitle = rq.searchString.isNotBlank()
             val hasStatus = rq.status != TrainingPlanStatus.NONE
             val hasOwnerUserId = rq.ownerUserId.isNotBlank()
-            val result =
+            val (result, totalSize) =
                 transaction(database) {
                     val conditions = mutableListOf<Op<Boolean>>()
                     if (hasClientCardId) {
@@ -235,9 +300,24 @@ class RepoTrainingPlanPg(
                         } else {
                             TrainingPlanTable.selectAll()
                         }
-                    query.map { it.toTrainingPlan() }
+                    val totalSize = query.count().toInt()
+                    val offset = (rq.pageNumber - 1).coerceAtLeast(0).toLong() * rq.pageSize
+                    val items =
+                        query
+                            .orderBy(TrainingPlanTable.createdAt to SortOrder.DESC, TrainingPlanTable.id to SortOrder.ASC)
+                            .limit(rq.pageSize)
+                            .offset(offset)
+                            .map { it.toTrainingPlan() }
+                    items to totalSize
                 }
-            DbTrainingPlansResponseOk(result)
+            DbTrainingPlansResponseOk(
+                Page(
+                    items = result,
+                    totalSize = totalSize,
+                    pageNumber = rq.pageNumber,
+                    pageSize = rq.pageSize,
+                ),
+            )
         }
 
     override fun save(plans: Collection<TrainingPlan>): Collection<TrainingPlan> {
@@ -261,6 +341,9 @@ class RepoTrainingPlanPg(
                     it[lock] = savedPlan.lock.asString()
                     it[createdAt] = now
                     it[updatedAt] = now
+                    it[completedAt] = if (savedPlan.completedAt.isNotBlank()) Instant.parse(savedPlan.completedAt) else null
+                    it[difficulty] = if (savedPlan.difficulty != WorkoutDifficulty.NONE) savedPlan.difficulty.name else null
+                    it[coachComment] = savedPlan.coachComment
                 }.single().toTrainingPlan()
             }
         }
@@ -297,6 +380,7 @@ class RepoTrainingPlanPg(
         private fun statusToString(status: TrainingPlanStatus): String =
             when (status) {
                 TrainingPlanStatus.ARCHIVED -> STATUS_ARCHIVED
+                TrainingPlanStatus.COMPLETED -> "COMPLETED"
                 else -> STATUS_ACTIVE
             }
     }
@@ -312,6 +396,7 @@ private fun ResultRow.toTrainingPlan(): TrainingPlan =
         status =
             when (this[TrainingPlanTable.status]) {
                 "ARCHIVED" -> TrainingPlanStatus.ARCHIVED
+                "COMPLETED" -> TrainingPlanStatus.COMPLETED
                 else -> TrainingPlanStatus.ACTIVE
             },
         lock = TrainingPlanLock(this[TrainingPlanTable.lock]),
@@ -319,4 +404,7 @@ private fun ResultRow.toTrainingPlan(): TrainingPlan =
         version = this[TrainingPlanTable.version],
         createdAt = this[TrainingPlanTable.createdAt].toString(),
         updatedAt = this[TrainingPlanTable.updatedAt].toString(),
+        completedAt = this[TrainingPlanTable.completedAt]?.toString() ?: "",
+        difficulty = this[TrainingPlanTable.difficulty]?.let { WorkoutDifficulty.valueOf(it) } ?: WorkoutDifficulty.NONE,
+        coachComment = this[TrainingPlanTable.coachComment],
     )

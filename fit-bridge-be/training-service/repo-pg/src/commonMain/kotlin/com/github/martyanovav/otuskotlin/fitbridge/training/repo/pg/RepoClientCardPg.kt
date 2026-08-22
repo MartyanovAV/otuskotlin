@@ -4,6 +4,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Client
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardStatus
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardFilterRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardIdRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardRequest
@@ -23,6 +24,7 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.jetbrains.exposed.v1.core.Op
 import org.jetbrains.exposed.v1.core.ResultRow
+import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.like
@@ -205,7 +207,7 @@ class RepoClientCardPg(
             val hasDisplayName = rq.searchString.isNotBlank()
             val hasStatus = rq.status != ClientCardStatus.NONE
             val hasOwnerUserId = rq.ownerUserId.isNotBlank()
-            val result =
+            val (result, totalSize) =
                 transaction(database) {
                     val conditions = mutableListOf<Op<Boolean>>()
                     if (hasStatus) {
@@ -226,9 +228,24 @@ class RepoClientCardPg(
                         } else {
                             ClientCardTable.selectAll()
                         }
-                    query.map { it.toClientCard() }
+                    val totalSize = query.count().toInt()
+                    val offset = (rq.pageNumber - 1).coerceAtLeast(0).toLong() * rq.pageSize
+                    val items =
+                        query
+                            .orderBy(ClientCardTable.createdAt to SortOrder.DESC, ClientCardTable.id to SortOrder.ASC)
+                            .limit(rq.pageSize)
+                            .offset(offset)
+                            .map { it.toClientCard() }
+                    items to totalSize
                 }
-            DbClientCardsResponseOk(result)
+            DbClientCardsResponseOk(
+                Page(
+                    items = result,
+                    totalSize = totalSize,
+                    pageNumber = rq.pageNumber,
+                    pageSize = rq.pageSize,
+                ),
+            )
         }
 
     override fun save(cards: Collection<ClientCard>): Collection<ClientCard> {

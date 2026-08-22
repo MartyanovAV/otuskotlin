@@ -30,6 +30,7 @@ fun ICorChainDsl<IFBContext>.stubTrainingPlanSuccess(title: String) =
                         it.status =
                             when (ctx.command) {
                                 TrainingPlanCommand.ARCHIVE -> TrainingPlanStatus.ARCHIVED
+                                TrainingPlanCommand.COMPLETE -> TrainingPlanStatus.COMPLETED
                                 else -> it.status
                             }
                     }

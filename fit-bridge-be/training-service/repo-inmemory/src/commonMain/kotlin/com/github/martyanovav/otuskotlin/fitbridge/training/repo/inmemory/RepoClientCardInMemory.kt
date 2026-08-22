@@ -5,6 +5,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Client
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardStatus
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardFilterRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardIdRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardRequest
@@ -118,7 +119,7 @@ class RepoClientCardInMemory(
 
     override suspend fun searchClientCards(rq: DbClientCardFilterRequest): IDbClientCardsResponse =
         tryClientCardsMethod {
-            val result: List<ClientCard> =
+            val filtered: List<ClientCard> =
                 cache.asMap().asSequence()
                     .filter { entry ->
                         rq.ownerUserId.takeIf { it.isNotBlank() }?.let {
@@ -137,7 +138,20 @@ class RepoClientCardInMemory(
                         } ?: true
                     }
                     .map { it.value.toInternal() }
+                    .sortedWith(compareByDescending<ClientCard> { it.createdAt }.thenBy { it.id.asString() })
                     .toList()
-            DbClientCardsResponseOk(result)
+            val offset =
+                ((rq.pageNumber - 1).coerceAtLeast(0).toLong() * rq.pageSize)
+                    .coerceAtMost(filtered.size.toLong())
+                    .toInt()
+            val result = filtered.drop(offset).take(rq.pageSize)
+            DbClientCardsResponseOk(
+                Page(
+                    items = result,
+                    totalSize = filtered.size,
+                    pageNumber = rq.pageNumber,
+                    pageSize = rq.pageSize,
+                ),
+            )
         }
 }

@@ -31,6 +31,9 @@ object TrainingPlanTable : Table("training_plan") {
     val createdAt = timestamp("created_at")
     val updatedAt = timestamp("updated_at")
     val archivedAt = timestamp("archived_at").nullable()
+    val completedAt = timestamp("completed_at").nullable()
+    val difficulty = registerColumn("difficulty", PgEnumColumnType("workout_difficulty_type")).nullable()
+    val coachComment = text("coach_comment")
 
     override val primaryKey = PrimaryKey(id)
 }

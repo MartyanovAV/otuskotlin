@@ -2,6 +2,7 @@
   "realm": "fit-bridge",
   "users": [
     {
+      "id": "f6721b43-9a28-4880-b5bf-bcc130ea60f3",
       "username": "fitbridge-test",
       "enabled": true,
       "email": "trainer@example.com",

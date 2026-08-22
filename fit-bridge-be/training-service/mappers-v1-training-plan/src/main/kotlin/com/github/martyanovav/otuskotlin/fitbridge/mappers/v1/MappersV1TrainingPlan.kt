@@ -4,6 +4,9 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ResponseResult
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanArchiveObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanArchiveRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanArchiveResponse
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanCompleteObject
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanCompleteRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanCompleteResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanCreateObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanCreateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanCreateResponse
@@ -34,6 +37,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Traini
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.WorkoutDifficulty
 import java.util.UUID
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.CircuitItem as CircuitItemV1
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ExerciseItem as ExerciseItemV1
@@ -41,6 +45,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ExerciseSet as 
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.PlanItem as PlanItemV1
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.SupersetItem as SupersetItemV1
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanStatus as TrainingPlanStatusV1
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.WorkoutDifficulty as WorkoutDifficultyV1
 
 // ─── From Transport ──────────────────────────────────────────────────────────
 
@@ -52,6 +57,8 @@ fun TrainingPlanUpdateRequest.fromTransport(): TrainingPlanContext = TrainingPla
 
 fun TrainingPlanArchiveRequest.fromTransport(): TrainingPlanContext = TrainingPlanContext().apply { fromTransport(this@fromTransport) }
 
+fun TrainingPlanCompleteRequest.fromTransport(): TrainingPlanContext = TrainingPlanContext().apply { fromTransport(this@fromTransport) }
+
 fun TrainingPlanSearchRequest.fromTransport(): TrainingPlanContext = TrainingPlanContext().apply { fromTransport(this@fromTransport) }
 
 fun TrainingPlanContext.toTransport(): Any =
@@ -60,6 +67,7 @@ fun TrainingPlanContext.toTransport(): Any =
         TrainingPlanCommand.READ -> toTransportTrainingPlanRead()
         TrainingPlanCommand.UPDATE -> toTransportTrainingPlanUpdate()
         TrainingPlanCommand.ARCHIVE -> toTransportTrainingPlanArchive()
+        TrainingPlanCommand.COMPLETE -> toTransportTrainingPlanComplete()
         TrainingPlanCommand.SEARCH -> toTransportTrainingPlanSearch()
         FBCommandBase.NONE -> toTransportInit()
         FBCommandBase.INIT -> toTransportInit()
@@ -86,6 +94,12 @@ fun TrainingPlanContext.fromTransport(request: TrainingPlanUpdateRequest) {
 
 fun TrainingPlanContext.fromTransport(request: TrainingPlanArchiveRequest) {
     command = TrainingPlanCommand.ARCHIVE
+    fromTransportBase(request.requestId, request.debug)
+    trainingPlanRequest = request.trainingPlan.toInternal()
+}
+
+fun TrainingPlanContext.fromTransport(request: TrainingPlanCompleteRequest) {
+    command = TrainingPlanCommand.COMPLETE
     fromTransportBase(request.requestId, request.debug)
     trainingPlanRequest = request.trainingPlan.toInternal()
 }
@@ -135,6 +149,14 @@ internal fun TrainingPlanContext.toTransportTrainingPlanArchive() =
         trainingPlan = trainingPlanResponse.toTransportTrainingPlan()
     )
 
+internal fun TrainingPlanContext.toTransportTrainingPlanComplete() =
+    TrainingPlanCompleteResponse(
+        requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
+        result = if (state == State.RUNNING || state == State.FINISHING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+        errors = errors.toTransportErrors(),
+        trainingPlan = trainingPlanResponse.toTransportTrainingPlan()
+    )
+
 internal fun TrainingPlanContext.toTransportTrainingPlanSearch() =
     TrainingPlanSearchResponse(
         requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
@@ -157,10 +179,21 @@ internal fun TrainingPlan.toTransportTrainingPlan(): TrainingPlanResponseObject?
                 TrainingPlanStatus.NONE -> null
                 TrainingPlanStatus.ACTIVE -> TrainingPlanStatusV1.ACTIVE
                 TrainingPlanStatus.ARCHIVED -> TrainingPlanStatusV1.ARCHIVED
+                TrainingPlanStatus.COMPLETED -> TrainingPlanStatusV1.COMPLETED
             },
         version = version,
         createdAt = createdAt.takeIf { it.isNotBlank() },
         updatedAt = updatedAt.takeIf { it.isNotBlank() },
+        completedAt = completedAt.takeIf { it.isNotBlank() },
+        difficulty =
+            when (difficulty) {
+                WorkoutDifficulty.NONE -> null
+                WorkoutDifficulty.EASY -> WorkoutDifficultyV1.EASY
+                WorkoutDifficulty.NORMAL -> WorkoutDifficultyV1.NORMAL
+                WorkoutDifficulty.HARD -> WorkoutDifficultyV1.HARD
+                WorkoutDifficulty.MAX -> WorkoutDifficultyV1.MAX
+            },
+        coachComment = coachComment.takeIf { it.isNotBlank() },
         planItems = planItems.map { it.toTransportPlanItem() }
     )
 }
@@ -270,6 +303,24 @@ private fun TrainingPlanArchiveObject?.toInternal() =
         lock = TrainingPlanLock(this?.lock.orEmpty())
     )
 
+private fun TrainingPlanCompleteObject?.toInternal() =
+    TrainingPlan(
+        id = this?.id.toTrainingPlanId(),
+        lock = TrainingPlanLock(this?.lock.orEmpty()),
+        completedAt = this?.completedAt.orEmpty(),
+        difficulty = this?.difficulty.toInternal(),
+        coachComment = this?.coachComment.orEmpty(),
+    )
+
+private fun WorkoutDifficultyV1?.toInternal() =
+    when (this) {
+        WorkoutDifficultyV1.EASY -> WorkoutDifficulty.EASY
+        WorkoutDifficultyV1.NORMAL -> WorkoutDifficulty.NORMAL
+        WorkoutDifficultyV1.HARD -> WorkoutDifficulty.HARD
+        WorkoutDifficultyV1.MAX -> WorkoutDifficulty.MAX
+        null -> WorkoutDifficulty.NONE
+    }
+
 private fun TrainingPlanSearchFilter?.toInternal() =
     TrainingPlanFilter(
         clientCardId = this?.clientCardId.toClientCardId(),
@@ -283,5 +334,6 @@ private fun TrainingPlanStatusV1?.toTrainingPlanStatus() =
     when (this) {
         TrainingPlanStatusV1.ACTIVE -> TrainingPlanStatus.ACTIVE
         TrainingPlanStatusV1.ARCHIVED -> TrainingPlanStatus.ARCHIVED
+        TrainingPlanStatusV1.COMPLETED -> TrainingPlanStatus.COMPLETED
         null -> TrainingPlanStatus.NONE
     }

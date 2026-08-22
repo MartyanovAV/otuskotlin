@@ -21,7 +21,6 @@ kotlin {
 
                 implementation(libs.ktor.server.core)
                 implementation(libs.ktor.server.cio)
-                implementation(libs.ktor.server.cors)
                 implementation(libs.ktor.server.yaml)
                 implementation(libs.ktor.server.negotiation)
                 implementation(libs.ktor.server.headers.default)

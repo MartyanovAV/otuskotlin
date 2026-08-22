@@ -2,14 +2,17 @@
 
 `deploy/` — единственный источник Docker Compose, Envoy и Keycloak-конфигурации и каноническая операционная инструкция локального MVP-стенда. Архитектурные границы описаны в [03-arch.md](../docs/03-architecture/03-arch.md), [C4 Container source](../docs/03-architecture/c4/C4_CONTAINER.drawio), [Security Architecture](../docs/03-architecture/SECURITY_ARCHITECTURE.md) и [ADR-006](../docs/03-architecture/ADR/ADR-006-use-greptimedb-fluent-bit-observability.md).
 
+Пошаговая ручная приёмка UI, авторизации, CORS/JWT, ownership и lifecycle API описана в [Manual Test Scenarios](../docs/05-testing/MANUAL_TEST_SCENARIOS.md).
+
 ## Состав
 
 | Сервис | Назначение | Порт хоста |
 |--------|------------|------------|
 | `training-service` | Backend API для работы с клиентами и планами | REST через Envoy `/v1/clientCard/`, `/v1/trainingPlan/`, `/v2/clientCard/`, `/v2/trainingPlan/`; WS `/v1/training/ws`, `/v2/training/ws` |
+| `frontend` | production-сборка Vue, отдаваемая внутренним Nginx | только через Envoy `/` |
 | `postgresql` | основное хранилище данных приложения | `5432` |
 | `liquibase-training` | применение схемы Training DB перед запуском приложения | без порта хоста |
-| `envoy` | входной proxy, JWT validation и WebSocket Upgrade для MVP `/v1/*`, `/v2/*` | `8080` |
+| `envoy` | входной proxy, CORS/preflight, JWT validation и WebSocket Upgrade для MVP `/v1/*`, `/v2/*` | `8080` |
 | `keycloak` | Identity Server, импорт realm `fit-bridge` | через Envoy `/admin`, `/realms` |
 | `greptimedb` | хранилище masked logs и метрик, встроенный Dashboard | `4000`–`4003` |
 | `fluent-bit` | доставка логов контейнеров в GreptimeDB | `24224`, `2020` |
@@ -19,7 +22,9 @@
 ## Keycloak realm
 
 - realm: `fit-bridge`;
-- client: `fit-bridge-service`;
+- browser client: `fit-bridge-web`;
+- API audience: `fit-bridge-service`;
+- local smoke client: `fit-bridge-smoke`;
 - регистрация явно оформлена как регистрация тренера;
 - username является логином и не редактируется пользователем;
 - новые пользователи автоматически получают `TRAINER`;
@@ -43,7 +48,28 @@ docker compose up --build -d
 docker compose ps
 ```
 
-`buildInfra` собирает образ миграций. Затем Compose запускает Liquibase после готовности PostgreSQL и запускает Training Service только после успешного применения схемы. `training-service/app-ktor` публикуется только через Envoy.
+`buildInfra` собирает образ миграций. Затем Compose запускает Liquibase после готовности PostgreSQL и запускает Training Service только после успешного применения схемы. Compose также строит многоэтапный образ `frontend`: Node собирает Vue-приложение, а финальный Nginx-образ содержит только статические файлы и стартовый скрипт конфигурации. Ни Ktor, ни Nginx фронтенда не публикуют собственные порты на хост: оба доступны только через Envoy.
+
+После запуска пользовательский интерфейс доступен по `http://localhost:8080/`. Vite (`npm run dev`) остаётся отдельным режимом разработки на `http://localhost:5173/`; он обращается к Envoy через proxy.
+
+## Runtime-конфигурация фронтенда
+
+Один и тот же образ фронтенда можно использовать на разных стендах. При каждом старте контейнер создаёт `/config.js` из переменных окружения; файл не кэшируется. Поддерживаются только публичные значения:
+
+| Переменная | Значение по умолчанию | Назначение |
+|---|---|---|
+| `FITBRIDGE_API_BASE_URL` | `/v2` | путь к API через Envoy |
+| `FITBRIDGE_KEYCLOAK_URL` | `http://localhost:8080` | публичный URL Keycloak через Envoy |
+| `FITBRIDGE_KEYCLOAK_REALM` | `fit-bridge` | Keycloak realm |
+| `FITBRIDGE_KEYCLOAK_CLIENT_ID` | `fit-bridge-web` | public OIDC client |
+
+Для локального Compose `FITBRIDGE_KEYCLOAK_URL` берётся из `FITBRIDGE_PUBLIC_URL` и по умолчанию равен `http://localhost:8080`. Для тестового или production-домена необходимо одновременно настроить этот URL, redirect URI и Web Origins клиента `fit-bridge-web` в Keycloak, а также issuer/JWKS URI JWT-провайдера Envoy. Это не секреты: access token и client secret в образ или `config.js` не помещаются.
+
+## CORS и граница API
+
+CORS настраивается только на внешней границе — в `volumes/envoy/envoy.yaml` для REST-маршрутов Training API. Envoy отвечает на разрешённые preflight-запросы до JWT-фильтра и добавляет CORS-заголовки к фактическим ответам. Внутренний Ktor-сервис не устанавливает CORS plugin и не публикует порт на хост, поэтому обращаться к нему в обход Envoy нельзя.
+
+Локальный allowlist содержит `http://localhost:5173` (Vite dev server) и `http://localhost:4173` (Vite preview). При развёртывании production origin фронтенда нужно явно добавить в `allow_origin_string_match`; wildcard использовать не следует. CORS не является механизмом авторизации: каждый прикладной запрос по-прежнему обязан пройти проверку JWT в Envoy и проверку владельца/роли в приложении.
 
 ## Миграции Training DB
 
@@ -73,6 +99,7 @@ docker compose run --rm liquibase-training history
 Адреса:
 
 - Keycloak: `http://localhost:8080/realms/fit-bridge`;
+- Frontend: `http://localhost:8080/`;
 - Training health: `http://localhost:8080/health/training/ready`;
 - Training WebSocket v1/v2: `ws://localhost:8080/v1/training/ws`, `ws://localhost:8080/v2/training/ws`;
 - Admin Console: `http://localhost:8080/admin/` (`admin` / `admin`);
@@ -138,6 +165,15 @@ docker compose config --quiet
 docker compose config --services
 ```
 
+Проверить preflight без JWT (ожидается `access-control-allow-origin: http://localhost:5173`):
+
+```powershell
+curl.exe -i -X OPTIONS http://localhost:8080/v2/clientCard/search `
+  -H "Origin: http://localhost:5173" `
+  -H "Access-Control-Request-Method: POST" `
+  -H "Access-Control-Request-Headers: authorization,content-type"
+```
+
 Список сервисов не должен содержать `profile-service`.
 
 ## Остановка
@@ -147,3 +183,53 @@ docker compose down
 ```
 
 `docker compose down -v` дополнительно удаляет данные PostgreSQL и GreptimeDB и используется только для намеренного чистого старта.
+
+## Деплой на стенд через GitHub Actions
+
+В проекте настроен автоматизированный CI/CD пайплайн (`.github/workflows/build.yml`), который собирает Docker-образы и публикует их в GitHub Container Registry, после чего запускает процесс обновления на удаленном сервере (стенде).
+
+> [!NOTE]
+> Пайплайн настроен так, что он автоматически срабатывает при пуше (или мерже) в ветку `main`. Но шаг деплоя защищен механизмом **GitHub Environments**, поэтому он дойдет до конца, встанет на паузу и будет ждать ручного нажатия кнопки "Approve" владельцем репозитория.
+
+### Подготовка репозитория (Один раз)
+
+Для того чтобы деплой заработал, нужно настроить доступы в GitHub:
+
+#### 1. Настройка Environment (Ручное подтверждение деплоя)
+1. В репозитории зайдите в **Settings** -> **Environments**.
+2. Нажмите **New environment** и назовите его строго **`stand`**.
+3. В настройках `stand` поставьте галочку **Required reviewers** и добавьте себя.
+
+#### 2. Получение токена для GHCR
+Серверу понадобится право скачивать собранные образы из GitHub.
+1. В настройках вашего **аккаунта** GitHub зайдите в **Developer settings** -> **Personal access tokens** -> **Tokens (classic)**.
+2. Создайте новый токен (Generate new token) без срока действия (No expiration).
+3. Выдайте права: **`read:packages`** (и `write:packages`).
+4. Скопируйте токен.
+
+#### 3. Настройка Секретов
+1. В настройках репозитория зайдите в **Settings** -> **Secrets and variables** -> **Actions**.
+2. Создайте следующие **Repository secrets** (или *Environment secrets* внутри `stand`):
+   - `SSH_HOST`: Публичный IP-адрес вашего стенда (например, `192.168.1.100`).
+   - `SSH_USERNAME`: Имя пользователя (например, `root` или `ubuntu`).
+   - `SSH_PRIVATE_KEY`: Приватный SSH ключ (содержимое файла `~/.ssh/id_rsa` или `~/.ssh/id_ed25519`). Убедитесь, что публичная часть (`.pub`) добавлена в файл `~/.ssh/authorized_keys` на стенде.
+   - `CR_PAT`: Скопированный токен из предыдущего шага.
+   - `FITBRIDGE_PUBLIC_URL`: Публичный HTTPS URL стенда без завершающего `/` (например, `https://stand.fitbridge.example`). TLS должен завершаться на внешнем reverse proxy перед Envoy.
+   - Пароли стенда: `POSTGRES_PASSWORD`, `KC_DB_PASSWORD`, `LIQUIBASE_DB_PASSWORD`, `DB_PASSWORD`, `KC_BOOTSTRAP_ADMIN_PASSWORD`, `GREPTIMEDB_PASS`. Деплой завершится ошибкой, если хотя бы один из них пуст.
+
+> [!TIP]
+> **Дополнительные имена (опционально)**
+> Имена баз и пользователей можно переопределить отдельными секретами. GitHub Actions передаёт все значения процессу `docker compose` через окружение и не сохраняет приватные данные в `.env` на сервере:
+> - Для суперпользователя PostgreSQL: `POSTGRES_DB`, `POSTGRES_USER`
+> - Для БД Keycloak: `KC_DB_NAME`, `KC_DB_USERNAME`
+> - Для админа Keycloak: `KC_BOOTSTRAP_ADMIN_USERNAME`
+> - Для Liquibase (владелец схемы): `LIQUIBASE_DB_USERNAME`
+> - Для БД микросервиса (только чтение/запись данных): `DB_NAME`, `DB_USER`
+> - Для GreptimeDB: `GREPTIMEDB_USER`
+
+### Как происходит деплой
+- При успешном мерже в `main`, GitHub Action прогоняет E2E тесты.
+- Образы `frontend`, `training-service` и `liquibase-training` получают тег с коротким хэшем коммита (Git SHA) и публикуются в GHCR.
+- Экшен подключается по SSH к стенду, скачивает актуальные конфиги (`docker-compose.yml` и `docker-compose.stand.yml`).
+- Перед запуском публичный URL подставляется в конфигурацию Keycloak и issuer JWT-провайдера Envoy.
+- Выполняется `docker compose pull` и `docker compose up -d` с указанием конкретного `APP_VERSION`, гарантируя запуск именно той сборки, которая прошла тесты.

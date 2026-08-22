@@ -3,19 +3,27 @@
 
 services:
   postgresql:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     container_name: postgresql
     environment:
-      POSTGRES_DB: fitbridge
-      POSTGRES_USER: fitbridge
-      POSTGRES_PASSWORD: fitbridge-password
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres-password}
+      KC_DB_NAME: ${KC_DB_NAME:-keycloak_db}
+      KC_DB_USERNAME: ${KC_DB_USERNAME:-keycloak}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD:-keycloak-password}
+      LIQUIBASE_DB_USERNAME: ${LIQUIBASE_DB_USERNAME:-liquibase}
+      LIQUIBASE_DB_PASSWORD: ${LIQUIBASE_DB_PASSWORD:-liquibase-password}
+      DB_NAME: ${DB_NAME:-training_db}
+      DB_USER: ${DB_USER:-training_user}
+      DB_PASSWORD: ${DB_PASSWORD:-training-password}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
-      - postgresql-data:/var/lib/postgresql/data
+      - postgresql-data:/var/lib/postgresql
       - ./volumes/postgres-init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U fitbridge -d fitbridge"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -23,11 +31,11 @@ services:
       - fitbridge-network
 
   liquibase-training:
-    image: fit-bridge-migration-pg-training:0.1.0
+    image: fit-bridge-migration-pg-training:${APP_VERSION:-0.1.0}
     environment:
-      LIQUIBASE_COMMAND_URL: jdbc:postgresql://postgresql:5432/training_db
-      LIQUIBASE_COMMAND_USERNAME: training_user
-      LIQUIBASE_COMMAND_PASSWORD: training-password
+      LIQUIBASE_COMMAND_URL: jdbc:postgresql://postgresql:5432/${DB_NAME:-training_db}
+      LIQUIBASE_COMMAND_USERNAME: ${LIQUIBASE_DB_USERNAME:-liquibase}
+      LIQUIBASE_COMMAND_PASSWORD: ${LIQUIBASE_DB_PASSWORD:-liquibase-password}
     depends_on:
       postgresql:
         condition: service_healthy
@@ -41,7 +49,7 @@ services:
       args:
         SERVICE_NAME: training-service
         SERVICE_PORT: 8081
-    image: fitbridge-training-service:local
+    image: fitbridge-training-service:${APP_VERSION:-local}
     depends_on:
       liquibase-training:
         condition: service_completed_successfully
@@ -53,9 +61,9 @@ services:
       DB_TYPE_PROD: postgres
       DB_HOST: postgresql
       DB_PORT: 5432
-      DB_NAME: training_db
-      DB_USER: training_user
-      DB_PASSWORD: training-password
+      DB_NAME: ${DB_NAME:-training_db}
+      DB_USER: ${DB_USER:-training_user}
+      DB_PASSWORD: ${DB_PASSWORD:-training-password}
     logging:
       driver: "fluentd"
       options:
@@ -70,6 +78,25 @@ services:
     networks:
       - fitbridge-network
 
+  frontend:
+    build:
+      context: ../fit-bridge-fe
+      dockerfile: Dockerfile
+    image: fitbridge-frontend:local
+    environment:
+      FITBRIDGE_API_BASE_URL: /v2
+      FITBRIDGE_KEYCLOAK_URL: ${FITBRIDGE_PUBLIC_URL:-http://localhost:8080}
+      FITBRIDGE_KEYCLOAK_REALM: fit-bridge
+      FITBRIDGE_KEYCLOAK_CLIENT_ID: fit-bridge-web
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/health | grep -q '\"status\":\"UP\"'"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 5s
+    networks:
+      - fitbridge-network
+
   fluent-bit:
     container_name: fluent-bit
     image: fluent/fluent-bit:4.2.0
@@ -77,13 +104,13 @@ services:
       greptimedb:
         condition: service_healthy
     ports:
-      - "24224:24224"
-      - "24224:24224/udp"
-      - "2020:2020"
+      - "127.0.0.1:24224:24224"
+      - "127.0.0.1:24224:24224/udp"
+      - "127.0.0.1:2020:2020"
     environment:
       - greptimedb_host=greptimedb
-      - greptimedb_user=admin
-      - greptimedb_pass=admin
+      - greptimedb_user=${GREPTIMEDB_USER:-admin}
+      - greptimedb_pass=${GREPTIMEDB_PASS:-admin}
     volumes:
       - ./volumes/fluent-bit-etc/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
       - ./volumes/fluent-bit-etc/parsers.conf:/fluent-bit/etc/parsers.conf
@@ -101,10 +128,10 @@ services:
       - --rpc-bind-addr
       - 0.0.0.0:4001
     ports:
-      - "4000:4000"
-      - "4001:4001"
-      - "4002:4002"
-      - "4003:4003"
+      - "127.0.0.1:4000:4000"
+      - "127.0.0.1:4001:4001"
+      - "127.0.0.1:4002:4002"
+      - "127.0.0.1:4003:4003"
     volumes:
       - greptimedb-data:/tmp/greptimedb/
     healthcheck:
@@ -124,6 +151,8 @@ services:
       - "8080:8080"
     depends_on:
       keycloak:
+        condition: service_healthy
+      frontend:
         condition: service_healthy
       fluent-bit:
         condition: service_started
@@ -146,9 +175,16 @@ services:
     volumes:
       - ./volumes/keycloak/import:/opt/keycloak/data/import
       - ./volumes/keycloak/themes:/opt/keycloak/themes:ro
+    depends_on:
+      postgresql:
+        condition: service_healthy
     environment:
-      KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgresql:5432/${KC_DB_NAME:-keycloak_db}
+      KC_DB_USERNAME: ${KC_DB_USERNAME:-keycloak}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD:-keycloak-password}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
       KC_HEALTH_ENABLED: "true"
     healthcheck:
       test: [ "CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000;echo -e 'HEAD /health/ready HTTP/1.1\r\nHost: localhost:9000\r\nConnection: close\r\n\r\n' >&3;cat <&3" ]
@@ -161,7 +197,7 @@ services:
       - --hostname-strict
       - "false"
       - --hostname
-      - "http://localhost:8080/"
+      - "${FITBRIDGE_PUBLIC_URL:-http://localhost:8080}"
       - --proxy-headers
       - forwarded
       - --hostname-backchannel-dynamic

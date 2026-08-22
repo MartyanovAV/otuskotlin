@@ -6,6 +6,8 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
 import kotlinx.serialization.json.Json
@@ -21,6 +23,28 @@ class RestAuthTest {
 
     @Test
     fun v2RestPropagatesPrincipal() = assertRestPrincipal("v2")
+
+    @Test
+    fun v2RestLeavesBrowserCorsPolicyToGateway() =
+        testApplication {
+            application { moduleJvm(AppSettings()) }
+
+            val response =
+                client.post("/v2/client-card/search") {
+                    contentType(ContentType.Application.Json)
+                    header(HttpHeaders.Origin, "https://untrusted.example")
+                    header(AUTH_HEADER, principalHeader("browser-user"))
+                    setBody(
+                        """
+                        {"requestType":"clientCard.search","requestId":"cors-at-gateway","clientCardFilter":{"pageSize":50,"pageNumber":1}}
+                        """.trimIndent(),
+                    )
+                }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(null, response.headers[HttpHeaders.AccessControlAllowOrigin])
+            assertEquals("success", resultOf(response.bodyAsText()))
+        }
 
     private fun assertRestPrincipal(version: String) =
         testApplication {

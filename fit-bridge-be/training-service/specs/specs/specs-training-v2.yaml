@@ -132,6 +132,19 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/TrainingPlanArchiveResponseBody'
+  /trainingPlan/complete:
+    post:
+      tags:
+      - trainingPlan
+      summary: Завершить тренировочный план
+      operationId: trainingPlanComplete
+      security:
+      - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/TrainingPlanCompleteRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/TrainingPlanCompleteResponseBody'
   /trainingPlan/search:
     post:
       tags:
@@ -215,6 +228,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/TrainingPlanArchiveRequest'
+    TrainingPlanCompleteRequestBody:
+      description: Request body
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TrainingPlanCompleteRequest'
     TrainingPlanSearchRequestBody:
       description: Request body
       required: true
@@ -277,6 +297,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/TrainingPlanArchiveResponse'
+    TrainingPlanCompleteResponseBody:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TrainingPlanCompleteResponse'
     TrainingPlanSearchResponseBody:
       description: Success
       content:
@@ -309,6 +335,7 @@ components:
           trainingPlan.read: '#/components/schemas/TrainingPlanReadRequest'
           trainingPlan.update: '#/components/schemas/TrainingPlanUpdateRequest'
           trainingPlan.archive: '#/components/schemas/TrainingPlanArchiveRequest'
+          trainingPlan.complete: '#/components/schemas/TrainingPlanCompleteRequest'
           trainingPlan.search: '#/components/schemas/TrainingPlanSearchRequest'
     IResponse:
       type: object
@@ -341,6 +368,7 @@ components:
           trainingPlan.read: '#/components/schemas/TrainingPlanReadResponse'
           trainingPlan.update: '#/components/schemas/TrainingPlanUpdateResponse'
           trainingPlan.archive: '#/components/schemas/TrainingPlanArchiveResponse'
+          trainingPlan.complete: '#/components/schemas/TrainingPlanCompleteResponse'
           trainingPlan.search: '#/components/schemas/TrainingPlanSearchResponse'
           init: '#/components/schemas/InitResponse'
     Error:
@@ -391,6 +419,14 @@ components:
       enum:
       - ACTIVE
       - ARCHIVED
+      - COMPLETED
+    WorkoutDifficulty:
+      type: string
+      enum:
+      - EASY
+      - NORMAL
+      - HARD
+      - MAX
     ItemType:
       type: string
       enum:
@@ -589,6 +625,10 @@ components:
             $ref: '#/components/schemas/PlanItem'
     TrainingPlanCreateObject:
       type: object
+      required:
+      - title
+      - planItems
+      - clientCardId
       properties:
         title:
           type: string
@@ -633,6 +673,20 @@ components:
           $ref: '#/components/schemas/TrainingPlanId'
         lock:
           $ref: '#/components/schemas/Lock'
+    TrainingPlanCompleteObject:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/TrainingPlanId'
+        lock:
+          $ref: '#/components/schemas/Lock'
+        completedAt:
+          $ref: '#/components/schemas/Timestamp'
+        difficulty:
+          $ref: '#/components/schemas/WorkoutDifficulty'
+        coachComment:
+          type: string
+          maxLength: 1000
     TrainingPlanSearchFilter:
       type: object
       properties:
@@ -680,6 +734,13 @@ components:
           $ref: '#/components/schemas/Timestamp'
         lock:
           $ref: '#/components/schemas/Lock'
+        completedAt:
+          $ref: '#/components/schemas/Timestamp'
+        difficulty:
+          $ref: '#/components/schemas/WorkoutDifficulty'
+        coachComment:
+          type: string
+          maxLength: 1000
     InitResponse:
       allOf:
       - $ref: '#/components/schemas/IResponse'
@@ -801,6 +862,14 @@ components:
         properties:
           trainingPlan:
             $ref: '#/components/schemas/TrainingPlanArchiveObject'
+    TrainingPlanCompleteRequest:
+      allOf:
+      - $ref: '#/components/schemas/IRequest'
+      - $ref: '#/components/schemas/RequestDebug'
+      - type: object
+        properties:
+          trainingPlan:
+            $ref: '#/components/schemas/TrainingPlanCompleteObject'
     TrainingPlanSearchRequest:
       allOf:
       - $ref: '#/components/schemas/IRequest'
@@ -831,6 +900,13 @@ components:
           trainingPlan:
             $ref: '#/components/schemas/TrainingPlanResponseObject'
     TrainingPlanArchiveResponse:
+      allOf:
+      - $ref: '#/components/schemas/IResponse'
+      - type: object
+        properties:
+          trainingPlan:
+            $ref: '#/components/schemas/TrainingPlanResponseObject'
+    TrainingPlanCompleteResponse:
       allOf:
       - $ref: '#/components/schemas/IResponse'
       - type: object

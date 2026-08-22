@@ -3,7 +3,7 @@ set -euo pipefail
 
 KCHOST=http://localhost:8080
 REALM=fit-bridge
-CLIENT_ID=fit-bridge-service
+CLIENT_ID=fit-bridge-smoke
 UNAME=fitbridge-test
 PASSWORD=fitbridge
 

@@ -2,6 +2,7 @@ package com.github.martyanovav.otuskotlin.fitbridge.training.repo.inmemory
 
 import com.benasher44.uuid.uuid4
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanLock
@@ -16,6 +17,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.IDbTrain
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.IRepoTrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.RepoTrainingPlanBase
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorEmptyTrainingPlanId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorInvalidTrainingPlanStatus
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorNotFoundTrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.errorRepoConcurrencyTrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.common.IRepoTrainingPlanInitializable
@@ -118,9 +120,40 @@ class RepoTrainingPlanInMemory(
             }
         }
 
+    override suspend fun completeTrainingPlan(rq: DbTrainingPlanRequest): IDbTrainingPlanResponse =
+        tryTrainingPlanMethod {
+            val rqPlan = rq.trainingPlan
+            val id = rqPlan.id.takeIf { it != TrainingPlanId.NONE } ?: return@tryTrainingPlanMethod errorEmptyTrainingPlanId
+            val key = id.asString()
+
+            mutex.withLock {
+                val oldEntity = cache.get(key)
+                val oldPlan = oldEntity?.toInternal()
+                when {
+                    oldPlan == null -> errorNotFoundTrainingPlan(id)
+                    oldPlan.lock != TrainingPlanLock.NONE && oldPlan.lock != rqPlan.lock ->
+                        errorRepoConcurrencyTrainingPlan(oldPlan, rqPlan.lock)
+                    oldPlan.status != TrainingPlanStatus.ACTIVE -> errorInvalidTrainingPlanStatus(oldPlan)
+                    else -> {
+                        val completedPlan =
+                            oldPlan.copy(
+                                status = TrainingPlanStatus.COMPLETED,
+                                lock = TrainingPlanLock(randomUuid()),
+                                completedAt = rqPlan.completedAt.takeIf { it.isNotBlank() } ?: java.time.Instant.now().toString(),
+                                difficulty = rqPlan.difficulty,
+                                coachComment = rqPlan.coachComment
+                            )
+                        val entity = TrainingPlanEntity(completedPlan)
+                        cache.put(key, entity)
+                        DbTrainingPlanResponseOk(completedPlan)
+                    }
+                }
+            }
+        }
+
     override suspend fun searchTrainingPlans(rq: DbTrainingPlanFilterRequest): IDbTrainingPlansResponse =
         tryTrainingPlansMethod {
-            val result: List<TrainingPlan> =
+            val filtered: List<TrainingPlan> =
                 cache.asMap().asSequence()
                     .filter { entry ->
                         rq.ownerUserId.takeIf { it.isNotBlank() }?.let {
@@ -143,7 +176,20 @@ class RepoTrainingPlanInMemory(
                         } ?: true
                     }
                     .map { it.value.toInternal() }
+                    .sortedWith(compareByDescending<TrainingPlan> { it.createdAt }.thenBy { it.id.asString() })
                     .toList()
-            DbTrainingPlansResponseOk(result)
+            val offset =
+                ((rq.pageNumber - 1).coerceAtLeast(0).toLong() * rq.pageSize)
+                    .coerceAtMost(filtered.size.toLong())
+                    .toInt()
+            val result = filtered.drop(offset).take(rq.pageSize)
+            DbTrainingPlansResponseOk(
+                Page(
+                    items = result,
+                    totalSize = filtered.size,
+                    pageNumber = rq.pageNumber,
+                    pageSize = rq.pageSize,
+                ),
+            )
         }
 }

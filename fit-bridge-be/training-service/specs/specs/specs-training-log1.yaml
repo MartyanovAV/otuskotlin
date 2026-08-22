@@ -62,6 +62,7 @@ components:
         - read
         - update
         - archive
+        - complete
         - search
         - init
         - finish

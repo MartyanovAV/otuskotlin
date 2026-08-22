@@ -1,6 +1,7 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests
 
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardFilterRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardIdRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardRequest
@@ -39,6 +40,6 @@ class RepoClientCardMock(
 
     companion object {
         val DEFAULT_CC_SUCCESS_EMPTY_MOCK = DbClientCardResponseOk(ClientCard())
-        val DEFAULT_CCS_SUCCESS_EMPTY_MOCK = DbClientCardsResponseOk(emptyList())
+        val DEFAULT_CCS_SUCCESS_EMPTY_MOCK = DbClientCardsResponseOk(Page(emptyList()))
     }
 }

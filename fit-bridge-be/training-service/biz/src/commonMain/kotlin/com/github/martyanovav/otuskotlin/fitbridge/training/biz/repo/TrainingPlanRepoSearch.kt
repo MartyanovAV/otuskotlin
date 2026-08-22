@@ -27,7 +27,15 @@ fun ICorChainDsl<IFBContext>.trainingPlanRepoSearch(title: String) =
                     pageSize = ctx.trainingPlanFilterValidated.pageSize,
                 )
             when (val result = ctx.trainingPlanRepo.searchTrainingPlans(request)) {
-                is DbTrainingPlansResponseOk -> ctx.trainingPlansRepoDone = result.data.toMutableList()
+                is DbTrainingPlansResponseOk -> {
+                    ctx.trainingPlansRepoDone = result.data.items.toMutableList()
+                    ctx.trainingPlansResponse =
+                        ctx.trainingPlansResponse.copy(
+                            totalSize = result.data.totalSize,
+                            pageNumber = result.data.pageNumber,
+                            pageSize = result.data.pageSize,
+                        )
+                }
                 is DbTrainingPlansResponseErr -> fail(result.errors)
             }
         }

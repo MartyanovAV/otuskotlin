@@ -25,8 +25,10 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.initClientC
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.initTrainingPlanRepo
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.prepareRepoResult
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoArchive
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoComplete
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoCreate
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoPrepareArchive
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoPrepareComplete
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoPrepareCreate
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoPrepareUpdate
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoRead
@@ -356,6 +358,32 @@ class TrainingProcessor(
                     accessValidationTrainingPlan("Проверка прав доступа")
                     trainingPlanRepoPrepareArchive("Подготовка объекта для архивирования")
                     trainingPlanRepoArchive("Архивирование тренировочного плана в БД")
+                }
+                prepareRepoResult("Подготовка ответа")
+            }
+            trainingPlanOperation("Завершение тренировочного плана", TrainingPlanCommand.COMPLETE) {
+                initTrainingPlanRepo("Инициализация репозитория")
+                stubs("Обработка стабов") {
+                    stubTrainingPlanSuccess("Успешная обработка")
+                    stubNotFound("Не найдено")
+                    stubValidationBadId("Неверный ID")
+                    stubNoCase("Ошибка: запрошенный стаб недопустим")
+                }
+                trainingPlanValidation("Валидация завершения тренировочного плана") {
+                    prepareTrainingPlanValidation("Подготовка тренировочного плана")
+                    validateTrainingPlanIdNotEmpty("Проверка непустого ID")
+                    validateTrainingPlanIdFormat("Проверка формата ID")
+                    validateTrainingPlanLockNotEmpty("Проверка непустого lock")
+                    validateTrainingPlanLockFormat("Проверка формата lock")
+                    finishTrainingPlanValidation("Завершение валидации тренировочного плана")
+                }
+                chain {
+                    title = "Логика завершения"
+                    trainingPlanRepoRead("Чтение тренировочного плана из БД")
+                    resolveTrainingPlanRelation("Вычисление прав доступа")
+                    accessValidationTrainingPlan("Проверка прав доступа")
+                    trainingPlanRepoPrepareComplete("Подготовка объекта для завершения")
+                    trainingPlanRepoComplete("Завершение тренировочного плана в БД")
                 }
                 prepareRepoResult("Подготовка ответа")
             }

@@ -1,6 +1,7 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.repo.inmemory
 
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.common.RepoTrainingPlanInitialized
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoTrainingPlanCompleteTest
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoTrainingPlanCreateTest
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoTrainingPlanDeleteTest
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests.RepoTrainingPlanReadTest
@@ -11,6 +12,14 @@ class RepoTrainingPlanInMemoryCreateTest : RepoTrainingPlanCreateTest() {
     override val repo =
         RepoTrainingPlanInitialized(
             RepoTrainingPlanInMemory(randomUuid = { uuidNew.asString() }),
+            initObjects = initObjects,
+        )
+}
+
+class RepoTrainingPlanInMemoryCompleteTest : RepoTrainingPlanCompleteTest() {
+    override val repo =
+        RepoTrainingPlanInitialized(
+            RepoTrainingPlanInMemory(),
             initObjects = initObjects,
         )
 }

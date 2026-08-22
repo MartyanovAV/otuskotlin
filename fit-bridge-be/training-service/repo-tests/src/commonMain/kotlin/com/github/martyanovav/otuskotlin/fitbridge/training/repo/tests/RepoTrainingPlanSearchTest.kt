@@ -8,6 +8,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.IRepoTra
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertTrue
 
 abstract class RepoTrainingPlanSearchTest {
     abstract val repo: IRepoTrainingPlan
@@ -20,7 +21,7 @@ abstract class RepoTrainingPlanSearchTest {
             val result = repo.searchTrainingPlans(DbTrainingPlanFilterRequest(clientCardId = searchClientCardId))
             assertIs<DbTrainingPlansResponseOk>(result)
             val expected = listOf(initializedObjects[1], initializedObjects[3]).sortedBy { it.id.asString() }
-            assertEquals(expected.size, result.data.size)
+            assertEquals(expected.size, result.data.items.size)
         }
 
     @Test
@@ -28,7 +29,7 @@ abstract class RepoTrainingPlanSearchTest {
         runRepoTest {
             val result = repo.searchTrainingPlans(DbTrainingPlanFilterRequest(searchString = "ad1"))
             assertIs<DbTrainingPlansResponseOk>(result)
-            assertEquals(1, result.data.size)
+            assertEquals(1, result.data.items.size)
         }
 
     @Test
@@ -42,8 +43,8 @@ abstract class RepoTrainingPlanSearchTest {
                     ),
                 )
             assertIs<DbTrainingPlansResponseOk>(result)
-            assertEquals(1, result.data.size)
-            assertEquals(initializedObjects[1].id, result.data[0].id)
+            assertEquals(1, result.data.items.size)
+            assertEquals(initializedObjects[1].id, result.data.items[0].id)
         }
 
     @Test
@@ -51,7 +52,7 @@ abstract class RepoTrainingPlanSearchTest {
         runRepoTest {
             val result = repo.searchTrainingPlans(DbTrainingPlanFilterRequest(ownerUserId = "owner-124"))
             assertIs<DbTrainingPlansResponseOk>(result)
-            assertEquals(setOf(initializedObjects[1].id, initializedObjects[3].id), result.data.map { it.id }.toSet())
+            assertEquals(setOf(initializedObjects[1].id, initializedObjects[3].id), result.data.items.map { it.id }.toSet())
         }
 
     @Test
@@ -59,7 +60,24 @@ abstract class RepoTrainingPlanSearchTest {
         runRepoTest {
             val result = repo.searchTrainingPlans(DbTrainingPlanFilterRequest())
             assertIs<DbTrainingPlansResponseOk>(result)
-            assertEquals(initializedObjects.size, result.data.size)
+            assertEquals(initializedObjects.size, result.data.items.size)
+        }
+
+    @Test
+    fun searchUsesPagination() =
+        runRepoTest {
+            val first = repo.searchTrainingPlans(DbTrainingPlanFilterRequest(pageNumber = 1, pageSize = 2))
+            val second = repo.searchTrainingPlans(DbTrainingPlanFilterRequest(pageNumber = 2, pageSize = 2))
+
+            assertIs<DbTrainingPlansResponseOk>(first)
+            assertIs<DbTrainingPlansResponseOk>(second)
+            assertEquals(2, first.data.items.size)
+            assertEquals(2, second.data.items.size)
+            assertEquals(initializedObjects.size, first.data.totalSize)
+            assertEquals(initializedObjects.size, second.data.totalSize)
+            assertEquals(1, first.data.pageNumber)
+            assertEquals(2, second.data.pageNumber)
+            assertTrue(first.data.items.map { it.id }.toSet().intersect(second.data.items.map { it.id }.toSet()).isEmpty())
         }
 
     companion object : BaseInitTrainingPlans("search") {
