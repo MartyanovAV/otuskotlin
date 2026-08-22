@@ -18,6 +18,23 @@ VITE_KEYCLOAK_CLIENT_ID=fit-bridge-web
 Run the local infrastructure from `deploy/` before opening the application. The direct grant
 client `fit-bridge-smoke` is reserved for local smoke checks and is not used by the browser UI.
 
+## Container deployment
+
+`Dockerfile` is a multi-stage build: the first stage performs `npm ci` and `npm run build`; the
+final `nginx:stable-alpine` stage contains only the generated static bundle. The deployed bundle
+loads `/config.js` before the application code. At container startup it is generated from public
+environment variables, so a new frontend image is not needed for a different stand:
+
+```powershell
+cd ..\deploy
+docker compose up --build -d
+```
+
+The local UI is then served by Envoy at `http://localhost:8080/`. Available variables are
+`FITBRIDGE_API_BASE_URL`, `FITBRIDGE_KEYCLOAK_URL`, `FITBRIDGE_KEYCLOAK_REALM` and
+`FITBRIDGE_KEYCLOAK_CLIENT_ID`; their defaults are `/v2`, `http://localhost:8080`,
+`fit-bridge` and `fit-bridge-web`. They must contain no secrets.
+
 ## Recommended IDE Setup
 
 [VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).

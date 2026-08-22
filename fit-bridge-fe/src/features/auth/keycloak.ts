@@ -1,11 +1,11 @@
 import Keycloak from 'keycloak-js';
+import { fitBridgeConfig } from '@/shared/config/runtime';
 
-// Конфигурация Keycloak берётся из Vite environment.
-// Значения по умолчанию оставлены только для локального запуска без .env-файла.
+// Docker deployment supplies config.js at container startup; Vite env remains a dev fallback.
 const keycloak = new Keycloak({
-  url: import.meta.env.VITE_KEYCLOAK_URL || 'http://localhost:8080',
-  realm: import.meta.env.VITE_KEYCLOAK_REALM || 'fit-bridge',
-  clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID || 'fit-bridge-web',
+  url: fitBridgeConfig.keycloakUrl,
+  realm: fitBridgeConfig.keycloakRealm,
+  clientId: fitBridgeConfig.keycloakClientId,
 });
 
 export default keycloak;

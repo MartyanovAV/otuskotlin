@@ -70,6 +70,25 @@ services:
     networks:
       - fitbridge-network
 
+  frontend:
+    build:
+      context: ../fit-bridge-fe
+      dockerfile: Dockerfile
+    image: fitbridge-frontend:local
+    environment:
+      FITBRIDGE_API_BASE_URL: /v2
+      FITBRIDGE_KEYCLOAK_URL: ${FITBRIDGE_PUBLIC_URL:-http://localhost:8080}
+      FITBRIDGE_KEYCLOAK_REALM: fit-bridge
+      FITBRIDGE_KEYCLOAK_CLIENT_ID: fit-bridge-web
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/health | grep -q '\"status\":\"UP\"'"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 5s
+    networks:
+      - fitbridge-network
+
   fluent-bit:
     container_name: fluent-bit
     image: fluent/fluent-bit:4.2.0
@@ -124,6 +143,8 @@ services:
       - "8080:8080"
     depends_on:
       keycloak:
+        condition: service_healthy
+      frontend:
         condition: service_healthy
       fluent-bit:
         condition: service_started

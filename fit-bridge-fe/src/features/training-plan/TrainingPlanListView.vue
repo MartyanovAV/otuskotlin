@@ -42,7 +42,7 @@ const clientOptions = computed<ClientCardResponseObject[]>(() => {
   return clientsRawData.value?.data?.clientCards ?? []
 })
 
-// Загружаем тренировочные планы из бэкенда через TanStack Query
+// Загружаем тренировочные планы через TanStack Query
 const { data: plansRawData, isLoading, isError, error, refetch } = useQuery({
   queryKey: ['trainingPlans', debouncedSearchQuery],
   queryFn: () =>
@@ -110,7 +110,7 @@ const handleCreatePlan = async () => {
   errorMessage.value = null
 
   try {
-    const res = await createMutation.mutateAsync({
+    await createMutation.mutateAsync({
       data: {
         requestType: 'trainingPlan.create',
         requestId: crypto.randomUUID(),
@@ -127,14 +127,11 @@ const handleCreatePlan = async () => {
       },
     })
 
-    if (res.data?.result === 'error') {
-      errorMessage.value = res.data?.errors?.[0]?.message ?? 'Ошибка при создании тренировочного плана'
-      return
-    }
-
-    // Инвалидируем кэш TanStack Query — бэкенд перезапросит свежий список из базы
-    await queryClient.invalidateQueries({ queryKey: ['trainingPlans'] })
-    await queryClient.invalidateQueries({ queryKey: ['trainingPlansCount'] })
+    // Инвалидируем кэши TanStack Query
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['trainingPlans'] }),
+      queryClient.invalidateQueries({ queryKey: ['trainingPlansCount'] }),
+    ])
 
     // Сброс формы и закрытие диалога
     newPlan.value = {
@@ -144,7 +141,7 @@ const handleCreatePlan = async () => {
     }
     isCreateOpen.value = false
   } catch (err: unknown) {
-    errorMessage.value = err instanceof Error ? err.message : 'Не удалось связаться с сервером'
+    errorMessage.value = err instanceof Error ? err.message : 'Произошла ошибка, попробуйте позже'
   } finally {
     isSubmitting.value = false
   }
@@ -153,7 +150,20 @@ const handleCreatePlan = async () => {
 const getClientNameById = (clientCardId?: string) => {
   if (!clientCardId) return 'Общий план'
   const found = clientOptions.value.find((c: ClientCardResponseObject) => c.id === clientCardId)
-  return found?.displayName ?? `Клиент (${clientCardId.substring(0, 6)}...)`
+  return found?.displayName ?? 'Клиент'
+}
+
+const getItemTypeLabel = (type?: string) => {
+  switch (type) {
+    case 'EXERCISE':
+      return 'Упражнение'
+    case 'CIRCUIT':
+      return 'Круговая'
+    case 'SUPERSET':
+      return 'Суперсет'
+    default:
+      return type ?? 'Упражнение'
+  }
 }
 
 const formatDate = (isoString?: string) => {
@@ -176,7 +186,7 @@ const formatDate = (isoString?: string) => {
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
         <h2 class="text-2xl font-bold tracking-tight text-text-main">Тренировочные планы</h2>
-        <p class="text-sm text-text-muted">Программы тренировок из базы данных Training Service</p>
+        <p class="text-sm text-text-muted">Программы тренировок</p>
       </div>
       <div class="flex items-center gap-3">
         <Input
@@ -195,13 +205,13 @@ const formatDate = (isoString?: string) => {
     <div v-if="isLoading" class="flex items-center justify-center p-12">
       <div class="text-center space-y-3">
         <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-        <p class="text-sm text-text-muted">Загрузка тренировочных планов из базы данных...</p>
+        <p class="text-sm text-text-muted">Загрузка планов...</p>
       </div>
     </div>
 
     <!-- Ошибка загрузки -->
     <div v-else-if="isError" class="p-6 rounded-xl border border-danger/30 bg-danger-soft text-center space-y-3">
-      <p class="text-sm font-medium text-danger">Не удалось загрузить данные из сервиса</p>
+      <p class="text-sm font-medium text-danger">Не удалось загрузить планы</p>
       <p class="text-xs text-text-muted">{{ error }}</p>
       <Button variant="outline" size="sm" @click="() => refetch()">Повторить попытку</Button>
     </div>
@@ -214,13 +224,13 @@ const formatDate = (isoString?: string) => {
       <div>
         <h3 class="font-semibold text-text-main text-lg">Тренировочные планы не найдены</h3>
         <p class="text-sm text-text-muted mt-1 max-w-sm mx-auto">
-          {{ searchQuery ? 'По вашему поисковому запросу ничего не найдено.' : 'В базе пока нет тренировочных планов. Создайте первый план!' }}
+          {{ searchQuery ? 'По вашему поисковому запросу ничего не найдено.' : 'У вас пока нет тренировочных планов. Создайте первый план!' }}
         </p>
       </div>
       <Button v-if="!searchQuery" @click="isCreateOpen = true">Создать первый план</Button>
     </div>
 
-    <!-- Сетка тренировочных планов из базы данных -->
+    <!-- Сетка тренировочных планов -->
     <div v-else class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <Card
         v-for="plan in plans"
@@ -258,9 +268,9 @@ const formatDate = (isoString?: string) => {
     <Dialog :open="isCreateOpen" @update:open="isCreateOpen = $event">
       <DialogContent class="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Новый тренировочный план</DialogTitle>
+          <DialogTitle>Новый план</DialogTitle>
           <DialogDescription>
-            Сформируйте программу тренировок и сохраните её в базу данных.
+            Заполните параметры плана
           </DialogDescription>
         </DialogHeader>
 
@@ -290,7 +300,7 @@ const formatDate = (isoString?: string) => {
             >
               <option value="" disabled>Выберите клиента</option>
               <option v-for="c in clientOptions" :key="c.id" :value="c.id">
-                {{ c.displayName }} ({{ (c.id ?? '').substring(0, 6) }}...)
+                {{ c.displayName }}
               </option>
             </select>
           </div>
@@ -340,8 +350,9 @@ const formatDate = (isoString?: string) => {
               </div>
               <div class="flex items-center gap-2">
                 <div class="flex-1 flex items-center gap-1">
-                  <span class="text-xs text-text-muted">Подходы:</span>
+                  <label for="exercise-sets" class="text-xs text-text-muted cursor-pointer">Подходы:</label>
                   <Input
+                    id="exercise-sets"
                     type="number"
                     v-model="newExerciseSets"
                     min="1"
@@ -349,8 +360,9 @@ const formatDate = (isoString?: string) => {
                   />
                 </div>
                 <div class="flex-1 flex items-center gap-1">
-                  <span class="text-xs text-text-muted">Повт:</span>
+                  <label for="exercise-reps" class="text-xs text-text-muted cursor-pointer">Повт:</label>
                   <Input
+                    id="exercise-reps"
                     type="number"
                     v-model="newExerciseReps"
                     min="1"
@@ -358,8 +370,9 @@ const formatDate = (isoString?: string) => {
                   />
                 </div>
                 <div class="flex-1 flex items-center gap-1">
-                  <span class="text-xs text-text-muted">Вес(кг):</span>
+                  <label for="exercise-weight" class="text-xs text-text-muted cursor-pointer">Вес(кг):</label>
                   <Input
+                    id="exercise-weight"
                     type="number"
                     v-model="newExerciseWeight"
                     min="0"
@@ -385,14 +398,14 @@ const formatDate = (isoString?: string) => {
               Отмена
             </Button>
             <Button type="submit" :disabled="!canSubmitPlan" id="submit-plan-btn">
-              {{ isSubmitting ? 'Сохранение в базу...' : 'Создать в базе' }}
+              {{ isSubmitting ? 'Создание...' : 'Создать' }}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
 
-    <!-- Модальное окно деталей плана из БД -->
+    <!-- Модальное окно деталей плана -->
     <Dialog :open="!!selectedPlan" @update:open="(val) => { if (!val) selectedPlan = null }">
       <DialogContent v-if="selectedPlan" class="sm:max-w-[500px]">
         <DialogHeader>
@@ -410,7 +423,7 @@ const formatDate = (isoString?: string) => {
         </DialogHeader>
 
         <div class="space-y-3 py-2">
-          <h4 class="text-xs font-semibold text-text-muted uppercase tracking-wider">Состав тренировки (Бэкенд):</h4>
+          <h4 class="text-xs font-semibold text-text-muted uppercase tracking-wider">Состав тренировки:</h4>
           <div v-if="(selectedPlan.planItems ?? []).length === 0" class="text-sm text-text-muted italic">
             В плане нет упражнений
           </div>
@@ -424,15 +437,10 @@ const formatDate = (isoString?: string) => {
                 <p class="font-medium text-sm text-text-main">{{ item.title ?? 'Упражнение' }}</p>
                 <p class="text-xs text-text-muted mt-0.5">{{ item.description }}</p>
               </div>
-              <Badge variant="outline" class="text-xs font-mono">
-                {{ item.itemType }}
+              <Badge variant="outline" class="text-xs">
+                {{ getItemTypeLabel(item.itemType) }}
               </Badge>
             </div>
-          </div>
-
-          <div class="pt-3 border-t border-border flex justify-between text-xs text-text-faint">
-            <span>Версия плана: {{ selectedPlan.version ?? 1 }}</span>
-            <span>Lock: {{ (selectedPlan.lock ?? '—').substring(0, 8) }}...</span>
           </div>
         </div>
 

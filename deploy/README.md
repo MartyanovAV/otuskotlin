@@ -9,6 +9,7 @@
 | Сервис | Назначение | Порт хоста |
 |--------|------------|------------|
 | `training-service` | Backend API для работы с клиентами и планами | REST через Envoy `/v1/clientCard/`, `/v1/trainingPlan/`, `/v2/clientCard/`, `/v2/trainingPlan/`; WS `/v1/training/ws`, `/v2/training/ws` |
+| `frontend` | production-сборка Vue, отдаваемая внутренним Nginx | только через Envoy `/` |
 | `postgresql` | основное хранилище данных приложения | `5432` |
 | `liquibase-training` | применение схемы Training DB перед запуском приложения | без порта хоста |
 | `envoy` | входной proxy, CORS/preflight, JWT validation и WebSocket Upgrade для MVP `/v1/*`, `/v2/*` | `8080` |
@@ -47,7 +48,22 @@ docker compose up --build -d
 docker compose ps
 ```
 
-`buildInfra` собирает образ миграций. Затем Compose запускает Liquibase после готовности PostgreSQL и запускает Training Service только после успешного применения схемы. `training-service/app-ktor` публикуется только через Envoy.
+`buildInfra` собирает образ миграций. Затем Compose запускает Liquibase после готовности PostgreSQL и запускает Training Service только после успешного применения схемы. Compose также строит многоэтапный образ `frontend`: Node собирает Vue-приложение, а финальный Nginx-образ содержит только статические файлы и стартовый скрипт конфигурации. Ни Ktor, ни Nginx фронтенда не публикуют собственные порты на хост: оба доступны только через Envoy.
+
+После запуска пользовательский интерфейс доступен по `http://localhost:8080/`. Vite (`npm run dev`) остаётся отдельным режимом разработки на `http://localhost:5173/`; он обращается к Envoy через proxy.
+
+## Runtime-конфигурация фронтенда
+
+Один и тот же образ фронтенда можно использовать на разных стендах. При каждом старте контейнер создаёт `/config.js` из переменных окружения; файл не кэшируется. Поддерживаются только публичные значения:
+
+| Переменная | Значение по умолчанию | Назначение |
+|---|---|---|
+| `FITBRIDGE_API_BASE_URL` | `/v2` | путь к API через Envoy |
+| `FITBRIDGE_KEYCLOAK_URL` | `http://localhost:8080` | публичный URL Keycloak через Envoy |
+| `FITBRIDGE_KEYCLOAK_REALM` | `fit-bridge` | Keycloak realm |
+| `FITBRIDGE_KEYCLOAK_CLIENT_ID` | `fit-bridge-web` | public OIDC client |
+
+Для локального Compose `FITBRIDGE_KEYCLOAK_URL` берётся из `FITBRIDGE_PUBLIC_URL` и по умолчанию равен `http://localhost:8080`. Для тестового или production-домена необходимо одновременно настроить этот URL, redirect URI и Web Origins клиента `fit-bridge-web` в Keycloak, а также issuer/JWKS URI JWT-провайдера Envoy. Это не секреты: access token и client secret в образ или `config.js` не помещаются.
 
 ## CORS и граница API
 
@@ -83,6 +99,7 @@ docker compose run --rm liquibase-training history
 Адреса:
 
 - Keycloak: `http://localhost:8080/realms/fit-bridge`;
+- Frontend: `http://localhost:8080/`;
 - Training health: `http://localhost:8080/health/training/ready`;
 - Training WebSocket v1/v2: `ws://localhost:8080/v1/training/ws`, `ws://localhost:8080/v2/training/ws`;
 - Admin Console: `http://localhost:8080/admin/` (`admin` / `admin`);

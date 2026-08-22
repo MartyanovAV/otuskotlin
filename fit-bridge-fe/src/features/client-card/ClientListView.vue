@@ -45,7 +45,7 @@ const editClient = ref({
   lock: '',
 })
 
-// Реальный запрос к бэкенду через TanStack Query
+// Запрос списка клиентов через TanStack Query
 const { data: searchResponse, isLoading, isError, error, refetch } = useQuery({
   queryKey: ['clientCards', debouncedSearchQuery],
   queryFn: () =>
@@ -73,7 +73,7 @@ const handleCreateClient = async () => {
   errorMessage.value = null
 
   try {
-    const res = await createMutation.mutateAsync({
+    await createMutation.mutateAsync({
       data: {
         requestType: 'clientCard.create',
         requestId: crypto.randomUUID(),
@@ -84,14 +84,12 @@ const handleCreateClient = async () => {
       },
     })
 
-    if (res.data?.result === 'error') {
-      errorMessage.value = res.data?.errors?.[0]?.message ?? 'Ошибка при создании карточки клиента'
-      return
-    }
-
-    // Инвалидируем кэш TanStack Query — бэкенд перезапросит свежий список из базы
-    await queryClient.invalidateQueries({ queryKey: ['clientCards'] })
-    await queryClient.invalidateQueries({ queryKey: ['clientCardsCount'] })
+    // Инвалидируем кэши TanStack Query
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['clientCards'] }),
+      queryClient.invalidateQueries({ queryKey: ['clientCardsCount'] }),
+      queryClient.invalidateQueries({ queryKey: ['clientCardsForPlans'] }),
+    ])
 
     // Сброс формы и закрытие диалога
     newClient.value = {
@@ -100,7 +98,7 @@ const handleCreateClient = async () => {
     }
     isCreateOpen.value = false
   } catch (err: unknown) {
-    errorMessage.value = err instanceof Error ? err.message : 'Не удалось связаться с сервером'
+    errorMessage.value = err instanceof Error ? err.message : 'Произошла ошибка, попробуйте позже'
   } finally {
     isSubmitting.value = false
   }
@@ -123,7 +121,7 @@ const handleUpdateClient = async () => {
   const displayName = editClient.value.displayName.trim()
 
   if (!id || !lock || !displayName) {
-    editErrorMessage.value = 'Карточка не содержит id или optimistic lock. Обновите список и повторите.'
+    editErrorMessage.value = 'Данные клиента устарели. Пожалуйста, обновите страницу и повторите попытку.'
     return
   }
 
@@ -131,7 +129,7 @@ const handleUpdateClient = async () => {
   editErrorMessage.value = null
 
   try {
-    const res = await updateMutation.mutateAsync({
+    await updateMutation.mutateAsync({
       data: {
         requestType: 'clientCard.update',
         requestId: crypto.randomUUID(),
@@ -144,19 +142,14 @@ const handleUpdateClient = async () => {
       },
     })
 
-    if (res.data?.result === 'error') {
-      editErrorMessage.value =
-        res.data?.errors?.[0]?.message ?? 'Ошибка при обновлении карточки клиента'
-      return
-    }
-
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ['clientCards'] }),
+      queryClient.invalidateQueries({ queryKey: ['clientCardsCount'] }),
       queryClient.invalidateQueries({ queryKey: ['clientCardsForPlans'] }),
     ])
     isEditOpen.value = false
   } catch (err: unknown) {
-    editErrorMessage.value = err instanceof Error ? err.message : 'Не удалось связаться с сервером'
+    editErrorMessage.value = err instanceof Error ? err.message : 'Произошла ошибка, попробуйте позже'
   } finally {
     isUpdating.value = false
   }
@@ -182,7 +175,7 @@ const formatDate = (isoString?: string) => {
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
         <h2 class="text-2xl font-bold tracking-tight text-text-main">Клиенты</h2>
-        <p class="text-sm text-text-muted">Клиентские карточки из базы данных Training Service</p>
+        <p class="text-sm text-text-muted">Список клиентов</p>
       </div>
       <div class="flex items-center gap-3">
         <Input
@@ -201,13 +194,13 @@ const formatDate = (isoString?: string) => {
     <div v-if="isLoading" class="flex items-center justify-center p-12">
       <div class="text-center space-y-3">
         <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
-        <p class="text-sm text-text-muted">Загрузка карточек клиентов из базы данных...</p>
+        <p class="text-sm text-text-muted">Загрузка клиентов...</p>
       </div>
     </div>
 
     <!-- Ошибка загрузки -->
     <div v-else-if="isError" class="p-6 rounded-xl border border-danger/30 bg-danger-soft text-center space-y-3">
-      <p class="text-sm font-medium text-danger">Не удалось загрузить данные из сервиса</p>
+      <p class="text-sm font-medium text-danger">Не удалось загрузить клиентов</p>
       <p class="text-xs text-text-muted">{{ error }}</p>
       <Button variant="outline" size="sm" @click="() => refetch()">Повторить попытку</Button>
     </div>
@@ -220,13 +213,13 @@ const formatDate = (isoString?: string) => {
       <div>
         <h3 class="font-semibold text-text-main text-lg">Клиенты не найдены</h3>
         <p class="text-sm text-text-muted mt-1 max-w-sm mx-auto">
-          {{ searchQuery ? 'По вашему поисковому запросу ничего не найдено.' : 'В вашей базе пока нет карточек клиентов. Создайте первую!' }}
+          {{ searchQuery ? 'По вашему поисковому запросу ничего не найдено.' : 'У вас пока нет клиентов. Создайте первую карточку!' }}
         </p>
       </div>
-      <Button v-if="!searchQuery" @click="isCreateOpen = true">Создать первую карточку</Button>
+      <Button v-if="!searchQuery" @click="isCreateOpen = true">Добавить клиента</Button>
     </div>
 
-    <!-- Сетка клиентов из базы данных -->
+    <!-- Сетка клиентов -->
     <div v-else class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <Card
         v-for="client in clientCards"
@@ -242,7 +235,6 @@ const formatDate = (isoString?: string) => {
               </Avatar>
               <div>
                 <h3 class="font-semibold leading-none text-text-main">{{ client.displayName ?? 'Без имени' }}</h3>
-                <p class="text-xs text-text-faint mt-1 font-mono">ID: {{ (client.id ?? '').substring(0, 8) }}...</p>
               </div>
             </div>
             <Badge :variant="client.status === 'ACTIVE' ? 'default' : 'secondary'">
@@ -268,7 +260,7 @@ const formatDate = (isoString?: string) => {
         <DialogHeader>
           <DialogTitle>Новый клиент</DialogTitle>
           <DialogDescription>
-            Заполните данные для создания карточки в базе данных бэкенда.
+            Заполните данные клиента
           </DialogDescription>
         </DialogHeader>
 
@@ -303,14 +295,14 @@ const formatDate = (isoString?: string) => {
               Отмена
             </Button>
             <Button type="submit" :disabled="!newClient.displayName.trim() || isSubmitting" id="submit-client-btn">
-              {{ isSubmitting ? 'Сохранение в базу...' : 'Создать в базе' }}
+              {{ isSubmitting ? 'Сохранение...' : 'Добавить' }}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
 
-    <!-- Модальное окно просмотра деталей клиента из БД -->
+    <!-- Модальное окно просмотра деталей клиента -->
     <Dialog :open="!!selectedClient" @update:open="(val) => { if (!val) selectedClient = null }">
       <DialogContent v-if="selectedClient" class="sm:max-w-[460px]">
         <DialogHeader>
@@ -320,7 +312,6 @@ const formatDate = (isoString?: string) => {
             </Avatar>
             <div>
               <DialogTitle>{{ selectedClient.displayName }}</DialogTitle>
-              <DialogDescription class="font-mono text-xs">{{ selectedClient.id }}</DialogDescription>
             </div>
           </div>
         </DialogHeader>
@@ -344,11 +335,6 @@ const formatDate = (isoString?: string) => {
             <span>Дата создания:</span>
             <span class="font-medium text-text-muted">{{ formatDate(selectedClient.createdAt) }}</span>
           </div>
-
-          <div class="flex justify-between text-xs text-text-faint">
-            <span>Optimistic Lock:</span>
-            <span class="font-mono text-xs">{{ (selectedClient.lock ?? '—').substring(0, 8) }}...</span>
-          </div>
         </div>
 
         <DialogFooter>
@@ -358,13 +344,13 @@ const formatDate = (isoString?: string) => {
       </DialogContent>
     </Dialog>
 
-    <!-- Модальное окно редактирования с optimistic lock -->
+    <!-- Модальное окно редактирования клиента -->
     <Dialog :open="isEditOpen" @update:open="isEditOpen = $event">
       <DialogContent class="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Редактирование клиента</DialogTitle>
           <DialogDescription>
-            Сохраняется актуальная версия карточки; при конфликте сервер попросит обновить список.
+            Измените данные клиента
           </DialogDescription>
         </DialogHeader>
 
@@ -399,7 +385,7 @@ const formatDate = (isoString?: string) => {
               Отмена
             </Button>
             <Button type="submit" :disabled="!editClient.displayName.trim() || isUpdating">
-              {{ isUpdating ? 'Сохранение...' : 'Сохранить изменения' }}
+              {{ isUpdating ? 'Сохранение...' : 'Сохранить' }}
             </Button>
           </DialogFooter>
         </form>

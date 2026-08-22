@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+
+: "${FITBRIDGE_API_BASE_URL:=/v2}"
+: "${FITBRIDGE_KEYCLOAK_URL:=http://localhost:8080}"
+: "${FITBRIDGE_KEYCLOAK_REALM:=fit-bridge}"
+: "${FITBRIDGE_KEYCLOAK_CLIENT_ID:=fit-bridge-web}"
+
+export FITBRIDGE_API_BASE_URL FITBRIDGE_KEYCLOAK_URL FITBRIDGE_KEYCLOAK_REALM FITBRIDGE_KEYCLOAK_CLIENT_ID
+
+envsubst '${FITBRIDGE_API_BASE_URL} ${FITBRIDGE_KEYCLOAK_URL} ${FITBRIDGE_KEYCLOAK_REALM} ${FITBRIDGE_KEYCLOAK_CLIENT_ID}' \
+  < /usr/share/nginx/html/config.template.js \
+  > /usr/share/nginx/html/config.js
+

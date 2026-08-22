@@ -136,6 +136,11 @@ static_resources:
                       - name: keycloak-resources
                         match: { prefix: "/resources/" }
                         route: { cluster: keycloak }
+                      # Keep the SPA behind the same public edge as API and Keycloak.
+                      # This route must remain last because it is the catch-all fallback.
+                      - name: frontend
+                        match: { prefix: "/" }
+                        route: { cluster: frontend }
               http_filters:
                 # Browser policy belongs to the public edge. The internal Ktor
                 # service deliberately has no CORS plugin.
@@ -202,4 +207,19 @@ static_resources:
                   address:
                     socket_address:
                       address: keycloak
+                      port_value: 8080
+
+    - name: frontend
+      connect_timeout: 0.25s
+      type: LOGICAL_DNS
+      dns_lookup_family: V4_ONLY
+      lb_policy: ROUND_ROBIN
+      load_assignment:
+        cluster_name: frontend
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: frontend
                       port_value: 8080

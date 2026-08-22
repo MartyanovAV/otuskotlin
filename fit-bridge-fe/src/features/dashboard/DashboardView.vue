@@ -45,7 +45,7 @@ const recentClients = computed<ClientCardResponseObject[]>(() => {
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
         <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle class="text-sm font-medium">Всего клиентов в БД</CardTitle>
+          <CardTitle class="text-sm font-medium">Всего клиентов</CardTitle>
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-text-muted"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </CardHeader>
         <CardContent>
@@ -53,7 +53,7 @@ const recentClients = computed<ClientCardResponseObject[]>(() => {
             <span v-if="isClientsLoading" class="animate-pulse text-text-muted">...</span>
             <span v-else>{{ totalClients }}</span>
           </div>
-          <p class="text-xs text-text-muted">Реальные карточки из PostgreSQL</p>
+          <p class="text-xs text-text-muted">Активные клиенты</p>
         </CardContent>
       </Card>
 
@@ -67,7 +67,7 @@ const recentClients = computed<ClientCardResponseObject[]>(() => {
             <span v-if="isPlansLoading" class="animate-pulse text-text-muted">...</span>
             <span v-else>{{ totalPlans }}</span>
           </div>
-          <p class="text-xs text-text-muted">Активные программы в Training Service</p>
+          <p class="text-xs text-text-muted">Активные программы</p>
         </CardContent>
       </Card>
     </div>
@@ -78,7 +78,7 @@ const recentClients = computed<ClientCardResponseObject[]>(() => {
         <CardTitle>Недавние клиенты тренера</CardTitle>
       </CardHeader>
       <CardContent>
-        <div v-if="isClientsLoading" class="text-sm text-text-muted">Загрузка данных из БД...</div>
+        <div v-if="isClientsLoading" class="text-sm text-text-muted">Загрузка...</div>
         <div v-else-if="recentClients.length === 0" class="text-sm text-text-muted">
           Клиенты ещё не добавлены. Перейдите в раздел «Клиенты», чтобы создать первую карточку.
         </div>
@@ -92,7 +92,6 @@ const recentClients = computed<ClientCardResponseObject[]>(() => {
               <p class="font-medium text-sm text-text-main">{{ c.displayName }}</p>
               <p class="text-xs text-text-muted mt-0.5">{{ c.note || 'Без заметок' }}</p>
             </div>
-            <span class="text-xs text-text-faint font-mono">{{ (c.id ?? '').substring(0, 8) }}...</span>
           </div>
         </div>
       </CardContent>

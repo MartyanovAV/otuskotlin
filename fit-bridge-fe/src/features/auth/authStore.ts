@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import keycloak from './keycloak';
 import type { KeycloakProfile } from 'keycloak-js';
+import { getFitBridgeRedirectUri } from '@/shared/config/runtime';
 
 export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = ref(false);
@@ -22,6 +23,7 @@ export const useAuthStore = defineStore('auth', () => {
       const authenticated = await keycloak.init({
         onLoad: 'login-required',
         pkceMethod: 'S256',
+        redirectUri: getFitBridgeRedirectUri(),
         // Отключаем iframe SSO-проверку: не нужна для SPA без поддоменов
         checkLoginIframe: false,
       });
@@ -59,16 +61,16 @@ export const useAuthStore = defineStore('auth', () => {
       console.error('Keycloak initialization failed', error);
       isAuthenticated.value = false;
       isInitialized.value = true;
-      initializationError.value = 'Не удалось подключиться к сервису аутентификации';
+      initializationError.value = 'Ошибка авторизации, попробуйте позже';
     }
   };
 
   const login = () => {
-    keycloak.login();
+    return keycloak.login({ redirectUri: getFitBridgeRedirectUri() });
   };
 
   const logout = () => {
-    keycloak.logout();
+    return keycloak.logout({ redirectUri: getFitBridgeRedirectUri() });
   };
 
   const hasRole = (role: string) => roles.value.includes(role);

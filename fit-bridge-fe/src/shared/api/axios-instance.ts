@@ -1,11 +1,11 @@
 import Axios, { type AxiosError, type AxiosRequestConfig } from 'axios';
 // Импортируем keycloak-объект напрямую: токен всегда актуален после рефреша
 import keycloak from '@/features/auth/keycloak';
+import { fitBridgeConfig } from '@/shared/config/runtime';
 
 export const AXIOS_INSTANCE = Axios.create({
-  // В dev используется vite-proxy (/api → http://localhost:8080/v2).
-  // В production baseURL берётся из переменной окружения VITE_API_BASE_URL.
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? '/api',
+  // Docker deployment gets this value from config.js; Vite .env remains a dev fallback.
+  baseURL: fitBridgeConfig.apiBaseUrl,
 });
 
 // JWT-interceptor: читаем токен напрямую из keycloak, обновляя при необходимости
@@ -56,7 +56,7 @@ export class ApiResponseError extends Error {
   readonly payload: ApiErrorPayload;
 
   constructor(payload: ApiErrorPayload) {
-    super(payload.errors?.[0]?.message ?? 'Сервис вернул ошибку');
+    super(payload.errors?.[0]?.message ?? 'Произошла ошибка, попробуйте позже');
     this.name = 'ApiResponseError';
     this.payload = payload;
   }
