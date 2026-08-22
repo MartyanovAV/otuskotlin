@@ -28,6 +28,7 @@ import type { ClientCardResponseObject } from '@/shared/api/generated/models/cli
 import type { TrainingPlanResponseObject } from '@/shared/api/generated/models/trainingPlanResponseObject'
 import PlanItemBuilder from '@/features/training-plan/ui/PlanItemBuilder.vue'
 import PlanItemCard from '@/features/training-plan/ui/PlanItemCard.vue'
+import PlanShareButton from '@/features/training-plan/ui/PlanShareButton.vue'
 import {
   type PlanItemDraft,
   mapDraftToPlanItem,
@@ -647,8 +648,13 @@ const formatDate = (isoString?: string) => {
           </div>
         </div>
 
-        <DialogFooter>
-          <Button @click="selectedPlanDetails = null">Закрыть</Button>
+        <DialogFooter class="flex flex-col sm:flex-row sm:justify-between items-stretch sm:items-center w-full gap-2 pt-2">
+          <div>
+            <PlanShareButton :plan="selectedPlanDetails" variant="outline" placement="top-left" />
+          </div>
+          <div>
+            <Button @click="selectedPlanDetails = null">Закрыть</Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

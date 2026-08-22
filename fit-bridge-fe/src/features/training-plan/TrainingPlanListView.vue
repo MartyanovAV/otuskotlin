@@ -21,6 +21,7 @@ import type { ClientCardResponseObject } from '@/shared/api/generated/models/cli
 import type { TrainingPlanStatus } from '@/shared/api/generated/models/trainingPlanStatus'
 import PlanItemBuilder from './ui/PlanItemBuilder.vue'
 import PlanItemCard from './ui/PlanItemCard.vue'
+import PlanShareButton from './ui/PlanShareButton.vue'
 import CompleteTrainingModal from './ui/CompleteTrainingModal.vue'
 import {
   type PlanItemDraft,
@@ -350,15 +351,18 @@ const formatDifficulty = (diff?: string) => {
                 {{ formatDate(plan.createdAt) }}
               </td>
               <td class="py-4 pl-4 pr-6 text-right whitespace-nowrap">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  class="h-8 text-xs group-hover:border-primary/50 group-hover:text-primary"
-                  @click.stop="selectedPlan = plan"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                  Состав
-                </Button>
+                <div class="flex items-center justify-end gap-2" @click.stop>
+                  <PlanShareButton :plan="plan" :show-label="false" />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    class="h-8 text-xs group-hover:border-primary/50 group-hover:text-primary"
+                    @click.stop="selectedPlan = plan"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Состав
+                  </Button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -487,15 +491,20 @@ const formatDifficulty = (diff?: string) => {
           </div>
         </div>
 
-        <DialogFooter>
-          <Button 
-            v-if="selectedPlan.status === 'ACTIVE' && !selectedPlan.completedAt" 
-            variant="default"
-            @click="isCompleteOpen = true"
-          >
-            Завершить
-          </Button>
-          <Button variant="outline" @click="selectedPlan = null">Закрыть</Button>
+        <DialogFooter class="flex flex-col sm:flex-row sm:justify-between items-stretch sm:items-center w-full gap-2 pt-2">
+          <div>
+            <PlanShareButton :plan="selectedPlan" variant="outline" placement="top-left" />
+          </div>
+          <div class="flex items-center justify-end gap-2">
+            <Button 
+              v-if="selectedPlan.status === 'ACTIVE' && !selectedPlan.completedAt" 
+              variant="default"
+              @click="isCompleteOpen = true"
+            >
+              Завершить
+            </Button>
+            <Button variant="outline" @click="selectedPlan = null">Закрыть</Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
