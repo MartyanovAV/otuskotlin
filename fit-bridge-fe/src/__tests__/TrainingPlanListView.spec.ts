@@ -8,6 +8,9 @@ import * as clientApi from '../shared/api/generated/client-card/client-card'
 vi.mock('../shared/api/generated/training-plan/training-plan', () => ({
   trainingPlanSearch: vi.fn<(...args: unknown[]) => unknown>(),
   useTrainingPlanCreate: vi.fn<(...args: unknown[]) => unknown>(),
+  useTrainingPlanComplete: vi.fn<(...args: unknown[]) => unknown>(() => ({
+    mutateAsync: vi.fn<(...args: unknown[]) => unknown>(),
+  })),
 }))
 
 vi.mock('../shared/api/generated/client-card/client-card', () => ({
@@ -98,6 +101,7 @@ describe('TrainingPlanListView Table View and Plan Items', () => {
     vi.mocked(clientApi.clientCardSearch).mockResolvedValue({
       data: {
         responseType: 'clientCard.search',
+        result: 'success',
         clientCards: mockClients,
         totalSize: 1,
       },
@@ -108,6 +112,7 @@ describe('TrainingPlanListView Table View and Plan Items', () => {
     vi.mocked(planApi.trainingPlanSearch).mockResolvedValue({
       data: {
         responseType: 'trainingPlan.search',
+        result: 'success',
         trainingPlans: mockPlans,
         totalSize: 1,
       },
@@ -175,6 +180,7 @@ describe('TrainingPlanListView Table View and Plan Items', () => {
     vi.mocked(clientApi.clientCardSearch).mockResolvedValue({
       data: {
         responseType: 'clientCard.search',
+        result: 'success',
         clientCards: mockClients,
         totalSize: 2,
       },
@@ -185,6 +191,7 @@ describe('TrainingPlanListView Table View and Plan Items', () => {
     vi.mocked(planApi.trainingPlanSearch).mockResolvedValue({
       data: {
         responseType: 'trainingPlan.search',
+        result: 'success',
         trainingPlans: [],
         totalSize: 0,
       },

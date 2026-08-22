@@ -10,6 +10,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardUpdat
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.IRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.IResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanArchiveRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanCompleteRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanCreateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanReadRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanSearchRequest
@@ -129,6 +130,13 @@ fun Route.v2Training(appSettings: AppSettings) {
         post("archive") {
             call.processV2<TrainingPlanArchiveRequest, IResponse, TrainingPlanContext>(
                 appSettings, "trainingPlan-archive",
+                { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+                { ctx, id -> ctx.toLog(id) }
+            )
+        }
+        post("complete") {
+            call.processV2<TrainingPlanCompleteRequest, IResponse, TrainingPlanContext>(
+                appSettings, "trainingPlan-complete",
                 { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
                 { ctx, id -> ctx.toLog(id) }
             )

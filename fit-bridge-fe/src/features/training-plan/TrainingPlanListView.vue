@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useDebounce } from '@vueuse/core'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
+import { Pagination } from '@/shared/ui/pagination'
 import {
   Dialog,
   DialogContent,
@@ -20,6 +21,7 @@ import type { ClientCardResponseObject } from '@/shared/api/generated/models/cli
 import type { TrainingPlanStatus } from '@/shared/api/generated/models/trainingPlanStatus'
 import PlanItemBuilder from './ui/PlanItemBuilder.vue'
 import PlanItemCard from './ui/PlanItemCard.vue'
+import CompleteTrainingModal from './ui/CompleteTrainingModal.vue'
 import {
   type PlanItemDraft,
   mapDraftToPlanItem,
@@ -31,8 +33,16 @@ const searchQuery = ref('')
 const debouncedSearchQuery = useDebounce(searchQuery, 300)
 const selectedClientFilter = ref('')
 const selectedStatusFilter = ref<TrainingPlanStatus | ''>('')
+const pageNumber = ref(1)
+const pageSize = ref(10)
+
+watch([debouncedSearchQuery, selectedClientFilter, selectedStatusFilter], () => {
+  pageNumber.value = 1
+})
+
 const isCreateOpen = ref(false)
 const selectedPlan = ref<TrainingPlanResponseObject | null>(null)
+const isCompleteOpen = ref(false)
 const isSubmitting = ref(false)
 const errorMessage = ref<string | null>(null)
 
@@ -51,9 +61,9 @@ const clientOptions = computed<ClientCardResponseObject[]>(() => {
   return clientsRawData.value?.data?.clientCards ?? []
 })
 
-// Загружаем тренировочные планы через TanStack Query с учетом фильтров
+// Загружаем тренировочные планы через TanStack Query с учетом фильтров и пагинации
 const { data: plansRawData, isLoading, isError, error, refetch } = useQuery({
-  queryKey: ['trainingPlans', debouncedSearchQuery, selectedClientFilter, selectedStatusFilter],
+  queryKey: ['trainingPlans', debouncedSearchQuery, selectedClientFilter, selectedStatusFilter, pageNumber, pageSize],
   queryFn: () =>
     trainingPlanSearch({
       requestType: 'trainingPlan.search',
@@ -62,14 +72,18 @@ const { data: plansRawData, isLoading, isError, error, refetch } = useQuery({
         searchString: debouncedSearchQuery.value.trim() || undefined,
         clientCardId: selectedClientFilter.value || undefined,
         status: (selectedStatusFilter.value || undefined) as TrainingPlanStatus | undefined,
-        pageSize: 50,
-        pageNumber: 1,
+        pageSize: pageSize.value,
+        pageNumber: pageNumber.value,
       },
     }),
 })
 
 const plans = computed<TrainingPlanResponseObject[]>(() => {
   return plansRawData.value?.data?.trainingPlans ?? []
+})
+
+const totalPlansCount = computed(() => {
+  return plansRawData.value?.data?.totalSize ?? plans.value.length
 })
 
 const hasActiveFilters = computed(
@@ -80,6 +94,7 @@ const resetFilters = () => {
   searchQuery.value = ''
   selectedClientFilter.value = ''
   selectedStatusFilter.value = ''
+  pageNumber.value = 1
 }
 
 const newPlan = ref({
@@ -153,6 +168,16 @@ const formatDate = (isoString?: string) => {
     })
   } catch {
     return isoString
+  }
+}
+
+const formatDifficulty = (diff?: string) => {
+  switch (diff) {
+    case 'EASY': return 'Легко'
+    case 'NORMAL': return 'Нормально'
+    case 'HARD': return 'Тяжело (с трудом)'
+    case 'MAX': return 'На пределе возможностей'
+    default: return 'Не указана'
   }
 }
 </script>
@@ -302,9 +327,14 @@ const formatDate = (isoString?: string) => {
                 </div>
               </td>
               <td class="px-4 py-4 whitespace-nowrap">
-                <Badge :variant="plan.status === 'ACTIVE' ? 'default' : 'secondary'">
-                  {{ plan.status === 'ACTIVE' ? 'Активен' : (plan.status ?? 'Черновик') }}
-                </Badge>
+                <div class="flex flex-col gap-1">
+                  <Badge :variant="plan.status === 'ACTIVE' ? 'default' : 'secondary'" class="w-fit">
+                    {{ plan.status === 'ACTIVE' ? 'Активен' : (plan.status ?? 'Черновик') }}
+                  </Badge>
+                  <span v-if="plan.completedAt" class="text-[10px] font-medium text-primary">
+                    Завершён
+                  </span>
+                </div>
               </td>
               <td class="px-4 py-4 whitespace-nowrap">
                 <div class="flex items-center gap-1.5">
@@ -333,6 +363,15 @@ const formatDate = (isoString?: string) => {
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Пагинация списка тренировочных планов -->
+      <div class="border-t border-border px-4 bg-surface-2/30">
+        <Pagination
+          v-model:pageNumber="pageNumber"
+          v-model:pageSize="pageSize"
+          :totalSize="totalPlansCount"
+        />
       </div>
     </div>
 
@@ -410,6 +449,22 @@ const formatDate = (isoString?: string) => {
         </DialogHeader>
 
         <div class="space-y-3 py-2">
+          <!-- Блок с информацией о завершении -->
+          <div v-if="selectedPlan.completedAt" class="p-3 bg-primary-soft/30 rounded-lg border border-primary/20 space-y-1 mb-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-medium text-text-muted">Завершена:</span>
+              <span class="text-xs font-semibold text-text-main">{{ formatDate(selectedPlan.completedAt) }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-medium text-text-muted">Сложность:</span>
+              <span class="text-xs font-semibold text-text-main">{{ formatDifficulty(selectedPlan.difficulty) }}</span>
+            </div>
+            <div v-if="selectedPlan.coachComment" class="pt-2 mt-2 border-t border-primary/10">
+              <span class="text-xs font-medium text-text-muted block mb-1">Комментарий тренера:</span>
+              <p class="text-xs text-text-main italic whitespace-pre-wrap">{{ selectedPlan.coachComment }}</p>
+            </div>
+          </div>
+
           <div class="flex items-center justify-between">
             <h4 class="text-xs font-semibold text-text-muted uppercase tracking-wider">
               Состав плана ({{ (selectedPlan.planItems ?? []).length }}):
@@ -433,9 +488,27 @@ const formatDate = (isoString?: string) => {
         </div>
 
         <DialogFooter>
-          <Button @click="selectedPlan = null">Закрыть</Button>
+          <Button 
+            v-if="selectedPlan.status === 'ACTIVE' && !selectedPlan.completedAt" 
+            variant="default"
+            @click="isCompleteOpen = true"
+          >
+            Завершить
+          </Button>
+          <Button variant="outline" @click="selectedPlan = null">Закрыть</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <CompleteTrainingModal
+      v-if="selectedPlan"
+      :open="isCompleteOpen"
+      @update:open="isCompleteOpen = $event"
+      :planId="selectedPlan.id!"
+      :planTitle="selectedPlan.title!"
+      :clientName="getClientNameById(selectedPlan.clientCardId)"
+      :planLock="selectedPlan.lock!"
+      @completed="selectedPlan = null"
+    />
   </div>
 </template>

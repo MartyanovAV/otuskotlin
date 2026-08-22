@@ -11,6 +11,7 @@ import type { PlanItem } from './planItem';
 import type { Timestamp } from './timestamp';
 import type { TrainingPlanId } from './trainingPlanId';
 import type { TrainingPlanStatus } from './trainingPlanStatus';
+import type { WorkoutDifficulty } from './workoutDifficulty';
 
 export interface TrainingPlanResponseObject {
   /**
@@ -32,4 +33,8 @@ export interface TrainingPlanResponseObject {
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
   lock?: Lock;
+  completedAt?: Timestamp;
+  difficulty?: WorkoutDifficulty;
+  /** @maxLength 1000 */
+  coachComment?: string;
 }

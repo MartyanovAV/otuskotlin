@@ -6,6 +6,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Traini
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.WorkoutDifficulty
 
 data class TrainingPlanEntity(
     val id: String? = null,
@@ -19,6 +20,9 @@ data class TrainingPlanEntity(
     val version: Int = 1,
     val createdAt: String? = null,
     val updatedAt: String? = null,
+    val completedAt: String? = null,
+    val difficulty: String? = null,
+    val coachComment: String? = null,
 ) {
     constructor(model: TrainingPlan) : this(
         id = model.id.asString().takeIf { it.isNotBlank() },
@@ -32,6 +36,9 @@ data class TrainingPlanEntity(
         version = model.version,
         createdAt = model.createdAt.takeIf { it.isNotBlank() },
         updatedAt = model.updatedAt.takeIf { it.isNotBlank() },
+        completedAt = model.completedAt.takeIf { it.isNotBlank() },
+        difficulty = model.difficulty.takeIf { it != WorkoutDifficulty.NONE }?.name,
+        coachComment = model.coachComment.takeIf { it.isNotBlank() },
     )
 
     fun toInternal() =
@@ -47,5 +54,8 @@ data class TrainingPlanEntity(
             version = version,
             createdAt = createdAt ?: "",
             updatedAt = updatedAt ?: "",
+            completedAt = completedAt ?: "",
+            difficulty = difficulty?.let { WorkoutDifficulty.valueOf(it) } ?: WorkoutDifficulty.NONE,
+            coachComment = coachComment ?: "",
         )
 }

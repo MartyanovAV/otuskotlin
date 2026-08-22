@@ -1,5 +1,6 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests
 
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbTrainingPlanFilterRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbTrainingPlanIdRequest
@@ -18,7 +19,7 @@ class RepoTrainingPlanMockTest {
             invokeReadTrainingPlan = { DbTrainingPlanResponseOk(TrainingPlan(title = "read")) },
             invokeUpdateTrainingPlan = { DbTrainingPlanResponseOk(TrainingPlan(title = "update")) },
             invokeArchiveTrainingPlan = { DbTrainingPlanResponseOk(TrainingPlan(title = "archive")) },
-            invokeSearchTrainingPlans = { DbTrainingPlansResponseOk(listOf(TrainingPlan(title = "search"))) },
+            invokeSearchTrainingPlans = { DbTrainingPlansResponseOk(Page(items = listOf(TrainingPlan(title = "search")), totalSize = 1)) },
         )
 
     @Test
@@ -58,6 +59,6 @@ class RepoTrainingPlanMockTest {
         runTest {
             val result = repo.searchTrainingPlans(DbTrainingPlanFilterRequest())
             assertIs<DbTrainingPlansResponseOk>(result)
-            assertEquals("search", result.data.first().title)
+            assertEquals("search", result.data.items.first().title)
         }
 }

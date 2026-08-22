@@ -12,6 +12,9 @@ data class TrainingPlan(
     var version: Int = 1,
     var createdAt: String = "",
     var updatedAt: String = "",
+    var completedAt: String = "",
+    var difficulty: WorkoutDifficulty = WorkoutDifficulty.NONE,
+    var coachComment: String = "",
 ) {
     fun deepCopy(): TrainingPlan =
         copy(

@@ -6,11 +6,9 @@
  * OpenAPI spec version: 2.0.0
  */
 
-export type TrainingPlanStatus = typeof TrainingPlanStatus[keyof typeof TrainingPlanStatus];
+export type TrainingPlanCompleteRequestRequestType = typeof TrainingPlanCompleteRequestRequestType[keyof typeof TrainingPlanCompleteRequestRequestType];
 
 
-export const TrainingPlanStatus = {
-  ACTIVE: 'ACTIVE',
-  ARCHIVED: 'ARCHIVED',
-  COMPLETED: 'COMPLETED',
+export const TrainingPlanCompleteRequestRequestType = {
+  trainingPlancomplete: 'trainingPlan.complete',
 } as const;

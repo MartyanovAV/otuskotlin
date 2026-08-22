@@ -4,6 +4,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Client
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardLock
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardStatus
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardFilterRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardIdRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardRequest
@@ -228,7 +229,14 @@ class RepoClientCardPg(
                         }
                     query.map { it.toClientCard() }
                 }
-            DbClientCardsResponseOk(result)
+            DbClientCardsResponseOk(
+                Page(
+                    items = result,
+                    totalSize = result.size,
+                    pageNumber = rq.pageNumber,
+                    pageSize = rq.pageSize,
+                ),
+            )
         }
 
     override fun save(cards: Collection<ClientCard>): Collection<ClientCard> {

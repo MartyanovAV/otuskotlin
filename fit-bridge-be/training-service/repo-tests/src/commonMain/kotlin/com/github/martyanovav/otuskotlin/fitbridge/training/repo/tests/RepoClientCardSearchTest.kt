@@ -20,7 +20,7 @@ abstract class RepoClientCardSearchTest {
             val result = repo.searchClientCards(DbClientCardFilterRequest(searchString = "ad1"))
             assertIs<DbClientCardsResponseOk>(result)
             val expected = listOf(initializedObjects[0])
-            assertEquals(expected.size, result.data.size)
+            assertEquals(expected.size, result.data.items.size)
         }
 
     @Test
@@ -34,8 +34,8 @@ abstract class RepoClientCardSearchTest {
                     ),
                 )
             assertIs<DbClientCardsResponseOk>(result)
-            assertEquals(1, result.data.size)
-            assertEquals(initializedObjects[1].id, result.data[0].id)
+            assertEquals(1, result.data.items.size)
+            assertEquals(initializedObjects[1].id, result.data.items[0].id)
         }
 
     @Test
@@ -43,7 +43,7 @@ abstract class RepoClientCardSearchTest {
         runRepoTest {
             val result = repo.searchClientCards(DbClientCardFilterRequest(ownerUserId = "owner-124"))
             assertIs<DbClientCardsResponseOk>(result)
-            assertEquals(setOf(initializedObjects[1].id, initializedObjects[3].id), result.data.map { it.id }.toSet())
+            assertEquals(setOf(initializedObjects[1].id, initializedObjects[3].id), result.data.items.map { it.id }.toSet())
         }
 
     @Test
@@ -51,7 +51,7 @@ abstract class RepoClientCardSearchTest {
         runRepoTest {
             val result = repo.searchClientCards(DbClientCardFilterRequest())
             assertIs<DbClientCardsResponseOk>(result)
-            assertEquals(initializedObjects.size, result.data.size)
+            assertEquals(initializedObjects.size, result.data.items.size)
         }
 
     companion object : BaseInitClientCards("search") {

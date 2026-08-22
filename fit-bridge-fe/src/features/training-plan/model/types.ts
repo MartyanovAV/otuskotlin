@@ -141,7 +141,7 @@ export function countTotalExercises(items?: PlanItem[]): number {
   if (!items || !items.length) return 0
   let count = 0
   for (const item of items) {
-    const rawItem = item as Record<string, unknown>
+    const rawItem = item as unknown as Record<string, unknown>
     if (rawItem.itemType === 'CIRCUIT' || rawItem.itemType === 'SUPERSET') {
       const nested = (rawItem.items as PlanItem[]) ?? []
       count += nested.length > 0 ? countTotalExercises(nested) : 1

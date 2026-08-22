@@ -1,8 +1,9 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.common.models
 
-enum class TrainingPlanStatus {
+enum class WorkoutDifficulty {
     NONE,
-    ACTIVE,
-    ARCHIVED,
-    COMPLETED
+    EASY,
+    NORMAL,
+    HARD,
+    MAX
 }

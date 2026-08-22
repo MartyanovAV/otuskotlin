@@ -1,6 +1,7 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.repo.tests
 
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardFilterRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardIdRequest
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.repo.DbClientCardRequest
@@ -18,7 +19,7 @@ class RepoClientCardMockTest {
             invokeReadClientCard = { DbClientCardResponseOk(ClientCard(displayName = "read")) },
             invokeUpdateClientCard = { DbClientCardResponseOk(ClientCard(displayName = "update")) },
             invokeArchiveClientCard = { DbClientCardResponseOk(ClientCard(displayName = "archive")) },
-            invokeSearchClientCards = { DbClientCardsResponseOk(listOf(ClientCard(displayName = "search"))) },
+            invokeSearchClientCards = { DbClientCardsResponseOk(Page(items = listOf(ClientCard(displayName = "search")), totalSize = 1)) },
         )
 
     @Test
@@ -58,6 +59,6 @@ class RepoClientCardMockTest {
         runTest {
             val result = repo.searchClientCards(DbClientCardFilterRequest())
             assertIs<DbClientCardsResponseOk>(result)
-            assertEquals("search", result.data.first().displayName)
+            assertEquals("search", result.data.items.first().displayName)
         }
 }

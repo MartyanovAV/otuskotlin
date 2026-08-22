@@ -2,6 +2,7 @@ package com.github.martyanovav.otuskotlin.fitbridge.training.repo.inmemory
 
 import com.benasher44.uuid.uuid4
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Page
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanLock
@@ -118,6 +119,36 @@ class RepoTrainingPlanInMemory(
             }
         }
 
+    override suspend fun completeTrainingPlan(rq: DbTrainingPlanRequest): IDbTrainingPlanResponse =
+        tryTrainingPlanMethod {
+            val rqPlan = rq.trainingPlan
+            val id = rqPlan.id.takeIf { it != TrainingPlanId.NONE } ?: return@tryTrainingPlanMethod errorEmptyTrainingPlanId
+            val key = id.asString()
+
+            mutex.withLock {
+                val oldEntity = cache.get(key)
+                val oldPlan = oldEntity?.toInternal()
+                when {
+                    oldPlan == null -> errorNotFoundTrainingPlan(id)
+                    oldPlan.lock != TrainingPlanLock.NONE && oldPlan.lock != rqPlan.lock ->
+                        errorRepoConcurrencyTrainingPlan(oldPlan, rqPlan.lock)
+                    else -> {
+                        val completedPlan =
+                            oldPlan.copy(
+                                status = TrainingPlanStatus.COMPLETED,
+                                lock = TrainingPlanLock(randomUuid()),
+                                completedAt = rqPlan.completedAt.takeIf { it.isNotBlank() } ?: java.time.Instant.now().toString(),
+                                difficulty = rqPlan.difficulty,
+                                coachComment = rqPlan.coachComment
+                            )
+                        val entity = TrainingPlanEntity(completedPlan)
+                        cache.put(key, entity)
+                        DbTrainingPlanResponseOk(completedPlan)
+                    }
+                }
+            }
+        }
+
     override suspend fun searchTrainingPlans(rq: DbTrainingPlanFilterRequest): IDbTrainingPlansResponse =
         tryTrainingPlansMethod {
             val result: List<TrainingPlan> =
@@ -144,6 +175,13 @@ class RepoTrainingPlanInMemory(
                     }
                     .map { it.value.toInternal() }
                     .toList()
-            DbTrainingPlansResponseOk(result)
+            DbTrainingPlansResponseOk(
+                Page(
+                    items = result,
+                    totalSize = result.size,
+                    pageNumber = rq.pageNumber,
+                    pageSize = rq.pageSize,
+                ),
+            )
         }
 }

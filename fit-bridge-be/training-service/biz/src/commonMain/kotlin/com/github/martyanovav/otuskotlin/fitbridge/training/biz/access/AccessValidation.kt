@@ -71,6 +71,8 @@ fun ICorChainDsl<IFBContext>.accessValidationTrainingPlan(title: String) =
                         ctx.principal.isTrainer() && ctx.principalRelation == FtcPrincipalRelation.OWNER
                     TrainingPlanCommand.ARCHIVE ->
                         ctx.principal.isTrainer() && ctx.principalRelation == FtcPrincipalRelation.OWNER
+                    TrainingPlanCommand.COMPLETE ->
+                        ctx.principal.isTrainer() && ctx.principalRelation == FtcPrincipalRelation.OWNER
                     TrainingPlanCommand.SEARCH -> ctx.principal.isTrainer() && ctx.principal.userId.isNotBlank()
                     else -> false
                 }

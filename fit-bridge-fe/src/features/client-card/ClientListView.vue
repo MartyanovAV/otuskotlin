@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useDebounce } from '@vueuse/core'
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar'
 import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
+import { Pagination } from '@/shared/ui/pagination'
 import {
   Dialog,
   DialogContent,
@@ -36,6 +37,13 @@ import {
 const queryClient = useQueryClient()
 const searchQuery = ref('')
 const debouncedSearchQuery = useDebounce(searchQuery, 300)
+const pageNumber = ref(1)
+const pageSize = ref(10)
+
+watch(debouncedSearchQuery, () => {
+  pageNumber.value = 1
+})
+
 const isCreateOpen = ref(false)
 const isEditOpen = ref(false)
 const selectedClient = ref<ClientCardResponseObject | null>(null)
@@ -67,23 +75,27 @@ const editClient = ref({
   lock: '',
 })
 
-// Запрос списка клиентов через TanStack Query
+// Запрос списка клиентов через TanStack Query с учетом пагинации
 const { data: searchResponse, isLoading, isError, error, refetch } = useQuery({
-  queryKey: ['clientCards', debouncedSearchQuery],
+  queryKey: ['clientCards', debouncedSearchQuery, pageNumber, pageSize],
   queryFn: () =>
     clientCardSearch({
       requestType: 'clientCard.search',
       requestId: crypto.randomUUID(),
       clientCardFilter: {
         searchString: debouncedSearchQuery.value.trim() || undefined,
-        pageSize: 50,
-        pageNumber: 1,
+        pageSize: pageSize.value,
+        pageNumber: pageNumber.value,
       },
     }),
 })
 
 const clientCards = computed<ClientCardResponseObject[]>(() => {
   return searchResponse.value?.data?.clientCards ?? []
+})
+
+const totalClientsCount = computed(() => {
+  return searchResponse.value?.data?.totalSize ?? clientCards.value.length
 })
 
 // Запрос тренировочных планов для выбранного клиента
@@ -393,6 +405,15 @@ const formatDate = (isoString?: string) => {
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Пагинация списка клиентов -->
+      <div class="border-t border-border px-4 bg-surface-2/30">
+        <Pagination
+          v-model:pageNumber="pageNumber"
+          v-model:pageSize="pageSize"
+          :totalSize="totalClientsCount"
+        />
       </div>
     </div>
 

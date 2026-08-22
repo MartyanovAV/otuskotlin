@@ -20,7 +20,7 @@ abstract class RepoTrainingPlanSearchTest {
             val result = repo.searchTrainingPlans(DbTrainingPlanFilterRequest(clientCardId = searchClientCardId))
             assertIs<DbTrainingPlansResponseOk>(result)
             val expected = listOf(initializedObjects[1], initializedObjects[3]).sortedBy { it.id.asString() }
-            assertEquals(expected.size, result.data.size)
+            assertEquals(expected.size, result.data.items.size)
         }
 
     @Test
@@ -28,7 +28,7 @@ abstract class RepoTrainingPlanSearchTest {
         runRepoTest {
             val result = repo.searchTrainingPlans(DbTrainingPlanFilterRequest(searchString = "ad1"))
             assertIs<DbTrainingPlansResponseOk>(result)
-            assertEquals(1, result.data.size)
+            assertEquals(1, result.data.items.size)
         }
 
     @Test
@@ -42,8 +42,8 @@ abstract class RepoTrainingPlanSearchTest {
                     ),
                 )
             assertIs<DbTrainingPlansResponseOk>(result)
-            assertEquals(1, result.data.size)
-            assertEquals(initializedObjects[1].id, result.data[0].id)
+            assertEquals(1, result.data.items.size)
+            assertEquals(initializedObjects[1].id, result.data.items[0].id)
         }
 
     @Test
@@ -51,7 +51,7 @@ abstract class RepoTrainingPlanSearchTest {
         runRepoTest {
             val result = repo.searchTrainingPlans(DbTrainingPlanFilterRequest(ownerUserId = "owner-124"))
             assertIs<DbTrainingPlansResponseOk>(result)
-            assertEquals(setOf(initializedObjects[1].id, initializedObjects[3].id), result.data.map { it.id }.toSet())
+            assertEquals(setOf(initializedObjects[1].id, initializedObjects[3].id), result.data.items.map { it.id }.toSet())
         }
 
     @Test
@@ -59,7 +59,7 @@ abstract class RepoTrainingPlanSearchTest {
         runRepoTest {
             val result = repo.searchTrainingPlans(DbTrainingPlanFilterRequest())
             assertIs<DbTrainingPlansResponseOk>(result)
-            assertEquals(initializedObjects.size, result.data.size)
+            assertEquals(initializedObjects.size, result.data.items.size)
         }
 
     companion object : BaseInitTrainingPlans("search") {

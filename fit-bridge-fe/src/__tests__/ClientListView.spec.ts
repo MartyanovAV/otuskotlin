@@ -60,6 +60,7 @@ describe('ClientListView with Training Plans', () => {
     vi.mocked(clientApi.clientCardSearch).mockResolvedValue({
       data: {
         responseType: 'clientCard.search',
+        result: 'success',
         clientCards: mockClients,
         totalSize: 1,
       },
@@ -70,6 +71,7 @@ describe('ClientListView with Training Plans', () => {
     vi.mocked(planApi.trainingPlanSearch).mockResolvedValue({
       data: {
         responseType: 'trainingPlan.search',
+        result: 'success',
         trainingPlans: mockPlans,
         totalSize: 1,
       },
@@ -134,6 +136,7 @@ describe('ClientListView with Training Plans', () => {
     vi.mocked(clientApi.clientCardSearch).mockResolvedValue({
       data: {
         responseType: 'clientCard.search',
+        result: 'success',
         clientCards: mockClients,
         totalSize: 1,
       },
@@ -144,6 +147,7 @@ describe('ClientListView with Training Plans', () => {
     vi.mocked(planApi.trainingPlanSearch).mockResolvedValue({
       data: {
         responseType: 'trainingPlan.search',
+        result: 'success',
         trainingPlans: [],
         totalSize: 0,
       },
