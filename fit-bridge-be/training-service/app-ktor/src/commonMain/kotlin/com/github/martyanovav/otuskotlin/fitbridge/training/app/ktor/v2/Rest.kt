@@ -9,6 +9,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardSearc
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ClientCardUpdateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.IRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.IResponse
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanActivateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanArchiveRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanCompleteRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanCreateRequest
@@ -140,6 +141,14 @@ fun Route.v2Training(appSettings: AppSettings) {
             call.processV2<TrainingPlanArchiveRequest, IResponse, TrainingPlanContext>(
                 appSettings.tpCorSettings.loggerProvider.logger("trainingPlan-archive"),
                 { appSettings.tpProcessor.exec(it) }, "trainingPlan-archive",
+                { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+                { ctx, id -> ctx.toLog(id) }
+            )
+        }
+        post("activate") {
+            call.processV2<TrainingPlanActivateRequest, IResponse, TrainingPlanContext>(
+                appSettings.tpCorSettings.loggerProvider.logger("trainingPlan-activate"),
+                { appSettings.tpProcessor.exec(it) }, "trainingPlan-activate",
                 { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
                 { ctx, id -> ctx.toLog(id) }
             )

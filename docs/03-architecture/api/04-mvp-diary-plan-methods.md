@@ -12,16 +12,21 @@
 ## Методы плана (versioned `/v1/*` и `/v2/*`)
 
 1. **`trainingPlan.create`** — создать простой план для `ClientCard`.
-    - *Бизнес-правило*: план создаёт только тренер-владелец карточки.
+    - *HTTP endpoints*: `POST /v1/trainingPlan/create` и `POST /v2/trainingPlan/create`.
+    - *Бизнес-правило*: план создаёт только тренер-владелец карточки. Может быть создан как `ACTIVE` (по умолчанию), так и `DRAFT` (черновик).
     - *Валидация*: название 3-120 символов; план содержит 1-200 заданий с учётом вложенных; глубина вложенности не более 5; UUID заданий уникальны в пределах плана; circuit содержит минимум одно задание, superset — минимум два; rounds не меньше 1, длительности и паузы неотрицательны; медданные/фото/видео/rich-media запрещены.
 
-2. **`trainingPlan.search`** — найти/вывести планы тренера.
+2. **`trainingPlan.activate`** — активировать черновой план тренировки (`DRAFT` → `ACTIVE`).
+   - *HTTP endpoints*: `POST /v1/trainingPlan/activate` и `POST /v2/trainingPlan/activate`.
+   - *Бизнес-правило*: переводит план из статуса `DRAFT` в статус `ACTIVE` с проверкой оптимистичной блокировки `lock`. Вызов доступен только тренеру-владельцу плана. При попытке активировать план не в статусе `DRAFT` возвращается ошибка бизнес-валидации `invalid-status`.
+
+3. **`trainingPlan.search`** — найти/вывести планы тренера.
    - *HTTP endpoints*: `POST /v1/trainingPlan/search` и `POST /v2/trainingPlan/search`.
    - *Бизнес-правило*: возвращает только планы текущего тренера; фильтр `clientCardId` допустим только для карточки этого же тренера.
-   - *Фильтры*: `clientCardId`, `searchString` по названию плана, `status`, `pageSize`, `pageNumber`.
+   - *Фильтры*: `clientCardId`, `searchString` по названию плана, `status` (`DRAFT`, `ACTIVE`, `COMPLETED`, `ARCHIVED`), `pageSize`, `pageNumber`.
    - *Ответ*: список `TrainingPlanResponseObject`, `totalSize`, `pageNumber`, `pageSize`.
 
-3. **`trainingPlan.complete`** — зафиксировать завершение тренировочного плана тренером.
+4. **`trainingPlan.complete`** — зафиксировать завершение тренировочного плана тренером.
    - *HTTP endpoints*: `POST /v1/trainingPlan/complete` и `POST /v2/trainingPlan/complete`.
    - *Бизнес-правило*: переводит план в статус `COMPLETED`, фиксирует дату `completedAt`, оценку сложности `difficulty` (`EASY`, `NORMAL`, `HARD`, `MAX`) и комментарий тренера `coachComment` (до 1000 символов). Доступно только тренеру-владельцу плана.
 
@@ -37,10 +42,10 @@
 | `clientCardId` | ✅ | Связь с клиентской карточкой тренера |
 | `title` | ✅ | Название плана |
 | `planItems` | ✅ | Список заданий плана |
-| `status` | ✅ | `ACTIVE`, `ARCHIVED`, `COMPLETED` |
+| `status` | ✅ | `DRAFT`, `ACTIVE`, `ARCHIVED`, `COMPLETED` |
 | `version` | ✅ | Версия плана |
 | `createdAt` / `updatedAt` | ✅ | Технические timestamps |
-| `lock` | ✅ | Версия optimistic lock для update/archive/complete |
+| `lock` | ✅ | Версия optimistic lock для update/archive/activate/complete |
 | `completedAt` | ✅ | Timestamp завершения тренировки |
 | `difficulty` | ✅ | Оценка сложности (`EASY`, `NORMAL`, `HARD`, `MAX`) |
 | `coachComment` | ✅ | Итоговый комментарий тренера |

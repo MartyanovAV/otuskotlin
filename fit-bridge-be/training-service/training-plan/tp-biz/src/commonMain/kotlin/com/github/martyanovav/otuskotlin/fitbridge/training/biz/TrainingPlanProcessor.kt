@@ -14,6 +14,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.prepareRepo
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoArchive
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoComplete
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoCreate
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoPrepareActivate
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoPrepareArchive
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoPrepareComplete
 import com.github.martyanovav.otuskotlin.fitbridge.training.biz.repo.trainingPlanRepoPrepareCreate
@@ -228,6 +229,32 @@ class TrainingPlanProcessor(
                     accessValidationTrainingPlan("Проверка прав доступа")
                     trainingPlanRepoPrepareComplete("Подготовка объекта для завершения")
                     trainingPlanRepoComplete("Завершение тренировочного плана в БД")
+                }
+                prepareRepoResult("Подготовка ответа")
+            }
+            operation("Активация тренировочного плана", TrainingPlanCommand.ACTIVATE) {
+                initTrainingPlanRepo("Инициализация репозитория")
+                stubs("Обработка стабов") {
+                    stubTrainingPlanSuccess("Успешная обработка")
+                    stubNotFound("Не найдено")
+                    stubValidationBadId("Неверный ID")
+                    stubNoCase("Ошибка: запрошенный стаб недопустим")
+                }
+                validation("Валидация активации тренировочного плана") {
+                    prepareTrainingPlanValidation("Подготовка тренировочного плана")
+                    validateTrainingPlanIdNotEmpty("Проверка непустого ID")
+                    validateTrainingPlanIdFormat("Проверка формата ID")
+                    validateTrainingPlanLockNotEmpty("Проверка непустого lock")
+                    validateTrainingPlanLockFormat("Проверка формата lock")
+                    finishTrainingPlanValidation("Завершение валидации тренировочного плана")
+                }
+                chain {
+                    title = "Логика активации"
+                    trainingPlanRepoRead("Чтение тренировочного плана из БД")
+                    resolveTrainingPlanRelation("Вычисление прав доступа")
+                    accessValidationTrainingPlan("Проверка прав доступа")
+                    trainingPlanRepoPrepareActivate("Подготовка объекта для активации")
+                    trainingPlanRepoUpdate("Активация тренировочного плана в БД")
                 }
                 prepareRepoResult("Подготовка ответа")
             }

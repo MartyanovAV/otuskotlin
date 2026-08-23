@@ -7,6 +7,7 @@
  */
 import type { ClientCardId } from './clientCardId';
 import type { PlanItem } from './planItem';
+import type { TrainingPlanStatus } from './trainingPlanStatus';
 
 export interface TrainingPlanCreateObject {
   /**
@@ -21,4 +22,5 @@ export interface TrainingPlanCreateObject {
      */
   planItems: PlanItem[];
   clientCardId: ClientCardId;
+  status?: TrainingPlanStatus;
 }

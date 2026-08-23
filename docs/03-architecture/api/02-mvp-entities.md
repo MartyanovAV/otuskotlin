@@ -34,7 +34,7 @@ Domain API содержит только клиентские карточки �
 | ownerId | Автор/владелец из `JWT.sub`, не входит в request | `3f8d9f3a-...` |
 | title | Название плана | `Стартовая неделя` |
 | planItems | Типизированный список заданий плана: UUID каждого элемента уникален в пределах плана; не более 200 элементов суммарно и не более 5 уровней вложенности | `[{ "itemType": "EXERCISE", "id": "550e8400-e29b-41d4-a716-446655440000", "title": "Приседания" }]` |
-| status | `ACTIVE`, `ARCHIVED`, `COMPLETED` | `COMPLETED` |
+| status | `DRAFT`, `ACTIVE`, `ARCHIVED`, `COMPLETED` | `DRAFT` |
 | version | Версия плана | `1` |
 | lock | Optimistic lock token | `8f2d...` |
 | completedAt | Дата/время завершения тренировки тренером | `2026-05-27T12:00:00Z` |

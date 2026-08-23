@@ -65,7 +65,7 @@ erDiagram
 | Сущность | Значения | Правило |
 |---|---|---|
 | `CLIENT_CARD.status` | `ACTIVE`, `ARCHIVED` | Архивированная карточка не получает новые планы |
-| `TRAINING_PLAN.status` | `ACTIVE`, `ARCHIVED`, `COMPLETED` | Завершённый тренером (`COMPLETED`) или архивный (`ARCHIVED`) план фиксируют статус тренировки в Дневнике |
+| `TRAINING_PLAN.status` | `DRAFT`, `ACTIVE`, `ARCHIVED`, `COMPLETED` | `DRAFT` — подготовительный черновик плана (активируется через `/trainingPlan/activate`); `ACTIVE` — активный план; `COMPLETED` — завершённая тренировка с оценкой сложности и комментарием; `ARCHIVED` — план в архиве |
 
 ## Индексы
 

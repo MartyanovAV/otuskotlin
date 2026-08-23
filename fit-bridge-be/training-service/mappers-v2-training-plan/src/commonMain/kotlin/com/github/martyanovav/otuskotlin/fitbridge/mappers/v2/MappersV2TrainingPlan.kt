@@ -1,6 +1,9 @@
 package com.github.martyanovav.otuskotlin.fitbridge.mappers.v2
 
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ResponseResult
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanActivateObject
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanActivateRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanActivateResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanArchiveObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanArchiveRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanArchiveResponse
@@ -58,6 +61,8 @@ fun TrainingPlanArchiveRequest.fromTransport(): TrainingPlanContext = TrainingPl
 
 fun TrainingPlanCompleteRequest.fromTransport(): TrainingPlanContext = TrainingPlanContext().apply { fromTransport(this@fromTransport) }
 
+fun TrainingPlanActivateRequest.fromTransport(): TrainingPlanContext = TrainingPlanContext().apply { fromTransport(this@fromTransport) }
+
 fun TrainingPlanSearchRequest.fromTransport(): TrainingPlanContext = TrainingPlanContext().apply { fromTransport(this@fromTransport) }
 
 fun TrainingPlanContext.toTransport(): Any =
@@ -66,6 +71,7 @@ fun TrainingPlanContext.toTransport(): Any =
         TrainingPlanCommand.READ -> toTransportTrainingPlanRead()
         TrainingPlanCommand.UPDATE -> toTransportTrainingPlanUpdate()
         TrainingPlanCommand.ARCHIVE -> toTransportTrainingPlanArchive()
+        TrainingPlanCommand.ACTIVATE -> toTransportTrainingPlanActivate()
         TrainingPlanCommand.COMPLETE -> toTransportTrainingPlanComplete()
         TrainingPlanCommand.SEARCH -> toTransportTrainingPlanSearch()
         FBCommandBase.NONE -> toTransportInit()
@@ -93,6 +99,12 @@ fun TrainingPlanContext.fromTransport(request: TrainingPlanUpdateRequest) {
 
 fun TrainingPlanContext.fromTransport(request: TrainingPlanArchiveRequest) {
     command = TrainingPlanCommand.ARCHIVE
+    fromTransportBase(request.requestId, request.debug)
+    trainingPlanRequest = request.trainingPlan.toInternal()
+}
+
+fun TrainingPlanContext.fromTransport(request: TrainingPlanActivateRequest) {
+    command = TrainingPlanCommand.ACTIVATE
     fromTransportBase(request.requestId, request.debug)
     trainingPlanRequest = request.trainingPlan.toInternal()
 }
@@ -148,6 +160,14 @@ fun TrainingPlanContext.toTransportTrainingPlanArchive() =
         trainingPlan = trainingPlanResponse.toTransportTrainingPlan()
     )
 
+fun TrainingPlanContext.toTransportTrainingPlanActivate() =
+    TrainingPlanActivateResponse(
+        requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
+        result = if (state == State.RUNNING || state == State.FINISHING) ResponseResult.SUCCESS else ResponseResult.ERROR,
+        errors = errors.toTransportErrors(),
+        trainingPlan = trainingPlanResponse.toTransportTrainingPlan()
+    )
+
 fun TrainingPlanContext.toTransportTrainingPlanComplete() =
     TrainingPlanCompleteResponse(
         requestId = requestId.takeIf { it != RequestId.NONE }?.asString(),
@@ -176,6 +196,7 @@ fun TrainingPlan.toTransportTrainingPlan(): TrainingPlanResponseObject? {
         status =
             when (status) {
                 TrainingPlanStatus.NONE -> null
+                TrainingPlanStatus.DRAFT -> TrainingPlanStatusV2.DRAFT
                 TrainingPlanStatus.ACTIVE -> TrainingPlanStatusV2.ACTIVE
                 TrainingPlanStatus.ARCHIVED -> TrainingPlanStatusV2.ARCHIVED
                 TrainingPlanStatus.COMPLETED -> TrainingPlanStatusV2.COMPLETED
@@ -273,6 +294,7 @@ private fun TrainingPlanCreateObject?.toInternal() =
     TrainingPlan(
         title = this?.title.orEmpty(),
         clientCardId = this?.clientCardId.toClientCardId(),
+        status = this?.status.toTrainingPlanStatus(),
         planItems = this?.planItems?.map { it.toInternal() } ?: emptyList()
     )
 
@@ -290,6 +312,12 @@ private fun TrainingPlanUpdateObject?.toInternal() =
     )
 
 private fun TrainingPlanArchiveObject?.toInternal() =
+    TrainingPlan(
+        id = this?.id.toTrainingPlanId(),
+        lock = TrainingPlanLock(this?.lock.orEmpty())
+    )
+
+private fun TrainingPlanActivateObject?.toInternal() =
     TrainingPlan(
         id = this?.id.toTrainingPlanId(),
         lock = TrainingPlanLock(this?.lock.orEmpty())
@@ -315,6 +343,7 @@ private fun TrainingPlanSearchFilter?.toInternal() =
 
 private fun TrainingPlanStatusV2?.toTrainingPlanStatus() =
     when (this) {
+        TrainingPlanStatusV2.DRAFT -> TrainingPlanStatus.DRAFT
         TrainingPlanStatusV2.ACTIVE -> TrainingPlanStatus.ACTIVE
         TrainingPlanStatusV2.ARCHIVED -> TrainingPlanStatus.ARCHIVED
         TrainingPlanStatusV2.COMPLETED -> TrainingPlanStatus.COMPLETED

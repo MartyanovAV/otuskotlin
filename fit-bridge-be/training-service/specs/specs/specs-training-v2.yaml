@@ -132,6 +132,19 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/TrainingPlanArchiveResponseBody'
+  /trainingPlan/activate:
+    post:
+      tags:
+      - trainingPlan
+      summary: Активировать тренировочный план
+      operationId: trainingPlanActivate
+      security:
+      - bearerAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/TrainingPlanActivateRequestBody'
+      responses:
+        '200':
+          $ref: '#/components/responses/TrainingPlanActivateResponseBody'
   /trainingPlan/complete:
     post:
       tags:
@@ -228,6 +241,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/TrainingPlanArchiveRequest'
+    TrainingPlanActivateRequestBody:
+      description: Request body
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TrainingPlanActivateRequest'
     TrainingPlanCompleteRequestBody:
       description: Request body
       required: true
@@ -297,6 +317,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/TrainingPlanArchiveResponse'
+    TrainingPlanActivateResponseBody:
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TrainingPlanActivateResponse'
     TrainingPlanCompleteResponseBody:
       description: Success
       content:
@@ -417,6 +443,7 @@ components:
     TrainingPlanStatus:
       type: string
       enum:
+      - DRAFT
       - ACTIVE
       - ARCHIVED
       - COMPLETED
@@ -643,6 +670,8 @@ components:
             $ref: '#/components/schemas/PlanItem'
         clientCardId:
           $ref: '#/components/schemas/ClientCardId'
+        status:
+          $ref: '#/components/schemas/TrainingPlanStatus'
     TrainingPlanReadObject:
       type: object
       properties:
@@ -667,6 +696,13 @@ components:
         lock:
           $ref: '#/components/schemas/Lock'
     TrainingPlanArchiveObject:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/TrainingPlanId'
+        lock:
+          $ref: '#/components/schemas/Lock'
+    TrainingPlanActivateObject:
       type: object
       properties:
         id:
@@ -862,6 +898,14 @@ components:
         properties:
           trainingPlan:
             $ref: '#/components/schemas/TrainingPlanArchiveObject'
+    TrainingPlanActivateRequest:
+      allOf:
+      - $ref: '#/components/schemas/IRequest'
+      - $ref: '#/components/schemas/RequestDebug'
+      - type: object
+        properties:
+          trainingPlan:
+            $ref: '#/components/schemas/TrainingPlanActivateObject'
     TrainingPlanCompleteRequest:
       allOf:
       - $ref: '#/components/schemas/IRequest'
@@ -900,6 +944,13 @@ components:
           trainingPlan:
             $ref: '#/components/schemas/TrainingPlanResponseObject'
     TrainingPlanArchiveResponse:
+      allOf:
+      - $ref: '#/components/schemas/IResponse'
+      - type: object
+        properties:
+          trainingPlan:
+            $ref: '#/components/schemas/TrainingPlanResponseObject'
+    TrainingPlanActivateResponse:
       allOf:
       - $ref: '#/components/schemas/IResponse'
       - type: object

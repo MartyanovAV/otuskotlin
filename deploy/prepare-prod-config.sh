@@ -28,21 +28,30 @@ echo "==> Preparing production configuration for: $public_url (domain: $domain)"
 
 # 2. Проверка наличия SSL сертификатов / Генерация Bootstrap Dummy Certificate
 cert_dir="volumes/certs/live/$domain"
+cert_chain="$cert_dir/fullchain.pem"
+cert_key="$cert_dir/privkey.pem"
 mkdir -p "volumes/certbot-webroot"
 
-if [ ! -f "$cert_dir/fullchain.pem" ] || [ ! -f "$cert_dir/privkey.pem" ]; then
+if [ -f "$cert_chain" ] && [ -f "$cert_key" ]; then
+    if ! openssl x509 -in "$cert_chain" -noout >/dev/null 2>&1; then
+        echo "ERROR: Existing certificate for '$domain' is not a valid PEM certificate" >&2
+        exit 1
+    fi
+    echo "  [OK] SSL certificate exists for $domain"
+elif [ -e "$cert_chain" ] || [ -L "$cert_chain" ] || [ -e "$cert_key" ] || [ -L "$cert_key" ]; then
+    echo "ERROR: Incomplete SSL certificate state for '$domain'; refusing to overwrite it" >&2
+    exit 1
+else
     echo "==> No SSL certificate found for '$domain'. Generating bootstrap dummy certificate for initial Envoy boot..."
     mkdir -p "$cert_dir"
     openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
-        -keyout "$cert_dir/privkey.pem" \
-        -out "$cert_dir/fullchain.pem" \
+        -keyout "$cert_key" \
+        -out "$cert_chain" \
         -subj "/CN=$domain" 2>/dev/null
-    chmod 644 "$cert_dir/privkey.pem"
-    chmod 644 "$cert_dir/fullchain.pem"
+    chmod 644 "$cert_key"
+    chmod 644 "$cert_chain"
     chmod 755 "volumes/certs" "volumes/certs/live" "volumes/certs/live/$domain" 2>/dev/null || true
     echo "  [OK] Temporary bootstrap certificate created for $domain"
-else
-    echo "  [OK] SSL certificate exists for $domain"
 fi
 
 # 3. Генерация конфигурации Envoy для prod

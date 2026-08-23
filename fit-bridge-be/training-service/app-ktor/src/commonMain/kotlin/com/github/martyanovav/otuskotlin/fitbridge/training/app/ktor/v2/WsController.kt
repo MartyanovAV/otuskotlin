@@ -10,7 +10,9 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.IRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.IResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.InitResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.ResponseResult
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanActivateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanArchiveRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanCompleteRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanCreateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanReadRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanSearchRequest
@@ -160,15 +162,51 @@ private suspend fun String.processV2(
             )
         is TrainingPlanArchiveRequest ->
             processWsReq(
-                request, wsSession, appSettings.tpCorSettings.loggerProvider.logger("ws-trainingPlan-archive"), "ws-trainingPlan-archive", {
-                    TrainingPlanContext()
-                }, { appSettings.tpProcessor.exec(it) }, { fromTransport(it) }, { toTransport() as IResponse }, { ctx, id -> ctx.toLog(id) }
+                request,
+                wsSession,
+                appSettings.tpCorSettings.loggerProvider.logger("ws-trainingPlan-archive"),
+                "ws-trainingPlan-archive",
+                { TrainingPlanContext() },
+                { appSettings.tpProcessor.exec(it) },
+                { fromTransport(it) },
+                { toTransport() as IResponse },
+                { ctx, id -> ctx.toLog(id) },
+            )
+        is TrainingPlanActivateRequest ->
+            processWsReq(
+                request,
+                wsSession,
+                appSettings.tpCorSettings.loggerProvider.logger("ws-trainingPlan-activate"),
+                "ws-trainingPlan-activate",
+                { TrainingPlanContext() },
+                { appSettings.tpProcessor.exec(it) },
+                { fromTransport(it) },
+                { toTransport() as IResponse },
+                { ctx, id -> ctx.toLog(id) },
+            )
+        is TrainingPlanCompleteRequest ->
+            processWsReq(
+                request,
+                wsSession,
+                appSettings.tpCorSettings.loggerProvider.logger("ws-trainingPlan-complete"),
+                "ws-trainingPlan-complete",
+                { TrainingPlanContext() },
+                { appSettings.tpProcessor.exec(it) },
+                { fromTransport(it) },
+                { toTransport() as IResponse },
+                { ctx, id -> ctx.toLog(id) },
             )
         is TrainingPlanSearchRequest ->
             processWsReq(
-                request, wsSession, appSettings.tpCorSettings.loggerProvider.logger("ws-trainingPlan-search"), "ws-trainingPlan-search", {
-                    TrainingPlanContext()
-                }, { appSettings.tpProcessor.exec(it) }, { fromTransport(it) }, { toTransport() as IResponse }, { ctx, id -> ctx.toLog(id) }
+                request,
+                wsSession,
+                appSettings.tpCorSettings.loggerProvider.logger("ws-trainingPlan-search"),
+                "ws-trainingPlan-search",
+                { TrainingPlanContext() },
+                { appSettings.tpProcessor.exec(it) },
+                { fromTransport(it) },
+                { toTransport() as IResponse },
+                { ctx, id -> ctx.toLog(id) },
             )
         else -> error("Unsupported v2 WebSocket request: ${request::class.simpleName}")
     }

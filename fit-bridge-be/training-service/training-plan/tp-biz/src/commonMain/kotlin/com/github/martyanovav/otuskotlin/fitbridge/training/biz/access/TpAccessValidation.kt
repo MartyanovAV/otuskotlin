@@ -31,6 +31,8 @@ fun ICorChainDsl<TrainingPlanContext>.accessValidationTrainingPlan(title: String
                         principal.isTrainer() && principalRelation == FtcPrincipalRelation.OWNER
                     TrainingPlanCommand.ARCHIVE ->
                         principal.isTrainer() && principalRelation == FtcPrincipalRelation.OWNER
+                    TrainingPlanCommand.ACTIVATE ->
+                        principal.isTrainer() && principalRelation == FtcPrincipalRelation.OWNER
                     TrainingPlanCommand.COMPLETE ->
                         principal.isTrainer() && principalRelation == FtcPrincipalRelation.OWNER
                     TrainingPlanCommand.SEARCH -> principal.isTrainer() && principal.userId.isNotBlank()

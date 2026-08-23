@@ -4,6 +4,9 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.Debug
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ExerciseItem
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ExerciseSet
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.RequestDebugMode
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanActivateObject
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanActivateRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanActivateResponse
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanCreateObject
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanCreateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanCreateResponse
@@ -217,9 +220,37 @@ class TrainingPlanMapperTest {
     }
 
     @Test
+    fun `training plan activate request and response map correctly`() {
+        val request =
+            TrainingPlanActivateRequest(
+                requestType = "trainingPlan.activate",
+                requestId = "tp-act-1",
+                trainingPlan = TrainingPlanActivateObject(id = "tp-100", lock = "lock-1"),
+            )
+
+        val context = request.fromTransport()
+
+        assertEquals(TrainingPlanCommand.ACTIVATE, context.command)
+        assertEquals(TrainingPlanId("tp-100"), context.trainingPlanRequest.id)
+
+        context.state = State.FINISHING
+        context.trainingPlanResponse =
+            TrainingPlan(
+                id = TrainingPlanId("tp-100"),
+                title = "Activated Plan",
+                status = InternalTrainingPlanStatus.ACTIVE,
+            )
+
+        val response = context.toTransport() as TrainingPlanActivateResponse
+        assertEquals("Activated Plan", response.trainingPlan?.title)
+        assertEquals(TrainingPlanStatus.ACTIVE, response.trainingPlan?.status)
+    }
+
+    @Test
     fun `training plan search filter status values map to domain`() {
         val cases =
             listOf(
+                TrainingPlanStatus.DRAFT to InternalTrainingPlanStatus.DRAFT,
                 TrainingPlanStatus.ACTIVE to InternalTrainingPlanStatus.ACTIVE,
                 TrainingPlanStatus.ARCHIVED to InternalTrainingPlanStatus.ARCHIVED,
                 null to InternalTrainingPlanStatus.NONE,

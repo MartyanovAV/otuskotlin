@@ -46,7 +46,10 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm \
     --key-type ecdsa \
     $staging_args
 
+# Envoy uses a static TLS context and reads certificates at process startup.
+docker compose -f docker-compose.yml -f docker-compose.prod.yml restart envoy
+
 echo "=============================================================================="
 echo "==> [SUCCESS] Certificate issued successfully for $domain!"
-echo "==> Envoy will automatically reload TLS certificates via inotify (watched_directory)."
+echo "==> Envoy restarted and is now using the issued certificate."
 echo "=============================================================================="

@@ -5,13 +5,9 @@
  * Trainer Diary MVP API v2 для управления клиентской базой и тренировочными планами
  * OpenAPI spec version: 2.0.0
  */
+import type { IResponse } from './iResponse';
+import type { TrainingPlanResponseObject } from './trainingPlanResponseObject';
 
-export type TrainingPlanStatus = typeof TrainingPlanStatus[keyof typeof TrainingPlanStatus];
-
-
-export const TrainingPlanStatus = {
-  DRAFT: 'DRAFT',
-  ACTIVE: 'ACTIVE',
-  ARCHIVED: 'ARCHIVED',
-  COMPLETED: 'COMPLETED',
-} as const;
+export type TrainingPlanActivateResponse = IResponse & {
+  trainingPlan?: TrainingPlanResponseObject;
+};

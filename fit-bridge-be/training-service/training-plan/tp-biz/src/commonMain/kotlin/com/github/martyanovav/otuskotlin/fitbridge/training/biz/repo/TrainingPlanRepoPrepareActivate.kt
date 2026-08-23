@@ -8,30 +8,28 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.FBErro
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus
 
-fun ICorChainDsl<TrainingPlanContext>.trainingPlanRepoPrepareUpdate(title: String) =
+fun ICorChainDsl<TrainingPlanContext>.trainingPlanRepoPrepareActivate(title: String) =
     worker {
         this.title = title
-        description = "Подготовка данных тренировочного плана к обновлению в БД"
+        description = "Подготовка данных тренировочного плана к активации в БД"
         on { state == State.RUNNING }
         handle {
             val ctx = this@handle
-            if (ctx.trainingPlanRepoRead.status !in setOf(TrainingPlanStatus.DRAFT, TrainingPlanStatus.ACTIVE)) {
+            if (ctx.trainingPlanRepoRead.status != TrainingPlanStatus.DRAFT) {
                 ctx.fail(
                     FBError(
                         code = "invalid-status",
                         group = "business",
                         field = "status",
-                        message = "Completed or archived training plan cannot be updated",
+                        message = "Only a draft training plan can be activated",
                     ),
                 )
                 return@handle
             }
             ctx.trainingPlanRepoPrepare =
                 ctx.trainingPlanRepoRead.deepCopy().apply {
-                    this.title = ctx.trainingPlanValidated.title
-                    planItems = ctx.trainingPlanValidated.planItems
-                    version = ctx.trainingPlanValidated.version
                     lock = ctx.trainingPlanValidated.lock
+                    status = TrainingPlanStatus.ACTIVE
                 }
         }
     }

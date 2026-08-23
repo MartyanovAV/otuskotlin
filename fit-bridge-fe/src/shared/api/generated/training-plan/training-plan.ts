@@ -16,6 +16,8 @@ import type {
 } from '@tanstack/vue-query';
 
 import type {
+  TrainingPlanActivateRequestBodyBody,
+  TrainingPlanActivateResponseBodyResponse,
   TrainingPlanArchiveRequestBodyBody,
   TrainingPlanArchiveResponseBodyResponse,
   TrainingPlanCompleteRequestBodyBody,
@@ -365,6 +367,88 @@ export const useTrainingPlanArchive = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getTrainingPlanArchiveMutationOptions(options), queryClient);
+    }
+    export type trainingPlanActivateResponse200 = {
+  data: TrainingPlanActivateResponseBodyResponse
+  status: 200
+}
+
+export type trainingPlanActivateResponseSuccess = (trainingPlanActivateResponse200) & {
+  headers: Headers;
+};
+;
+
+export type trainingPlanActivateResponse = (trainingPlanActivateResponseSuccess)
+
+export const getTrainingPlanActivateUrl = () => {
+
+
+
+
+  return `/trainingPlan/activate`
+}
+
+/**
+ * @summary Активировать тренировочный план
+ */
+export const trainingPlanActivate = async (trainingPlanActivateRequestBodyBody: TrainingPlanActivateRequestBodyBody, options?: Parameters<typeof customInstance>[1]): Promise<trainingPlanActivateResponse> => {
+
+  return customInstance<trainingPlanActivateResponse>(getTrainingPlanActivateUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(trainingPlanActivateRequestBodyBody)
+  }
+);}
+
+
+
+
+
+export const getTrainingPlanActivateMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof trainingPlanActivate>>, TError,{data: TrainingPlanActivateRequestBodyBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof trainingPlanActivate>>, TError,{data: TrainingPlanActivateRequestBodyBody}, TContext> => {
+
+const mutationKey = ['trainingPlanActivate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof trainingPlanActivate>>, {data: TrainingPlanActivateRequestBodyBody}> = (props) => {
+          const {data} = props ?? {};
+
+          return  trainingPlanActivate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type TrainingPlanActivateMutationResult = NonNullable<Awaited<ReturnType<typeof trainingPlanActivate>>>
+    export type TrainingPlanActivateMutationBody = TrainingPlanActivateRequestBodyBody
+    export type TrainingPlanActivateMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Активировать тренировочный план
+ */
+export const useTrainingPlanActivate = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof trainingPlanActivate>>, TError,{data: TrainingPlanActivateRequestBodyBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationReturnType<
+        Awaited<ReturnType<typeof trainingPlanActivate>>,
+        TError,
+        {data: TrainingPlanActivateRequestBodyBody},
+        TContext
+      > => {
+      return useMutation(getTrainingPlanActivateMutationOptions(options), queryClient);
     }
     export type trainingPlanCompleteResponse200 = {
   data: TrainingPlanCompleteResponseBodyResponse

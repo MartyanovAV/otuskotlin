@@ -125,13 +125,15 @@ docker compose -f docker-compose.yml -f docker-compose.local.yml down
 ### Процесс выкатки на сервере:
 1. Скрипт `prepare-prod-config.sh` проверяет наличие всех секретов, подготавливает bootstrap dummy-сертификат (если боевой еще не выпущен) и генерирует `volumes/envoy/envoy.prod.yaml` и `volumes/keycloak/import-prod/fit-bridge-realm.json` из шаблонов без мутации tracked git-файлов.
 2. Скачиваются образы конкретного коммита: `docker compose -f docker-compose.yml -f docker-compose.prod.yml pull`.
-3. Запускаются сервисы: `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build`.
+3. Скрипт `cleanup-legacy-certbot.sh` удаляет старый long-running контейнер Certbot, если он остался от предыдущей версии деплоя. Данные в `volumes/certs` не удаляются.
+4. Запускаются сервисы: `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build`.
+5. Скрипт `ensure-certbot-cron.sh` устанавливает или обновляет host cron для регулярного renewal без дубликатов.
 
 ---
 
 ## 6. Управление SSL-сертификатами Let's Encrypt
 
-В production-контуре Envoy терминирует HTTPS на порту `443` с автоматическим отслеживанием обновлений сертификатов через `watched_directory` (Zero-Downtime Hot-Reload без перезапуска контейнера).
+В production-контуре Envoy терминирует HTTPS на порту `443`. После выпуска или продления сертификата Envoy перезапускается скриптом Certbot и перечитывает сертификат при старте.
 
 ### Первоначальный выпуск боевого сертификата:
 1. Убедитесь, что DNS-запись (A/AAAA) вашего домена указывает на IP-адрес вашего боевого сервера.
@@ -145,12 +147,10 @@ docker compose -f docker-compose.yml -f docker-compose.local.yml down
    ```bash
    sh ./certbot-init.sh
    ```
-   *Certbot пройдет HTTP-01 challenge через порт 80, выпустит ECDSA-сертификат, и Envoy мгновенно на лету подхватит его без перезапуска.*
+   *Certbot пройдет HTTP-01 challenge через порт 80, выпустит ECDSA-сертификат, после чего `certbot-init.sh` перезапустит Envoy.*
 
 ### Автоматическое продление (Auto-Renewal):
-1. **Через встроенный контейнер `certbot`:** сервис `certbot` в `docker-compose.prod.yml` автоматически выполняет проверку и продление каждые 12 часов.
-2. **Через Cron на хосте (с нулевым оверхедом RAM в простое):**
-   Если вы хотите отключить фоновый контейнер certbot ради экономии оперативной памяти на слабом VPS, добавьте задачу в crontab сервера:
+Для продления используется host cron. Скрипт `ensure-certbot-cron.sh` на каждом деплое устанавливает или обновляет задачу без дубликатов. Сервис `certbot` находится в Compose-профиле `certbot` и не запускается вместе с основным production-стеком. Скрипт выполняет `certbot renew`, а затем перезапускает Envoy:
    ```bash
    # Выполнять проверку каждый понедельник в 03:00 ночи
    0 3 * * 1 /home/user/otuskotlin/deploy/certbot-renew.sh >> /var/log/certbot-renew.log 2>&1
@@ -162,4 +162,3 @@ docker compose -f docker-compose.yml -f docker-compose.local.yml down
 docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm \
   --entrypoint certbot certbot renew --dry-run --webroot -w /var/www/certbot
 ```
-

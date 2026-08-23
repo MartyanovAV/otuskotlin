@@ -23,6 +23,7 @@ import {
 import {
   trainingPlanSearch,
   useTrainingPlanCreate,
+  useTrainingPlanActivate,
 } from '@/shared/api/generated/training-plan/training-plan'
 import type { ClientCardResponseObject } from '@/shared/api/generated/models/clientCardResponseObject'
 import type { TrainingPlanResponseObject } from '@/shared/api/generated/models/trainingPlanResponseObject'
@@ -142,6 +143,7 @@ const formatPlanStatus = (status?: TrainingPlanStatus) => {
   if (status === 'ACTIVE') return 'Активен'
   if (status === 'ARCHIVED') return 'В архиве'
   if (status === 'COMPLETED') return 'Завершён'
+  if (status === 'DRAFT') return 'Черновик'
   return 'Черновик'
 }
 
@@ -158,6 +160,8 @@ const formatDifficulty = (diff?: string) => {
 const createMutation = useClientCardCreate()
 const updateMutation = useClientCardUpdate()
 const createPlanMutation = useTrainingPlanCreate()
+const activatePlanMutation = useTrainingPlanActivate()
+const isActivatingPlan = ref(false)
 
 const handleCreateClient = async () => {
   if (!newClient.value.displayName.trim()) return
@@ -264,7 +268,7 @@ const openCreatePlanForClient = () => {
   isCreatePlanOpen.value = true
 }
 
-const handleCreateClientPlan = async () => {
+const handleCreateClientPlan = async (status: TrainingPlanStatus = 'ACTIVE') => {
   if (!selectedClient.value?.id || !canSubmitClientPlan.value) return
   isPlanSubmitting.value = true
   planErrorMessage.value = null
@@ -277,6 +281,7 @@ const handleCreateClientPlan = async () => {
         trainingPlan: {
           title: newClientPlan.value.title.trim(),
           clientCardId: selectedClient.value.id,
+          status,
           planItems: newClientPlan.value.items.map(mapDraftToPlanItem),
         },
       },
@@ -298,6 +303,40 @@ const handleCreateClientPlan = async () => {
     planErrorMessage.value = err instanceof Error ? err.message : 'Произошла ошибка при создании плана'
   } finally {
     isPlanSubmitting.value = false
+  }
+}
+
+const handleActivateClientPlan = async (plan: TrainingPlanResponseObject) => {
+  if (!plan.id || !plan.lock || isActivatingPlan.value) return
+  isActivatingPlan.value = true
+
+  try {
+    const response = await activatePlanMutation.mutateAsync({
+      data: {
+        requestType: 'trainingPlan.activate',
+        requestId: crypto.randomUUID(),
+        trainingPlan: {
+          id: plan.id,
+          lock: plan.lock,
+        },
+      },
+    })
+
+    if (selectedPlanDetails.value && selectedPlanDetails.value.id === plan.id && response.data.trainingPlan) {
+      selectedPlanDetails.value = response.data.trainingPlan
+    }
+
+    if (selectedClient.value?.id) {
+      await queryClient.invalidateQueries({ queryKey: ['clientPlans', selectedClient.value.id] })
+    }
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['trainingPlans'] }),
+      queryClient.invalidateQueries({ queryKey: ['trainingPlansCount'] }),
+    ])
+  } catch (err: unknown) {
+    alert(err instanceof Error ? err.message : 'Не удалось активировать план')
+  } finally {
+    isActivatingPlan.value = false
   }
 }
 
@@ -616,7 +655,7 @@ const formatDate = (isoString?: string) => {
           {{ planErrorMessage }}
         </div>
 
-        <form @submit.prevent="handleCreateClientPlan" class="space-y-4 py-2">
+        <form @submit.prevent="handleCreateClientPlan('ACTIVE')" class="space-y-4 py-2">
           <div class="space-y-1.5">
             <label class="text-sm font-medium text-text-main" for="client-plan-name">Название плана *</label>
             <Input
@@ -631,12 +670,15 @@ const formatDate = (isoString?: string) => {
           <!-- Конструктор элементов плана (Упражнения, Круговые, Суперсеты) -->
           <PlanItemBuilder v-model:items="newClientPlan.items" />
 
-          <DialogFooter>
+          <DialogFooter class="flex flex-col sm:flex-row sm:justify-end gap-2">
             <Button type="button" variant="outline" @click="isCreatePlanOpen = false">
               Отмена
             </Button>
+            <Button type="button" variant="secondary" :disabled="!canSubmitClientPlan" @click="handleCreateClientPlan('DRAFT')" id="save-draft-client-plan-btn">
+              {{ isPlanSubmitting ? 'Сохранение...' : 'Сохранить как черновик' }}
+            </Button>
             <Button type="submit" :disabled="!canSubmitClientPlan" id="submit-client-plan-btn">
-              {{ isPlanSubmitting ? 'Создание...' : 'Создать и назначить' }}
+              {{ isPlanSubmitting ? 'Создание...' : 'Создать и активировать' }}
             </Button>
           </DialogFooter>
         </form>
@@ -711,8 +753,18 @@ const formatDate = (isoString?: string) => {
           <div>
             <PlanShareButton :plan="selectedPlanDetails" variant="outline" placement="top-left" />
           </div>
-          <div>
-            <Button @click="selectedPlanDetails = null">Закрыть</Button>
+          <div class="flex items-center gap-2">
+            <Button
+              v-if="selectedPlanDetails.status === 'DRAFT'"
+              variant="default"
+              class="bg-emerald-600 hover:bg-emerald-700 text-white"
+              @click="handleActivateClientPlan(selectedPlanDetails)"
+              :disabled="isActivatingPlan"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Активировать
+            </Button>
+            <Button variant="outline" @click="selectedPlanDetails = null">Закрыть</Button>
           </div>
         </DialogFooter>
       </DialogContent>
