@@ -126,12 +126,12 @@ jobs:
     needs: [frontend, build]
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-22.04
-    environment: stand
+    environment: prod
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Copy deploy folder to VPS
+      - name: Copy deploy folder to target server
         uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -159,11 +159,12 @@ jobs:
           GREPTIMEDB_USER: ${{ secrets.GREPTIMEDB_USER }}
           GREPTIMEDB_PASS: ${{ secrets.GREPTIMEDB_PASS }}
           FITBRIDGE_PUBLIC_URL: ${{ secrets.FITBRIDGE_PUBLIC_URL }}
+          LETSENCRYPT_EMAIL: ${{ secrets.LETSENCRYPT_EMAIL }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD,KC_DB_NAME,KC_DB_USERNAME,KC_DB_PASSWORD,LIQUIBASE_DB_USERNAME,LIQUIBASE_DB_PASSWORD,DB_NAME,DB_USER,DB_PASSWORD,KC_BOOTSTRAP_ADMIN_USERNAME,KC_BOOTSTRAP_ADMIN_PASSWORD,GREPTIMEDB_USER,GREPTIMEDB_PASS,FITBRIDGE_PUBLIC_URL
+          envs: POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD,KC_DB_NAME,KC_DB_USERNAME,KC_DB_PASSWORD,LIQUIBASE_DB_USERNAME,LIQUIBASE_DB_PASSWORD,DB_NAME,DB_USER,DB_PASSWORD,KC_BOOTSTRAP_ADMIN_USERNAME,KC_BOOTSTRAP_ADMIN_PASSWORD,GREPTIMEDB_USER,GREPTIMEDB_PASS,FITBRIDGE_PUBLIC_URL,LETSENCRYPT_EMAIL
           script: |
             GHCR_USERNAME=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
             COMMIT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
@@ -176,14 +177,14 @@ jobs:
             : "${GREPTIMEDB_PASS:?GREPTIMEDB_PASS is required}"
 
             cd ~/otuskotlin/deploy
-            printf 'GHCR_USERNAME=%s\nAPP_VERSION=%s\nFITBRIDGE_PUBLIC_URL=%s\n' \
-              "$GHCR_USERNAME" "$COMMIT_SHA" "$FITBRIDGE_PUBLIC_URL" > .env
+            printf 'GHCR_USERNAME=%s\nAPP_VERSION=%s\nFITBRIDGE_PUBLIC_URL=%s\nLETSENCRYPT_EMAIL=%s\n' \
+              "$GHCR_USERNAME" "$COMMIT_SHA" "$FITBRIDGE_PUBLIC_URL" "${LETSENCRYPT_EMAIL:-}" > .env
             chmod 600 .env
 
-            sh ./prepare-stand-config.sh
+            sh ./prepare-prod-config.sh
 
             # Login to GHCR to pull images
             echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            docker compose -f docker-compose.yml -f docker-compose.stand.yml pull
-            docker compose -f docker-compose.yml -f docker-compose.stand.yml up -d --no-build
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build

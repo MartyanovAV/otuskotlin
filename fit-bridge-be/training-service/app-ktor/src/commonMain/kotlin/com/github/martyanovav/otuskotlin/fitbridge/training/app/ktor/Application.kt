@@ -25,7 +25,7 @@ fun Application.module(appSettings: AppSettings = initAppSettings()) {
         masking = false
     }
     routing {
-        healthRoutes()
+        healthRoutes(appSettings)
         route("v2") {
             install(ContentNegotiation) {
                 json(appSettings.json)

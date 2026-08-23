@@ -1,0 +1,169 @@
+# ==============================================================================
+# FitBridge Production Override (docker-compose.prod.yml)
+# Включает строгие производственные ограничения:
+#   - OCI-образы из GHCR по версии/SHA;
+#   - Политика перезапуска unless-stopped;
+#   - Ограничения ресурсов (CPU/RAM limits & reservations, cgroups);
+#   - Hardening контейнеров (no-new-privileges);
+#   - Защищенный Keycloak Realm БЕЗ тестовых учетных записей;
+#   - Защищенный Envoy с портами 80/443, авто-SSL (Let's Encrypt), закрытым /admin и доменным CORS;
+#   - Полная изоляция внутренних портов (БД, логи, метрики).
+# Запуск: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build
+# ==============================================================================
+
+services:
+  postgresql:
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  liquibase-training:
+    image: ghcr.io/${GHCR_USERNAME}/fitbridge-migration-pg-training:${APP_VERSION:-latest}
+    restart: "no"
+
+  training-service:
+    image: ghcr.io/${GHCR_USERNAME}/fitbridge-training-service:${APP_VERSION:-latest}
+    restart: unless-stopped
+    environment:
+      JAVA_TOOL_OPTIONS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:InitialRAMPercentage=50.0"
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: 127.0.0.1:24224
+        tag: training.logs
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  frontend:
+    image: ghcr.io/${GHCR_USERNAME}/fitbridge-frontend:${APP_VERSION:-latest}
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+
+  fluent-bit:
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
+        reservations:
+          cpus: '0.05'
+          memory: 32M
+
+  greptimedb:
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+
+  envoy:
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./volumes/envoy/envoy.prod.yaml:/etc/envoy/envoy.yaml:ro
+      - ./volumes/certs:/etc/letsencrypt:ro
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: 127.0.0.1:24224
+        tag: envoy.logs
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+
+  certbot-helper:
+    image: nginx:alpine
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - ./volumes/certbot-webroot:/usr/share/nginx/html/.well-known/acme-challenge:ro
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 32M
+        reservations:
+          cpus: '0.01'
+          memory: 8M
+    networks:
+      - fitbridge-network
+
+  certbot:
+    image: certbot/certbot:latest
+    restart: unless-stopped
+    volumes:
+      - ./volumes/certs:/etc/letsencrypt
+      - ./volumes/certbot-webroot:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done;'"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+        reservations:
+          cpus: '0.01'
+          memory: 16M
+    networks:
+      - fitbridge-network
+
+  keycloak:
+    restart: unless-stopped
+    volumes:
+      - ./volumes/keycloak/import-prod:/opt/keycloak/data/import:ro
+      - ./volumes/keycloak/themes:/opt/keycloak/themes:ro
+    environment:
+      JAVA_OPTS_KC_BUILD: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 768M
+        reservations:
+          cpus: '0.25'
+          memory: 512M

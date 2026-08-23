@@ -34,4 +34,5 @@ data class AppSettings(
     val tpProcessor: TrainingPlanProcessor = TrainingPlanProcessor(tpCorSettings),
     val wsSessionsV1: IFBWsSessionRepo = KtorWsSessionRepo(),
     val wsSessionsV2: IFBWsSessionRepo = KtorWsSessionRepo(),
+    val readyCheck: suspend () -> Boolean = { true },
 )

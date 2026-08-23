@@ -16,10 +16,21 @@ class HealthRoutesTest {
         }
 
     @Test
-    fun `readiness endpoint reports service is ready`() =
+    fun `readiness endpoint reports service is ready when check passes`() =
         testApplication {
             application { module() }
 
             assertEquals(HttpStatusCode.OK, client.get("/health/ready").status)
+        }
+
+    @Test
+    fun `readiness endpoint reports 503 when dependency check fails`() =
+        testApplication {
+            application {
+                module(AppSettings(readyCheck = { false }))
+            }
+
+            val response = client.get("/health/ready")
+            assertEquals(HttpStatusCode.ServiceUnavailable, response.status)
         }
 }

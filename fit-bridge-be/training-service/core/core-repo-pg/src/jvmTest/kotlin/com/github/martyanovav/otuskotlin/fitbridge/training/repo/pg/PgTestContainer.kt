@@ -19,7 +19,7 @@ import java.sql.SQLException
 
 object PgTestContainer {
     val container: PostgreSQLContainer<*> =
-        PostgreSQLContainer("postgres:16-alpine")
+        PostgreSQLContainer("postgres:18-alpine")
             .withDatabaseName("fitbridge_test")
             .withUsername("postgres")
             .withPassword("postgres")

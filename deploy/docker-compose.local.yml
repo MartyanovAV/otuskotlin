@@ -1,0 +1,56 @@
+# ==============================================================================
+# FitBridge Local Development Override (docker-compose.local.yml)
+# Включает локальную сборку из исходников, проброс портов для отладки
+# и монтирование локального Keycloak Realm с тестовыми учетными записями.
+# Запуск: docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
+# ==============================================================================
+
+services:
+  postgresql:
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  training-service:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.app
+      args:
+        SERVICE_NAME: training-service
+        SERVICE_PORT: 8081
+    image: fitbridge-training-service:${APP_VERSION:-local}
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: 127.0.0.1:24224
+        tag: training.logs
+
+  frontend:
+    build:
+      context: ../fit-bridge-fe
+      dockerfile: Dockerfile
+    image: fitbridge-frontend:${APP_VERSION:-local}
+
+  fluent-bit:
+    ports:
+      - "127.0.0.1:2020:2020"
+
+  greptimedb:
+    ports:
+      - "127.0.0.1:4000:4000"
+      - "127.0.0.1:4001:4001"
+      - "127.0.0.1:4002:4002"
+      - "127.0.0.1:4003:4003"
+
+  envoy:
+    volumes:
+      - ./volumes/envoy/envoy.local.yaml:/etc/envoy/envoy.yaml:ro
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: 127.0.0.1:24224
+        tag: envoy.logs
+
+  keycloak:
+    volumes:
+      - ./volumes/keycloak/import:/opt/keycloak/data/import:ro
+      - ./volumes/keycloak/themes:/opt/keycloak/themes:ro
