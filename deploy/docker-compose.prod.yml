@@ -120,7 +120,7 @@ services:
     security_opt:
       - no-new-privileges:true
     volumes:
-      - ./volumes/certbot-webroot:/usr/share/nginx/html/.well-known/acme-challenge:ro
+      - ./volumes/certbot-webroot:/usr/share/nginx/html:ro
     deploy:
       resources:
         limits:
@@ -138,7 +138,28 @@ services:
     volumes:
       - ./volumes/certs:/etc/letsencrypt
       - ./volumes/certbot-webroot:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done;'"
+    environment:
+      FITBRIDGE_PUBLIC_URL: ${FITBRIDGE_PUBLIC_URL}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+    entrypoint: 
+      - "/bin/sh"
+      - "-c"
+      - |
+        DOMAIN=$$(echo $$FITBRIDGE_PUBLIC_URL | sed -e "s|^https://||" -e "s|:.*$$||" -e "s|/.*$$||")
+        if [ ! -f "/etc/letsencrypt/renewal/$$DOMAIN.conf" ]; then
+          echo "No renewal config found for $$DOMAIN. Waiting for Envoy to start..."
+          sleep 10
+          echo "Removing dummy certificates..."
+          rm -rf /etc/letsencrypt/live/$$DOMAIN
+          rm -rf /etc/letsencrypt/archive/$$DOMAIN
+          echo "Requesting initial Let's Encrypt certificate for $$DOMAIN..."
+          certbot certonly --webroot -w /var/www/certbot -d "$$DOMAIN" --email "$$LETSENCRYPT_EMAIL" --rsa-key-size 2048 --agree-tos --non-interactive
+          chmod -R 755 /etc/letsencrypt/archive /etc/letsencrypt/live 2>/dev/null || true
+        fi
+        trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet --deploy-hook "chmod -R 755 /etc/letsencrypt/archive /etc/letsencrypt/live"; sleep 12h & wait $${!}; done;
+    depends_on:
+      envoy:
+        condition: service_started
     deploy:
       resources:
         limits:

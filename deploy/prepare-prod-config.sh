@@ -37,8 +37,9 @@ if [ ! -f "$cert_dir/fullchain.pem" ] || [ ! -f "$cert_dir/privkey.pem" ]; then
         -keyout "$cert_dir/privkey.pem" \
         -out "$cert_dir/fullchain.pem" \
         -subj "/CN=$domain" 2>/dev/null
-    chmod 600 "$cert_dir/privkey.pem"
+    chmod 644 "$cert_dir/privkey.pem"
     chmod 644 "$cert_dir/fullchain.pem"
+    chmod 755 "volumes/certs" "volumes/certs/live" "volumes/certs/live/$domain" 2>/dev/null || true
     echo "  [OK] Temporary bootstrap certificate created for $domain"
 else
     echo "  [OK] SSL certificate exists for $domain"
