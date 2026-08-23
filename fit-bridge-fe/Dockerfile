@@ -10,7 +10,7 @@ COPY . ./
 
 # Safe fallbacks for an image started without runtime config.js.
 ARG VITE_API_BASE_URL=/v2
-ARG VITE_KEYCLOAK_URL=http://localhost:8080
+ARG VITE_KEYCLOAK_URL=
 ARG VITE_KEYCLOAK_REALM=fit-bridge
 ARG VITE_KEYCLOAK_CLIENT_ID=fit-bridge-web
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL \

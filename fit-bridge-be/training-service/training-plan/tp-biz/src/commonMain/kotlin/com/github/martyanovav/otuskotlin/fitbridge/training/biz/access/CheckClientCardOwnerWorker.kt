@@ -18,7 +18,7 @@ fun ICorChainDsl<TrainingPlanContext>.checkClientCardOwner(title: String) =
         description = "Проверка того, что план тренировок привязывается к карточке клиента, принадлежащей пользователю"
         on { state == State.RUNNING && command == TrainingPlanCommand.CREATE }
         handle {
-            val ctx = this@handle as TrainingPlanContext
+            val ctx = this@handle
             val response =
                 ctx.clientCardRepo.readClientCard(
                     DbClientCardIdRequest(ctx.trainingPlanValidating.clientCardId, ClientCardLock.NONE),

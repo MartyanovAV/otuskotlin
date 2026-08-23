@@ -15,7 +15,7 @@ fun ICorChainDsl<TrainingPlanContext>.trainingPlanRepoSearch(title: String) =
         description = "Поиск тренировочных планов в БД по фильтру"
         on { state == State.RUNNING }
         handle {
-            val ctx = this@handle as TrainingPlanContext
+            val ctx = this@handle
             val request =
                 DbTrainingPlanFilterRequest(
                     clientCardId = ctx.trainingPlanFilterValidated.clientCardId,

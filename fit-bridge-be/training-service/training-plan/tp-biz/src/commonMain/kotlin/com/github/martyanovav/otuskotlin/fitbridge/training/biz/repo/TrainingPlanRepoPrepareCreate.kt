@@ -11,7 +11,7 @@ fun ICorChainDsl<TrainingPlanContext>.trainingPlanRepoPrepareCreate(title: Strin
         description = "Подготовка тренировочного плана к сохранению в БД"
         on { state == State.RUNNING }
         handle {
-            val ctx = this@handle as TrainingPlanContext
+            val ctx = this@handle
             ctx.trainingPlanRepoPrepare = ctx.trainingPlanValidated.deepCopy()
         }
     }

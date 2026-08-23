@@ -15,7 +15,7 @@ fun ICorChainDsl<TrainingPlanContext>.initTrainingPlanRepo(title: String) =
         this.title = title
         description = "Вычисление рабочего репозитория для тренировочных планов"
         handle {
-            val ctx = this@handle as TrainingPlanContext
+            val ctx = this@handle
             ctx.trainingPlanRepo =
                 when {
                     ctx.workMode == WorkMode.TEST -> ctx.corSettings.repoTrainingPlanTest

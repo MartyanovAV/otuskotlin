@@ -12,7 +12,7 @@ fun ICorChainDsl<TrainingPlanContext>.resolveTrainingPlanRelation(title: String)
         description = "Вычисление отношения пользователя к плану тренировок"
         on { principal.userId.isNotBlank() }
         handle {
-            val ctx = this@handle as TrainingPlanContext
+            val ctx = this@handle
             ctx.principalRelation =
                 when {
                     // For CREATE, we will trust repo checks or validate clientCard separately

@@ -16,7 +16,7 @@ fun ICorChainDsl<TrainingPlanContext>.trainingPlanRepoRead(title: String) =
         description = "Чтение тренировочного плана из БД"
         on { state == State.RUNNING }
         handle {
-            val ctx = this@handle as TrainingPlanContext
+            val ctx = this@handle
             val request = DbTrainingPlanIdRequest(ctx.trainingPlanValidated)
             when (val result = ctx.trainingPlanRepo.readTrainingPlan(request)) {
                 is DbTrainingPlanResponseOk -> ctx.trainingPlanRepoRead = result.data

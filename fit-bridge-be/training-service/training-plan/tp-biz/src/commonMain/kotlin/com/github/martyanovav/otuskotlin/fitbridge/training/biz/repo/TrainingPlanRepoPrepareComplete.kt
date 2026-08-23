@@ -14,7 +14,7 @@ fun ICorChainDsl<TrainingPlanContext>.trainingPlanRepoPrepareComplete(title: Str
         description = "Подготовка данных тренировочного плана к завершению в БД"
         on { state == State.RUNNING }
         handle {
-            val ctx = this@handle as TrainingPlanContext
+            val ctx = this@handle
             if (ctx.trainingPlanRepoRead.status != TrainingPlanStatus.ACTIVE) {
                 ctx.fail(
                     FBError(

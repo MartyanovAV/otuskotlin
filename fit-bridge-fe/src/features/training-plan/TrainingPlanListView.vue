@@ -14,7 +14,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/shared/ui/dialog'
-import { trainingPlanSearch, useTrainingPlanCreate } from '@/shared/api/generated/training-plan/training-plan'
+import { trainingPlanSearch, useTrainingPlanCreate, useTrainingPlanUpdate } from '@/shared/api/generated/training-plan/training-plan'
 import { clientCardSearch } from '@/shared/api/generated/client-card/client-card'
 import type { TrainingPlanResponseObject } from '@/shared/api/generated/models/trainingPlanResponseObject'
 import type { ClientCardResponseObject } from '@/shared/api/generated/models/clientCardResponseObject'
@@ -26,6 +26,7 @@ import CompleteTrainingModal from './ui/CompleteTrainingModal.vue'
 import {
   type PlanItemDraft,
   mapDraftToPlanItem,
+  mapPlanItemToDraft,
   formatPlanStructureSummary,
 } from './model/types'
 
@@ -171,6 +172,86 @@ const handleCreatePlan = async () => {
     errorMessage.value = err instanceof Error ? err.message : 'Произошла ошибка, попробуйте позже'
   } finally {
     isSubmitting.value = false
+  }
+}
+
+const isEditOpen = ref(false)
+const isUpdating = ref(false)
+const editErrorMessage = ref<string | null>(null)
+const editPlan = ref({
+  id: '',
+  lock: '',
+  clientCardId: '',
+  title: '',
+  items: [] as PlanItemDraft[],
+})
+
+const updateMutation = useTrainingPlanUpdate()
+
+const openEditPlan = (plan: TrainingPlanResponseObject) => {
+  if (plan.status !== 'ACTIVE' || plan.completedAt) {
+    return
+  }
+  editErrorMessage.value = null
+  editPlan.value = {
+    id: plan.id ?? '',
+    lock: plan.lock ?? '',
+    clientCardId: plan.clientCardId ?? '',
+    title: plan.title ?? '',
+    items: (plan.planItems ?? []).map(mapPlanItemToDraft),
+  }
+  isEditOpen.value = true
+}
+
+const canSubmitEditPlan = computed(
+  () =>
+    editPlan.value.title.trim().length >= 3 &&
+    editPlan.value.items.length > 0 &&
+    !isUpdating.value,
+)
+
+const handleUpdatePlan = async () => {
+  const { id, lock } = editPlan.value
+  const title = editPlan.value.title.trim()
+
+  if (!id || !lock || !title) {
+    editErrorMessage.value = 'Данные плана устарели. Пожалуйста, обновите страницу и повторите попытку.'
+    return
+  }
+
+  isUpdating.value = true
+  editErrorMessage.value = null
+
+  try {
+    const response = await updateMutation.mutateAsync({
+      data: {
+        requestType: 'trainingPlan.update',
+        requestId: crypto.randomUUID(),
+        trainingPlan: {
+          id,
+          lock,
+          title,
+          planItems: editPlan.value.items.map(mapDraftToPlanItem),
+        },
+      },
+    })
+
+    // Обновляем выбранный план, если открыта детальная модалка
+    if (selectedPlan.value && selectedPlan.value.id === id && response.data.trainingPlan) {
+      selectedPlan.value = response.data.trainingPlan
+    }
+
+    // Инвалидируем кэши TanStack Query
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['trainingPlans'] }),
+      queryClient.invalidateQueries({ queryKey: ['trainingPlansCount'] }),
+    ])
+
+    isEditOpen.value = false
+  } catch (err: unknown) {
+    editErrorMessage.value = err instanceof Error ? err.message : 'Произошла ошибка, попробуйте позже'
+  } finally {
+    isUpdating.value = false
   }
 }
 
@@ -351,14 +432,9 @@ const formatDifficulty = (diff?: string) => {
                 </div>
               </td>
               <td class="px-4 py-4 whitespace-nowrap">
-                <div class="flex flex-col gap-1">
-                  <Badge :variant="plan.status === 'ACTIVE' ? 'default' : 'secondary'" class="w-fit">
-                    {{ formatPlanStatus(plan.status) }}
-                  </Badge>
-                  <span v-if="plan.completedAt" class="text-[10px] font-medium text-primary">
-                    Завершён
-                  </span>
-                </div>
+                <Badge :variant="plan.status === 'ACTIVE' ? 'default' : 'secondary'" class="w-fit">
+                  {{ formatPlanStatus(plan.status) }}
+                </Badge>
               </td>
               <td class="px-4 py-4 whitespace-nowrap">
                 <div class="flex items-center gap-1.5">
@@ -377,10 +453,23 @@ const formatDifficulty = (diff?: string) => {
                 <div class="flex items-center justify-end gap-2" @click.stop>
                   <PlanShareButton :plan="plan" :show-label="false" />
                   <Button
+                    v-if="plan.status === 'ACTIVE' && !plan.completedAt"
+                    variant="outline"
+                    size="sm"
+                    class="h-8 text-xs group-hover:border-primary/50 group-hover:text-primary"
+                    @click.stop="openEditPlan(plan)"
+                    :id="`edit-plan-btn-${plan.id}`"
+                    title="Редактировать план"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                    Изменить
+                  </Button>
+                  <Button
                     variant="outline"
                     size="sm"
                     class="h-8 text-xs group-hover:border-primary/50 group-hover:text-primary"
                     @click.stop="selectedPlan = plan"
+                    :id="`view-plan-btn-${plan.id}`"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                     Состав
@@ -458,24 +547,75 @@ const formatDifficulty = (diff?: string) => {
       </DialogContent>
     </Dialog>
 
+    <!-- Модальное окно редактирования тренировочного плана -->
+    <Dialog :open="isEditOpen" @update:open="isEditOpen = $event">
+      <DialogContent class="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Редактирование плана</DialogTitle>
+          <DialogDescription>
+            Внесите изменения в параметры плана и состав тренировки
+          </DialogDescription>
+        </DialogHeader>
+
+        <div v-if="editErrorMessage" class="p-3 bg-danger-soft text-danger text-xs rounded-md" id="edit-plan-error">
+          {{ editErrorMessage }}
+        </div>
+
+        <form @submit.prevent="handleUpdatePlan" class="space-y-4 py-2">
+          <div class="space-y-1.5">
+            <label class="text-sm font-medium text-text-main" for="edit-plan-name">Название плана *</label>
+            <Input
+              id="edit-plan-name"
+              v-model="editPlan.title"
+              placeholder="например, Силовой 4-недельный цикл"
+              required
+              class="bg-surface-2"
+            />
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="text-sm font-medium text-text-muted">Клиент</label>
+            <div class="flex items-center gap-2 p-2.5 rounded-md border border-border bg-surface-3 text-sm text-text-main">
+              <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-surface-2 text-[11px] font-medium text-text-muted">
+                {{ getClientNameById(editPlan.clientCardId).substring(0, 1).toUpperCase() }}
+              </span>
+              <span>{{ getClientNameById(editPlan.clientCardId) }}</span>
+            </div>
+          </div>
+
+          <!-- Конструктор элементов плана (Упражнения, Круговые, Суперсеты) -->
+          <PlanItemBuilder v-model:items="editPlan.items" />
+
+          <DialogFooter>
+            <Button type="button" variant="outline" @click="isEditOpen = false">
+              Отмена
+            </Button>
+            <Button type="submit" :disabled="!canSubmitEditPlan" id="save-plan-btn">
+              {{ isUpdating ? 'Сохранение...' : 'Сохранить изменения' }}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+
     <!-- Модальное окно деталей плана -->
     <Dialog :open="!!selectedPlan" @update:open="(val) => { if (!val) selectedPlan = null }">
       <DialogContent v-if="selectedPlan" class="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <div class="flex justify-between items-start">
-            <div>
-              <DialogTitle>{{ selectedPlan.title }}</DialogTitle>
-              <DialogDescription class="mt-1">
-                {{ getClientNameById(selectedPlan.clientCardId) }}
-              </DialogDescription>
-            </div>
+          <DialogTitle>{{ selectedPlan.title }}</DialogTitle>
+          <DialogDescription>
+            Клиент: {{ getClientNameById(selectedPlan.clientCardId) }}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div class="space-y-3 py-2 text-sm">
+          <div class="flex justify-between border-b border-border pb-2">
+            <span class="text-text-muted">Статус:</span>
             <Badge :variant="selectedPlan.status === 'ACTIVE' ? 'default' : 'secondary'">
               {{ formatPlanStatus(selectedPlan.status) }}
             </Badge>
           </div>
-        </DialogHeader>
 
-        <div class="space-y-3 py-2">
           <!-- Блок с информацией о завершении -->
           <div v-if="selectedPlan.completedAt" class="p-3 bg-primary-soft/30 rounded-lg border border-primary/20 space-y-1 mb-2">
             <div class="flex items-center justify-between">
@@ -492,25 +632,33 @@ const formatDifficulty = (diff?: string) => {
             </div>
           </div>
 
-          <div class="flex items-center justify-between">
-            <h4 class="text-xs font-semibold text-text-muted uppercase tracking-wider">
-              Состав плана ({{ (selectedPlan.planItems ?? []).length }}):
-            </h4>
-            <span class="text-xs text-text-muted">
-              {{ formatPlanStructureSummary(selectedPlan.planItems) }}
-            </span>
+          <div class="flex justify-between text-xs text-text-faint pb-1">
+            <span>Дата создания:</span>
+            <span class="font-medium text-text-muted">{{ formatDate(selectedPlan.createdAt) }}</span>
           </div>
 
-          <div v-if="(selectedPlan.planItems ?? []).length === 0" class="text-sm text-text-muted italic">
-            В плане нет элементов
-          </div>
-          <div v-else class="space-y-2.5 max-h-[60vh] overflow-y-auto pr-1">
-            <PlanItemCard
-              v-for="(item, idx) in selectedPlan.planItems"
-              :key="item.id || idx"
-              :item="item"
-              :index="idx"
-            />
+          <!-- Секция состава плана -->
+          <div class="border-t border-border pt-3 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <h4 class="font-semibold text-sm text-text-main">
+                Состав плана ({{ (selectedPlan.planItems ?? []).length }}):
+              </h4>
+              <span class="text-xs text-text-muted">
+                {{ formatPlanStructureSummary(selectedPlan.planItems) }}
+              </span>
+            </div>
+
+            <div v-if="(selectedPlan.planItems ?? []).length === 0" class="text-sm text-text-muted italic">
+              В плане нет элементов
+            </div>
+            <div v-else class="space-y-2.5 max-h-[50vh] overflow-y-auto pr-1">
+              <PlanItemCard
+                v-for="(item, idx) in selectedPlan.planItems"
+                :key="item.id || idx"
+                :item="item"
+                :index="idx"
+              />
+            </div>
           </div>
         </div>
 
@@ -519,6 +667,15 @@ const formatDifficulty = (diff?: string) => {
             <PlanShareButton :plan="selectedPlan" variant="outline" placement="top-left" />
           </div>
           <div class="flex items-center justify-end gap-2">
+            <Button
+              v-if="selectedPlan.status === 'ACTIVE' && !selectedPlan.completedAt"
+              variant="outline"
+              @click="openEditPlan(selectedPlan)"
+              id="details-edit-plan-btn"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+              Редактировать
+            </Button>
             <Button
               v-if="selectedPlan.status === 'ACTIVE' && !selectedPlan.completedAt"
               variant="default"

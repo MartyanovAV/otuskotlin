@@ -16,7 +16,7 @@ fun ICorChainDsl<TrainingPlanContext>.trainingPlanRepoCreate(title: String) =
         description = "Создание тренировочного плана в БД"
         on { state == State.RUNNING }
         handle {
-            val ctx = this@handle as TrainingPlanContext
+            val ctx = this@handle
             val request = DbTrainingPlanRequest(ctx.trainingPlanRepoPrepare)
             when (val result = ctx.trainingPlanRepo.createTrainingPlan(request)) {
                 is DbTrainingPlanResponseOk -> ctx.trainingPlanRepoDone = result.data

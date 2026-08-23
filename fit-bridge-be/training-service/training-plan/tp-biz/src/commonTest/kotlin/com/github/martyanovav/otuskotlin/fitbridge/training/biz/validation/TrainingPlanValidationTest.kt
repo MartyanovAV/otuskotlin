@@ -15,6 +15,9 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.Supers
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlan
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanCommand
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanFilter
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanId
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanLock
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.TrainingPlanStatus
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.WorkMode
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.inmemory.RepoClientCardInMemory
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.inmemory.RepoTrainingPlanInMemory
@@ -199,6 +202,57 @@ class TrainingPlanValidationTest {
                 ),
                 ctx.errors.map { it.code }.toSet(),
             )
+        }
+
+    @Test
+    fun completedPlanCannotBeUpdated() =
+        runTest {
+            val planRepo =
+                RepoTrainingPlanInMemory().apply {
+                    save(
+                        listOf(
+                            TrainingPlan(
+                                id = TrainingPlanId("00000000-0000-0000-0000-000000000201"),
+                                clientCardId = ClientCardId("client-1"),
+                                ownerUserId = "user-1",
+                                createdByUserId = "user-1",
+                                title = "Завершенная тренировка",
+                                status = TrainingPlanStatus.COMPLETED,
+                                lock = TrainingPlanLock("lock-1"),
+                                planItems = listOf(ExerciseItem(id = "00000000-0000-0000-0000-000000000301", title = "Приседания")),
+                            ),
+                        ),
+                    )
+                }
+            val testProcessor =
+                TrainingPlanProcessor(
+                    TrainingPlanCorSettings(
+                        repoTrainingPlanTest = planRepo,
+                        repoClientCardTest =
+                            RepoClientCardInMemory().apply {
+                                save(listOf(ClientCard(id = ClientCardId("client-1"), ownerUserId = "user-1", createdByUserId = "user-1")))
+                            },
+                    ),
+                )
+
+            val ctx =
+                TrainingPlanContext(
+                    command = TrainingPlanCommand.UPDATE,
+                    workMode = WorkMode.TEST,
+                    principal = AuthPrincipal(userId = "user-1", roles = setOf(AuthPrincipal.TRAINER_ROLE)),
+                    trainingPlanRequest =
+                        TrainingPlan(
+                            id = TrainingPlanId("00000000-0000-0000-0000-000000000201"),
+                            lock = TrainingPlanLock("lock-1"),
+                            title = "Попытка обновить",
+                            planItems = listOf(ExerciseItem(id = "00000000-0000-0000-0000-000000000301", title = "Приседания")),
+                        ),
+                )
+
+            testProcessor.exec(ctx)
+
+            assertEquals(State.FAILING, ctx.state)
+            assertEquals(setOf("invalid-status"), ctx.errors.map { it.code }.toSet())
         }
 
     @Test

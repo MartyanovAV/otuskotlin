@@ -8,6 +8,7 @@ import * as clientApi from '../shared/api/generated/client-card/client-card'
 vi.mock('../shared/api/generated/training-plan/training-plan', () => ({
   trainingPlanSearch: vi.fn<(...args: unknown[]) => unknown>(),
   useTrainingPlanCreate: vi.fn<(...args: unknown[]) => unknown>(),
+  useTrainingPlanUpdate: vi.fn<(...args: unknown[]) => unknown>(),
   useTrainingPlanComplete: vi.fn<(...args: unknown[]) => unknown>(() => ({
     mutateAsync: vi.fn<(...args: unknown[]) => unknown>(),
   })),
@@ -239,6 +240,269 @@ describe('TrainingPlanListView Table View and Plan Items', () => {
 
     expect((clientSelect.element as HTMLSelectElement).value).toBe('')
     expect((statusSelect.element as HTMLSelectElement).value).toBe('')
+
+    wrapper.unmount()
+  })
+
+  it('opens edit modal with pre-filled plan data and submits update request', async () => {
+    const mockClients = [
+      { id: 'client-1', displayName: 'Дмитрий Кузнецов' },
+    ]
+
+    const mockPlan = {
+      id: 'plan-101',
+      lock: 'lock-test-123',
+      title: 'Силовая база',
+      clientCardId: 'client-1',
+      status: 'ACTIVE' as const,
+      createdAt: '2026-08-22T10:00:00Z',
+      planItems: [
+        {
+          id: 'item-1',
+          itemType: 'EXERCISE' as const,
+          title: 'Приседания со штангой',
+          description: '3 подх. × 10 повт. (100 кг), отдых 90 с',
+          sets: [
+            { reps: '10', weight: '100', weightUnit: 'KG', durationSeconds: 0 },
+            { reps: '10', weight: '100', weightUnit: 'KG', durationSeconds: 0 },
+            { reps: '10', weight: '100', weightUnit: 'KG', durationSeconds: 0 },
+          ],
+          restBetweenSetsSeconds: 90,
+        },
+      ],
+    }
+
+    vi.mocked(clientApi.clientCardSearch).mockResolvedValue({
+      data: {
+        responseType: 'clientCard.search',
+        result: 'success',
+        clientCards: mockClients,
+        totalSize: 1,
+      },
+      status: 200,
+      headers: new Headers(),
+    })
+
+    vi.mocked(planApi.trainingPlanSearch).mockResolvedValue({
+      data: {
+        responseType: 'trainingPlan.search',
+        result: 'success',
+        trainingPlans: [mockPlan],
+        totalSize: 1,
+      },
+      status: 200,
+      headers: new Headers(),
+    })
+
+    const updateMutateAsync = vi.fn<(...args: unknown[]) => unknown>().mockResolvedValue({
+      data: {
+        responseType: 'trainingPlan.update',
+        result: 'success',
+        trainingPlan: {
+          ...mockPlan,
+          title: 'Обновленная силовая база',
+          lock: 'lock-new-456',
+        },
+      },
+      status: 200,
+      headers: new Headers(),
+    })
+
+    vi.mocked(planApi.useTrainingPlanUpdate).mockReturnValue({
+      mutateAsync: updateMutateAsync,
+    } as unknown as ReturnType<typeof planApi.useTrainingPlanUpdate>)
+
+    const wrapper = mount(TrainingPlanListView, {
+      attachTo: document.body,
+      global: {
+        plugins: [[VueQueryPlugin, { queryClient }]],
+      },
+    })
+
+    await flushPromises()
+
+    // Нажимаем кнопку "Изменить" в таблице
+    const editBtn = wrapper.find('#edit-plan-btn-plan-101')
+    expect(editBtn.exists()).toBe(true)
+    await editBtn.trigger('click')
+    await flushPromises()
+
+    // Проверяем открытие модалки и предзаполнение заголовка
+    const editTitleInput = document.body.querySelector('#edit-plan-name') as HTMLInputElement
+    expect(editTitleInput).not.toBeNull()
+    expect(editTitleInput.value).toBe('Силовая база')
+    expect(document.body.textContent).toContain('Дмитрий Кузнецов')
+    expect(document.body.textContent).toContain('Приседания со штангой')
+
+    // Меняем название
+    editTitleInput.value = 'Обновленная силовая база'
+    editTitleInput.dispatchEvent(new Event('input'))
+    await flushPromises()
+
+    // Нажимаем кнопку сохранения
+    const saveBtn = document.body.querySelector('#save-plan-btn') as HTMLButtonElement
+    expect(saveBtn).not.toBeNull()
+    expect(saveBtn.disabled).toBe(false)
+    saveBtn.click()
+    await flushPromises()
+
+    // Проверяем вызов useTrainingPlanUpdate
+    expect(updateMutateAsync).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        requestType: 'trainingPlan.update',
+        trainingPlan: expect.objectContaining({
+          id: 'plan-101',
+          lock: 'lock-test-123',
+          title: 'Обновленная силовая база',
+          planItems: expect.arrayContaining([
+            expect.objectContaining({
+              itemType: 'EXERCISE',
+              title: 'Приседания со штангой',
+            }),
+          ]),
+        }),
+      }),
+    })
+
+    wrapper.unmount()
+  })
+
+  it('displays error message when update fails (concurrency conflict)', async () => {
+    const mockClients = [{ id: 'client-1', displayName: 'Дмитрий' }]
+    const mockPlan = {
+      id: 'plan-102',
+      lock: 'lock-old',
+      title: 'Кардио план',
+      clientCardId: 'client-1',
+      status: 'ACTIVE' as const,
+      createdAt: '2026-08-22T10:00:00Z',
+      planItems: [
+        {
+          id: 'item-1',
+          itemType: 'EXERCISE' as const,
+          title: 'Бег',
+          sets: [{ reps: '1', durationSeconds: 600 }],
+        },
+      ],
+    }
+
+    vi.mocked(clientApi.clientCardSearch).mockResolvedValue({
+      data: {
+        responseType: 'clientCard.search',
+        result: 'success',
+        clientCards: mockClients,
+        totalSize: 1,
+      },
+      status: 200,
+      headers: new Headers(),
+    })
+
+    vi.mocked(planApi.trainingPlanSearch).mockResolvedValue({
+      data: {
+        responseType: 'trainingPlan.search',
+        result: 'success',
+        trainingPlans: [mockPlan],
+        totalSize: 1,
+      },
+      status: 200,
+      headers: new Headers(),
+    })
+
+    const updateMutateAsync = vi.fn<(...args: unknown[]) => unknown>().mockRejectedValue(
+      new Error('План был изменен другим пользователем. Обновите данные.')
+    )
+
+    vi.mocked(planApi.useTrainingPlanUpdate).mockReturnValue({
+      mutateAsync: updateMutateAsync,
+    } as unknown as ReturnType<typeof planApi.useTrainingPlanUpdate>)
+
+    const wrapper = mount(TrainingPlanListView, {
+      attachTo: document.body,
+      global: {
+        plugins: [[VueQueryPlugin, { queryClient }]],
+      },
+    })
+
+    await flushPromises()
+
+    const editBtn = wrapper.find('#edit-plan-btn-plan-102')
+    await editBtn.trigger('click')
+    await flushPromises()
+
+    const saveBtn = document.body.querySelector('#save-plan-btn') as HTMLButtonElement
+    saveBtn.click()
+    await flushPromises()
+
+    const errorEl = document.body.querySelector('#edit-plan-error')
+    expect(errorEl).not.toBeNull()
+    expect(errorEl?.textContent).toContain('План был изменен другим пользователем')
+
+    wrapper.unmount()
+  })
+
+  it('does not render edit button for completed training plans', async () => {
+    const mockClients = [{ id: 'client-1', displayName: 'Дмитрий' }]
+    const mockCompletedPlan = {
+      id: 'plan-completed-1',
+      lock: 'lock-completed',
+      title: 'Завершенная тренировка',
+      clientCardId: 'client-1',
+      status: 'COMPLETED' as const,
+      completedAt: '2026-08-22T12:00:00Z',
+      createdAt: '2026-08-22T10:00:00Z',
+      planItems: [
+        {
+          id: 'item-1',
+          itemType: 'EXERCISE' as const,
+          title: 'Бег',
+          sets: [{ reps: '1', durationSeconds: 600 }],
+        },
+      ],
+    }
+
+    vi.mocked(clientApi.clientCardSearch).mockResolvedValue({
+      data: {
+        responseType: 'clientCard.search',
+        result: 'success',
+        clientCards: mockClients,
+        totalSize: 1,
+      },
+      status: 200,
+      headers: new Headers(),
+    })
+
+    vi.mocked(planApi.trainingPlanSearch).mockResolvedValue({
+      data: {
+        responseType: 'trainingPlan.search',
+        result: 'success',
+        trainingPlans: [mockCompletedPlan],
+        totalSize: 1,
+      },
+      status: 200,
+      headers: new Headers(),
+    })
+
+    const wrapper = mount(TrainingPlanListView, {
+      attachTo: document.body,
+      global: {
+        plugins: [[VueQueryPlugin, { queryClient }]],
+      },
+    })
+
+    await flushPromises()
+
+    // Кнопка редактирования в строке таблицы не должна отображаться
+    const editBtn = wrapper.find('#edit-plan-btn-plan-completed-1')
+    expect(editBtn.exists()).toBe(false)
+
+    // Открываем модальное окно деталей
+    const planRow = wrapper.find('#plan-row-plan-completed-1')
+    await planRow.trigger('click')
+    await flushPromises()
+
+    // Кнопка редактирования в деталях также не должна отображаться
+    const detailsEditBtn = document.body.querySelector('#details-edit-plan-btn')
+    expect(detailsEditBtn).toBeNull()
 
     wrapper.unmount()
   })

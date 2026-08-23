@@ -148,7 +148,7 @@ fun ICorChainDsl<TrainingPlanContext>.prepareTrainingPlanValidation(
     resetIdentity: Boolean = false,
 ) = worker {
     this.title = title
-    on { this is TrainingPlanContext }
+    on { true }
     handle {
         val ctx = trainingPlanContext
         ctx.trainingPlanValidating =
@@ -175,7 +175,7 @@ fun ICorChainDsl<TrainingPlanContext>.prepareTrainingPlanValidation(
 fun ICorChainDsl<TrainingPlanContext>.prepareTrainingPlanFilterValidation(title: String) =
     worker {
         this.title = title
-        on { this is TrainingPlanContext }
+        on { true }
         handle {
             val ctx = trainingPlanContext
             ctx.trainingPlanFilterValidating =
@@ -468,7 +468,7 @@ fun ICorChainDsl<TrainingPlanContext>.validateTrainingPlanPageSize(title: String
 fun ICorChainDsl<TrainingPlanContext>.finishTrainingPlanValidation(title: String) =
     worker {
         this.title = title
-        on { state == State.RUNNING && this is TrainingPlanContext }
+        on { state == State.RUNNING }
         handle {
             val ctx = trainingPlanContext
             ctx.trainingPlanValidated = ctx.trainingPlanValidating
@@ -478,7 +478,7 @@ fun ICorChainDsl<TrainingPlanContext>.finishTrainingPlanValidation(title: String
 fun ICorChainDsl<TrainingPlanContext>.finishTrainingPlanFilterValidation(title: String) =
     worker {
         this.title = title
-        on { state == State.RUNNING && this is TrainingPlanContext }
+        on { state == State.RUNNING }
         handle {
             val ctx = trainingPlanContext
             ctx.trainingPlanFilterValidated = ctx.trainingPlanFilterValidating
