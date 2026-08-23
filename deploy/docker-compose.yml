@@ -144,7 +144,7 @@ services:
       - fitbridge-network
 
   envoy:
-    image: envoyproxy/envoy:v1.29.0
+    image: envoyproxy/envoy:v1.39.0
     volumes:
       - ./volumes/envoy/envoy.yaml:/etc/envoy/envoy.yaml
     ports:
@@ -171,7 +171,7 @@ services:
       - fitbridge-network
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.1.0
+    image: quay.io/keycloak/keycloak:26.7.1
     volumes:
       - ./volumes/keycloak/import:/opt/keycloak/data/import
       - ./volumes/keycloak/themes:/opt/keycloak/themes:ro
@@ -192,14 +192,16 @@ services:
       timeout: 5s
       retries: 15
     command:
-      - start-dev
+      - start
       - --import-realm
+      - --http-enabled
+      - "true"
       - --hostname-strict
-      - "false"
+      - "true"
       - --hostname
       - "${FITBRIDGE_PUBLIC_URL:-http://localhost:8080}"
       - --proxy-headers
-      - forwarded
+      - xforwarded
       - --hostname-backchannel-dynamic
       - "true"
     networks:

@@ -2,7 +2,6 @@ plugins {
     id("build-kmp")
     alias(libs.plugins.kotlinx.serialization)
 }
-
 kotlin {
     sourceSets {
         commonMain {
@@ -11,6 +10,8 @@ kotlin {
                 api("com.github.martyanovav.otuskotlin.fitbridge.libs:fit-bridge-lib-logging-common")
                 implementation(libs.coroutines.core)
                 implementation(libs.kotlinx.serialization.json)
+                api(project(":core:core-common"))
+                api(project(":client-card:cc-common"))
             }
         }
         commonTest {

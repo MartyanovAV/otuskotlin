@@ -68,7 +68,7 @@ npm run dev
 |---|---|
 | Frontend | `http://localhost:5173` |
 | Envoy / API / Keycloak routes | `http://localhost:8080` |
-| Keycloak Admin Console | `http://localhost:8080/admin/` |
+| Keycloak Admin Console | Не публикуется через Envoy; проверка `/admin` и `/admin/` должна возвращать `404` |
 | Training readiness | `http://localhost:8080/health/training/ready` |
 | GreptimeDB Dashboard | `http://localhost:4000/dashboard/` |
 

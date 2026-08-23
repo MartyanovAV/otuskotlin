@@ -22,7 +22,6 @@ interface IFBContext {
     var principal: AuthPrincipal
     var principalRelation: FtcPrincipalRelation
     var wsSession: IFBWsSession
-    var corSettings: CorSettings
 
     fun addError(error: FBError)
 }

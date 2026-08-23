@@ -1,0 +1,97 @@
+package com.github.martyanovav.otuskotlin.fitbridge.training.biz.validation
+
+import com.github.martyanovav.otuskotlin.fitbridge.training.biz.ClientCardProcessor
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardContext
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardCorSettings
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.AuthPrincipal
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCard
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardCommand
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.ClientCardFilter
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.State
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.models.WorkMode
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.inmemory.RepoClientCardInMemory
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.stubs.RepoClientCardStub
+import kotlinx.coroutines.test.runTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+
+class ClientCardValidationTest {
+    private val processor =
+        ClientCardProcessor(
+            ClientCardCorSettings(
+                repoClientCardTest = RepoClientCardInMemory(),
+                repoClientCardStub = RepoClientCardStub(),
+            ),
+        )
+
+    @Test
+    fun validCreateRequestIsNormalizedAndValidated() =
+        runTest {
+            val request = ClientCard(displayName = "  Анна  ", note = "  Заметка  ")
+            val ctx =
+                ClientCardContext(
+                    command = ClientCardCommand.CREATE,
+                    workMode = WorkMode.TEST,
+                    principal = AuthPrincipal(userId = "user-1", roles = setOf(AuthPrincipal.TRAINER_ROLE)),
+                    clientCardRequest = request,
+                )
+
+            processor.exec(ctx)
+
+            assertEquals(State.FINISHING, ctx.state)
+            assertTrue(ctx.errors.isEmpty())
+            assertEquals("Анна", ctx.clientCardValidated.displayName)
+            assertEquals("Заметка", ctx.clientCardValidated.note)
+            assertEquals("  Анна  ", request.displayName, "The source request must remain unchanged")
+        }
+
+    @Test
+    fun requiredUpdateFieldsAreValidatedTogether() =
+        runTest {
+            val ctx =
+                ClientCardContext(
+                    command = ClientCardCommand.UPDATE,
+                    workMode = WorkMode.TEST,
+                    principal = AuthPrincipal(userId = "user-1", roles = setOf(AuthPrincipal.TRAINER_ROLE)),
+                    clientCardRequest = ClientCard(),
+                )
+
+            processor.exec(ctx)
+
+            assertEquals(State.FAILING, ctx.state)
+            assertEquals(
+                setOf("validation-id-empty", "validation-displayName-empty", "validation-lock-empty"),
+                ctx.errors.map { it.code }.toSet(),
+            )
+        }
+
+    @Test
+    fun searchFilterIsValidated() =
+        runTest {
+            val ctx =
+                ClientCardContext(
+                    command = ClientCardCommand.SEARCH,
+                    workMode = WorkMode.TEST,
+                    principal = AuthPrincipal(userId = "user-1", roles = setOf(AuthPrincipal.TRAINER_ROLE)),
+                    clientCardFilter =
+                        ClientCardFilter(
+                            searchString = "a".repeat(121),
+                            pageNumber = 0,
+                            pageSize = 101,
+                        ),
+                )
+
+            processor.exec(ctx)
+
+            assertEquals(State.FAILING, ctx.state)
+            assertEquals(
+                setOf(
+                    "validation-searchString-tooLong",
+                    "validation-pageNumber-outOfRange",
+                    "validation-pageSize-outOfRange",
+                ),
+                ctx.errors.map { it.code }.toSet(),
+            )
+        }
+}

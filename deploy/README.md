@@ -13,7 +13,7 @@
 | `postgresql` | основное хранилище данных приложения | `5432` |
 | `liquibase-training` | применение схемы Training DB перед запуском приложения | без порта хоста |
 | `envoy` | входной proxy, CORS/preflight, JWT validation и WebSocket Upgrade для MVP `/v1/*`, `/v2/*` | `8080` |
-| `keycloak` | Identity Server, импорт realm `fit-bridge` | через Envoy `/admin`, `/realms` |
+| `keycloak` | Identity Server, импорт realm `fit-bridge` | публичные OIDC routes через Envoy `/realms`, Admin Console/API не публикуются |
 | `greptimedb` | хранилище masked logs и метрик, встроенный Dashboard | `4000`–`4003` |
 | `fluent-bit` | доставка логов контейнеров в GreptimeDB | `24224`, `2020` |
 
@@ -102,7 +102,7 @@ docker compose run --rm liquibase-training history
 - Frontend: `http://localhost:8080/`;
 - Training health: `http://localhost:8080/health/training/ready`;
 - Training WebSocket v1/v2: `ws://localhost:8080/v1/training/ws`, `ws://localhost:8080/v2/training/ws`;
-- Admin Console: `http://localhost:8080/admin/` (`admin` / `admin`);
+- Keycloak Admin Console и Admin REST API не публикуются через Envoy; операционные действия выполняются из доверенной среды через `kcadm.sh`, например `docker compose exec keycloak /opt/keycloak/bin/kcadm.sh`;
 - GreptimeDB Dashboard: `http://localhost:4000/dashboard/`;
 - Fluent Bit health: `http://localhost:2020`.
 

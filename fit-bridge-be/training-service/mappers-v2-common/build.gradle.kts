@@ -10,7 +10,9 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(projects.apiV2Kmp)
-                implementation(projects.common)
+                implementation(project(":core:core-common"))
+                implementation(project(":client-card:cc-common"))
+                implementation(project(":training-plan:tp-common"))
             }
         }
         commonTest {

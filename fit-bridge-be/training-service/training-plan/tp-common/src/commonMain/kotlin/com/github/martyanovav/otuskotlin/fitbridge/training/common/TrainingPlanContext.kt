@@ -28,7 +28,7 @@ data class TrainingPlanContext(
     override var principal: AuthPrincipal = AuthPrincipal.NONE,
     override var principalRelation: FtcPrincipalRelation = FtcPrincipalRelation.NONE,
     override var wsSession: IFBWsSession = IFBWsSession.NONE,
-    override var corSettings: CorSettings = CorSettings(),
+    var corSettings: TrainingPlanCorSettings = TrainingPlanCorSettings(),
     var trainingPlanRequest: TrainingPlan = TrainingPlan(),
     var trainingPlanValidating: TrainingPlan = TrainingPlan(),
     var trainingPlanValidated: TrainingPlan = TrainingPlan(),
