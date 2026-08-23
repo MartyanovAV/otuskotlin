@@ -26,6 +26,9 @@ RUN apk add --no-cache curl
 ARG SERVICE_NAME
 ARG SERVICE_PORT=8080
 
+# Cgroup & container memory awareness for JVM
+ENV JAVA_TOOL_OPTIONS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:InitialRAMPercentage=50.0"
+
 # Copy the built JAR from builder stage
 COPY --from=builder /home/gradle/project/fit-bridge-be/${SERVICE_NAME}/app-ktor/build/libs/*-all.jar app.jar
 

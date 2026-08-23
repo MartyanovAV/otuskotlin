@@ -8,9 +8,11 @@ import com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardCor
 import com.github.martyanovav.otuskotlin.fitbridge.training.common.TrainingPlanCorSettings
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.inmemory.RepoClientCardInMemory
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.inmemory.RepoTrainingPlanInMemory
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.pg.ClientCardTable
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.pg.PgProperties
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.pg.RepoClientCardPg
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.pg.RepoTrainingPlanPg
+import com.github.martyanovav.otuskotlin.fitbridge.training.repo.pg.TrainingPlanTable
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.stubs.RepoClientCardStub
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.stubs.RepoTrainingPlanStub
 import com.zaxxer.hikari.HikariConfig
@@ -18,6 +20,8 @@ import com.zaxxer.hikari.HikariDataSource
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationStopped
 import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 fun Application.initAppSettings(
     loggerProvider: FbLoggerProvider = FbLoggerProvider()
@@ -58,6 +62,27 @@ fun Application.initAppSettings(
     val repoClientCardTest = if (isTestPg) RepoClientCardPg(db = sharedDb) else RepoClientCardInMemory()
     val repoTrainingPlanTest = if (isTestPg) RepoTrainingPlanPg(db = sharedDb) else RepoTrainingPlanInMemory()
 
+    val readyCheck: suspend () -> Boolean = {
+        if (isProdPg) {
+            try {
+                val db = sharedDb
+                if (db == null) {
+                    false
+                } else {
+                    transaction(db) {
+                        ClientCardTable.selectAll().limit(1).count()
+                        TrainingPlanTable.selectAll().limit(1).count()
+                    }
+                    true
+                }
+            } catch (_: Throwable) {
+                false
+            }
+        } else {
+            true
+        }
+    }
+
     environment.monitor.subscribe(ApplicationStopped) {
         dsToClose?.close()
     }
@@ -80,5 +105,6 @@ fun Application.initAppSettings(
                 repoClientCardProd = repoClientCardProd,
                 repoClientCardStub = RepoClientCardStub(),
             ),
+        readyCheck = readyCheck,
     )
 }

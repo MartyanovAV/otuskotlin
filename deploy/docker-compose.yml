@@ -1,5 +1,10 @@
-# Минимальная инфраструктура FitBridge:
-# PostgreSQL, GreptimeDB, Fluent Bit, Envoy, Keycloak and Ktor services.
+# ==============================================================================
+# FitBridge Base Docker Compose (docker-compose.yml)
+# Содержит общие определения сервисов, сетей, зависимостей и проверок здоровья.
+# Запуск выполняется вместе с профильным оверрайдом:
+#   - Local: docker compose -f docker-compose.yml -f docker-compose.local.yml up -d
+#   - Prod:  docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# ==============================================================================
 
 services:
   postgresql:
@@ -17,11 +22,9 @@ services:
       DB_NAME: ${DB_NAME:-training_db}
       DB_USER: ${DB_USER:-training_user}
       DB_PASSWORD: ${DB_PASSWORD:-training-password}
-    ports:
-      - "127.0.0.1:5432:5432"
     volumes:
       - postgresql-data:/var/lib/postgresql
-      - ./volumes/postgres-init:/docker-entrypoint-initdb.d
+      - ./volumes/postgres-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres}"]
       interval: 5s
@@ -43,12 +46,6 @@ services:
       - fitbridge-network
 
   training-service:
-    build:
-      context: ..
-      dockerfile: deploy/Dockerfile.app
-      args:
-        SERVICE_NAME: training-service
-        SERVICE_PORT: 8081
     image: fitbridge-training-service:${APP_VERSION:-local}
     depends_on:
       liquibase-training:
@@ -64,11 +61,6 @@ services:
       DB_NAME: ${DB_NAME:-training_db}
       DB_USER: ${DB_USER:-training_user}
       DB_PASSWORD: ${DB_PASSWORD:-training-password}
-    logging:
-      driver: "fluentd"
-      options:
-        fluentd-address: 127.0.0.1:24224
-        tag: training.logs
     healthcheck:
       test: ["CMD-SHELL", "curl --fail --silent --show-error http://127.0.0.1:8081/health/ready > /dev/null"]
       interval: 10s
@@ -79,10 +71,7 @@ services:
       - fitbridge-network
 
   frontend:
-    build:
-      context: ../fit-bridge-fe
-      dockerfile: Dockerfile
-    image: fitbridge-frontend:local
+    image: fitbridge-frontend:${APP_VERSION:-local}
     environment:
       FITBRIDGE_API_BASE_URL: /v2
       FITBRIDGE_KEYCLOAK_URL: ${FITBRIDGE_PUBLIC_URL:-http://localhost:8080}
@@ -106,14 +95,13 @@ services:
     ports:
       - "127.0.0.1:24224:24224"
       - "127.0.0.1:24224:24224/udp"
-      - "127.0.0.1:2020:2020"
     environment:
       - greptimedb_host=greptimedb
       - greptimedb_user=${GREPTIMEDB_USER:-admin}
       - greptimedb_pass=${GREPTIMEDB_PASS:-admin}
     volumes:
-      - ./volumes/fluent-bit-etc/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
-      - ./volumes/fluent-bit-etc/parsers.conf:/fluent-bit/etc/parsers.conf
+      - ./volumes/fluent-bit-etc/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./volumes/fluent-bit-etc/parsers.conf:/fluent-bit/etc/parsers.conf:ro
     networks:
       - fitbridge-network
 
@@ -127,11 +115,6 @@ services:
       - 0.0.0.0:4000
       - --rpc-bind-addr
       - 0.0.0.0:4001
-    ports:
-      - "127.0.0.1:4000:4000"
-      - "127.0.0.1:4001:4001"
-      - "127.0.0.1:4002:4002"
-      - "127.0.0.1:4003:4003"
     volumes:
       - greptimedb-data:/tmp/greptimedb/
     healthcheck:
@@ -145,10 +128,8 @@ services:
 
   envoy:
     image: envoyproxy/envoy:v1.39.0
-    volumes:
-      - ./volumes/envoy/envoy.yaml:/etc/envoy/envoy.yaml
     ports:
-      - "8080:8080"
+      - "${ENVOY_PORT:-8080}:8080"
     depends_on:
       keycloak:
         condition: service_healthy
@@ -156,11 +137,6 @@ services:
         condition: service_healthy
       fluent-bit:
         condition: service_started
-    logging:
-      driver: "fluentd"
-      options:
-        fluentd-address: 127.0.0.1:24224
-        tag: envoy.logs
     healthcheck:
       test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/15001; printf 'GET /ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3; grep -q '200 OK' <&3"]
       interval: 5s
@@ -172,9 +148,6 @@ services:
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.7.1
-    volumes:
-      - ./volumes/keycloak/import:/opt/keycloak/data/import
-      - ./volumes/keycloak/themes:/opt/keycloak/themes:ro
     depends_on:
       postgresql:
         condition: service_healthy

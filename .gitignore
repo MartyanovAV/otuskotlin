@@ -14,5 +14,11 @@
 
 /.idea/
 /.gigaide/
+/.qwen/
+/QWEN.md
 /deploy/*.jar
 /deploy/.env
+/deploy/.env.*
+!/deploy/.env.*.example
+!/deploy/.env.*.template
+*.secrets.env
