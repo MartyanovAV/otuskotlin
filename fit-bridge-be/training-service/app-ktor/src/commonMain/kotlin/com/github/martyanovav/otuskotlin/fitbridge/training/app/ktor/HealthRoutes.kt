@@ -18,9 +18,10 @@ fun Route.healthRoutes(appSettings: AppSettings? = null) {
         call.respondText(LIVENESS_RESPONSE, ContentType.Application.Json, HttpStatusCode.OK)
     }
     get("/health/ready") {
-        val isReady = runCatching {
-            appSettings?.readyCheck?.invoke() ?: true
-        }.getOrDefault(false)
+        val isReady =
+            runCatching {
+                appSettings?.readyCheck?.invoke() ?: true
+            }.getOrDefault(false)
 
         if (isReady) {
             call.respondText(READINESS_UP_RESPONSE, ContentType.Application.Json, HttpStatusCode.OK)

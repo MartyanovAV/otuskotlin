@@ -34,9 +34,14 @@ Domain API содержит только клиентские карточки �
 | ownerId | Автор/владелец из `JWT.sub`, не входит в request | `3f8d9f3a-...` |
 | title | Название плана | `Стартовая неделя` |
 | planItems | Типизированный список заданий плана: UUID каждого элемента уникален в пределах плана; не более 200 элементов суммарно и не более 5 уровней вложенности | `[{ "itemType": "EXERCISE", "id": "550e8400-e29b-41d4-a716-446655440000", "title": "Приседания" }]` |
-| status | `ACTIVE`, `ARCHIVED` | `ACTIVE` |
+| status | `ACTIVE`, `ARCHIVED`, `COMPLETED` | `COMPLETED` |
 | version | Версия плана | `1` |
+| lock | Optimistic lock token | `8f2d...` |
+| completedAt | Дата/время завершения тренировки тренером | `2026-05-27T12:00:00Z` |
+| difficulty | Оценка сложности тренировки (`EASY`, `NORMAL`, `HARD`, `MAX`) | `NORMAL` |
+| coachComment | Комментарий тренера по итогам тренировки | `Отличный темп, добавить вес в следующий раз` |
 
 ## Phase 2
 
-`ClientProfile`, `Invite`, `AccessGrant`, расширенный профессиональный профиль тренера, дневник выполнения, `TrainingEntry`, `ProgramAssignment`, billing и product audit остаются вне MVP.
+`ClientProfile`, `Invite`, `AccessGrant`, расширенный профессиональный профиль тренера, самостоятельный клиентский дневник выполнения и отметки со стороны клиента, `TrainingEntry`, `ProgramAssignment`, billing и product audit остаются вне MVP.
+
