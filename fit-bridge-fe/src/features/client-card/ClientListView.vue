@@ -359,13 +359,14 @@ const formatDate = (isoString?: string) => {
   <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <h2 class="text-2xl font-bold tracking-tight text-text-main">Клиенты</h2>
+        <h1 class="text-2xl font-bold tracking-tight text-text-main">Клиенты</h1>
         <p class="text-sm text-text-muted">Список клиентов</p>
       </div>
       <div class="flex items-center gap-3">
         <Input
           v-model="searchQuery"
           placeholder="Поиск по имени..."
+          aria-label="Поиск клиентов по имени"
           class="w-64 bg-surface"
         />
         <Button @click="isCreateOpen = true" id="add-client-btn">
@@ -376,7 +377,7 @@ const formatDate = (isoString?: string) => {
     </div>
 
     <!-- Загрузка -->
-    <div v-if="isLoading" class="flex items-center justify-center p-12">
+    <div v-if="isLoading" class="flex items-center justify-center p-12" role="status" aria-live="polite">
       <div class="text-center space-y-3">
         <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
         <p class="text-sm text-text-muted">Загрузка клиентов...</p>
@@ -384,7 +385,7 @@ const formatDate = (isoString?: string) => {
     </div>
 
     <!-- Ошибка загрузки -->
-    <div v-else-if="isError" class="p-6 rounded-xl border border-danger/30 bg-danger-soft text-center space-y-3">
+    <div v-else-if="isError" class="p-6 rounded-xl border border-danger/30 bg-danger-soft text-center space-y-3" role="alert">
       <p class="text-sm font-medium text-danger">Не удалось загрузить клиентов</p>
       <p class="text-xs text-text-muted">{{ error }}</p>
       <Button variant="outline" size="sm" @click="() => refetch()">Повторить попытку</Button>
@@ -404,8 +405,41 @@ const formatDate = (isoString?: string) => {
       <Button v-if="!searchQuery" @click="isCreateOpen = true">Добавить клиента</Button>
     </div>
 
-    <!-- Таблица клиентов -->
-    <div v-else class="rounded-xl border border-border bg-surface overflow-hidden shadow-xs">
+    <!-- Список клиентов: карточки на телефоне, таблица на desktop -->
+    <template v-else>
+      <section class="space-y-3 md:hidden" aria-label="Список клиентов">
+        <article
+          v-for="client in clientCards"
+          :key="client.id"
+          class="rounded-xl border border-border bg-surface p-4 shadow-sm"
+        >
+          <div class="flex items-start gap-3">
+            <Avatar class="h-10 w-10 shrink-0 text-xs">
+              <AvatarFallback>{{ (client.displayName ?? 'КЛ').substring(0, 2).toUpperCase() }}</AvatarFallback>
+            </Avatar>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-start justify-between gap-2">
+                <h2 class="truncate text-base font-semibold text-text-main">{{ client.displayName ?? 'Без имени' }}</h2>
+                <Badge :variant="client.status === 'ACTIVE' ? 'default' : 'secondary'" class="shrink-0">
+                  {{ client.status === 'ACTIVE' ? 'Активен' : 'В архиве' }}
+                </Badge>
+              </div>
+              <p class="mt-1 line-clamp-2 text-sm text-text-muted">{{ client.note || 'Заметок нет' }}</p>
+              <p class="mt-2 text-xs text-text-faint">Создан: {{ formatDate(client.createdAt) }}</p>
+            </div>
+          </div>
+          <div class="mt-4 grid grid-cols-2 gap-2">
+            <Button variant="outline" @click="selectedClient = client" :id="`mobile-open-client-btn-${client.id}`">
+              Карточка
+            </Button>
+            <Button variant="secondary" @click="openEditClient(client)" :aria-label="`Редактировать клиента ${client.displayName ?? 'без имени'}`">
+              Редактировать
+            </Button>
+          </div>
+        </article>
+      </section>
+
+      <div class="hidden overflow-hidden rounded-xl border border-border bg-surface shadow-xs md:block">
       <div class="overflow-x-auto">
         <table class="w-full text-left text-sm">
           <thead class="border-b border-border bg-surface-2/60 text-xs font-semibold uppercase tracking-wider text-text-muted">
@@ -423,6 +457,11 @@ const formatDate = (isoString?: string) => {
               :key="client.id"
               class="hover:bg-surface-2/70 transition-colors cursor-pointer group"
               @click="selectedClient = client"
+              @keydown.enter="selectedClient = client"
+              @keydown.space.prevent="selectedClient = client"
+              tabindex="0"
+              role="button"
+              :aria-label="`Открыть карточку клиента ${client.displayName ?? 'без имени'}`"
               :id="`client-row-${client.id}`"
             >
               <td class="py-4 pl-6 pr-4 font-medium">
@@ -470,6 +509,7 @@ const formatDate = (isoString?: string) => {
                     size="sm"
                     class="h-8 w-8 p-0 text-text-muted hover:text-text-main"
                     title="Редактировать"
+                    :aria-label="`Редактировать клиента ${client.displayName ?? 'без имени'}`"
                     @click="openEditClient(client)"
                     :id="`edit-client-btn-${client.id}`"
                   >
@@ -482,15 +522,16 @@ const formatDate = (isoString?: string) => {
         </table>
       </div>
 
-      <!-- Пагинация списка клиентов -->
-      <div class="border-t border-border px-4 bg-surface-2/30">
+      </div>
+
+      <div class="rounded-xl border border-border bg-surface-2/30 px-2 md:px-4">
         <Pagination
           v-model:pageNumber="pageNumber"
           v-model:pageSize="pageSize"
           :totalSize="totalClientsCount"
         />
       </div>
-    </div>
+    </template>
 
     <!-- Модальное окно добавления клиента -->
     <Dialog :open="isCreateOpen" @update:open="isCreateOpen = $event">
@@ -757,7 +798,7 @@ const formatDate = (isoString?: string) => {
             <Button
               v-if="selectedPlanDetails.status === 'DRAFT'"
               variant="default"
-              class="bg-emerald-600 hover:bg-emerald-700 text-white"
+              class="bg-success text-text-inverse hover:opacity-90"
               @click="handleActivateClientPlan(selectedPlanDetails)"
               :disabled="isActivatingPlan"
             >

@@ -138,8 +138,8 @@ const removeItem = (index: number) => {
           class="flex items-center justify-between p-2.5 rounded-lg text-xs transition-colors border"
           :class="{
             'bg-surface-2 border-border/70': item.itemType === 'EXERCISE',
-            'bg-amber-500/10 border-amber-500/30': item.itemType === 'CIRCUIT',
-            'bg-purple-500/10 border-purple-500/30': item.itemType === 'SUPERSET',
+            'bg-warning-soft border-warning/30': item.itemType === 'CIRCUIT',
+            'bg-primary-soft border-primary/30': item.itemType === 'SUPERSET',
           }"
         >
           <div class="space-y-0.5">
@@ -148,8 +148,8 @@ const removeItem = (index: number) => {
                 class="text-[10px] px-1.5 py-0"
                 :class="{
                   'bg-surface-3 text-text-main': item.itemType === 'EXERCISE',
-                  'bg-amber-500/20 text-amber-700 dark:text-amber-300': item.itemType === 'CIRCUIT',
-                  'bg-purple-500/20 text-purple-700 dark:text-purple-300': item.itemType === 'SUPERSET',
+                  'bg-warning-soft text-text-main': item.itemType === 'CIRCUIT',
+                  'bg-primary-soft text-primary-soft-text': item.itemType === 'SUPERSET',
                 }"
               >
                 {{ item.itemType === 'EXERCISE' ? 'Упражнение' : item.itemType === 'CIRCUIT' ? 'Круговая' : 'Суперсет' }}
@@ -177,6 +177,7 @@ const removeItem = (index: number) => {
             @click="removeItem(index)"
             class="text-danger hover:text-danger/80 p-1 font-bold text-sm"
             title="Удалить"
+            :aria-label="`Удалить элемент ${index + 1}`"
           >
             ✕
           </button>
@@ -195,6 +196,7 @@ const removeItem = (index: number) => {
             class="px-2.5 py-1 rounded-md transition-colors text-xs font-medium"
             :class="activeType === 'EXERCISE' ? 'bg-primary text-primary-inverse shadow-xs' : 'text-text-muted hover:text-text-main'"
             id="tab-exercise-btn"
+            :aria-pressed="activeType === 'EXERCISE'"
           >
             Упражнение
           </button>
@@ -202,8 +204,9 @@ const removeItem = (index: number) => {
             type="button"
             @click="activeType = 'CIRCUIT'"
             class="px-2.5 py-1 rounded-md transition-colors text-xs font-medium"
-            :class="activeType === 'CIRCUIT' ? 'bg-amber-500 text-white shadow-xs' : 'text-text-muted hover:text-text-main'"
+            :class="activeType === 'CIRCUIT' ? 'bg-warning text-text-main shadow-xs' : 'text-text-muted hover:text-text-main'"
             id="tab-circuit-btn"
+            :aria-pressed="activeType === 'CIRCUIT'"
           >
             Круговая
           </button>
@@ -211,8 +214,9 @@ const removeItem = (index: number) => {
             type="button"
             @click="activeType = 'SUPERSET'"
             class="px-2.5 py-1 rounded-md transition-colors text-xs font-medium"
-            :class="activeType === 'SUPERSET' ? 'bg-purple-600 text-white shadow-xs' : 'text-text-muted hover:text-text-main'"
+            :class="activeType === 'SUPERSET' ? 'bg-primary text-primary-inverse shadow-xs' : 'text-text-muted hover:text-text-main'"
             id="tab-superset-btn"
+            :aria-pressed="activeType === 'SUPERSET'"
           >
             Суперсет
           </button>
@@ -279,10 +283,10 @@ const removeItem = (index: number) => {
         </div>
 
         <!-- Список добавленных в круг упражнений -->
-        <div class="border border-amber-500/30 rounded-lg p-2 bg-amber-500/5 space-y-1.5">
-          <div class="flex items-center justify-between text-[11px] text-amber-700 dark:text-amber-300 font-medium">
+        <div class="border border-warning/30 rounded-lg p-2 bg-warning-soft space-y-1.5">
+          <div class="flex items-center justify-between text-[11px] text-text-main font-medium">
             <span>Упражнения круга ({{ circuitSubItems.length }}):</span>
-            <span v-if="circuitSubItems.length === 0" class="text-amber-600/80">требуется минимум 1</span>
+            <span v-if="circuitSubItems.length === 0" class="text-text-muted">требуется минимум 1</span>
           </div>
 
           <div v-if="circuitSubItems.length > 0" class="space-y-1 max-h-28 overflow-y-auto">
@@ -292,7 +296,7 @@ const removeItem = (index: number) => {
               class="flex items-center justify-between bg-surface px-2 py-1 rounded text-xs"
             >
               <span>{{ sIdx + 1 }}. {{ sub.name }} ({{ sub.reps }} повт.<span v-if="sub.weight">, {{ sub.weight }} кг</span>)</span>
-              <button type="button" @click="removeCircuitSubItem(sIdx)" class="text-danger p-0.5 hover:text-danger/80">✕</button>
+              <button type="button" @click="removeCircuitSubItem(sIdx)" class="text-danger p-0.5 hover:text-danger/80" :aria-label="`Удалить упражнение ${sub.name} из круговой`">✕</button>
             </div>
           </div>
 
@@ -323,7 +327,7 @@ const removeItem = (index: number) => {
 
         <Button
           type="button"
-          class="w-full h-8 text-xs bg-amber-600 hover:bg-amber-700 text-white font-medium"
+          class="w-full h-8 text-xs bg-warning text-text-main hover:opacity-90 font-medium"
           :disabled="!circuitTitle.trim() || circuitSubItems.length === 0"
           @click="addCircuit"
           id="add-circuit-btn"
@@ -346,10 +350,10 @@ const removeItem = (index: number) => {
         </div>
 
         <!-- Список упражнений суперсета -->
-        <div class="border border-purple-500/30 rounded-lg p-2 bg-purple-500/5 space-y-1.5">
-          <div class="flex items-center justify-between text-[11px] text-purple-700 dark:text-purple-300 font-medium">
+        <div class="border border-primary/30 rounded-lg p-2 bg-primary-soft space-y-1.5">
+          <div class="flex items-center justify-between text-[11px] text-primary-soft-text font-medium">
             <span>Упражнения суперсета ({{ supersetSubItems.length }}/мин. 2):</span>
-            <span v-if="supersetSubItems.length < 2" class="text-purple-600/80">добавьте минимум 2</span>
+            <span v-if="supersetSubItems.length < 2" class="text-primary-soft-text/80">добавьте минимум 2</span>
           </div>
 
           <div v-if="supersetSubItems.length > 0" class="space-y-1 max-h-28 overflow-y-auto">
@@ -359,7 +363,7 @@ const removeItem = (index: number) => {
               class="flex items-center justify-between bg-surface px-2 py-1 rounded text-xs"
             >
               <span>{{ String.fromCharCode(65 + sIdx) }}. {{ sub.name }} ({{ sub.sets }}×{{ sub.reps }}<span v-if="sub.weight">, {{ sub.weight }} кг</span>)</span>
-              <button type="button" @click="removeSupersetSubItem(sIdx)" class="text-danger p-0.5 hover:text-danger/80">✕</button>
+              <button type="button" @click="removeSupersetSubItem(sIdx)" class="text-danger p-0.5 hover:text-danger/80" :aria-label="`Удалить упражнение ${sub.name} из суперсета`">✕</button>
             </div>
           </div>
 
@@ -391,7 +395,7 @@ const removeItem = (index: number) => {
 
         <Button
           type="button"
-          class="w-full h-8 text-xs bg-purple-600 hover:bg-purple-700 text-white font-medium"
+          class="w-full h-8 text-xs bg-primary text-primary-inverse hover:bg-primary-hover font-medium"
           :disabled="!supersetTitle.trim() || supersetSubItems.length < 2"
           @click="addSuperset"
           id="add-superset-btn"

@@ -22,12 +22,30 @@ public_url="${FITBRIDGE_PUBLIC_URL%/}"
 escaped_public_url=$(printf '%s' "$public_url" | sed 's/[&|]/\\&/g')
 
 domain=$(printf '%s' "$public_url" | sed -e 's|^https://||' -e 's|:[0-9]*$||' -e 's|/.*$||')
-escaped_domain=$(printf '%s' "$domain" | sed 's/[&|]/\\&/g')
 
 echo "==> Preparing production configuration for: $public_url (domain: $domain)"
 
 # 2. Проверка наличия SSL сертификатов / Генерация Bootstrap Dummy Certificate
-cert_dir="volumes/certs/live/$domain"
+cert_name="$domain"
+renewal_dir="volumes/certs/renewal"
+
+# Certbot may create a suffixed lineage (for example, domain-0001) when a
+# certificate directory already exists. Resolve the lineage by its domains so
+# Envoy does not keep using an old bootstrap certificate.
+if [ -d "$renewal_dir" ] && [ ! -f "$renewal_dir/$cert_name.conf" ]; then
+    for renewal_file in "$renewal_dir"/*.conf; do
+        [ -f "$renewal_file" ] || continue
+        domains_line=$(grep '^domains[[:space:]]*=' "$renewal_file" || true)
+        if printf '%s\n' "$domains_line" | tr ' ,' '\n' | grep -Fxq "$domain"; then
+            cert_name=$(basename "$renewal_file" .conf)
+            echo "  [OK] Certbot lineage for $domain: $cert_name"
+            break
+        fi
+    done
+fi
+
+escaped_cert_name=$(printf '%s' "$cert_name" | sed 's/[&|]/\\&/g')
+cert_dir="volumes/certs/live/$cert_name"
 cert_chain="$cert_dir/fullchain.pem"
 cert_key="$cert_dir/privkey.pem"
 mkdir -p "volumes/certbot-webroot"
@@ -50,14 +68,14 @@ else
         -subj "/CN=$domain" 2>/dev/null
     chmod 644 "$cert_key"
     chmod 644 "$cert_chain"
-    chmod 755 "volumes/certs" "volumes/certs/live" "volumes/certs/live/$domain" 2>/dev/null || true
+    chmod 755 "volumes/certs" "volumes/certs/live" "volumes/certs/live/$cert_name" 2>/dev/null || true
     echo "  [OK] Temporary bootstrap certificate created for $domain"
 fi
 
 # 3. Генерация конфигурации Envoy для prod
 if [ -f "volumes/envoy/envoy.prod.yaml.template" ]; then
     sed -e "s|\${FITBRIDGE_PUBLIC_URL}|$escaped_public_url|g" \
-        -e "s|\${DOMAIN}|$escaped_domain|g" \
+        -e "s|\${DOMAIN}|$escaped_cert_name|g" \
         volumes/envoy/envoy.prod.yaml.template > volumes/envoy/envoy.prod.yaml
     echo "  [OK] volumes/envoy/envoy.prod.yaml generated"
 else

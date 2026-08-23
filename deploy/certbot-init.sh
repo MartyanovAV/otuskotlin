@@ -21,6 +21,24 @@ fi
 
 domain=$(printf '%s' "$FITBRIDGE_PUBLIC_URL" | sed -e 's|^https://||' -e 's|:[0-9]*$||' -e 's|/.*$||')
 
+cert_dir="volumes/certs/live/$domain"
+renewal_config="volumes/certs/renewal/$domain.conf"
+
+# The bootstrap certificate occupies live/$domain only until the first real
+# issuance. Remove it only when it is demonstrably self-signed. Never remove
+# an existing non-bootstrap certificate automatically.
+if [ ! -f "$renewal_config" ] && [ -f "$cert_dir/fullchain.pem" ]; then
+    issuer=$(openssl x509 -in "$cert_dir/fullchain.pem" -noout -issuer -nameopt RFC2253 | sed 's/^issuer=//')
+    subject=$(openssl x509 -in "$cert_dir/fullchain.pem" -noout -subject -nameopt RFC2253 | sed 's/^subject=//')
+    if [ "$issuer" = "$subject" ]; then
+        echo "==> Removing the temporary self-signed bootstrap certificate"
+        rm -rf "volumes/certs/live/$domain" "volumes/certs/archive/$domain"
+    else
+        echo "ERROR: A non-Certbot certificate already exists for '$domain'; refusing to replace it" >&2
+        exit 1
+    fi
+fi
+
 echo "==> Requesting Let's Encrypt certificate for: $domain"
 echo "==> Notification email: $LETSENCRYPT_EMAIL"
 
@@ -39,6 +57,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm \
     certbot certonly \
     --webroot \
     -w /var/www/certbot \
+    --cert-name "$domain" \
     -d "$domain" \
     --email "$LETSENCRYPT_EMAIL" \
     --agree-tos \

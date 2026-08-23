@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/features/auth/authStore'
 import { Button } from '@/shared/ui/button'
+import { LayoutDashboard, UsersRound, Dumbbell } from 'lucide-vue-next'
 
 const authStore = useAuthStore()
 
@@ -12,9 +13,9 @@ const emit = defineEmits<{ close: [] }>()
 const closeMobile = () => emit('close')
 
 const navItems = [
-  { to: '/', label: 'Дашборд' },
-  { to: '/clients', label: 'Клиенты' },
-  { to: '/plans', label: 'Планы' },
+  { to: '/', label: 'Дашборд', icon: LayoutDashboard },
+  { to: '/clients', label: 'Клиенты', icon: UsersRound },
+  { to: '/plans', label: 'Планы', icon: Dumbbell },
 ]
 </script>
 
@@ -28,9 +29,9 @@ const navItems = [
     />
     <aside
       :class="[
-        'w-64 flex-col border-r border-border bg-surface px-4 py-6',
+        'w-64 flex-col border-r border-border bg-surface px-4 py-6 md:sticky md:top-0 md:h-screen',
         props.mobileOpen ? 'fixed inset-y-0 left-0 z-40 flex' : 'hidden',
-        'md:static md:flex',
+        'md:flex',
       ]"
     >
       <div class="mb-8 flex items-center justify-between px-2">
@@ -57,12 +58,13 @@ const navItems = [
             :href="href"
             @click="navigate(); closeMobile()"
             :class="[
-              'flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors',
+              'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
               (item.to === '/' ? isExactActive : isActive)
                 ? 'bg-primary text-text-inverse'
                 : 'text-text-muted hover:bg-surface-2 hover:text-text-main',
             ]"
           >
+            <component :is="item.icon" :size="18" aria-hidden="true" />
             {{ item.label }}
           </a>
         </router-link>

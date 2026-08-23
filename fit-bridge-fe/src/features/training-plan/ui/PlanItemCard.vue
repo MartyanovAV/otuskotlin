@@ -58,11 +58,11 @@ const subItems = computed<PlanItem[]>(() => {
   <!-- Круговая тренировка -->
   <div
     v-else-if="isCircuit"
-    class="bg-amber-500/5 rounded-xl border border-amber-500/20 p-3.5 space-y-3"
+    class="bg-warning-soft rounded-xl border border-warning/30 p-3.5 space-y-3"
   >
     <div class="flex items-start justify-between gap-2">
       <div class="flex items-start gap-2.5">
-        <div class="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">
+        <div class="w-7 h-7 rounded-lg bg-warning-soft text-text-main flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">
           🔄
         </div>
         <div>
@@ -70,20 +70,20 @@ const subItems = computed<PlanItem[]>(() => {
             <h4 class="font-semibold text-sm text-text-main">
               {{ item.title || 'Круговая тренировка' }}
             </h4>
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/20 text-amber-700 dark:text-amber-300">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-warning-soft text-text-main">
               {{ circuitData.rounds ?? 1 }} {{ (circuitData.rounds ?? 1) === 1 ? 'раунд' : (circuitData.rounds ?? 1) < 5 ? 'раунда' : 'раундов' }}
             </span>
           </div>
           <p v-if="item.description" class="text-xs text-text-muted mt-1">
             {{ item.description }}
           </p>
-          <div v-if="circuitData.restBetweenRoundsSeconds" class="text-[11px] text-amber-600/90 dark:text-amber-400/90 mt-1 flex items-center gap-1">
+          <div v-if="circuitData.restBetweenRoundsSeconds" class="text-[11px] text-text-muted mt-1 flex items-center gap-1">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             Отдых между кругами: {{ circuitData.restBetweenRoundsSeconds }} с
           </div>
         </div>
       </div>
-      <Badge class="text-[11px] shrink-0 bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30">
+      <Badge class="text-[11px] shrink-0 bg-warning-soft text-text-main border-warning/30">
         Круговая
       </Badge>
     </div>
@@ -111,11 +111,11 @@ const subItems = computed<PlanItem[]>(() => {
   <!-- Суперсет -->
   <div
     v-else-if="isSuperset"
-    class="bg-purple-500/5 rounded-xl border border-purple-500/20 p-3.5 space-y-3"
+    class="bg-primary-soft rounded-xl border border-primary/30 p-3.5 space-y-3"
   >
     <div class="flex items-start justify-between gap-2">
       <div class="flex items-start gap-2.5">
-        <div class="w-7 h-7 rounded-lg bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">
+        <div class="w-7 h-7 rounded-lg bg-primary-soft text-primary-soft-text flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">
           ⚡
         </div>
         <div>
@@ -123,34 +123,34 @@ const subItems = computed<PlanItem[]>(() => {
             <h4 class="font-semibold text-sm text-text-main">
               {{ item.title || 'Суперсет' }}
             </h4>
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-purple-500/20 text-purple-700 dark:text-purple-300">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-primary-soft text-primary-soft-text">
               {{ subItems.length }} упражнения без отдыха
             </span>
           </div>
           <p v-if="item.description" class="text-xs text-text-muted mt-1">
             {{ item.description }}
           </p>
-          <div v-if="supersetData.restBetweenSetsSeconds" class="text-[11px] text-purple-600/90 dark:text-purple-400/90 mt-1 flex items-center gap-1">
+          <div v-if="supersetData.restBetweenSetsSeconds" class="text-[11px] text-primary-soft-text mt-1 flex items-center gap-1">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             Отдых после суперсета: {{ supersetData.restBetweenSetsSeconds }} с
           </div>
         </div>
       </div>
-      <Badge class="text-[11px] shrink-0 bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/30">
+      <Badge class="text-[11px] shrink-0 bg-primary-soft text-primary-soft-text border-primary/30">
         Суперсет
       </Badge>
     </div>
 
     <!-- Вложенные упражнения суперсета -->
     <div class="space-y-1.5 pl-9 relative">
-      <div class="absolute left-4 top-2 bottom-2 w-0.5 bg-purple-500/20 rounded"></div>
+      <div class="absolute left-4 top-2 bottom-2 w-0.5 bg-primary/20 rounded"></div>
       <div
         v-for="(sub, sIdx) in subItems"
         :key="sub.id || sIdx"
         class="flex items-center justify-between bg-surface/80 px-3 py-2 rounded-lg text-xs border border-border/50 relative z-10"
       >
         <div class="flex items-center gap-2">
-          <span class="w-4 h-4 rounded-full bg-purple-500/20 text-purple-700 dark:text-purple-300 text-[10px] flex items-center justify-center font-bold">
+          <span class="w-4 h-4 rounded-full bg-primary-soft text-primary-soft-text text-[10px] flex items-center justify-center font-bold">
             {{ String.fromCharCode(65 + sIdx) }}
           </span>
           <span class="font-medium text-text-main">{{ sub.title }}</span>
