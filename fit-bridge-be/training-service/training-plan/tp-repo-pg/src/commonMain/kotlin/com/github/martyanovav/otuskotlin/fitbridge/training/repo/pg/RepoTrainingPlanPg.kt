@@ -376,11 +376,14 @@ class RepoTrainingPlanPg(
     companion object {
         private const val STATUS_ACTIVE = "ACTIVE"
         private const val STATUS_ARCHIVED = "ARCHIVED"
+        private const val STATUS_COMPLETED = "COMPLETED"
+        private const val STATUS_DRAFT = "DRAFT"
 
         private fun statusToString(status: TrainingPlanStatus): String =
             when (status) {
                 TrainingPlanStatus.ARCHIVED -> STATUS_ARCHIVED
-                TrainingPlanStatus.COMPLETED -> "COMPLETED"
+                TrainingPlanStatus.COMPLETED -> STATUS_COMPLETED
+                TrainingPlanStatus.DRAFT -> STATUS_DRAFT
                 else -> STATUS_ACTIVE
             }
     }
@@ -397,6 +400,7 @@ private fun ResultRow.toTrainingPlan(): TrainingPlan =
             when (this[TrainingPlanTable.status]) {
                 "ARCHIVED" -> TrainingPlanStatus.ARCHIVED
                 "COMPLETED" -> TrainingPlanStatus.COMPLETED
+                "DRAFT" -> TrainingPlanStatus.DRAFT
                 else -> TrainingPlanStatus.ACTIVE
             },
         lock = TrainingPlanLock(this[TrainingPlanTable.lock]),

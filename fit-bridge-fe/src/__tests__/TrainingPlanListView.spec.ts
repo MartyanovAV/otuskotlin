@@ -9,6 +9,9 @@ vi.mock('../shared/api/generated/training-plan/training-plan', () => ({
   trainingPlanSearch: vi.fn<(...args: unknown[]) => unknown>(),
   useTrainingPlanCreate: vi.fn<(...args: unknown[]) => unknown>(),
   useTrainingPlanUpdate: vi.fn<(...args: unknown[]) => unknown>(),
+  useTrainingPlanActivate: vi.fn<(...args: unknown[]) => unknown>(() => ({
+    mutateAsync: vi.fn<(...args: unknown[]) => unknown>(),
+  })),
   useTrainingPlanComplete: vi.fn<(...args: unknown[]) => unknown>(() => ({
     mutateAsync: vi.fn<(...args: unknown[]) => unknown>(),
   })),
@@ -503,6 +506,101 @@ describe('TrainingPlanListView Table View and Plan Items', () => {
     // Кнопка редактирования в деталях также не должна отображаться
     const detailsEditBtn = document.body.querySelector('#details-edit-plan-btn')
     expect(detailsEditBtn).toBeNull()
+
+    wrapper.unmount()
+  })
+
+  it('renders draft badge and allows activating draft training plan', async () => {
+    const mockClients = [
+      {
+        id: 'client-1',
+        displayName: 'Дмитрий Кузнецов',
+      },
+    ]
+
+    const mockDraftPlan = {
+      id: 'plan-draft-1',
+      lock: 'lock-draft-1',
+      title: 'Черновой план',
+      clientCardId: 'client-1',
+      status: 'DRAFT' as const,
+      createdAt: '2026-08-22T10:00:00Z',
+      planItems: [
+        {
+          id: 'item-1',
+          itemType: 'EXERCISE' as const,
+          title: 'Приседания',
+        },
+      ],
+    }
+
+    vi.mocked(clientApi.clientCardSearch).mockResolvedValue({
+      data: {
+        responseType: 'clientCard.search',
+        result: 'success',
+        clientCards: mockClients,
+        totalSize: 1,
+      },
+      status: 200,
+      headers: new Headers(),
+    })
+
+    vi.mocked(planApi.trainingPlanSearch).mockResolvedValue({
+      data: {
+        responseType: 'trainingPlan.search',
+        result: 'success',
+        trainingPlans: [mockDraftPlan],
+        totalSize: 1,
+      },
+      status: 200,
+      headers: new Headers(),
+    })
+
+    const mutateAsyncActivate = vi.fn<(...args: unknown[]) => unknown>().mockResolvedValue({
+      data: {
+        responseType: 'trainingPlan.activate',
+        result: 'success',
+        trainingPlan: {
+          ...mockDraftPlan,
+          status: 'ACTIVE' as const,
+        },
+      },
+      status: 200,
+      headers: new Headers(),
+    })
+
+    vi.mocked(planApi.useTrainingPlanActivate).mockReturnValue({
+      mutateAsync: mutateAsyncActivate,
+    } as unknown as ReturnType<typeof planApi.useTrainingPlanActivate>)
+
+    const wrapper = mount(TrainingPlanListView, {
+      attachTo: document.body,
+      global: {
+        plugins: [[VueQueryPlugin, { queryClient }]],
+      },
+    })
+
+    await flushPromises()
+
+    // В строке таблицы виден статус "Черновик" и кнопка "Активировать"
+    expect(wrapper.text()).toContain('Черновик')
+    const activateBtn = wrapper.find('#activate-plan-btn-plan-draft-1')
+    expect(activateBtn.exists()).toBe(true)
+
+    // Кликаем по кнопке "Активировать"
+    await activateBtn.trigger('click')
+    await flushPromises()
+
+    expect(mutateAsyncActivate).toHaveBeenCalledWith({
+      data: {
+        requestType: 'trainingPlan.activate',
+        requestId: expect.any(String),
+        trainingPlan: {
+          id: 'plan-draft-1',
+          lock: 'lock-draft-1',
+        },
+      },
+    })
 
     wrapper.unmount()
   })

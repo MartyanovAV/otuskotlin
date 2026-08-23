@@ -19,4 +19,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm \
     -w /var/www/certbot \
     --quiet
 
+# Envoy uses a static TLS context and must be restarted to read renewed files.
+docker compose -f docker-compose.yml -f docker-compose.prod.yml restart envoy
+
 echo "==> [$(date -u)] Certbot renewal check completed."

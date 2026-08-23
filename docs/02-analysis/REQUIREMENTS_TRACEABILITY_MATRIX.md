@@ -40,15 +40,14 @@
 
 ## Явно отложенные возможности
 
-Публичные ссылки/capability-token, клиентская регистрация и кабинет, отметки выполнения/`COMPLETED`, `AccessGrant`, multi-specialist, биллинг, медиа и расширенная аналитика не имеют MVP trace и не должны появляться в OpenAPI или runtime без отдельного изменения scope.
+Публичные ссылки/capability-token, клиентская регистрация и клиентский кабинет, самостоятельные клиентские отметки выполнения (клиентский дневник), `AccessGrant`, multi-specialist, биллинг, медиа и глубокая сквозная аналитика не имеют MVP trace и не должны появляться в OpenAPI или runtime без отдельного изменения scope.
 
 ## Известные разрывы
 
 | Gap | Impact | Recommended action |
 |---|---|---|
-| Business processor пока ориентирован на stub/test путь, production persistence и ownership policy не завершены | Контракты компилируются, но end-to-end бизнес-сценарий ещё не production-ready | Реализовать repository/authorization chains и заменить плановые `TEST-*` ссылками на реальные тесты |
 | Нет утверждённой минимальной event taxonomy пилота | Activation/return метрики могут считаться неодинаково | До инструментирования согласовать названия событий и поля без пользовательского payload |
-| Supporting update/archive операции шире минимальных P0 user stories BR-010 | Возможен незаметный scope creep | Считать их техническим lifecycle-support, не включать в Gate 1 value hypothesis без отдельного решения |
+| Supporting update/archive/complete операции шире минимальных P0 user stories BR-010 | Возможен незаметный scope creep | Считать их техническим lifecycle-support тренера, не включать в базовую Gate 1 value hypothesis без отдельного решения |
 
 ## Maintenance Rules
 

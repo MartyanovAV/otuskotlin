@@ -24,7 +24,13 @@ private const val SEARCH_STRING_MAX_LENGTH = 120
 private const val PAGE_SIZE_MIN = 1
 private const val PAGE_SIZE_MAX = 100
 private val ALLOWED_STATUSES =
-    setOf(TrainingPlanStatus.NONE, TrainingPlanStatus.ACTIVE, TrainingPlanStatus.ARCHIVED, TrainingPlanStatus.COMPLETED)
+    setOf(
+        TrainingPlanStatus.NONE,
+        TrainingPlanStatus.DRAFT,
+        TrainingPlanStatus.ACTIVE,
+        TrainingPlanStatus.ARCHIVED,
+        TrainingPlanStatus.COMPLETED,
+    )
 private val UUID_PATTERN =
     Regex(
         "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
@@ -165,7 +171,12 @@ fun ICorChainDsl<TrainingPlanContext>.prepareTrainingPlanValidation(
                     id = TrainingPlanId.NONE
                     ownerUserId = ""
                     createdByUserId = ""
-                    status = TrainingPlanStatus.ACTIVE
+                    status =
+                        if (ctx.trainingPlanRequest.status == TrainingPlanStatus.DRAFT) {
+                            TrainingPlanStatus.DRAFT
+                        } else {
+                            TrainingPlanStatus.ACTIVE
+                        }
                     lock = TrainingPlanLock.NONE
                 }
             }

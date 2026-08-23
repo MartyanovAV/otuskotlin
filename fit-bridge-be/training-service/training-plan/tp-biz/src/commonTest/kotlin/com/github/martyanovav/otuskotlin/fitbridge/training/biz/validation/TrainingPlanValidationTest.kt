@@ -256,6 +256,189 @@ class TrainingPlanValidationTest {
         }
 
     @Test
+    fun validCreateDraftRequestSetsDraftStatus() =
+        runTest {
+            val request =
+                TrainingPlan(
+                    clientCardId = ClientCardId("client-1"),
+                    title = "Черновой план",
+                    status = TrainingPlanStatus.DRAFT,
+                    planItems =
+                        mutableListOf(
+                            ExerciseItem(
+                                id = "00000000-0000-0000-0000-000000000301",
+                                title = "Приседания",
+                            ),
+                        ),
+                )
+            val ctx =
+                TrainingPlanContext(
+                    command = TrainingPlanCommand.CREATE,
+                    workMode = WorkMode.TEST,
+                    principal = AuthPrincipal(userId = "user-1", roles = setOf(AuthPrincipal.TRAINER_ROLE)),
+                    trainingPlanRequest = request,
+                )
+
+            processor.exec(ctx)
+
+            assertEquals(State.FINISHING, ctx.state)
+            assertTrue(ctx.errors.isEmpty())
+            assertEquals(TrainingPlanStatus.DRAFT, ctx.trainingPlanResponse.status)
+        }
+
+    @Test
+    fun activateDraftTrainingPlanSucceeds() =
+        runTest {
+            val repo =
+                RepoTrainingPlanInMemory().apply {
+                    save(
+                        listOf(
+                            TrainingPlan(
+                                id = TrainingPlanId("00000000-0000-0000-0000-000000000201"),
+                                ownerUserId = "user-1",
+                                createdByUserId = "user-1",
+                                clientCardId = ClientCardId("client-1"),
+                                title = "Черновик",
+                                status = TrainingPlanStatus.DRAFT,
+                                lock = TrainingPlanLock("lock-1"),
+                                planItems = listOf(ExerciseItem(id = "00000000-0000-0000-0000-000000000301", title = "Приседания")),
+                            ),
+                        ),
+                    )
+                }
+            val testProcessor =
+                TrainingPlanProcessor(
+                    TrainingPlanCorSettings(
+                        repoTrainingPlanTest = repo,
+                        repoTrainingPlanStub = RepoTrainingPlanStub(),
+                        repoClientCardTest =
+                            RepoClientCardInMemory().apply {
+                                save(listOf(ClientCard(id = ClientCardId("client-1"), ownerUserId = "user-1", createdByUserId = "user-1")))
+                            },
+                    ),
+                )
+            val ctx =
+                TrainingPlanContext(
+                    command = TrainingPlanCommand.ACTIVATE,
+                    workMode = WorkMode.TEST,
+                    principal = AuthPrincipal(userId = "user-1", roles = setOf(AuthPrincipal.TRAINER_ROLE)),
+                    trainingPlanRequest =
+                        TrainingPlan(
+                            id = TrainingPlanId("00000000-0000-0000-0000-000000000201"),
+                            lock = TrainingPlanLock("lock-1"),
+                        ),
+                )
+
+            testProcessor.exec(ctx)
+
+            assertEquals(State.FINISHING, ctx.state)
+            assertTrue(ctx.errors.isEmpty())
+            assertEquals(TrainingPlanStatus.ACTIVE, ctx.trainingPlanResponse.status)
+        }
+
+    @Test
+    fun activateActiveTrainingPlanFailsWithInvalidStatus() =
+        runTest {
+            val repo =
+                RepoTrainingPlanInMemory().apply {
+                    save(
+                        listOf(
+                            TrainingPlan(
+                                id = TrainingPlanId("00000000-0000-0000-0000-000000000201"),
+                                ownerUserId = "user-1",
+                                createdByUserId = "user-1",
+                                clientCardId = ClientCardId("client-1"),
+                                title = "Активный план",
+                                status = TrainingPlanStatus.ACTIVE,
+                                lock = TrainingPlanLock("lock-1"),
+                                planItems = listOf(ExerciseItem(id = "00000000-0000-0000-0000-000000000301", title = "Приседания")),
+                            ),
+                        ),
+                    )
+                }
+            val testProcessor =
+                TrainingPlanProcessor(
+                    TrainingPlanCorSettings(
+                        repoTrainingPlanTest = repo,
+                        repoTrainingPlanStub = RepoTrainingPlanStub(),
+                        repoClientCardTest =
+                            RepoClientCardInMemory().apply {
+                                save(listOf(ClientCard(id = ClientCardId("client-1"), ownerUserId = "user-1", createdByUserId = "user-1")))
+                            },
+                    ),
+                )
+            val ctx =
+                TrainingPlanContext(
+                    command = TrainingPlanCommand.ACTIVATE,
+                    workMode = WorkMode.TEST,
+                    principal = AuthPrincipal(userId = "user-1", roles = setOf(AuthPrincipal.TRAINER_ROLE)),
+                    trainingPlanRequest =
+                        TrainingPlan(
+                            id = TrainingPlanId("00000000-0000-0000-0000-000000000201"),
+                            lock = TrainingPlanLock("lock-1"),
+                        ),
+                )
+
+            testProcessor.exec(ctx)
+
+            assertEquals(State.FAILING, ctx.state)
+            assertEquals(setOf("invalid-status"), ctx.errors.map { it.code }.toSet())
+        }
+
+    @Test
+    fun updateDraftTrainingPlanPreservesDraftStatus() =
+        runTest {
+            val repo =
+                RepoTrainingPlanInMemory().apply {
+                    save(
+                        listOf(
+                            TrainingPlan(
+                                id = TrainingPlanId("00000000-0000-0000-0000-000000000202"),
+                                ownerUserId = "user-1",
+                                createdByUserId = "user-1",
+                                clientCardId = ClientCardId("client-1"),
+                                title = "Черновик",
+                                status = TrainingPlanStatus.DRAFT,
+                                lock = TrainingPlanLock("lock-2"),
+                                planItems = listOf(ExerciseItem(id = "00000000-0000-0000-0000-000000000302", title = "Приседания")),
+                            ),
+                        ),
+                    )
+                }
+            val testProcessor =
+                TrainingPlanProcessor(
+                    TrainingPlanCorSettings(
+                        repoTrainingPlanTest = repo,
+                        repoTrainingPlanStub = RepoTrainingPlanStub(),
+                        repoClientCardTest =
+                            RepoClientCardInMemory().apply {
+                                save(listOf(ClientCard(id = ClientCardId("client-1"), ownerUserId = "user-1", createdByUserId = "user-1")))
+                            },
+                    ),
+                )
+            val ctx =
+                TrainingPlanContext(
+                    command = TrainingPlanCommand.UPDATE,
+                    workMode = WorkMode.TEST,
+                    principal = AuthPrincipal(userId = "user-1", roles = setOf(AuthPrincipal.TRAINER_ROLE)),
+                    trainingPlanRequest =
+                        TrainingPlan(
+                            id = TrainingPlanId("00000000-0000-0000-0000-000000000202"),
+                            lock = TrainingPlanLock("lock-2"),
+                            title = "Обновлённый черновик",
+                            planItems = mutableListOf(ExerciseItem(id = "00000000-0000-0000-0000-000000000303", title = "Жим лёжа")),
+                        ),
+                )
+
+            testProcessor.exec(ctx)
+
+            assertEquals(State.FINISHING, ctx.state)
+            assertTrue(ctx.errors.isEmpty())
+            assertEquals(TrainingPlanStatus.DRAFT, ctx.trainingPlanResponse.status)
+            assertEquals("Обновлённый черновик", ctx.trainingPlanResponse.title)
+        }
+
+    @Test
     fun searchFilterIsValidated() =
         runTest {
             val ctx =

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 
+defineProps<{ title: string }>()
+
 const isDark = ref(false)
 
 // Восстанавливаем тему из localStorage при монтировании
@@ -25,16 +27,17 @@ const toggleTheme = () => {
 </script>
 
 <template>
-  <header class="flex h-14 items-center gap-4 border-b border-border bg-surface px-6 lg:h-[60px]">
+  <header class="sticky top-0 z-[200] flex h-14 items-center gap-4 border-b border-border bg-surface/95 px-4 backdrop-blur-md md:px-6 lg:h-[60px]">
     <slot name="leading" />
     <div class="flex-1">
-      <h1 class="text-lg font-semibold md:text-2xl text-text-main">
-        <slot name="title">Кабинет</slot>
-      </h1>
+      <p class="text-base font-semibold text-text-main md:text-lg">{{ title }}</p>
     </div>
     <div class="flex items-center gap-4">
       <button
+        type="button"
         @click="toggleTheme"
+        :aria-label="isDark ? 'Включить светлую тему' : 'Включить тёмную тему'"
+        :aria-pressed="isDark"
         :title="isDark ? 'Переключить на светлую тему' : 'Переключить на тёмную тему'"
         class="rounded-full bg-surface-2 p-2 text-text-main hover:bg-surface-3 transition-colors"
       >

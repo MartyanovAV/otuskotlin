@@ -19,26 +19,33 @@ erDiagram
 
     CLIENT_CARD {
         string id PK
-        string ownerId
-        string displayName
+        string owner_user_id
+        string created_by_user_id
+        string display_name
         string note
         string status
-        datetime createdAt
-        datetime updatedAt
-        datetime archivedAt
+        string lock
+        datetime created_at
+        datetime updated_at
+        datetime archived_at
     }
 
     TRAINING_PLAN {
         string id PK
-        string clientCardId FK
-        string ownerId
+        string client_card_id FK
+        string owner_user_id
+        string created_by_user_id
         string title
-        jsonb planBody
+        jsonb plan_items
         string status
         int version
-        datetime createdAt
-        datetime updatedAt
-        datetime archivedAt
+        string lock
+        datetime created_at
+        datetime updated_at
+        datetime archived_at
+        datetime completed_at
+        string difficulty
+        string coach_comment
     }
 ```
 
@@ -46,19 +53,19 @@ erDiagram
 
 | Правило | Реализация |
 |---|---|
-| Канонический owner | `ownerId = JWT.sub` |
+| Канонический owner | `owner_user_id = JWT.sub` |
 | Источник owner | Только серверный Auth Guard; owner не принимается из request payload |
-| Чтение и поиск | Каждый запрос фильтруется по `ownerId` текущего principal |
-| Изменение и архивирование | Допускаются только при совпадении `entity.ownerId == principal.userId` |
-| Создание плана | `ClientCard.ownerId` должен совпадать с `principal.userId`; план получает тот же owner |
-| Ссылка на пользователя | `ownerId` не является FK: Keycloak владеет lifecycle пользователя |
+| Чтение и поиск | Каждый запрос фильтруется по `owner_user_id` текущего principal |
+| Изменение и архивирование | Допускаются только при совпадении `entity.owner_user_id == principal.userId` |
+| Создание плана | `ClientCard.owner_user_id` должен совпадать с `principal.userId`; план получает тот же owner |
+| Ссылка на пользователя | `owner_user_id` не является FK: Keycloak владеет lifecycle пользователя |
 
 ## Статусы MVP
 
 | Сущность | Значения | Правило |
 |---|---|---|
 | `CLIENT_CARD.status` | `ACTIVE`, `ARCHIVED` | Архивированная карточка не получает новые планы |
-| `TRAINING_PLAN.status` | `DRAFT`, `ACTIVE`, `ARCHIVED` | Архивный план исключается из активного поиска по умолчанию |
+| `TRAINING_PLAN.status` | `DRAFT`, `ACTIVE`, `ARCHIVED`, `COMPLETED` | `DRAFT` — подготовительный черновик плана (активируется через `/trainingPlan/activate`); `ACTIVE` — активный план; `COMPLETED` — завершённая тренировка с оценкой сложности и комментарием; `ARCHIVED` — план в архиве |
 
 ## Индексы
 

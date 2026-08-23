@@ -14,7 +14,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/shared/ui/dialog'
-import { trainingPlanSearch, useTrainingPlanCreate, useTrainingPlanUpdate } from '@/shared/api/generated/training-plan/training-plan'
+import { trainingPlanSearch, useTrainingPlanCreate, useTrainingPlanUpdate, useTrainingPlanActivate } from '@/shared/api/generated/training-plan/training-plan'
 import { clientCardSearch } from '@/shared/api/generated/client-card/client-card'
 import type { TrainingPlanResponseObject } from '@/shared/api/generated/models/trainingPlanResponseObject'
 import type { ClientCardResponseObject } from '@/shared/api/generated/models/clientCardResponseObject'
@@ -111,6 +111,7 @@ const formatPlanStatus = (status?: TrainingPlanStatus) => {
   if (status === 'ACTIVE') return 'Активен'
   if (status === 'ARCHIVED') return 'В архиве'
   if (status === 'COMPLETED') return 'Завершён'
+  if (status === 'DRAFT') return 'Черновик'
   return 'Черновик'
 }
 
@@ -136,8 +137,10 @@ const canSubmitPlan = computed(
 )
 
 const createMutation = useTrainingPlanCreate()
+const activateMutation = useTrainingPlanActivate()
+const isActivating = ref(false)
 
-const handleCreatePlan = async () => {
+const handleCreatePlan = async (status: TrainingPlanStatus = 'ACTIVE') => {
   if (!canSubmitPlan.value) return
   isSubmitting.value = true
   errorMessage.value = null
@@ -150,6 +153,7 @@ const handleCreatePlan = async () => {
         trainingPlan: {
           title: newPlan.value.title.trim(),
           clientCardId: newPlan.value.clientCardId,
+          status,
           planItems: newPlan.value.items.map(mapDraftToPlanItem),
         },
       },
@@ -175,6 +179,37 @@ const handleCreatePlan = async () => {
   }
 }
 
+const handleActivatePlan = async (plan: TrainingPlanResponseObject) => {
+  if (!plan.id || !plan.lock || isActivating.value) return
+  isActivating.value = true
+
+  try {
+    const response = await activateMutation.mutateAsync({
+      data: {
+        requestType: 'trainingPlan.activate',
+        requestId: crypto.randomUUID(),
+        trainingPlan: {
+          id: plan.id,
+          lock: plan.lock,
+        },
+      },
+    })
+
+    if (selectedPlan.value && selectedPlan.value.id === plan.id && response.data.trainingPlan) {
+      selectedPlan.value = response.data.trainingPlan
+    }
+
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['trainingPlans'] }),
+      queryClient.invalidateQueries({ queryKey: ['trainingPlansCount'] }),
+    ])
+  } catch (err: unknown) {
+    alert(err instanceof Error ? err.message : 'Не удалось активировать тренировочный план')
+  } finally {
+    isActivating.value = false
+  }
+}
+
 const isEditOpen = ref(false)
 const isUpdating = ref(false)
 const editErrorMessage = ref<string | null>(null)
@@ -189,7 +224,7 @@ const editPlan = ref({
 const updateMutation = useTrainingPlanUpdate()
 
 const openEditPlan = (plan: TrainingPlanResponseObject) => {
-  if (plan.status !== 'ACTIVE' || plan.completedAt) {
+  if ((plan.status !== 'ACTIVE' && plan.status !== 'DRAFT') || plan.completedAt) {
     return
   }
   editErrorMessage.value = null
@@ -290,7 +325,7 @@ const formatDifficulty = (diff?: string) => {
   <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <h2 class="text-2xl font-bold tracking-tight text-text-main">Тренировочные планы</h2>
+        <h1 class="text-2xl font-bold tracking-tight text-text-main">Тренировочные планы</h1>
         <p class="text-sm text-text-muted">Программы тренировок</p>
       </div>
       <div class="flex items-center gap-3">
@@ -308,6 +343,7 @@ const formatDifficulty = (diff?: string) => {
         <Input
           v-model="searchQuery"
           placeholder="Поиск по названию..."
+          aria-label="Поиск тренировочных планов по названию"
           class="bg-surface-2 h-9 text-sm"
           id="plan-search-input"
         />
@@ -335,6 +371,7 @@ const formatDifficulty = (diff?: string) => {
           id="plan-status-filter"
         >
           <option value="">Все статусы</option>
+          <option value="DRAFT">Черновики</option>
           <option value="ACTIVE">Активные</option>
           <option value="COMPLETED">Завершённые</option>
           <option value="ARCHIVED">В архиве</option>
@@ -356,7 +393,7 @@ const formatDifficulty = (diff?: string) => {
     </div>
 
     <!-- Состояние загрузки -->
-    <div v-if="isLoading" class="flex items-center justify-center p-12">
+    <div v-if="isLoading" class="flex items-center justify-center p-12" role="status" aria-live="polite">
       <div class="text-center space-y-3">
         <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent"></div>
         <p class="text-sm text-text-muted">Загрузка планов...</p>
@@ -364,7 +401,7 @@ const formatDifficulty = (diff?: string) => {
     </div>
 
     <!-- Ошибка загрузки -->
-    <div v-else-if="isError" class="p-6 rounded-xl border border-danger/30 bg-danger-soft text-center space-y-3">
+    <div v-else-if="isError" class="p-6 rounded-xl border border-danger/30 bg-danger-soft text-center space-y-3" role="alert">
       <p class="text-sm font-medium text-danger">Не удалось загрузить планы</p>
       <p class="text-xs text-text-muted">{{ error }}</p>
       <Button variant="outline" size="sm" @click="() => refetch()">Повторить попытку</Button>
@@ -387,8 +424,54 @@ const formatDifficulty = (diff?: string) => {
       <Button v-else @click="isCreateOpen = true">Создать первый план</Button>
     </div>
 
-    <!-- Таблица тренировочных планов -->
-    <div v-else class="rounded-xl border border-border bg-surface overflow-hidden shadow-xs">
+    <!-- Список планов: карточки на телефоне, таблица на desktop -->
+    <template v-else>
+      <section class="space-y-3 md:hidden" aria-label="Список тренировочных планов">
+        <article
+          v-for="plan in plans"
+          :key="plan.id"
+          class="rounded-xl border border-border bg-surface p-4 shadow-sm"
+        >
+          <div class="flex items-start gap-3">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-start justify-between gap-2">
+                <h2 class="line-clamp-2 text-base font-semibold text-text-main">{{ plan.title }}</h2>
+                <Badge :variant="plan.status === 'ACTIVE' ? 'default' : plan.status === 'COMPLETED' ? 'outline' : 'secondary'" class="shrink-0">
+                  {{ formatPlanStatus(plan.status) }}
+                </Badge>
+              </div>
+              <p class="mt-1 text-sm text-text-muted">Клиент: {{ getClientNameById(plan.clientCardId) }}</p>
+              <p class="mt-1 text-xs text-text-muted">{{ (plan.planItems ?? []).length }} эл. · {{ formatPlanStructureSummary(plan.planItems) }}</p>
+              <p class="mt-2 text-xs text-text-faint">Создан: {{ formatDate(plan.createdAt) }}</p>
+            </div>
+          </div>
+          <div class="mt-4 grid grid-cols-2 gap-2">
+            <Button variant="outline" @click="selectedPlan = plan" :id="`mobile-view-plan-btn-${plan.id}`">Открыть</Button>
+            <Button
+              v-if="(plan.status === 'ACTIVE' || plan.status === 'DRAFT') && !plan.completedAt"
+              variant="secondary"
+              @click="openEditPlan(plan)"
+            >
+              Редактировать
+            </Button>
+            <Button v-else variant="secondary" @click="selectedPlan = plan">Состав</Button>
+            <Button
+              v-if="plan.status === 'DRAFT'"
+              class="bg-success text-text-inverse hover:opacity-90"
+              @click="handleActivatePlan(plan)"
+              :disabled="isActivating"
+            >
+              Активировать
+            </Button>
+            <PlanShareButton :plan="plan" placement="top-left" />
+          </div>
+        </article>
+      </section>
+
+      <div class="hidden overflow-hidden rounded-xl border border-border bg-surface shadow-xs md:block">
       <div class="overflow-x-auto">
         <table class="w-full text-left text-sm">
           <thead class="border-b border-border bg-surface-2/60 text-xs font-semibold uppercase tracking-wider text-text-muted">
@@ -407,6 +490,11 @@ const formatDifficulty = (diff?: string) => {
               :key="plan.id"
               class="hover:bg-surface-2/70 transition-colors cursor-pointer group"
               @click="selectedPlan = plan"
+              @keydown.enter="selectedPlan = plan"
+              @keydown.space.prevent="selectedPlan = plan"
+              tabindex="0"
+              role="button"
+              :aria-label="`Открыть тренировочный план ${plan.title ?? 'без названия'}`"
               :id="`plan-row-${plan.id}`"
             >
               <td class="py-4 pl-6 pr-4 font-medium">
@@ -432,7 +520,7 @@ const formatDifficulty = (diff?: string) => {
                 </div>
               </td>
               <td class="px-4 py-4 whitespace-nowrap">
-                <Badge :variant="plan.status === 'ACTIVE' ? 'default' : 'secondary'" class="w-fit">
+                <Badge :variant="plan.status === 'ACTIVE' ? 'default' : plan.status === 'COMPLETED' ? 'outline' : 'secondary'" class="w-fit">
                   {{ formatPlanStatus(plan.status) }}
                 </Badge>
               </td>
@@ -453,7 +541,20 @@ const formatDifficulty = (diff?: string) => {
                 <div class="flex items-center justify-end gap-2" @click.stop>
                   <PlanShareButton :plan="plan" :show-label="false" />
                   <Button
-                    v-if="plan.status === 'ACTIVE' && !plan.completedAt"
+                    v-if="plan.status === 'DRAFT'"
+                    variant="default"
+                    size="sm"
+                    class="h-8 text-xs bg-success text-text-inverse hover:opacity-90"
+                    @click.stop="handleActivatePlan(plan)"
+                    :disabled="isActivating"
+                    :id="`activate-plan-btn-${plan.id}`"
+                    title="Активировать план"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Активировать
+                  </Button>
+                  <Button
+                    v-if="(plan.status === 'ACTIVE' || plan.status === 'DRAFT') && !plan.completedAt"
                     variant="outline"
                     size="sm"
                     class="h-8 text-xs group-hover:border-primary/50 group-hover:text-primary"
@@ -481,15 +582,16 @@ const formatDifficulty = (diff?: string) => {
         </table>
       </div>
 
-      <!-- Пагинация списка тренировочных планов -->
-      <div class="border-t border-border px-4 bg-surface-2/30">
+      </div>
+
+      <div class="rounded-xl border border-border bg-surface-2/30 px-2 md:px-4">
         <Pagination
           v-model:pageNumber="pageNumber"
           v-model:pageSize="pageSize"
           :totalSize="totalPlansCount"
         />
       </div>
-    </div>
+    </template>
 
     <!-- Модальное окно создания тренировочного плана -->
     <Dialog :open="isCreateOpen" @update:open="isCreateOpen = $event">
@@ -505,7 +607,7 @@ const formatDifficulty = (diff?: string) => {
           {{ errorMessage }}
         </div>
 
-        <form @submit.prevent="handleCreatePlan" class="space-y-4 py-2">
+        <form @submit.prevent="handleCreatePlan('ACTIVE')" class="space-y-4 py-2">
           <div class="space-y-1.5">
             <label class="text-sm font-medium text-text-main" for="plan-name">Название плана *</label>
             <Input
@@ -535,12 +637,15 @@ const formatDifficulty = (diff?: string) => {
           <!-- Конструктор элементов плана (Упражнения, Круговые, Суперсеты) -->
           <PlanItemBuilder v-model:items="newPlan.items" />
 
-          <DialogFooter>
+          <DialogFooter class="flex flex-col sm:flex-row sm:justify-end gap-2">
             <Button type="button" variant="outline" @click="isCreateOpen = false">
               Отмена
             </Button>
+            <Button type="button" variant="secondary" :disabled="!canSubmitPlan" @click="handleCreatePlan('DRAFT')" id="save-draft-plan-btn">
+              {{ isSubmitting ? 'Сохранение...' : 'Сохранить как черновик' }}
+            </Button>
             <Button type="submit" :disabled="!canSubmitPlan" id="submit-plan-btn">
-              {{ isSubmitting ? 'Создание...' : 'Создать' }}
+              {{ isSubmitting ? 'Создание...' : 'Создать и активировать' }}
             </Button>
           </DialogFooter>
         </form>
@@ -668,7 +773,18 @@ const formatDifficulty = (diff?: string) => {
           </div>
           <div class="flex items-center justify-end gap-2">
             <Button
-              v-if="selectedPlan.status === 'ACTIVE' && !selectedPlan.completedAt"
+              v-if="selectedPlan.status === 'DRAFT'"
+              variant="default"
+              class="bg-success text-text-inverse hover:opacity-90"
+              @click="handleActivatePlan(selectedPlan)"
+              :disabled="isActivating"
+              id="details-activate-plan-btn"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Активировать
+            </Button>
+            <Button
+              v-if="(selectedPlan.status === 'ACTIVE' || selectedPlan.status === 'DRAFT') && !selectedPlan.completedAt"
               variant="outline"
               @click="openEditPlan(selectedPlan)"
               id="details-edit-plan-btn"

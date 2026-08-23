@@ -5,13 +5,10 @@
  * Trainer Diary MVP API v2 для управления клиентской базой и тренировочными планами
  * OpenAPI spec version: 2.0.0
  */
+import type { Lock } from './lock';
+import type { TrainingPlanId } from './trainingPlanId';
 
-export type TrainingPlanStatus = typeof TrainingPlanStatus[keyof typeof TrainingPlanStatus];
-
-
-export const TrainingPlanStatus = {
-  DRAFT: 'DRAFT',
-  ACTIVE: 'ACTIVE',
-  ARCHIVED: 'ARCHIVED',
-  COMPLETED: 'COMPLETED',
-} as const;
+export interface TrainingPlanActivateObject {
+  id?: TrainingPlanId;
+  lock?: Lock;
+}

@@ -7,7 +7,9 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardSearc
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.ClientCardUpdateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.IRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.IResponse
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanActivateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanArchiveRequest
+import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanCompleteRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanCreateRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanReadRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v1.models.TrainingPlanSearchRequest
@@ -130,6 +132,22 @@ fun Route.v1Training(appSettings: AppSettings) {
             call.processV1<TrainingPlanArchiveRequest, IResponse, TrainingPlanContext>(
                 appSettings.tpCorSettings.loggerProvider.logger("trainingPlan-archive"),
                 { appSettings.tpProcessor.exec(it) }, "trainingPlan-archive",
+                { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+                { ctx, id -> ctx.toLog(id) }
+            )
+        }
+        post("activate") {
+            call.processV1<TrainingPlanActivateRequest, IResponse, TrainingPlanContext>(
+                appSettings.tpCorSettings.loggerProvider.logger("trainingPlan-activate"),
+                { appSettings.tpProcessor.exec(it) }, "trainingPlan-activate",
+                { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
+                { ctx, id -> ctx.toLog(id) }
+            )
+        }
+        post("complete") {
+            call.processV1<TrainingPlanCompleteRequest, IResponse, TrainingPlanContext>(
+                appSettings.tpCorSettings.loggerProvider.logger("trainingPlan-complete"),
+                { appSettings.tpProcessor.exec(it) }, "trainingPlan-complete",
                 { TrainingPlanContext() }, { fromTransport(it) }, { toTransport() as IResponse },
                 { ctx, id -> ctx.toLog(id) }
             )

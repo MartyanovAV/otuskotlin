@@ -14,6 +14,9 @@ vi.mock('../shared/api/generated/client-card/client-card', () => ({
 vi.mock('../shared/api/generated/training-plan/training-plan', () => ({
   trainingPlanSearch: vi.fn<(...args: unknown[]) => unknown>(),
   useTrainingPlanCreate: vi.fn<(...args: unknown[]) => unknown>(),
+  useTrainingPlanActivate: vi.fn<(...args: unknown[]) => unknown>(() => ({
+    mutateAsync: vi.fn<(...args: unknown[]) => unknown>(),
+  })),
 }))
 
 describe('ClientListView with Training Plans', () => {

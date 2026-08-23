@@ -42,6 +42,10 @@ const recentClients = computed<ClientCardResponseObject[]>(() => {
 
 <template>
   <div class="space-y-6">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight text-text-main">Дашборд</h1>
+      <p class="text-sm text-text-muted">Краткий обзор клиентской базы и программ</p>
+    </div>
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
         <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">

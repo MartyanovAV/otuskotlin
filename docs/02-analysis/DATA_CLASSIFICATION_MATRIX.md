@@ -32,7 +32,7 @@
 |---|---|---|---|---|---|
 | Keycloak trainer identity: username, email, имя, `sub`, `TRAINER`, принятие условий | `personal`, `security` | MVP | Владелец и IAM в пределах обязанностей; backend получает минимальные JWT claims. | Не логировать username/email/ФИО/JWT; использовать `sub`, action/result. | Lifecycle аккаунта находится в Keycloak; self-service deletion — Phase 2. |
 | `ClientCard`: минимальное имя/обозначение, id, ownerId, статус | `personal`, `internal` | MVP | Только тренер-владелец; клиент и другие тренеры доступа не имеют. | Не логировать имя; допустимы ids, изменённые field names, action/result. | Архивирование в рабочем контуре; не превращать в client-owned профиль без Phase 2 решения. |
-| `TrainingPlan`: название, элементы тренировки, инструкции, clientCardId, ownerId, статус | `fitness-adjacent`, `personal`, `internal` | MVP | Только тренер-владелец; связь разрешена только с его `ClientCard`. | Не логировать содержимое плана или raw JSON; допустимы ids, version/status, action/result. | Хранить в рабочем контуре тренера; `ARCHIVED` исключает план из активной работы. |
+| `TrainingPlan`: название, элементы тренировки, инструкции, clientCardId, ownerId, статус, completedAt, difficulty, coachComment | `fitness-adjacent`, `personal`, `internal` | MVP | Только тренер-владелец; связь разрешена только с его `ClientCard`. | Не логировать содержимое плана или raw JSON; допустимы ids, version/status, action/result. | Хранить в рабочем контуре тренера; `ARCHIVED` исключает план из активной работы. |
 | Агрегированные метрики: регистрация, создание карточки/плана, поиск и повторный просмотр | `internal` | MVP validation | PO/Product видят агрегаты; тренер — только свои продуктовые данные. | Использовать агрегаты и internal ids без пользовательского payload. | Retention ограничить задачами пилота и диагностики. |
 | Медданные, диагнозы, противопоказания, body metrics и замеры | `sensitive / special category`, `personal` | Out of scope | Не принимаются и не показываются в MVP. | Не должны попадать в payload или логи. | Нужны отдельная правовая оценка и retention policy до включения. |
 | Фото, видео, rich-media, EXIF и медиа-ссылки | `sensitive / special category`, `personal`, `security` | Out of scope | Не загружаются и не показываются в MVP. | Не логировать URL, превью, EXIF или metadata. | Нужна отдельная media retention policy. |
@@ -43,10 +43,10 @@
 
 ## Обязательные продуктовые правила
 
-1. Критический путь MVP: регистрация тренера → создание `ClientCard` → создание `TrainingPlan` → поиск/повторный просмотр карточек и планов.
+1. Критический путь MVP: регистрация тренера → создание `ClientCard` → создание/завершение `TrainingPlan` → поиск/повторный просмотр карточек и планов.
 2. Все domain API операции требуют JWT, `TRAINER` и проверку `ownerId == JWT.sub`.
-3. Клиент не регистрируется, не открывает план и не оставляет отметку выполнения в текущем MVP.
-4. MVP не содержит публичных endpoints, capability-token, `AccessGrant` или состояния плана `COMPLETED`.
+3. Клиент не регистрируется, не открывает план и не оставляет отметку выполнения в текущем MVP (завершение плана фиксируется самим тренером в рамках его Дневника).
+4. MVP не содержит публичных endpoints, capability-token, `AccessGrant` или самостоятельного клиентского дневника.
 5. Персональные поля и содержимое планов/карточек не попадают в логи.
 6. Любое расширение в сторону client-owned или публичной модели требует отдельного изменения бизнес-scope, RTM, OpenAPI и архитектурного решения.
 

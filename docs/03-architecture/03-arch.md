@@ -46,7 +46,7 @@ FitBridge MVP **Trainer Diary** позволяет зарегистрирова�
 - **No runtime UserInfo dependency:** профиль запрашивает UI; backend не вызывает UserInfo на каждом запросе.
 - **Minimal domain:** в PostgreSQL находятся только подтверждённые бизнес-сущности.
 - **Entity boundaries inside service:** Training Service собирает независимые модули `ClientCard` и `TrainingPlan`; common/biz/api/repo-*/app и миграции принадлежат соответствующей сущности, общего repo-layer сервиса нет.
-- **Masked observability:** JWT, ФИО, email, заметки и содержимое планов не логируются.
+
 
 ## API-поверхность
 
@@ -59,4 +59,4 @@ Profile API отсутствует. `ClientProfile`, `Invite`, `AccessGrant`, cl
 
 ## Текущее состояние реализации
 
-OpenAPI, transport/common models, мапперы, Ktor application и REST/WS endpoints Training Service находятся в tracked sources. Процессоры пока работают как учебный stub-фасад; persistence, полная JWT validation в backend и authorization chains ещё должны быть реализованы. Плоская структура модулей остаётся переходной и позднее должна быть разнесена по entity-модулям без изменения структуры монорепозитория.
+OpenAPI, transport/common models, мапперы, Ktor application и REST/WS endpoints Training Service находятся в tracked sources. Процессоры реализуют полноценные цепочки бизнес-логики с использованием репозиториев (PostgreSQL). Проверка JWT, извлечение стабильного `ownerId` и авторизационные проверки (`accessValidation`) встроены в backend. Структура `training-service` успешно разнесена по модулям сущностей (`client-card`, `training-plan`, `core`, `common`), изолирующим свои `biz`, `common` и `repo` слои.
