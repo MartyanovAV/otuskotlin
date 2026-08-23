@@ -13,7 +13,9 @@ dependencies {
     // Используем созданную ранее конфигурацию "specsConfiguration" проекта со спецификациями
     specsFromLib(project(path = ":training-specs", configuration = "specsConfiguration"))
 
-    implementation(project(":common"))
+    implementation(project(":core:core-common"))
+    implementation(project(":client-card:cc-common"))
+    implementation(project(":training-plan:tp-common"))
     implementation(libs.kotlinx.datetime)
     implementation(kotlin("stdlib"))
     implementation(libs.jackson.kotlin)

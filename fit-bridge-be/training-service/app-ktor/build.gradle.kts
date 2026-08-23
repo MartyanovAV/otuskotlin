@@ -12,8 +12,12 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(kotlin("stdlib-common"))
-                implementation(project(":common"))
-                implementation(project(":biz"))
+                implementation(project(":core:core-common"))
+                implementation(project(":client-card:cc-common"))
+                implementation(project(":training-plan:tp-common"))
+                implementation(project(":core:core-biz"))
+                implementation(project(":client-card:cc-biz"))
+                implementation(project(":training-plan:tp-biz"))
                 implementation(project(":api-v2-kmp"))
                 implementation(project(":mappers-v2-common"))
                 implementation(project(":mappers-v2-client-card"))
@@ -33,9 +37,12 @@ kotlin {
                 implementation(libs.coroutines.core)
 
                 // DB
-                implementation(project(":repo-stubs"))
-                implementation(project(":repo-inmemory"))
-                implementation(project(":repo-pg"))
+                implementation(project(":client-card:cc-repo-stubs"))
+                implementation(project(":training-plan:tp-repo-stubs"))
+                implementation(project(":client-card:cc-repo-inmemory"))
+                implementation(project(":training-plan:tp-repo-inmemory"))
+                implementation(project(":client-card:cc-repo-pg"))
+                implementation(project(":training-plan:tp-repo-pg"))
                 implementation(libs.db.hikari)
                 implementation(libs.db.exposed.core)
                 implementation(libs.db.exposed.jdbc)
@@ -69,7 +76,9 @@ kotlin {
                 implementation(libs.ktor.client.websockets)
 
                 // DB
-                implementation(project(":repo-common"))
+                implementation(project(":core:core-repo"))
+                implementation(project(":client-card:cc-repo-common"))
+                implementation(project(":training-plan:tp-repo-common"))
             }
         }
 

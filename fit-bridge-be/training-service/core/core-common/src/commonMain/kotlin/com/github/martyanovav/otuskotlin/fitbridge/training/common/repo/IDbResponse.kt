@@ -1,3 +1,3 @@
 package com.github.martyanovav.otuskotlin.fitbridge.training.common.repo
 
-sealed interface IDbResponse<T>
+interface IDbResponse<T>

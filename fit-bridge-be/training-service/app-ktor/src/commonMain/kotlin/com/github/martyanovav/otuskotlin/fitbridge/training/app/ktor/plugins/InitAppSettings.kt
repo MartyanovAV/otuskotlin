@@ -2,10 +2,10 @@ package com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.plugins
 
 import com.github.martyanovav.otuskotlin.fitbridge.logging.common.FbLoggerProvider
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.AppSettings
-import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.base.KtorWsSessionRepo
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.configs.ConfigPaths
 import com.github.martyanovav.otuskotlin.fitbridge.training.app.ktor.configs.PostgresConfig
-import com.github.martyanovav.otuskotlin.fitbridge.training.common.CorSettings
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.ClientCardCorSettings
+import com.github.martyanovav.otuskotlin.fitbridge.training.common.TrainingPlanCorSettings
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.inmemory.RepoClientCardInMemory
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.inmemory.RepoTrainingPlanInMemory
 import com.github.martyanovav.otuskotlin.fitbridge.training.repo.pg.PgProperties
@@ -63,17 +63,22 @@ fun Application.initAppSettings(
     }
 
     return AppSettings(
-        corSettings =
-            CorSettings(
+        ccCorSettings =
+            ClientCardCorSettings(
                 loggerProvider = loggerProvider,
-                wsSessionsV1 = KtorWsSessionRepo(),
-                wsSessionsV2 = KtorWsSessionRepo(),
                 repoClientCardTest = repoClientCardTest,
                 repoClientCardProd = repoClientCardProd,
                 repoClientCardStub = RepoClientCardStub(),
+            ),
+        tpCorSettings =
+            TrainingPlanCorSettings(
+                loggerProvider = loggerProvider,
                 repoTrainingPlanTest = repoTrainingPlanTest,
                 repoTrainingPlanProd = repoTrainingPlanProd,
                 repoTrainingPlanStub = RepoTrainingPlanStub(),
+                repoClientCardTest = repoClientCardTest,
+                repoClientCardProd = repoClientCardProd,
+                repoClientCardStub = RepoClientCardStub(),
             ),
     )
 }

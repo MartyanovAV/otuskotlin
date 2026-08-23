@@ -27,7 +27,7 @@ data class ClientCardContext(
     override var principal: AuthPrincipal = AuthPrincipal.NONE,
     override var principalRelation: FtcPrincipalRelation = FtcPrincipalRelation.NONE,
     override var wsSession: IFBWsSession = IFBWsSession.NONE,
-    override var corSettings: CorSettings = CorSettings(),
+    var corSettings: ClientCardCorSettings = ClientCardCorSettings(),
     var clientCardRequest: ClientCard = ClientCard(),
     var clientCardValidating: ClientCard = ClientCard(),
     var clientCardValidated: ClientCard = ClientCard(),

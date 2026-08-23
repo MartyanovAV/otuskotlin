@@ -48,7 +48,7 @@ services:
       start_period: 10s
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.1.0
+    image: quay.io/keycloak/keycloak:26.7.1
     volumes:
       - ./volumes/keycloak/import:/opt/keycloak/data/import:ro
     environment:
@@ -62,19 +62,21 @@ services:
       retries: 18
       start_period: 10s
     command:
-      - start-dev
+      - start
       - --import-realm
+      - --http-enabled
+      - "true"
       - --hostname-strict
-      - "false"
+      - "true"
       - --hostname
-      - "http://localhost:8080/"
+      - "http://localhost:8080"
       - --proxy-headers
-      - forwarded
+      - xforwarded
       - --hostname-backchannel-dynamic
       - "true"
 
   envoy:
-    image: envoyproxy/envoy:v1.29.0
+    image: envoyproxy/envoy:v1.39.0
     volumes:
       - ./volumes/envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
     depends_on:

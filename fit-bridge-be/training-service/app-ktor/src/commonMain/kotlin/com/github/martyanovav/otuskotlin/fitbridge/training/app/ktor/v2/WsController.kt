@@ -15,6 +15,7 @@ import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanCre
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanReadRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanSearchRequest
 import com.github.martyanovav.otuskotlin.fitbridge.api.v2.models.TrainingPlanUpdateRequest
+import com.github.martyanovav.otuskotlin.fitbridge.logging.common.IFbLogWrapper
 import com.github.martyanovav.otuskotlin.fitbridge.mappers.v2.fromTransport
 import com.github.martyanovav.otuskotlin.fitbridge.mappers.v2.toTransport
 import com.github.martyanovav.otuskotlin.fitbridge.training.api.log1.mapper.toLog
@@ -40,7 +41,7 @@ suspend fun WebSocketSession.wsHandlerV2(
     sessions.add(wsSession)
 
     try {
-        appSettings.processor.exec(
+        appSettings.ccProcessor.exec(
             ClientCardContext(command = FBCommandBase.INIT, wsSession = wsSession, principal = principal),
         )
         wsSession.send(InitResponse(apiVersion = "v2", result = ResponseResult.SUCCESS))
@@ -59,7 +60,7 @@ suspend fun WebSocketSession.wsHandlerV2(
             wsSession.send(response)
         }
     } finally {
-        appSettings.processor.exec(
+        appSettings.ccProcessor.exec(
             ClientCardContext(command = FBCommandBase.FINISH, wsSession = wsSession, principal = principal),
         )
         sessions.remove(wsSession)
@@ -79,14 +80,14 @@ private fun wsError(
 private suspend inline fun <reified Q : IRequest, C : IFBContext> processWsReq(
     request: Q,
     wsSession: KtorWsSessionV2,
-    appSettings: AppSettings,
+    logger: IFbLogWrapper,
     logId: String,
     crossinline makeCtx: () -> C,
+    crossinline execProc: suspend (C) -> Unit,
     crossinline fromTransport: suspend C.(Q) -> Unit,
     crossinline toTransport: suspend C.() -> IResponse,
     crossinline toLog: (C, String) -> Any
 ): IResponse {
-    val logger = appSettings.corSettings.loggerProvider.logger(logId)
     return executePipeline(
         getContext = {
             makeCtx().apply {
@@ -97,7 +98,7 @@ private suspend inline fun <reified Q : IRequest, C : IFBContext> processWsReq(
         logger = logger,
         logId = logId,
         receive = { fromTransport(request) },
-        exec = { appSettings.processor.exec(this) },
+        exec = { execProc(this as C) },
         respond = { toTransport() },
         toLog = { toLog(it, logId) }
     )
@@ -111,63 +112,63 @@ private suspend fun String.processV2(
     return when (request) {
         is ClientCardCreateRequest ->
             processWsReq(
-                request, wsSession, appSettings, "ws-clientCard-create", {
+                request, wsSession, appSettings.ccCorSettings.loggerProvider.logger("ws-clientCard-create"), "ws-clientCard-create", {
                     ClientCardContext()
-                }, { fromTransport(it) }, { toTransport() as IResponse }, { ctx, id -> ctx.toLog(id) }
+                }, { appSettings.ccProcessor.exec(it) }, { fromTransport(it) }, { toTransport() as IResponse }, { ctx, id -> ctx.toLog(id) }
             )
         is ClientCardReadRequest ->
             processWsReq(
-                request, wsSession, appSettings, "ws-clientCard-read", {
+                request, wsSession, appSettings.ccCorSettings.loggerProvider.logger("ws-clientCard-read"), "ws-clientCard-read", {
                     ClientCardContext()
-                }, { fromTransport(it) }, { toTransport() as IResponse }, { ctx, id -> ctx.toLog(id) }
+                }, { appSettings.ccProcessor.exec(it) }, { fromTransport(it) }, { toTransport() as IResponse }, { ctx, id -> ctx.toLog(id) }
             )
         is ClientCardUpdateRequest ->
             processWsReq(
-                request, wsSession, appSettings, "ws-clientCard-update", {
+                request, wsSession, appSettings.ccCorSettings.loggerProvider.logger("ws-clientCard-update"), "ws-clientCard-update", {
                     ClientCardContext()
-                }, { fromTransport(it) }, { toTransport() as IResponse }, { ctx, id -> ctx.toLog(id) }
+                }, { appSettings.ccProcessor.exec(it) }, { fromTransport(it) }, { toTransport() as IResponse }, { ctx, id -> ctx.toLog(id) }
             )
         is ClientCardArchiveRequest ->
             processWsReq(
-                request, wsSession, appSettings, "ws-clientCard-archive", {
+                request, wsSession, appSettings.ccCorSettings.loggerProvider.logger("ws-clientCard-archive"), "ws-clientCard-archive", {
                     ClientCardContext()
-                }, { fromTransport(it) }, { toTransport() as IResponse }, { ctx, id -> ctx.toLog(id) }
+                }, { appSettings.ccProcessor.exec(it) }, { fromTransport(it) }, { toTransport() as IResponse }, { ctx, id -> ctx.toLog(id) }
             )
         is ClientCardSearchRequest ->
             processWsReq(
-                request, wsSession, appSettings, "ws-clientCard-search", {
+                request, wsSession, appSettings.ccCorSettings.loggerProvider.logger("ws-clientCard-search"), "ws-clientCard-search", {
                     ClientCardContext()
-                }, { fromTransport(it) }, { toTransport() as IResponse }, { ctx, id -> ctx.toLog(id) }
+                }, { appSettings.ccProcessor.exec(it) }, { fromTransport(it) }, { toTransport() as IResponse }, { ctx, id -> ctx.toLog(id) }
             )
         is TrainingPlanCreateRequest ->
             processWsReq(
-                request, wsSession, appSettings, "ws-trainingPlan-create", {
+                request, wsSession, appSettings.tpCorSettings.loggerProvider.logger("ws-trainingPlan-create"), "ws-trainingPlan-create", {
                     TrainingPlanContext()
-                }, { fromTransport(it) }, { toTransport() as IResponse }, { ctx, id -> ctx.toLog(id) }
+                }, { appSettings.tpProcessor.exec(it) }, { fromTransport(it) }, { toTransport() as IResponse }, { ctx, id -> ctx.toLog(id) }
             )
         is TrainingPlanReadRequest ->
             processWsReq(
-                request, wsSession, appSettings, "ws-trainingPlan-read", {
+                request, wsSession, appSettings.tpCorSettings.loggerProvider.logger("ws-trainingPlan-read"), "ws-trainingPlan-read", {
                     TrainingPlanContext()
-                }, { fromTransport(it) }, { toTransport() as IResponse }, { ctx, id -> ctx.toLog(id) }
+                }, { appSettings.tpProcessor.exec(it) }, { fromTransport(it) }, { toTransport() as IResponse }, { ctx, id -> ctx.toLog(id) }
             )
         is TrainingPlanUpdateRequest ->
             processWsReq(
-                request, wsSession, appSettings, "ws-trainingPlan-update", {
+                request, wsSession, appSettings.tpCorSettings.loggerProvider.logger("ws-trainingPlan-update"), "ws-trainingPlan-update", {
                     TrainingPlanContext()
-                }, { fromTransport(it) }, { toTransport() as IResponse }, { ctx, id -> ctx.toLog(id) }
+                }, { appSettings.tpProcessor.exec(it) }, { fromTransport(it) }, { toTransport() as IResponse }, { ctx, id -> ctx.toLog(id) }
             )
         is TrainingPlanArchiveRequest ->
             processWsReq(
-                request, wsSession, appSettings, "ws-trainingPlan-archive", {
+                request, wsSession, appSettings.tpCorSettings.loggerProvider.logger("ws-trainingPlan-archive"), "ws-trainingPlan-archive", {
                     TrainingPlanContext()
-                }, { fromTransport(it) }, { toTransport() as IResponse }, { ctx, id -> ctx.toLog(id) }
+                }, { appSettings.tpProcessor.exec(it) }, { fromTransport(it) }, { toTransport() as IResponse }, { ctx, id -> ctx.toLog(id) }
             )
         is TrainingPlanSearchRequest ->
             processWsReq(
-                request, wsSession, appSettings, "ws-trainingPlan-search", {
+                request, wsSession, appSettings.tpCorSettings.loggerProvider.logger("ws-trainingPlan-search"), "ws-trainingPlan-search", {
                     TrainingPlanContext()
-                }, { fromTransport(it) }, { toTransport() as IResponse }, { ctx, id -> ctx.toLog(id) }
+                }, { appSettings.tpProcessor.exec(it) }, { fromTransport(it) }, { toTransport() as IResponse }, { ctx, id -> ctx.toLog(id) }
             )
         else -> error("Unsupported v2 WebSocket request: ${request::class.simpleName}")
     }
