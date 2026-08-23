@@ -124,6 +124,69 @@ export function mapDraftToPlanItem(draft: PlanItemDraft): PlanItem {
   return item
 }
 
+export function mapPlanItemToDraft(item: PlanItem): PlanItemDraft {
+  const rawItem = item as unknown as Record<string, unknown>
+  const itemType = item.itemType || 'EXERCISE'
+
+  if (itemType === 'CIRCUIT') {
+    const circuit = item as CircuitItem
+    const subItems: ExerciseSubDraft[] = (circuit.items ?? []).map((sub) => {
+      const ex = sub as ExerciseItem
+      const firstSet = ex.sets?.[0]
+      return {
+        name: ex.title || 'Упражнение',
+        sets: ex.sets && ex.sets.length > 0 ? ex.sets.length : 1,
+        reps: firstSet?.reps ? parseInt(firstSet.reps, 10) || 10 : 10,
+        weight: firstSet?.weight ? Number(firstSet.weight) || 0 : undefined,
+        restBetweenSetsSeconds: ex.restBetweenSetsSeconds,
+      }
+    })
+    return {
+      itemType: 'CIRCUIT',
+      title: circuit.title || 'Круговая тренировка',
+      rounds: circuit.rounds || 1,
+      restBetweenRoundsSeconds: circuit.restBetweenRoundsSeconds,
+      items: subItems,
+      description: circuit.description,
+    }
+  }
+
+  if (itemType === 'SUPERSET') {
+    const superset = item as SupersetItem
+    const subItems: ExerciseSubDraft[] = (superset.items ?? []).map((sub) => {
+      const ex = sub as ExerciseItem
+      const firstSet = ex.sets?.[0]
+      return {
+        name: ex.title || 'Упражнение',
+        sets: ex.sets && ex.sets.length > 0 ? ex.sets.length : 1,
+        reps: firstSet?.reps ? parseInt(firstSet.reps, 10) || 10 : 10,
+        weight: firstSet?.weight ? Number(firstSet.weight) || 0 : undefined,
+        restBetweenSetsSeconds: ex.restBetweenSetsSeconds,
+      }
+    })
+    return {
+      itemType: 'SUPERSET',
+      title: superset.title || 'Суперсет',
+      restBetweenSetsSeconds: superset.restBetweenSetsSeconds,
+      items: subItems,
+      description: superset.description,
+    }
+  }
+
+  // EXERCISE / default
+  const exercise = item as ExerciseItem
+  const firstSet = exercise.sets?.[0]
+  return {
+    itemType: 'EXERCISE',
+    name: exercise.title || String(rawItem.title || 'Упражнение'),
+    sets: exercise.sets && exercise.sets.length > 0 ? exercise.sets.length : 1,
+    reps: firstSet?.reps ? parseInt(firstSet.reps, 10) || 10 : 10,
+    weight: firstSet?.weight ? Number(firstSet.weight) || 0 : undefined,
+    restBetweenSetsSeconds: exercise.restBetweenSetsSeconds,
+    description: exercise.description,
+  }
+}
+
 export function getItemTypeLabel(type?: string): string {
   switch (type) {
     case 'EXERCISE':

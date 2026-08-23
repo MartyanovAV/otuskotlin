@@ -11,19 +11,31 @@ declare global {
   }
 }
 
-const runtimeConfig =
+const getRuntimeConfig = () =>
   typeof window === 'undefined' ? undefined : window.__FITBRIDGE_CONFIG__
 
 const fromRuntimeOrBuild = (runtimeValue: string | undefined, buildValue: string | undefined) =>
-  runtimeValue?.trim() || buildValue?.trim()
+  runtimeValue?.trim() || buildValue?.trim() || undefined
 
 export const fitBridgeConfig = {
-  apiBaseUrl: fromRuntimeOrBuild(runtimeConfig?.apiBaseUrl, import.meta.env.VITE_API_BASE_URL) ?? '/api',
-  keycloakUrl: fromRuntimeOrBuild(runtimeConfig?.keycloakUrl, import.meta.env.VITE_KEYCLOAK_URL) ?? 'http://localhost:8080',
-  keycloakRealm: fromRuntimeOrBuild(runtimeConfig?.keycloakRealm, import.meta.env.VITE_KEYCLOAK_REALM) ?? 'fit-bridge',
-  keycloakClientId:
-    fromRuntimeOrBuild(runtimeConfig?.keycloakClientId, import.meta.env.VITE_KEYCLOAK_CLIENT_ID) ??
-    'fit-bridge-web',
+  get apiBaseUrl() {
+    return fromRuntimeOrBuild(getRuntimeConfig()?.apiBaseUrl, import.meta.env.VITE_API_BASE_URL) ?? '/v2'
+  },
+  get keycloakUrl() {
+    return (
+      fromRuntimeOrBuild(getRuntimeConfig()?.keycloakUrl, import.meta.env.VITE_KEYCLOAK_URL) ??
+      (typeof window !== 'undefined' && window.location.origin ? window.location.origin : 'http://localhost:8080')
+    )
+  },
+  get keycloakRealm() {
+    return fromRuntimeOrBuild(getRuntimeConfig()?.keycloakRealm, import.meta.env.VITE_KEYCLOAK_REALM) ?? 'fit-bridge'
+  },
+  get keycloakClientId() {
+    return (
+      fromRuntimeOrBuild(getRuntimeConfig()?.keycloakClientId, import.meta.env.VITE_KEYCLOAK_CLIENT_ID) ??
+      'fit-bridge-web'
+    )
+  },
 }
 
 const keycloakPathPrefixes = ['/realms/', '/admin/', '/resources/']

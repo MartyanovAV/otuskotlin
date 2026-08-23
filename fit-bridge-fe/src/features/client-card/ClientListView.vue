@@ -145,6 +145,16 @@ const formatPlanStatus = (status?: TrainingPlanStatus) => {
   return 'Черновик'
 }
 
+const formatDifficulty = (diff?: string) => {
+  switch (diff) {
+    case 'EASY': return 'Легко'
+    case 'NORMAL': return 'Нормально'
+    case 'HARD': return 'Тяжело (с трудом)'
+    case 'MAX': return 'На пределе возможностей'
+    default: return 'Не указана'
+  }
+}
+
 const createMutation = useClientCardCreate()
 const updateMutation = useClientCardUpdate()
 const createPlanMutation = useTrainingPlanCreate()
@@ -637,39 +647,63 @@ const formatDate = (isoString?: string) => {
     <Dialog :open="!!selectedPlanDetails" @update:open="(val) => { if (!val) selectedPlanDetails = null }">
       <DialogContent v-if="selectedPlanDetails" class="sm:max-w-[550px] max-h-[90vh] overflow-y-auto z-[60]" overlay-class="z-[55]">
         <DialogHeader>
-          <div class="flex justify-between items-start">
-            <div>
-              <DialogTitle>{{ selectedPlanDetails.title }}</DialogTitle>
-              <DialogDescription class="mt-1">
-                Назначен: {{ selectedClient?.displayName }}
-              </DialogDescription>
-            </div>
+          <DialogTitle>{{ selectedPlanDetails.title }}</DialogTitle>
+          <DialogDescription>
+            Назначен: {{ selectedClient?.displayName }}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div class="space-y-3 py-2 text-sm">
+          <div class="flex justify-between border-b border-border pb-2">
+            <span class="text-text-muted">Статус:</span>
             <Badge :variant="selectedPlanDetails.status === 'ACTIVE' ? 'default' : 'secondary'">
               {{ formatPlanStatus(selectedPlanDetails.status) }}
             </Badge>
           </div>
-        </DialogHeader>
 
-        <div class="space-y-3 py-2">
-          <div class="flex items-center justify-between">
-            <h4 class="text-xs font-semibold text-text-muted uppercase tracking-wider">
-              Состав плана ({{ (selectedPlanDetails.planItems ?? []).length }}):
-            </h4>
-            <span class="text-xs text-text-muted">
-              {{ formatPlanStructureSummary(selectedPlanDetails.planItems) }}
-            </span>
+          <!-- Блок с информацией о завершении -->
+          <div v-if="selectedPlanDetails.completedAt" class="p-3 bg-primary-soft/30 rounded-lg border border-primary/20 space-y-1 mb-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-medium text-text-muted">Завершена:</span>
+              <span class="text-xs font-semibold text-text-main">{{ formatDate(selectedPlanDetails.completedAt) }}</span>
+            </div>
+            <div v-if="selectedPlanDetails.difficulty" class="flex items-center justify-between">
+              <span class="text-xs font-medium text-text-muted">Сложность:</span>
+              <span class="text-xs font-semibold text-text-main">{{ formatDifficulty(selectedPlanDetails.difficulty) }}</span>
+            </div>
+            <div v-if="selectedPlanDetails.coachComment" class="pt-2 mt-2 border-t border-primary/10">
+              <span class="text-xs font-medium text-text-muted block mb-1">Комментарий тренера:</span>
+              <p class="text-xs text-text-main italic whitespace-pre-wrap">{{ selectedPlanDetails.coachComment }}</p>
+            </div>
           </div>
 
-          <div v-if="(selectedPlanDetails.planItems ?? []).length === 0" class="text-sm text-text-muted italic">
-            В плане нет элементов
+          <div class="flex justify-between text-xs text-text-faint pb-1">
+            <span>Дата создания:</span>
+            <span class="font-medium text-text-muted">{{ formatDate(selectedPlanDetails.createdAt) }}</span>
           </div>
-          <div v-else class="space-y-2.5 max-h-60 overflow-y-auto pr-1">
-            <PlanItemCard
-              v-for="(item, idx) in selectedPlanDetails.planItems"
-              :key="item.id || idx"
-              :item="item"
-              :index="idx"
-            />
+
+          <!-- Секция состава плана -->
+          <div class="border-t border-border pt-3 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <h4 class="font-semibold text-sm text-text-main">
+                Состав плана ({{ (selectedPlanDetails.planItems ?? []).length }}):
+              </h4>
+              <span class="text-xs text-text-muted">
+                {{ formatPlanStructureSummary(selectedPlanDetails.planItems) }}
+              </span>
+            </div>
+
+            <div v-if="(selectedPlanDetails.planItems ?? []).length === 0" class="text-sm text-text-muted italic">
+              В плане нет элементов
+            </div>
+            <div v-else class="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+              <PlanItemCard
+                v-for="(item, idx) in selectedPlanDetails.planItems"
+                :key="item.id || idx"
+                :item="item"
+                :index="idx"
+              />
+            </div>
           </div>
         </div>
 

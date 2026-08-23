@@ -17,9 +17,9 @@ fun ICorChainDsl<TrainingPlanContext>.stubTrainingPlanSuccess(title: String) =
             """
             Кейс успеха для тренировочного плана
             """.trimIndent()
-        on { stubCase == Stubs.SUCCESS && state == State.RUNNING && this is TrainingPlanContext }
+        on { stubCase == Stubs.SUCCESS && state == State.RUNNING }
         handle {
-            val ctx = this as TrainingPlanContext
+            val ctx = this
             ctx.state = State.FINISHING
             if (ctx.command == TrainingPlanCommand.SEARCH) {
                 ctx.trainingPlansResponse = Page(items = TrainingPlanStub.getList(), totalSize = TrainingPlanStub.getList().size)

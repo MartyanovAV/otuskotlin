@@ -1,0 +1,14 @@
+services:
+  envoy:
+    image: alpine
+    command: sleep 100
+    healthcheck:
+      test: [ "CMD", "false" ]
+      interval: 1s
+      retries: 1
+  training:
+    image: alpine
+    command: echo success
+    depends_on:
+      envoy:
+        condition: service_healthy
