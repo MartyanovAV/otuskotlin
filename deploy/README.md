@@ -120,14 +120,27 @@ docker compose -f docker-compose.yml -f docker-compose.local.yml down
    - `SSH_PRIVATE_KEY`: приватный SSH-ключ.
    - `CR_PAT`: GitHub Personal Access Token с правом `read:packages`.
    - `FITBRIDGE_PUBLIC_URL`: боевой HTTPS URL (например, `https://fitbridge.example.com`).
+   - `LETSENCRYPT_EMAIL`: контактный адрес ACME account.
+   - Имена БД и пользователей: `POSTGRES_DB`, `POSTGRES_USER`, `KC_DB_NAME`, `KC_DB_USERNAME`, `LIQUIBASE_DB_USERNAME`, `DB_NAME`, `DB_USER`, `KC_BOOTSTRAP_ADMIN_USERNAME`, `GREPTIMEDB_USER`.
    - Пароли: `POSTGRES_PASSWORD`, `KC_DB_PASSWORD`, `LIQUIBASE_DB_PASSWORD`, `DB_PASSWORD`, `KC_BOOTSTRAP_ADMIN_PASSWORD`, `GREPTIMEDB_PASS`.
 
+Все перечисленные значения обязательны: production deployment не использует fallback-логины и пароли. Значения сохраняются в shell-compatible `.env`; секреты с одинарной кавычкой отклоняются до изменения стека и должны быть ротированы.
+
+`KC_BOOTSTRAP_ADMIN_USERNAME` и `KC_BOOTSTRAP_ADMIN_PASSWORD` создают
+администратора только при первом запуске пустой базы Keycloak. Изменение GitHub
+Secret не меняет пароль уже существующего администратора: пароль нужно сначала
+ротировать через Keycloak Admin Console/`kcadm`, затем синхронно обновить secret.
+Realm также импортируется автоматически только при первом создании; deploy
+проверяет актуальность redirect URI, но не выполняет опасный full override
+существующего realm.
+
 ### Процесс выкатки на сервере:
-1. Скрипт `prepare-prod-config.sh` проверяет наличие всех секретов, подготавливает bootstrap dummy-сертификат (если боевой еще не выпущен) и генерирует `volumes/envoy/envoy.prod.yaml` и `volumes/keycloak/import-prod/fit-bridge-realm.json` из шаблонов без мутации tracked git-файлов.
-2. Скачиваются образы конкретного коммита: `docker compose -f docker-compose.yml -f docker-compose.prod.yml pull`.
-3. Скрипт `cleanup-legacy-certbot.sh` удаляет старый long-running контейнер Certbot, если он остался от предыдущей версии деплоя. Данные в `volumes/certs` не удаляются.
-4. Запускаются сервисы: `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build`.
-5. Скрипт `ensure-certbot-cron.sh` устанавливает или обновляет host cron для регулярного renewal без дубликатов.
+1. GitHub Actions и `flock` не допускают параллельные production-деплои. Полный production environment атомарно записывается в `.env` с правами `0600`, чтобы ручное восстановление не использовало небезопасные значения по умолчанию.
+2. `prepare-prod-config.sh` подготавливает bootstrap-сертификат при первом запуске и генерирует конфигурации Envoy и Keycloak. `validate-prod-config.sh` проверяет merged Compose и запускает `envoy --mode validate` до изменения работающего стека.
+3. Скачиваются immutable-образы конкретного commit SHA. Старый long-running контейнер Certbot удаляется без удаления `volumes/certs`.
+4. `certbot-helper` и Envoy пересоздаются отдельно от приложения, БД и observability. Поэтому HTTP-01 остаётся доступным даже при отказе upstream-сервисов.
+5. При первом запуске выпускается сертификат; при последующих запусках выполняется идемпотентная проверка renewal. Envoy перезапускается только если сертификат действительно обновился.
+6. Устанавливается host cron, затем запускается полный стек. `verify-prod.sh` ожидает readiness и проверяет публичные HTTPS health endpoints, OIDC discovery, frontend, hostname сертификата и запас срока не менее семи дней.
 
 ---
 
@@ -137,28 +150,41 @@ docker compose -f docker-compose.yml -f docker-compose.local.yml down
 
 ### Первоначальный выпуск боевого сертификата:
 1. Убедитесь, что DNS-запись (A/AAAA) вашего домена указывает на IP-адрес вашего боевого сервера.
-2. Запустите стек:
+2. Подготовьте и провалидируйте конфигурацию:
    ```bash
    sh ./prepare-prod-config.sh
-   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build
+   sh ./validate-prod-config.sh
    ```
-   *Envoy запустится на портах 80 и 443 с временным bootstrap-сертификатом.*
 3. Запустите первоначальный выпуск боевого сертификата:
    ```bash
    sh ./certbot-init.sh
    ```
-   *Certbot пройдет HTTP-01 challenge через порт 80, выпустит ECDSA-сертификат, после чего `certbot-init.sh` перезапустит Envoy.*
+   *Скрипт самостоятельно поднимет только Envoy и certbot-helper, проверит реальную отдачу probe-файла через HTTP-01, выпустит ECDSA-сертификат и перезапустит Envoy.*
+4. Запустите приложение и выполните публичную проверку:
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build
+   sh ./verify-prod.sh
+   ```
 
 ### Автоматическое продление (Auto-Renewal):
-Для продления используется host cron. Скрипт `ensure-certbot-cron.sh` на каждом деплое устанавливает или обновляет задачу без дубликатов. Сервис `certbot` находится в Compose-профиле `certbot` и не запускается вместе с основным production-стеком. Скрипт выполняет `certbot renew`, а затем перезапускает Envoy:
+Для продления используется host cron. Скрипт `ensure-certbot-cron.sh` на каждом деплое устанавливает или обновляет задачу без дубликатов. Certbot запускается отдельным one-shot контейнером и не зависит от состояния application stack. Deploy hook создаёт reload marker только после успешного renewal, поэтому Envoy не перезапускается при обычной проверке свежего сертификата:
    ```bash
-   # Выполнять проверку каждый понедельник в 03:00 ночи
-   0 3 * * 1 /home/user/otuskotlin/deploy/certbot-renew.sh >> /var/log/certbot-renew.log 2>&1
+   # Проверка дважды в сутки; Certbot обращается к CA только когда renewal необходим
+   23 4,16 * * * sh /home/user/otuskotlin/deploy/certbot-renew.sh >> /home/user/otuskotlin/deploy/certbot-renew.log 2>&1
    ```
 
 ### Ручная проверка и отладка:
 ```bash
 # Проверка процесса продления в режиме dry-run (без расхода лимитов Let's Encrypt)
-docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm \
-  --entrypoint certbot certbot renew --dry-run --webroot -w /var/www/certbot
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build certbot-helper envoy
+sh ./verify-acme-path.sh
+docker run --rm \
+  -v "$(pwd)/volumes/certs:/etc/letsencrypt" \
+  -v "$(pwd)/volumes/certbot-webroot:/var/www/certbot" \
+  certbot/certbot:v5.7.0 renew --dry-run --webroot -w /var/www/certbot
+
+# Проверка фактически доступного production endpoint и сертификата
+sh ./verify-prod.sh
 ```
+
+Ошибки cron пишутся в `deploy/certbot-renew.log`, но этого недостаточно как единственного канала контроля. Для production необходим внешний HTTPS monitor с предупреждением минимум за 21 день до истечения сертификата и критическим уведомлением за 7 дней.

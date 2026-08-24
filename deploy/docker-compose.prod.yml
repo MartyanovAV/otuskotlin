@@ -40,6 +40,8 @@ services:
       driver: "fluentd"
       options:
         fluentd-address: 127.0.0.1:24224
+        fluentd-async: "true"
+        fluentd-buffer-limit: "10485760"
         tag: training.logs
     deploy:
       resources:
@@ -104,6 +106,8 @@ services:
       driver: "fluentd"
       options:
         fluentd-address: 127.0.0.1:24224
+        fluentd-async: "true"
+        fluentd-buffer-limit: "10485760"
         tag: envoy.logs
     deploy:
       resources:
@@ -132,28 +136,10 @@ services:
     networks:
       - fitbridge-network
 
-  certbot:
-    image: certbot/certbot:v5.7.0
-    # Certbot is invoked by certbot-renew.sh from the host, not as a daemon.
-    profiles:
-      - certbot
-    restart: "no"
-    volumes:
-      - ./volumes/certs:/etc/letsencrypt
-      - ./volumes/certbot-webroot:/var/www/certbot
-    depends_on:
-      envoy:
-        condition: service_healthy
-    deploy:
-      resources:
-        limits:
-          cpus: '0.1'
-          memory: 64M
-        reservations:
-          cpus: '0.01'
-          memory: 16M
-    networks:
-      - fitbridge-network
+  # Note: the certbot container has been removed from the compose stack.
+  # It is now invoked as a one-shot `docker run` by certbot-init.sh /
+  # certbot-renew.sh on the host, so that a failing peer service
+  # (keycloak, postgres, ...) never blocks certificate issuance or renewal.
 
   keycloak:
     restart: unless-stopped

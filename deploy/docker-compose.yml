@@ -33,6 +33,36 @@ services:
     networks:
       - fitbridge-network
 
+  # db-bootstrap synchronises application database users (and their passwords)
+  # and the application databases with the current environment on every
+  # `docker compose up`. This handles secret rotation between deploys without
+  # requiring the operator to drop the data volume.
+  db-bootstrap:
+    image: postgres:18-alpine
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    environment:
+      PGHOST: postgresql
+      PGPORT: "5432"
+      PGUSER: ${POSTGRES_USER:-postgres}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-postgres-password}
+      PGDATABASE: ${POSTGRES_DB:-postgres}
+      KC_DB_NAME: ${KC_DB_NAME:-keycloak_db}
+      KC_DB_USERNAME: ${KC_DB_USERNAME:-keycloak}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD:-keycloak-password}
+      LIQUIBASE_DB_USERNAME: ${LIQUIBASE_DB_USERNAME:-liquibase}
+      LIQUIBASE_DB_PASSWORD: ${LIQUIBASE_DB_PASSWORD:-liquibase-password}
+      DB_NAME: ${DB_NAME:-training_db}
+      DB_USER: ${DB_USER:-training_user}
+      DB_PASSWORD: ${DB_PASSWORD:-training-password}
+    volumes:
+      - ./volumes/db-bootstrap/db-bootstrap.sh:/bootstrap.sh:ro
+    command: ["bash", "/bootstrap.sh"]
+    restart: "no"
+    networks:
+      - fitbridge-network
+
   liquibase-training:
     image: fit-bridge-migration-pg-training:${APP_VERSION:-0.1.0}
     environment:
@@ -42,6 +72,8 @@ services:
     depends_on:
       postgresql:
         condition: service_healthy
+      db-bootstrap:
+        condition: service_completed_successfully
     networks:
       - fitbridge-network
 
@@ -50,8 +82,6 @@ services:
     depends_on:
       liquibase-training:
         condition: service_completed_successfully
-      fluent-bit:
-        condition: service_started
       envoy:
         condition: service_healthy
     environment:
@@ -89,9 +119,8 @@ services:
   fluent-bit:
     container_name: fluent-bit
     image: fluent/fluent-bit:4.2.0
-    depends_on:
-      greptimedb:
-        condition: service_healthy
+    # Observability is best-effort: Fluent Bit buffers/retries its outputs and
+    # must not block the public edge or application when GreptimeDB is down.
     ports:
       - "127.0.0.1:24224:24224"
       - "127.0.0.1:24224:24224/udp"
@@ -128,15 +157,9 @@ services:
 
   envoy:
     image: envoyproxy/envoy:v1.39.0
-    ports:
-      - "${ENVOY_PORT:-8080}:8080"
-    depends_on:
-      keycloak:
-        condition: service_healthy
-      frontend:
-        condition: service_healthy
-      fluent-bit:
-        condition: service_started
+    # The public edge must start independently. Envoy can report unavailable
+    # upstreams itself, while coupling startup to Keycloak, the frontend or
+    # observability would also make ACME HTTP-01 unavailable during incidents.
     healthcheck:
       test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/15001; printf 'GET /ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3; grep -q '200 OK' <&3"]
       interval: 5s
@@ -151,6 +174,8 @@ services:
     depends_on:
       postgresql:
         condition: service_healthy
+      db-bootstrap:
+        condition: service_completed_successfully
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgresql:5432/${KC_DB_NAME:-keycloak_db}
@@ -159,11 +184,13 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
       KC_HEALTH_ENABLED: "true"
+      KC_HTTP_MANAGEMENT_HEALTH_ENABLED: "true"
     healthcheck:
-      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000;echo -e 'HEAD /health/ready HTTP/1.1\r\nHost: localhost:9000\r\nConnection: close\r\n\r\n' >&3;cat <&3" ]
+      test: [ "CMD-SHELL", "{ printf 'HEAD /health/ready HTTP/1.0\r\n\r\n' >&0; grep -q 'HTTP/1.0 200'; } 0<>/dev/tcp/127.0.0.1/9000" ]
       interval: 10s
       timeout: 5s
       retries: 15
+      start_period: 20s
     command:
       - start
       - --import-realm

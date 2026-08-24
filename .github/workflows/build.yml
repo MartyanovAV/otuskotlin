@@ -57,7 +57,7 @@ jobs:
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         run: |
           GHCR_USERNAME=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          COMMIT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          COMMIT_SHA="${{ github.sha }}"
 
           docker build -t fitbridge-frontend:local .
           docker tag fitbridge-frontend:local ghcr.io/$GHCR_USERNAME/fitbridge-frontend:$COMMIT_SHA
@@ -101,7 +101,7 @@ jobs:
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         run: |
           GHCR_USERNAME=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          COMMIT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          COMMIT_SHA="${{ github.sha }}"
 
           # training-service
           docker tag fitbridge-training-service:local ghcr.io/$GHCR_USERNAME/fitbridge-training-service:$COMMIT_SHA
@@ -115,11 +115,117 @@ jobs:
           docker push ghcr.io/$GHCR_USERNAME/fitbridge-migration-pg-training:$COMMIT_SHA
           docker push ghcr.io/$GHCR_USERNAME/fitbridge-migration-pg-training:latest
 
+  deploy-config:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: deploy
+    env:
+      GHCR_USERNAME: example
+      APP_VERSION: ci-validation
+      FITBRIDGE_PUBLIC_URL: https://fitbridge.example.com
+      LETSENCRYPT_EMAIL: admin@example.com
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 'postgres-$-ci-secret'
+      KC_DB_NAME: keycloak_db
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: 'keycloak-$-ci-secret'
+      LIQUIBASE_DB_USERNAME: liquibase
+      LIQUIBASE_DB_PASSWORD: 'liquibase-$-ci-secret'
+      DB_NAME: training_db
+      DB_USER: training_user
+      DB_PASSWORD: 'training-$-ci-secret'
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: 'admin-$-ci-secret'
+      GREPTIMEDB_USER: admin
+      GREPTIMEDB_PASS: 'greptime-$-ci-secret'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Validate deployment shell syntax
+        run: dash -n ./*.sh
+
+      - name: Generate test production configuration
+        run: |
+          test "$(sh ./resolve-public-domain.sh "$FITBRIDGE_PUBLIC_URL")" = "fitbridge.example.com"
+          if sh ./resolve-public-domain.sh "https://fitbridge.example.com/unexpected-path" >/dev/null 2>&1; then
+            echo "Invalid production URL was accepted" >&2
+            exit 1
+          fi
+          expected_password="$POSTGRES_PASSWORD"
+          sh ./write-prod-env.sh
+          unset POSTGRES_PASSWORD
+          set -a
+          . ./.env
+          set +a
+          test "$POSTGRES_PASSWORD" = "$expected_password"
+          sh ./prepare-prod-config.sh
+
+      - name: Validate Compose and Envoy configuration
+        run: sh ./validate-prod-config.sh
+
+      - name: Smoke-test production Keycloak bootstrap
+        run: |
+          compose() {
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml "$@"
+          }
+          cleanup() {
+            compose down -v --remove-orphans
+          }
+          trap cleanup EXIT
+
+          if ! compose up -d --no-build keycloak; then
+            compose logs --no-color postgresql db-bootstrap keycloak
+            exit 1
+          fi
+
+          keycloak_ready=false
+          for attempt in $(seq 1 36); do
+            if compose exec -T keycloak bash -c \
+              "{ printf 'HEAD /health/ready HTTP/1.0\r\n\r\n' >&0; grep -q 'HTTP/1.0 200'; } 0<>/dev/tcp/127.0.0.1/9000"; then
+              keycloak_ready=true
+              break
+            fi
+            echo "Waiting for production Keycloak bootstrap ($attempt/36)"
+            sleep 5
+          done
+
+          if [ "$keycloak_ready" != true ]; then
+            compose logs --no-color postgresql db-bootstrap keycloak
+            exit 1
+          fi
+
+          realm=$(compose exec -T postgresql psql \
+            -U "$POSTGRES_USER" -d "$KC_DB_NAME" -Atc \
+            "SELECT name FROM realm WHERE name='fit-bridge'")
+          test "$realm" = "fit-bridge"
+
+          redirects=$(compose exec -T postgresql psql \
+            -U "$POSTGRES_USER" -d "$KC_DB_NAME" -Atc \
+            "SELECT r.value FROM redirect_uris r JOIN client c ON c.id=r.client_id WHERE c.client_id='fit-bridge-web'")
+          printf '%s\n' "$redirects" | grep -Fq "$FITBRIDGE_PUBLIC_URL"
+
+          compose exec -T keycloak /opt/keycloak/bin/kcadm.sh config credentials \
+            --server http://127.0.0.1:8080 \
+            --realm master \
+            --user "$KC_BOOTSTRAP_ADMIN_USERNAME" \
+            --password "$KC_BOOTSTRAP_ADMIN_PASSWORD"
+
   deploy:
-    needs: [frontend, build]
+    needs: [frontend, build, deploy-config]
     if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-22.04
     environment: prod
+    concurrency:
+      group: fitbridge-production
+      cancel-in-progress: false
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -158,28 +264,97 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           envs: POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD,KC_DB_NAME,KC_DB_USERNAME,KC_DB_PASSWORD,LIQUIBASE_DB_USERNAME,LIQUIBASE_DB_PASSWORD,DB_NAME,DB_USER,DB_PASSWORD,KC_BOOTSTRAP_ADMIN_USERNAME,KC_BOOTSTRAP_ADMIN_PASSWORD,GREPTIMEDB_USER,GREPTIMEDB_PASS,FITBRIDGE_PUBLIC_URL,LETSENCRYPT_EMAIL
+          command_timeout: 20m
           script: |
-            GHCR_USERNAME=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-            COMMIT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+            set -eu
 
+            GHCR_USERNAME=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+            COMMIT_SHA="${{ github.sha }}"
+            export GHCR_USERNAME
+            APP_VERSION="$COMMIT_SHA"
+            export APP_VERSION
+
+            : "${POSTGRES_DB:?POSTGRES_DB is required}"
+            : "${POSTGRES_USER:?POSTGRES_USER is required}"
             : "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}"
+            : "${KC_DB_NAME:?KC_DB_NAME is required}"
+            : "${KC_DB_USERNAME:?KC_DB_USERNAME is required}"
             : "${KC_DB_PASSWORD:?KC_DB_PASSWORD is required}"
+            : "${LIQUIBASE_DB_USERNAME:?LIQUIBASE_DB_USERNAME is required}"
             : "${LIQUIBASE_DB_PASSWORD:?LIQUIBASE_DB_PASSWORD is required}"
+            : "${DB_NAME:?DB_NAME is required}"
+            : "${DB_USER:?DB_USER is required}"
             : "${DB_PASSWORD:?DB_PASSWORD is required}"
+            : "${KC_BOOTSTRAP_ADMIN_USERNAME:?KC_BOOTSTRAP_ADMIN_USERNAME is required}"
             : "${KC_BOOTSTRAP_ADMIN_PASSWORD:?KC_BOOTSTRAP_ADMIN_PASSWORD is required}"
+            : "${GREPTIMEDB_USER:?GREPTIMEDB_USER is required}"
             : "${GREPTIMEDB_PASS:?GREPTIMEDB_PASS is required}"
+            : "${FITBRIDGE_PUBLIC_URL:?FITBRIDGE_PUBLIC_URL is required}"
+            : "${LETSENCRYPT_EMAIL:?LETSENCRYPT_EMAIL is required}"
 
             cd ~/otuskotlin/deploy
-            printf 'GHCR_USERNAME=%s\nAPP_VERSION=%s\nFITBRIDGE_PUBLIC_URL=%s\nLETSENCRYPT_EMAIL=%s\n' \
-              "$GHCR_USERNAME" "$COMMIT_SHA" "$FITBRIDGE_PUBLIC_URL" "${LETSENCRYPT_EMAIL:-}" > .env
-            chmod 600 .env
+
+            if ! command -v flock >/dev/null 2>&1; then
+              echo "ERROR: flock is required to serialize production deployments" >&2
+              exit 1
+            fi
+            exec 9>.deploy.lock
+            if ! flock -n 9; then
+              echo "ERROR: Another production deployment is already running" >&2
+              exit 1
+            fi
+
+            domain=$(sh ./resolve-public-domain.sh "$FITBRIDGE_PUBLIC_URL")
+            FITBRIDGE_PUBLIC_URL="https://$domain"
+            export FITBRIDGE_PUBLIC_URL
+
+            sh ./write-prod-env.sh
 
             sh ./prepare-prod-config.sh
+            sh ./validate-prod-config.sh
 
             # Login to GHCR to pull images
             echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
             sh ./cleanup-legacy-certbot.sh
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build
+
+            # Coordinate the edge recreation with host cron. Child Certbot
+            # scripts inherit descriptor 8 and therefore skip reacquiring it.
+            exec 8>.certbot.lock
+            if ! flock -w 180 8; then
+              echo "ERROR: Timed out waiting for an active Certbot operation" >&2
+              exit 1
+            fi
+            CERTBOT_LOCK_HELD=true
+            export CERTBOT_LOCK_HELD
+
+            # Keep the public ACME path available independently of application,
+            # database and observability health. Recreate Envoy so tracked
+            # configuration changes are always applied.
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build --force-recreate certbot-helper envoy
+
+            # Issue the Let's Encrypt certificate automatically on the first
+            # deploy. On later deploys, run the idempotent renewal check so a
+            # broken cron can heal before the certificate reaches expiry.
+            if sh ./certbot-lineage-exists.sh "$domain"; then
+              echo "==> Existing Let's Encrypt lineage found; checking renewal"
+              sh ./certbot-renew.sh
+            else
+              echo "==> No Let's Encrypt renewal config found; issuing the initial certificate"
+              sh ./certbot-init.sh
+            fi
+
+            flock -u 8
+            unset CERTBOT_LOCK_HELD
+
             sh ./ensure-certbot-cron.sh
+
+            # `up -d` already honours health/completion dependency conditions.
+            # Avoid Compose --wait here because the project intentionally has
+            # successful one-shot db-bootstrap and Liquibase containers. The
+            # public verification below is the authoritative readiness gate.
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build
+
+            sh ./verify-prod.sh
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml ps
