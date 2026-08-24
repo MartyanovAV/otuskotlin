@@ -23,14 +23,14 @@ const navItems = [
   <div>
     <div
       v-if="props.mobileOpen"
-      class="fixed inset-0 z-30 bg-black/40 md:hidden"
+      class="fixed inset-0 z-overlay bg-black/40 md:hidden"
       aria-hidden="true"
       @click="closeMobile"
     />
     <aside
       :class="[
         'w-64 flex-col border-r border-border bg-surface px-4 py-6 md:sticky md:top-0 md:h-screen',
-        props.mobileOpen ? 'fixed inset-y-0 left-0 z-40 flex' : 'hidden',
+        props.mobileOpen ? 'fixed inset-y-0 left-0 z-drawer flex' : 'hidden',
         'md:flex',
       ]"
     >

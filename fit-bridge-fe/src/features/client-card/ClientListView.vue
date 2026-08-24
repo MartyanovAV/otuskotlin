@@ -31,13 +31,18 @@ import type { TrainingPlanStatus } from '@/shared/api/generated/models/trainingP
 import PlanItemBuilder from '@/features/training-plan/ui/PlanItemBuilder.vue'
 import PlanItemCard from '@/features/training-plan/ui/PlanItemCard.vue'
 import PlanShareButton from '@/features/training-plan/ui/PlanShareButton.vue'
+import PlanStatusBadge from '@/features/training-plan/ui/PlanStatusBadge.vue'
 import {
   type PlanItemDraft,
   mapDraftToPlanItem,
   formatPlanStructureSummary,
 } from '@/features/training-plan/model/types'
+import { useToast } from '@/shared/ui/toast'
+import { confirm } from '@/shared/ui/confirm-dialog'
+import { formatRelativeDate, formatExactDateTime } from '@/shared/lib/format'
 
 const queryClient = useQueryClient()
+const toast = useToast()
 const searchQuery = ref('')
 const debouncedSearchQuery = useDebounce(searchQuery, 300)
 const pageNumber = ref(1)
@@ -139,13 +144,7 @@ const clientPlans = computed<TrainingPlanResponseObject[]>(() => {
   return clientPlansData.value ?? []
 })
 
-const formatPlanStatus = (status?: TrainingPlanStatus) => {
-  if (status === 'ACTIVE') return 'Активен'
-  if (status === 'ARCHIVED') return 'В архиве'
-  if (status === 'COMPLETED') return 'Завершён'
-  if (status === 'DRAFT') return 'Черновик'
-  return 'Черновик'
-}
+// formatPlanStatus удалён: рендеринг через <PlanStatusBadge>
 
 const formatDifficulty = (diff?: string) => {
   switch (diff) {
@@ -308,6 +307,14 @@ const handleCreateClientPlan = async (status: TrainingPlanStatus = 'ACTIVE') => 
 
 const handleActivateClientPlan = async (plan: TrainingPlanResponseObject) => {
   if (!plan.id || !plan.lock || isActivatingPlan.value) return
+  // Подтверждаем необратимое действие: активированный план становится доступен клиенту.
+  const ok = await confirm({
+    title: 'Активировать план?',
+    description: `План «${plan.title ?? 'без названия'}» станет доступен клиенту. Действие можно отменить только архивацией.`,
+    confirmText: 'Активировать',
+    cancelText: 'Отмена',
+  })
+  if (!ok) return
   isActivatingPlan.value = true
 
   try {
@@ -333,26 +340,19 @@ const handleActivateClientPlan = async (plan: TrainingPlanResponseObject) => {
       queryClient.invalidateQueries({ queryKey: ['trainingPlans'] }),
       queryClient.invalidateQueries({ queryKey: ['trainingPlansCount'] }),
     ])
+    toast.success('План активирован', plan.title ?? undefined)
   } catch (err: unknown) {
-    alert(err instanceof Error ? err.message : 'Не удалось активировать план')
+    toast.error(
+      'Не удалось активировать план',
+      err instanceof Error ? err.message : 'Попробуйте позже',
+    )
   } finally {
     isActivatingPlan.value = false
   }
 }
 
-const formatDate = (isoString?: string) => {
-  if (!isoString) return '—'
-  try {
-    return new Date(isoString).toLocaleString('ru-RU', {
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  } catch {
-    return isoString
-  }
-}
+const formatRelativeCreatedAt = (isoString?: string) => formatRelativeDate(isoString)
+const formatExactCreatedAt = (isoString?: string) => formatExactDateTime(isoString)
 </script>
 
 <template>
@@ -425,7 +425,9 @@ const formatDate = (isoString?: string) => {
                 </Badge>
               </div>
               <p class="mt-1 line-clamp-2 text-sm text-text-muted">{{ client.note || 'Заметок нет' }}</p>
-              <p class="mt-2 text-xs text-text-faint">Создан: {{ formatDate(client.createdAt) }}</p>
+              <p class="mt-2 text-xs text-text-faint" :title="formatExactCreatedAt(client.createdAt)">
+                Создан: {{ formatRelativeCreatedAt(client.createdAt) }}
+              </p>
             </div>
           </div>
           <div class="mt-4 grid grid-cols-2 gap-2">
@@ -489,8 +491,8 @@ const formatDate = (isoString?: string) => {
                   —
                 </span>
               </td>
-              <td class="px-4 py-4 text-xs text-text-muted whitespace-nowrap">
-                {{ formatDate(client.createdAt) }}
+              <td class="px-4 py-4 text-xs text-text-muted whitespace-nowrap" :title="formatExactCreatedAt(client.createdAt)">
+                {{ formatRelativeCreatedAt(client.createdAt) }}
               </td>
               <td class="py-4 pl-4 pr-6 text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-2" @click.stop>
@@ -613,7 +615,7 @@ const formatDate = (isoString?: string) => {
 
           <div class="flex justify-between text-xs text-text-faint">
             <span>Дата создания:</span>
-            <span class="font-medium text-text-muted">{{ formatDate(selectedClient.createdAt) }}</span>
+            <span class="font-medium text-text-muted">{{ formatExactCreatedAt(selectedClient.createdAt) }}</span>
           </div>
 
           <!-- Секция назначенных тренировочных планов -->
@@ -659,14 +661,12 @@ const formatDate = (isoString?: string) => {
                     <span class="font-medium text-sm text-text-main group-hover:text-primary transition-colors">
                       {{ plan.title }}
                     </span>
-                    <Badge :variant="plan.status === 'ACTIVE' ? 'default' : 'secondary'" class="text-[10px] px-1.5 py-0">
-                      {{ formatPlanStatus(plan.status) }}
-                    </Badge>
+                    <PlanStatusBadge :status="plan.status" class="text-[10px] px-1.5 py-0" />
                   </div>
                   <div class="text-xs text-text-muted flex items-center gap-3">
                     <span>{{ (plan.planItems ?? []).length }} эл. ({{ formatPlanStructureSummary(plan.planItems) }})</span>
                     <span>•</span>
-                    <span>{{ formatDate(plan.createdAt) }}</span>
+                    <span :title="formatExactCreatedAt(plan.createdAt)">{{ formatRelativeCreatedAt(plan.createdAt) }}</span>
                   </div>
                 </div>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-text-muted group-hover:text-primary transition-colors"><path d="m9 18 6-6-6-6"/></svg>
@@ -684,7 +684,7 @@ const formatDate = (isoString?: string) => {
 
     <!-- Модальное окно создания плана для выбранного клиента -->
     <Dialog :open="isCreatePlanOpen" @update:open="isCreatePlanOpen = $event">
-      <DialogContent class="sm:max-w-[550px] max-h-[90vh] overflow-y-auto z-[60]" overlay-class="z-[55]">
+      <DialogContent class="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Новый план тренировки</DialogTitle>
           <DialogDescription>
@@ -728,7 +728,7 @@ const formatDate = (isoString?: string) => {
 
     <!-- Модальное окно просмотра деталей плана из карточки клиента -->
     <Dialog :open="!!selectedPlanDetails" @update:open="(val) => { if (!val) selectedPlanDetails = null }">
-      <DialogContent v-if="selectedPlanDetails" class="sm:max-w-[550px] max-h-[90vh] overflow-y-auto z-[60]" overlay-class="z-[55]">
+      <DialogContent v-if="selectedPlanDetails" class="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{{ selectedPlanDetails.title }}</DialogTitle>
           <DialogDescription>
@@ -739,16 +739,14 @@ const formatDate = (isoString?: string) => {
         <div class="space-y-3 py-2 text-sm">
           <div class="flex justify-between border-b border-border pb-2">
             <span class="text-text-muted">Статус:</span>
-            <Badge :variant="selectedPlanDetails.status === 'ACTIVE' ? 'default' : 'secondary'">
-              {{ formatPlanStatus(selectedPlanDetails.status) }}
-            </Badge>
+            <PlanStatusBadge :status="selectedPlanDetails.status" />
           </div>
 
           <!-- Блок с информацией о завершении -->
           <div v-if="selectedPlanDetails.completedAt" class="p-3 bg-primary-soft/30 rounded-lg border border-primary/20 space-y-1 mb-2">
             <div class="flex items-center justify-between">
               <span class="text-xs font-medium text-text-muted">Завершена:</span>
-              <span class="text-xs font-semibold text-text-main">{{ formatDate(selectedPlanDetails.completedAt) }}</span>
+              <span class="text-xs font-semibold text-text-main">{{ formatExactCreatedAt(selectedPlanDetails.completedAt) }}</span>
             </div>
             <div v-if="selectedPlanDetails.difficulty" class="flex items-center justify-between">
               <span class="text-xs font-medium text-text-muted">Сложность:</span>
@@ -762,7 +760,7 @@ const formatDate = (isoString?: string) => {
 
           <div class="flex justify-between text-xs text-text-faint pb-1">
             <span>Дата создания:</span>
-            <span class="font-medium text-text-muted">{{ formatDate(selectedPlanDetails.createdAt) }}</span>
+            <span class="font-medium text-text-muted">{{ formatExactCreatedAt(selectedPlanDetails.createdAt) }}</span>
           </div>
 
           <!-- Секция состава плана -->
@@ -813,7 +811,7 @@ const formatDate = (isoString?: string) => {
 
     <!-- Модальное окно редактирования клиента -->
     <Dialog :open="isEditOpen" @update:open="isEditOpen = $event">
-      <DialogContent class="sm:max-w-[425px] z-[60]" overlay-class="z-[55]">
+      <DialogContent class="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Редактирование клиента</DialogTitle>
           <DialogDescription>

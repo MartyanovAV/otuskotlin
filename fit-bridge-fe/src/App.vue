@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import { useAuthStore } from './features/auth/authStore'
+import { ToastContainer } from '@/shared/ui/toast'
+import { ConfirmDialog } from '@/shared/ui/confirm-dialog'
 
 const authStore = useAuthStore()
 const reload = () => window.location.reload()
@@ -21,4 +23,10 @@ const reload = () => window.location.reload()
     </div>
   </div>
   <RouterView v-else />
+  <!--
+    Глобальные слои: тосты и confirm-модалка.
+    Позиционируются fixed, не влияют на layout, доступны в любом состоянии приложения.
+  -->
+  <ToastContainer />
+  <ConfirmDialog />
 </template>
