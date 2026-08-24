@@ -95,6 +95,12 @@ static_resources:
                 tls_certificates:
                   - certificate_chain:
                       filename: "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem"
+                      # The watched_directory below is a no-op in this static
+                      # listener config: Envoy only watches for filesystem
+                      # changes when TlsCertificate is delivered via SDS
+                      # (https://www.envoyproxy.io/docs/envoy/latest/configuration/security/secret).
+                      # After every certbot renewal, certbot-renew.sh issues
+                      # `docker compose restart envoy` to pick up the new files.
                       watched_directory:
                         path: "/etc/letsencrypt/live/${DOMAIN}"
                     private_key:

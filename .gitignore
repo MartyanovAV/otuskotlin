@@ -19,6 +19,9 @@
 /deploy/*.jar
 /deploy/.env
 /deploy/.env.*
+/deploy/.deploy.lock
+/deploy/.certbot.lock
+/deploy/certbot-renew.log
 !/deploy/.env.*.example
 !/deploy/.env.*.template
 *.secrets.env
