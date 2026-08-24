@@ -1,0 +1,117 @@
+name: 'E2E (Playwright)'
+
+# Прогон UI E2E тестов на полном локальном стеке.
+# Триггерится:
+#  - pull_request в main/master/v-*/release/*
+#  - push в main
+#  - ручной запуск (workflow_dispatch)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches: [main, master, 'v-*', 'release/*']
+  workflow_dispatch:
+
+# Чтобы не запускать E2E, если упали дешёвые проверки в PR.
+# Сам workflow — финальный gate перед merge.
+concurrency:
+  group: e2e-fe-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  playwright:
+    name: Playwright UI tests
+    runs-on: ubuntu-22.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+
+    env:
+      APP_VERSION: local
+      BASE_URL: http://localhost:8080
+      TEST_USERNAME: fitbridge-test
+      TEST_PASSWORD: fitbridge
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # ── Toolchains ────────────────────────────────────────────────
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: fit-bridge-be/fit-bridge-e2e-fe/package-lock.json
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      # ── Caches ────────────────────────────────────────────────────
+      - name: Cache Playwright browsers
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            /ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('fit-bridge-be/fit-bridge-e2e-fe/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      # ── Build backend images (migrations + training-service) ──────
+      - name: Build migration Docker image (Liquibase)
+        run: ./gradlew --no-daemon buildInfra --console=plain
+
+      - name: Build training-service Docker image
+        run: ./gradlew --no-daemon :fit-bridge-be:training-service:app-ktor:dockerBuildJvm --console=plain
+
+      # ── Build frontend image + start stack ───────────────────────
+      # Используем Gradle-таски из fit-bridge-stack (кросс-платформенные).
+      - name: Build frontend Docker image
+        run: ./gradlew --no-daemon :fit-bridge-be:fit-bridge-stack:buildFrontendImage --console=plain
+
+      - name: Start docker-compose stack
+        run: ./gradlew --no-daemon :fit-bridge-be:fit-bridge-stack:stackUp --console=plain
+
+      - name: Wait for stack to be ready
+        run: ./gradlew --no-daemon :fit-bridge-be:fit-bridge-stack:stackWaitForHealth --console=plain
+
+      - name: Show stack status
+        if: always()
+        run: ./gradlew --no-daemon :fit-bridge-be:fit-bridge-stack:stackStatus --console=plain || true
+
+      # ── Run E2E ──────────────────────────────────────────────────
+      - name: Run Playwright E2E (via Gradle)
+        run: ./gradlew --no-daemon :fit-bridge-be:fit-bridge-e2e-fe:e2eFe --console=plain
+
+      # ── Artifacts ────────────────────────────────────────────────
+      - name: Upload Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: playwright-report
+          path: fit-bridge-be/fit-bridge-e2e-fe/playwright-report
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Upload Playwright test results (videos, traces)
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: playwright-test-results
+          path: fit-bridge-be/fit-bridge-e2e-fe/test-results
+          retention-days: 7
+          if-no-files-found: ignore
+
+      # ── Teardown ────────────────────────────────────────────────
+      - name: Stop docker-compose stack
+        if: always()
+        run: ./gradlew --no-daemon :fit-bridge-be:fit-bridge-stack:stackClean --console=plain || true

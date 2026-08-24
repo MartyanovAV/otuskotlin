@@ -22,3 +22,5 @@ pluginManagement {
 
 includeBuild("training-service")
 include(":fit-bridge-e2e-be")
+include(":fit-bridge-e2e-fe")
+include(":fit-bridge-stack")

@@ -61,4 +61,49 @@ tasks {
             dependsOn(it.task(":ktlintCheck"))
         }
     }
+
+    // === Локальный стенд + UI E2E ==================================
+    register("stackUpReady") {
+        description = "Поднять локальный FitBridge-стек + дождаться готовности envoy"
+        group = "stack"
+        dependsOn(gradle.includedBuild("fit-bridge-be").task(":fit-bridge-stack:stackUpReady"))
+    }
+
+    register("stackBuildImages") {
+        description = "Пересобрать все Docker-образы стенда (migrations + training + frontend)"
+        group = "stack"
+        dependsOn(gradle.includedBuild("fit-bridge-be").task(":fit-bridge-stack:stackBuildImages"))
+    }
+
+    register("stackDown") {
+        description = "Остановить локальный стек (volumes сохраняются)"
+        group = "stack"
+        dependsOn(gradle.includedBuild("fit-bridge-be").task(":fit-bridge-stack:stackDown"))
+    }
+
+    register("stackClean") {
+        description = "Остановить стек И удалить volumes (БД теряется)"
+        group = "stack"
+        dependsOn(gradle.includedBuild("fit-bridge-be").task(":fit-bridge-stack:stackClean"))
+    }
+
+    register("stackStatus") {
+        description = "Показать статус контейнеров локального стека"
+        group = "stack"
+        dependsOn(gradle.includedBuild("fit-bridge-be").task(":fit-bridge-stack:stackStatus"))
+    }
+
+    /**
+     * Полный цикл UI E2E одной командой:
+     *   поднять стек → дождаться готовности → прогнать Playwright.
+     * Полезно локально и в CI как gate «поднять-и-протестить».
+     */
+    register("e2eFeAll") {
+        description = "Поднять стек + прогнать Playwright UI E2E"
+        group = "verification"
+        dependsOn(
+            gradle.includedBuild("fit-bridge-be").task(":fit-bridge-stack:stackUpReady"),
+            gradle.includedBuild("fit-bridge-be").task(":fit-bridge-e2e-fe:e2eFe"),
+        )
+    }
 }
