@@ -56,7 +56,7 @@ FitBridge — приватная CRM для фитнес-тренеров, за�
 - **CSS-политика для legacy-матрицы:** основной пользовательский сценарий должен оставаться читаемым и работоспособным, но visual parity с modern-версией не требуется; допустимы отличия цветов, теней, градиентов, анимаций и других декоративных эффектов. База — flexbox/grid; `:has`, container queries, `dvh` и другие современные CSS-возможности используются только с фолбэками либо graceful degradation.
 - **Формы:** native HTML validation для MVP; VeeValidate 4 + Zod остаются опцией при усложнении форм.
 - **PWA:** `vite-plugin-pwa` — манифест с существующей favicon, Workbox precache оболочки, `registerType: 'autoUpdate'`; dedicated 192/512 maskable icons — backlog.
-- **Тестирование:** Vitest + `@vue/test-utils` (unit/компонентные); Playwright auth smoke против поднятых Keycloak, Envoy и Training Service. Расширение до полной browser/viewport matrix выполняется отдельным этапом.
+- **Тестирование:** Vitest + `@vue/test-utils` (unit/компонентные); Playwright auth smoke против поднятых Keycloak, Caddy и Training Service. Расширение до полной browser/viewport matrix выполняется отдельным этапом.
 - **Размещение:** новый корневой каталог `fit-bridge-fe/` рядом с `fit-bridge-be/`; Node-проект, в Gradle не включается (CI — отдельная Node-джоба); feature-based структура по доменам бэкенда: `features/client-card`, `features/training-plan`, `features/auth` + `shared/ui`, `shared/api`, `router`, `stores`, `styles`; монорепо-инструменты не вводятся (YAGNI).
 
 ## Rationale

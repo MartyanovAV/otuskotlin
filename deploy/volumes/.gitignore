@@ -1,6 +1,4 @@
-envoy/certs/
-/ca/
-certs/
-certbot-webroot/
-envoy/envoy.prod.yaml
-keycloak/import-prod/fit-bridge-realm.json
+caddy/certs/
+caddy/Caddyfile.prod
+ca/
+keycloak/certs/

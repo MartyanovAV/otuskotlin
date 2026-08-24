@@ -1,7 +1,7 @@
 # Модуль E2E тестирования (End-to-End)
 
 Модуль содержит black-box тесты FitBridge. Они запускают изолированный Docker
-Compose-стенд через Testcontainers, отправляют запросы через Envoy в реальный
+Compose-стенд через Testcontainers, отправляют запросы через Caddy в реальный
 `training-service`, а access token получают из Keycloak.
 
 ## Требования
@@ -10,7 +10,7 @@ Compose-стенд через Testcontainers, отправляют запрос�
 - Docker Engine или Docker Desktop;
 - Docker Compose plugin.
 
-Свободные фиксированные host ports не требуются: Testcontainers публикует Envoy
+Свободные фиксированные host ports не требуются: Testcontainers публикует Caddy
 на динамический порт. Локальный стенд из `deploy/docker-compose.yml` можно не
 останавливать.
 
@@ -39,7 +39,7 @@ Linux:
 1. `buildInfra` собирает и проверяет resource ZIP модуля `fit-bridge-dcompose`;
 2. `buildImages` создаёт актуальный `fitbridge-training-service:local` из fat JAR;
 3. `e2eTests` распаковывает resource ZIP, один раз поднимает минимальный стенд
-   PostgreSQL + Keycloak + Training Service + Envoy, ждёт readiness, запускает
+   PostgreSQL + Keycloak + Training Service + Caddy, ждёт readiness, запускает
    тесты и останавливает контейнеры с удалением тестовых volumes.
 
 Если инфраструктура и образы не менялись, для повторного запуска достаточно
@@ -50,14 +50,14 @@ Linux:
 Его можно переопределить переменными `FITBRIDGE_E2E_USERNAME`,
 `FITBRIDGE_E2E_PASSWORD`, `FITBRIDGE_E2E_CLIENT_ID` или одноимёнными JVM
 properties `fitbridge.e2e.username`, `fitbridge.e2e.password`,
-`fitbridge.e2e.clientId`. Адрес Envoy устанавливает Testcontainers.
+`fitbridge.e2e.clientId`. Адрес Caddy устанавливает Testcontainers.
 
 ## Что проверяется
 
-- готовность Envoy и Training Service;
+- готовность Caddy и Training Service;
 - обязательность JWT для API;
 - получение JWT из Keycloak;
 - реальные маршруты API v2 для `ClientCard` и `TrainingPlan`;
 - тип, `requestId`, результат и содержимое каждого ответа.
 
-Тесты используют внешние маршруты Envoy: `/v2/clientCard/*` и `/v2/trainingPlan/*`. WebSocket Training Service доступен через `/v1/training/ws` и `/v2/training/ws`.
+Тесты используют внешние маршруты Caddy: `/v2/clientCard/*` и `/v2/trainingPlan/*`. WebSocket Training Service доступен через `/v1/training/ws` и `/v2/training/ws`.

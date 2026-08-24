@@ -10,8 +10,8 @@ import org.testcontainers.containers.wait.strategy.Wait
 import java.io.File
 import java.time.Duration
 
-private const val ENVOY_SERVICE = "envoy-1"
-private const val ENVOY_PORT = 8080
+private const val GATEWAY_SERVICE = "caddy-1"
+private const val GATEWAY_PORT = 8080
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
@@ -52,8 +52,8 @@ private class FitBridgeStackResource private constructor(
 
             val compose = ComposeContainer(composeFile)
                 .withExposedService(
-                    ENVOY_SERVICE,
-                    ENVOY_PORT,
+                    GATEWAY_SERVICE,
+                    GATEWAY_PORT,
                     Wait.forHttp("/health")
                         .forStatusCode(200)
                         .withStartupTimeout(Duration.ofMinutes(5)),
@@ -61,14 +61,14 @@ private class FitBridgeStackResource private constructor(
                 .withLogConsumer("postgresql-1", logConsumer("postgresql"))
                 .withLogConsumer("training-service-1", logConsumer("training-service"))
                 .withLogConsumer("keycloak-1", logConsumer("keycloak"))
-                .withLogConsumer(ENVOY_SERVICE, logConsumer("envoy"))
+                .withLogConsumer(GATEWAY_SERVICE, logConsumer("caddy"))
                 .withRemoveVolumes(true)
                 .withStartupTimeout(Duration.ofMinutes(5))
 
             try {
                 compose.start()
-                val host = compose.getServiceHost(ENVOY_SERVICE, ENVOY_PORT)
-                val port = compose.getServicePort(ENVOY_SERVICE, ENVOY_PORT)
+                val host = compose.getServiceHost(GATEWAY_SERVICE, GATEWAY_PORT)
+                val port = compose.getServicePort(GATEWAY_SERVICE, GATEWAY_PORT)
                 System.setProperty(BASE_URL_PROPERTY, "http://$host:$port")
                 return FitBridgeStackResource(compose)
             } catch (error: Throwable) {

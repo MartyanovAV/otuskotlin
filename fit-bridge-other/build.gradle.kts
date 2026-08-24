@@ -17,6 +17,7 @@ tasks {
         description = "Сборка и проверка переиспользуемого Docker Compose resource-артефакта"
         dependsOn(project(":fit-bridge-dcompose").tasks.named("verifyResourcesZip"))
         dependsOn(project(":fit-bridge-migration-pg").getTasksByName("buildImages", false))
+        dependsOn(project(":fit-bridge-caddy").getTasksByName("buildImages", false))
     }
 
     register("clean" ) {

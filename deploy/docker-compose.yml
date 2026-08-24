@@ -82,7 +82,7 @@ services:
     depends_on:
       liquibase-training:
         condition: service_completed_successfully
-      envoy:
+      caddy:
         condition: service_healthy
     environment:
       DB_TYPE_PROD: postgres
@@ -155,13 +155,13 @@ services:
     networks:
       - fitbridge-network
 
-  envoy:
-    image: envoyproxy/envoy:v1.39.0
-    # The public edge must start independently. Envoy can report unavailable
+  caddy:
+    image: fitbridge-caddy:${APP_VERSION:-local}
+    # The public edge must start independently. Caddy can report unavailable
     # upstreams itself, while coupling startup to Keycloak, the frontend or
     # observability would also make ACME HTTP-01 unavailable during incidents.
     healthcheck:
-      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/15001; printf 'GET /ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3; grep -q '200 OK' <&3"]
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/health"]
       interval: 5s
       timeout: 3s
       retries: 12
@@ -210,6 +210,8 @@ services:
 volumes:
   greptimedb-data:
   postgresql-data:
+  caddy-data:
+  caddy-config:
 
 networks:
   fitbridge-network:

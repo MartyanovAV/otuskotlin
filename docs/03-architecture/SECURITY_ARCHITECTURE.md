@@ -8,7 +8,7 @@ Security baseline распространяется на trainer-only кабин�
 |---|---|---|
 | Trainer | Регистрируется, входит, управляет своими карточками и планами | Не передаёт доверенный owner id или роль |
 | Keycloak | Username, credentials, identity profile, `TRAINER`, OIDC/JWT/JWKS | Не решает domain ownership |
-| Envoy | Edge-проверка подписи, issuer и audience | Не заменяет backend authorization |
+| Caddy | Edge-проверка подписи, issuer и audience | Не заменяет backend authorization |
 | Training Service | Повторная JWT validation, role и ownership guards, business rules | Единственная точка доменной авторизации |
 | PostgreSQL | Trainer-owned карточки и планы | Не хранит credentials или локальную user projection |
 | Fluent Bit / GreptimeDB | Masked technical logs | Не получает JWT или пользовательские payload |
@@ -43,7 +43,7 @@ Backend проверяет:
 5. Непустой `sub` и `preferred_username`.
 6. Наличие `TRAINER` в `realm_access.roles`.
 
-Envoy выполняет edge-проверку как для REST, так и для WebSocket Upgrade, но backend повторяет security-critical validation самостоятельно. REST и WebSocket используют один `AuthPrincipal` и одинаковые role/ownership guards.
+Caddy выполняет edge-проверку как для REST, так и для WebSocket Upgrade, но backend повторяет security-critical validation самостоятельно. REST и WebSocket используют один `AuthPrincipal` и одинаковые role/ownership guards.
 
 ## 4. Ownership algorithm
 
@@ -92,7 +92,7 @@ Self-contained access token остаётся действительным до `
 | Использование username как owner | Потеря связи при lifecycle-изменениях | Ownership только по `sub` |
 | Token replay после блокировки | Доступ до истечения токена | TTL 5 минут, TLS, refresh/session revoke |
 | Sensitive access token/logs | Раскрытие PII | Минимальные claims, запрет raw token и payload logging |
-| Ошибка audience/issuer | Приём токена другого клиента/realm | Строгая проверка `iss` и `aud` в Envoy и backend |
+| Ошибка audience/issuer | Приём токена другого клиента/realm | Строгая проверка `iss` и `aud` в Caddy и backend |
 | Scope creep Keycloak profile | IAM превращается в domain DB | Короткие identity attributes; сложный профиль через новый ADR |
 
 ## 9. Security acceptance criteria
