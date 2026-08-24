@@ -10,7 +10,7 @@ const navItems = [
 
 <template>
   <nav
-    class="fixed inset-x-0 bottom-0 z-[200] grid h-[68px] grid-cols-3 border-t border-border bg-surface/95 px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+    class="fixed inset-x-0 bottom-0 z-app-chrome grid h-[68px] grid-cols-3 border-t border-border bg-surface/95 px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
     aria-label="Основная навигация"
   >
     <router-link

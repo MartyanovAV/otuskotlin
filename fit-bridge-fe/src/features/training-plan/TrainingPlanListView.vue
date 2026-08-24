@@ -2,7 +2,6 @@
 import { ref, computed, watch } from 'vue'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useDebounce } from '@vueuse/core'
-import { Badge } from '@/shared/ui/badge'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Pagination } from '@/shared/ui/pagination'
@@ -23,14 +22,19 @@ import PlanItemBuilder from './ui/PlanItemBuilder.vue'
 import PlanItemCard from './ui/PlanItemCard.vue'
 import PlanShareButton from './ui/PlanShareButton.vue'
 import CompleteTrainingModal from './ui/CompleteTrainingModal.vue'
+import PlanStatusBadge from './ui/PlanStatusBadge.vue'
 import {
   type PlanItemDraft,
   mapDraftToPlanItem,
   mapPlanItemToDraft,
   formatPlanStructureSummary,
 } from './model/types'
+import { useToast } from '@/shared/ui/toast'
+import { confirm } from '@/shared/ui/confirm-dialog'
+import { formatRelativeDate, formatExactDateTime } from '@/shared/lib/format'
 
 const queryClient = useQueryClient()
+const toast = useToast()
 const searchQuery = ref('')
 const debouncedSearchQuery = useDebounce(searchQuery, 300)
 const selectedClientFilter = ref('')
@@ -107,13 +111,7 @@ const hasActiveFilters = computed(
   () => !!searchQuery.value.trim() || !!selectedClientFilter.value || !!selectedStatusFilter.value,
 )
 
-const formatPlanStatus = (status?: TrainingPlanStatus) => {
-  if (status === 'ACTIVE') return 'Активен'
-  if (status === 'ARCHIVED') return 'В архиве'
-  if (status === 'COMPLETED') return 'Завершён'
-  if (status === 'DRAFT') return 'Черновик'
-  return 'Черновик'
-}
+// formatPlanStatus удалён: рендеринг через <PlanStatusBadge>
 
 const resetFilters = () => {
   searchQuery.value = ''
@@ -181,6 +179,14 @@ const handleCreatePlan = async (status: TrainingPlanStatus = 'ACTIVE') => {
 
 const handleActivatePlan = async (plan: TrainingPlanResponseObject) => {
   if (!plan.id || !plan.lock || isActivating.value) return
+  // Подтверждаем: активированный план становится доступен клиенту.
+  const ok = await confirm({
+    title: 'Активировать план?',
+    description: `План «${plan.title ?? 'без названия'}» станет доступен клиенту. Действие можно отменить только архивацией.`,
+    confirmText: 'Активировать',
+    cancelText: 'Отмена',
+  })
+  if (!ok) return
   isActivating.value = true
 
   try {
@@ -203,8 +209,12 @@ const handleActivatePlan = async (plan: TrainingPlanResponseObject) => {
       queryClient.invalidateQueries({ queryKey: ['trainingPlans'] }),
       queryClient.invalidateQueries({ queryKey: ['trainingPlansCount'] }),
     ])
+    toast.success('План активирован', plan.title ?? undefined)
   } catch (err: unknown) {
-    alert(err instanceof Error ? err.message : 'Не удалось активировать тренировочный план')
+    toast.error(
+      'Не удалось активировать тренировочный план',
+      err instanceof Error ? err.message : 'Попробуйте позже',
+    )
   } finally {
     isActivating.value = false
   }
@@ -296,19 +306,8 @@ const getClientNameById = (clientCardId?: string) => {
   return found?.displayName ?? 'Клиент'
 }
 
-const formatDate = (isoString?: string) => {
-  if (!isoString) return '—'
-  try {
-    return new Date(isoString).toLocaleString('ru-RU', {
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  } catch {
-    return isoString
-  }
-}
+const formatRelativeCreatedAt = (isoString?: string) => formatRelativeDate(isoString)
+const formatExactCreatedAt = (isoString?: string) => formatExactDateTime(isoString)
 
 const formatDifficulty = (diff?: string) => {
   switch (diff) {
@@ -439,13 +438,13 @@ const formatDifficulty = (diff?: string) => {
             <div class="min-w-0 flex-1">
               <div class="flex items-start justify-between gap-2">
                 <h2 class="line-clamp-2 text-base font-semibold text-text-main">{{ plan.title }}</h2>
-                <Badge :variant="plan.status === 'ACTIVE' ? 'default' : plan.status === 'COMPLETED' ? 'outline' : 'secondary'" class="shrink-0">
-                  {{ formatPlanStatus(plan.status) }}
-                </Badge>
+                <PlanStatusBadge :status="plan.status" class="shrink-0" />
               </div>
               <p class="mt-1 text-sm text-text-muted">Клиент: {{ getClientNameById(plan.clientCardId) }}</p>
               <p class="mt-1 text-xs text-text-muted">{{ (plan.planItems ?? []).length }} эл. · {{ formatPlanStructureSummary(plan.planItems) }}</p>
-              <p class="mt-2 text-xs text-text-faint">Создан: {{ formatDate(plan.createdAt) }}</p>
+              <p class="mt-2 text-xs text-text-faint" :title="formatExactCreatedAt(plan.createdAt)">
+                Создан: {{ formatRelativeCreatedAt(plan.createdAt) }}
+              </p>
             </div>
           </div>
           <div class="mt-4 grid grid-cols-2 gap-2">
@@ -520,9 +519,7 @@ const formatDifficulty = (diff?: string) => {
                 </div>
               </td>
               <td class="px-4 py-4 whitespace-nowrap">
-                <Badge :variant="plan.status === 'ACTIVE' ? 'default' : plan.status === 'COMPLETED' ? 'outline' : 'secondary'" class="w-fit">
-                  {{ formatPlanStatus(plan.status) }}
-                </Badge>
+                <PlanStatusBadge :status="plan.status" class="w-fit" />
               </td>
               <td class="px-4 py-4 whitespace-nowrap">
                 <div class="flex items-center gap-1.5">
@@ -534,8 +531,8 @@ const formatDifficulty = (diff?: string) => {
                   </span>
                 </div>
               </td>
-              <td class="px-4 py-4 text-xs text-text-muted whitespace-nowrap">
-                {{ formatDate(plan.createdAt) }}
+              <td class="px-4 py-4 text-xs text-text-muted whitespace-nowrap" :title="formatExactCreatedAt(plan.createdAt)">
+                {{ formatRelativeCreatedAt(plan.createdAt) }}
               </td>
               <td class="py-4 pl-4 pr-6 text-right whitespace-nowrap">
                 <div class="flex items-center justify-end gap-2" @click.stop>
@@ -716,16 +713,14 @@ const formatDifficulty = (diff?: string) => {
         <div class="space-y-3 py-2 text-sm">
           <div class="flex justify-between border-b border-border pb-2">
             <span class="text-text-muted">Статус:</span>
-            <Badge :variant="selectedPlan.status === 'ACTIVE' ? 'default' : 'secondary'">
-              {{ formatPlanStatus(selectedPlan.status) }}
-            </Badge>
+            <PlanStatusBadge :status="selectedPlan.status" />
           </div>
 
           <!-- Блок с информацией о завершении -->
           <div v-if="selectedPlan.completedAt" class="p-3 bg-primary-soft/30 rounded-lg border border-primary/20 space-y-1 mb-2">
             <div class="flex items-center justify-between">
               <span class="text-xs font-medium text-text-muted">Завершена:</span>
-              <span class="text-xs font-semibold text-text-main">{{ formatDate(selectedPlan.completedAt) }}</span>
+              <span class="text-xs font-semibold text-text-main">{{ formatExactCreatedAt(selectedPlan.completedAt) }}</span>
             </div>
             <div class="flex items-center justify-between">
               <span class="text-xs font-medium text-text-muted">Сложность:</span>
@@ -739,7 +734,7 @@ const formatDifficulty = (diff?: string) => {
 
           <div class="flex justify-between text-xs text-text-faint pb-1">
             <span>Дата создания:</span>
-            <span class="font-medium text-text-muted">{{ formatDate(selectedPlan.createdAt) }}</span>
+            <span class="font-medium text-text-muted">{{ formatExactCreatedAt(selectedPlan.createdAt) }}</span>
           </div>
 
           <!-- Секция состава плана -->

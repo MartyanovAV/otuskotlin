@@ -27,7 +27,7 @@ const toggleTheme = () => {
 </script>
 
 <template>
-  <header class="sticky top-0 z-[200] flex h-14 items-center gap-4 border-b border-border bg-surface/95 px-4 backdrop-blur-md md:px-6 lg:h-[60px]">
+  <header class="sticky top-0 z-app-chrome flex h-14 items-center gap-4 border-b border-border bg-surface/95 px-4 backdrop-blur-md md:px-6 lg:h-[60px]">
     <slot name="leading" />
     <div class="flex-1">
       <p class="text-base font-semibold text-text-main md:text-lg">{{ title }}</p>

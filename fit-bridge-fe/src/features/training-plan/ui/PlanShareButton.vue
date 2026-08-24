@@ -127,7 +127,7 @@ onUnmounted(() => {
     <!-- Выпадающее меню шеринга -->
     <div
       v-if="isOpen"
-      :class="['absolute w-64 rounded-xl border border-border bg-surface p-1.5 shadow-xl z-50 animate-in fade-in zoom-in-95 duration-100', placementClasses]"
+      :class="['absolute w-64 rounded-xl border border-border bg-surface p-1.5 shadow-xl z-popover animate-in fade-in zoom-in-95 duration-100', placementClasses]"
       @click.stop
     >
       <div class="px-2.5 py-1.5 text-[11px] font-semibold text-text-muted uppercase tracking-wider border-b border-border/50 mb-1">

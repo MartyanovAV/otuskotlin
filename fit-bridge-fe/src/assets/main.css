@@ -57,6 +57,22 @@
   --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 18px 40px rgba(0, 0, 0, 0.12);
   --shadow-phone: 0 24px 60px rgba(0, 0, 0, 0.15);
+
+  /*
+   * Z-index шкала. Используйте семантические имена (z-raised, z-modal, …)
+   * вместо магических чисел. Шкала намеренно с большими интервалами,
+   * чтобы между слоями оставалось пространство под региональные оверрайды.
+   */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 20;
+  --z-drawer: 30;
+  --z-overlay: 40;
+  --z-modal: 50;
+  --z-popover: 60;
+  --z-toast: 70;
+  --z-tooltip: 80;
+  --z-app-chrome: 100;
 }
 
 :root {
@@ -132,4 +148,21 @@ body {
   transition: background-color 0.15s ease, color 0.15s ease;
   margin: 0;
   padding: 0;
+}
+
+/*
+ * Уважаем prefers-reduced-motion: убираем плавные переходы и анимации,
+ * чтобы избежать укачивания/головокружения у пользователей с вестибулярными
+ * нарушениями. Сами переходы темы оставляем короткими (0.01s),
+ * чтобы визуально состояние всё равно отличалось.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
