@@ -147,7 +147,7 @@ const subItems = computed<PlanItem[]>(() => {
       <div
         v-for="(sub, sIdx) in subItems"
         :key="sub.id || sIdx"
-        class="flex items-center justify-between bg-surface/80 px-3 py-2 rounded-lg text-xs border border-border/50 relative z-10"
+        class="flex items-center justify-between bg-surface/80 px-3 py-2 rounded-lg text-xs border border-border/50 relative z-raised"
       >
         <div class="flex items-center gap-2">
           <span class="w-4 h-4 rounded-full bg-primary-soft text-primary-soft-text text-[10px] flex items-center justify-center font-bold">

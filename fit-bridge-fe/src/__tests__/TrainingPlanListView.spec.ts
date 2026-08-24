@@ -21,6 +21,11 @@ vi.mock('../shared/api/generated/client-card/client-card', () => ({
   clientCardSearch: vi.fn<(...args: unknown[]) => unknown>(),
 }))
 
+// Mock confirm-диалог: по умолчанию подтверждаем, чтобы тест проверял основной поток
+vi.mock('../shared/ui/confirm-dialog', () => ({
+  confirm: vi.fn(async () => true),
+}))
+
 describe('TrainingPlanListView Table View and Plan Items', () => {
   let queryClient: QueryClient
 
