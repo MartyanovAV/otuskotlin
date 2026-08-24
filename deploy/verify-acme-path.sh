@@ -41,4 +41,10 @@ while [ "$attempt" -le "$max_attempts" ]; do
 done
 
 echo "ERROR: ACME HTTP-01 route did not become ready for $domain" >&2
+echo "==> Edge container status:" >&2
+docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+    ps envoy certbot-helper >&2 || true
+echo "==> Recent Envoy and ACME helper logs:" >&2
+docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+    logs --no-color --tail 100 envoy certbot-helper >&2 || true
 exit 1

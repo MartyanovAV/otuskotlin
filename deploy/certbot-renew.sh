@@ -45,6 +45,7 @@ docker run --rm \
 # when the deploy hook confirms that at least one certificate was renewed.
 if [ -f "$reload_marker" ]; then
     echo "==> Certificate renewed; restarting Envoy to load the new files"
+    sh ./prepare-envoy-cert-permissions.sh
     docker compose -f docker-compose.yml -f docker-compose.prod.yml restart envoy
     rm -f "$reload_marker"
 else

@@ -9,6 +9,10 @@ if [ ! -f volumes/db-bootstrap/db-bootstrap.sh ]; then
     echo "ERROR: Required database bootstrap script is missing: volumes/db-bootstrap/db-bootstrap.sh" >&2
     exit 1
 fi
+if [ ! -f prepare-envoy-cert-permissions.sh ]; then
+    echo "ERROR: Required Envoy certificate permission script is missing" >&2
+    exit 1
+fi
 
 echo "==> Validating merged production Compose configuration"
 # shellcheck disable=SC2086

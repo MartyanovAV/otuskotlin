@@ -160,6 +160,11 @@ services:
     # The public edge must start independently. Envoy can report unavailable
     # upstreams itself, while coupling startup to Keycloak, the frontend or
     # observability would also make ACME HTTP-01 unavailable during incidents.
+    environment:
+      # The image entrypoint changes the unprivileged Envoy process to this
+      # dedicated group. Certificate scripts grant this group read-only access
+      # to private keys without making them world-readable.
+      ENVOY_GID: "2443"
     healthcheck:
       test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/15001; printf 'GET /ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3; grep -q '200 OK' <&3"]
       interval: 5s

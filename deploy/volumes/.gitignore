@@ -2,5 +2,6 @@ envoy/certs/
 /ca/
 certs/
 certbot-webroot/
+certbot-initial.*/
 envoy/envoy.prod.yaml
 keycloak/import-prod/fit-bridge-realm.json

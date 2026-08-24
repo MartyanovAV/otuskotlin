@@ -100,12 +100,24 @@ elif [ -e "$cert_chain" ] || [ -L "$cert_chain" ] || [ -e "$cert_key" ] || [ -L 
 else
     echo "==> No SSL certificate found for '$domain'. Generating bootstrap dummy certificate for initial Envoy boot..."
     mkdir -p "$cert_dir"
+    bootstrap_key=$(mktemp "$cert_dir/.privkey.pem.XXXXXX")
+    bootstrap_chain=$(mktemp "$cert_dir/.fullchain.pem.XXXXXX")
+    cleanup_bootstrap_files() {
+        rm -f "${bootstrap_key:-}" "${bootstrap_chain:-}"
+    }
+    trap cleanup_bootstrap_files EXIT HUP INT TERM
     MSYS2_ARG_CONV_EXCL='/CN=' openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
-        -keyout "$cert_key" \
-        -out "$cert_chain" \
+        -keyout "$bootstrap_key" \
+        -out "$bootstrap_chain" \
         -subj "/CN=$domain" 2>/dev/null
-    chmod 600 "$cert_key"
-    chmod 644 "$cert_chain"
+    chmod 600 "$bootstrap_key"
+    chmod 644 "$bootstrap_chain"
+    # Publish only complete files. Envoy may be restart-looping after an
+    # interrupted first issuance, so writing directly to its active paths can
+    # let it observe a partially generated private key.
+    mv "$bootstrap_key" "$cert_key"
+    mv "$bootstrap_chain" "$cert_chain"
+    trap - EXIT HUP INT TERM
     chmod 755 "volumes/certs" "volumes/certs/live" "volumes/certs/live/$cert_name" 2>/dev/null || true
     echo "  [OK] Temporary bootstrap certificate created for $domain"
 fi
@@ -120,6 +132,11 @@ else
     echo "ERROR: volumes/envoy/envoy.prod.yaml.template not found" >&2
     exit 1
 fi
+
+# The official Envoy image runs as an unprivileged user. Apply the same
+# dedicated group permissions to bootstrap and real Certbot keys on every
+# configuration preparation, including recovery after interrupted deploys.
+sh ./prepare-envoy-cert-permissions.sh
 
 # 4. Генерация конфигурации Keycloak Realm для prod
 if [ -f "volumes/keycloak/import-prod/fit-bridge-realm.json.template" ]; then

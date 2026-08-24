@@ -42,14 +42,18 @@ if [ -f "$renewal_config" ] && ! sh ./certbot-lineage-exists.sh "$domain"; then
 fi
 
 # The bootstrap certificate occupies live/$domain only until the first real
-# issuance. Remove it only when it is demonstrably self-signed. Never remove
-# an existing non-bootstrap certificate automatically.
+# issuance. Keep it in place while Envoy serves the ACME HTTP-01 route: removing
+# files referenced by the active TLS listener can make Envoy restart-loop before
+# Certbot even gets a chance to validate the domain. The real certificate is
+# therefore issued into an isolated state directory and promoted only after a
+# successful issuance.
+bootstrap_certificate=false
 if [ ! -f "$renewal_config" ] && [ -f "$cert_dir/fullchain.pem" ]; then
     issuer=$(openssl x509 -in "$cert_dir/fullchain.pem" -noout -issuer -nameopt RFC2253 | sed 's/^issuer=//')
     subject=$(openssl x509 -in "$cert_dir/fullchain.pem" -noout -subject -nameopt RFC2253 | sed 's/^subject=//')
     if [ "$issuer" = "$subject" ]; then
-        echo "==> Removing the temporary self-signed bootstrap certificate"
-        rm -rf "volumes/certs/live/$domain" "volumes/certs/archive/$domain"
+        bootstrap_certificate=true
+        echo "==> Temporary self-signed bootstrap certificate will remain active during ACME validation"
     else
         echo "ERROR: A non-Certbot certificate already exists for '$domain'; refusing to replace it" >&2
         exit 1
@@ -73,12 +77,20 @@ mkdir -p "volumes/certs" "volumes/certbot-webroot"
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build certbot-helper envoy
 sh ./verify-acme-path.sh
 
-# Run certbot as a one-shot container that is independent of the rest of the
-# compose stack. This way, a failing peer service (keycloak, postgres, ...)
-# never blocks certificate issuance, and we do not pull the entire production
-# project up just to talk to Let's Encrypt.
+# Run Certbot against an empty, isolated state directory. The bootstrap
+# certificate deliberately lives in the final Certbot path so Envoy can start,
+# but presenting that path directly to Certbot would collide with the lineage
+# it is about to create.
+issuance_dir=$(mktemp -d "volumes/certbot-initial.XXXXXX")
+cleanup_issuance_dir() {
+    if [ -n "${issuance_dir:-}" ] && [ -d "$issuance_dir" ]; then
+        rm -rf "$issuance_dir"
+    fi
+}
+trap cleanup_issuance_dir EXIT HUP INT TERM
+
 docker run --rm \
-    -v "$(pwd)/volumes/certs:/etc/letsencrypt" \
+    -v "$(pwd)/$issuance_dir:/etc/letsencrypt" \
     -v "$(pwd)/volumes/certbot-webroot:/var/www/certbot" \
     certbot/certbot:v5.7.0 certonly \
     --non-interactive \
@@ -91,6 +103,33 @@ docker run --rm \
     --no-eff-email \
     --key-type ecdsa \
     $staging_args
+
+issued_chain="$issuance_dir/live/$domain/fullchain.pem"
+issued_key="$issuance_dir/live/$domain/privkey.pem"
+issued_renewal="$issuance_dir/renewal/$domain.conf"
+
+if [ ! -f "$issued_chain" ] || [ ! -f "$issued_key" ] || [ ! -f "$issued_renewal" ]; then
+    echo "ERROR: Certbot reported success but did not create the expected '$domain' lineage" >&2
+    exit 1
+fi
+if ! openssl x509 -in "$issued_chain" -noout -checkhost "$domain" >/dev/null 2>&1; then
+    echo "ERROR: The issued certificate does not cover '$domain'" >&2
+    exit 1
+fi
+
+# Promote only a complete, validated Certbot state. Until this point any
+# failure leaves the bootstrap certificate and the running Envoy untouched.
+if [ "$bootstrap_certificate" = "true" ]; then
+    echo "==> Replacing the temporary bootstrap certificate with the issued lineage"
+    rm -rf "volumes/certs/live/$domain" "volumes/certs/archive/$domain"
+fi
+cp -a "$issuance_dir/." "volumes/certs/"
+
+if ! sh ./certbot-lineage-exists.sh "$domain"; then
+    echo "ERROR: Issued Certbot lineage was not promoted successfully" >&2
+    exit 1
+fi
+sh ./prepare-envoy-cert-permissions.sh
 
 # Restart Envoy so its static TLS context reads the freshly issued files.
 docker compose -f docker-compose.yml -f docker-compose.prod.yml restart envoy

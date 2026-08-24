@@ -169,6 +169,27 @@ jobs:
       - name: Validate Compose and Envoy configuration
         run: sh ./validate-prod-config.sh
 
+      - name: Smoke-test production Envoy bootstrap
+        run: |
+          compose() {
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml "$@"
+          }
+          cleanup() {
+            compose rm --stop --force envoy certbot-helper
+          }
+          trap cleanup EXIT
+
+          if ! compose up -d --no-build envoy certbot-helper; then
+            compose logs --no-color envoy certbot-helper
+            exit 1
+          fi
+
+          sh ./verify-acme-path.sh
+
+          key_metadata=$(compose exec -T envoy \
+            stat -Lc '%g %a' /etc/letsencrypt/live/fitbridge.example.com/privkey.pem)
+          test "$key_metadata" = "2443 640"
+
       - name: Smoke-test production Keycloak bootstrap
         run: |
           compose() {
