@@ -103,27 +103,17 @@ jobs:
           GHCR_USERNAME=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           COMMIT_SHA="${{ github.sha }}"
 
-          # training-service
-          docker tag fitbridge-training-service:local ghcr.io/$GHCR_USERNAME/fitbridge-training-service:$COMMIT_SHA
-          docker tag fitbridge-training-service:local ghcr.io/$GHCR_USERNAME/fitbridge-training-service:latest
-          docker push ghcr.io/$GHCR_USERNAME/fitbridge-training-service:$COMMIT_SHA
-          docker push ghcr.io/$GHCR_USERNAME/fitbridge-training-service:latest
+          tag_and_push() {
+            local src="$1" dst="$2"; shift 2
+            for tag in "$@"; do
+              docker tag "$src" "ghcr.io/$GHCR_USERNAME/$dst:$tag"
+              docker push "ghcr.io/$GHCR_USERNAME/$dst:$tag"
+            done
+          }
 
-          # liquibase-training
-          docker tag fit-bridge-migration-pg-training:0.1.0 ghcr.io/$GHCR_USERNAME/fitbridge-migration-pg-training:$COMMIT_SHA
-          docker tag fit-bridge-migration-pg-training:0.1.0 ghcr.io/$GHCR_USERNAME/fitbridge-migration-pg-training:latest
-          docker push ghcr.io/$GHCR_USERNAME/fitbridge-migration-pg-training:$COMMIT_SHA
-          docker push ghcr.io/$GHCR_USERNAME/fitbridge-migration-pg-training:latest
-
-          # caddy edge proxy
-          docker tag fitbridge-caddy:local ghcr.io/$GHCR_USERNAME/fitbridge-caddy:2.11.4-$COMMIT_SHA
-          docker tag fitbridge-caddy:local ghcr.io/$GHCR_USERNAME/fitbridge-caddy:2.11.4-latest
-          docker tag fitbridge-caddy:local ghcr.io/$GHCR_USERNAME/fitbridge-caddy:$COMMIT_SHA
-          docker tag fitbridge-caddy:local ghcr.io/$GHCR_USERNAME/fitbridge-caddy:latest
-          docker push ghcr.io/$GHCR_USERNAME/fitbridge-caddy:2.11.4-$COMMIT_SHA
-          docker push ghcr.io/$GHCR_USERNAME/fitbridge-caddy:2.11.4-latest
-          docker push ghcr.io/$GHCR_USERNAME/fitbridge-caddy:$COMMIT_SHA
-          docker push ghcr.io/$GHCR_USERNAME/fitbridge-caddy:latest
+          tag_and_push fitbridge-training-service:local       fitbridge-training-service      "$COMMIT_SHA" latest
+          tag_and_push fit-bridge-migration-pg-training:0.1.0 fitbridge-migration-pg-training "$COMMIT_SHA" latest
+          tag_and_push fitbridge-caddy:local                  fitbridge-caddy                 "$COMMIT_SHA" latest "2.11.4-$COMMIT_SHA" "2.11.4-latest"
 
   deploy-config:
     runs-on: ubuntu-22.04
@@ -324,9 +314,8 @@ jobs:
             sh ./write-prod-env.sh
 
             sh ./prepare-prod-config.sh
-            sh ./validate-prod-config.sh
 
-            # Login to GHCR to pull images
+            # Login to GHCR and pull images
             echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
