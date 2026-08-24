@@ -77,7 +77,7 @@ wait_for_keycloak_redirect() {
 }
 
 echo "==> Verifying public production endpoints at $public_url"
-wait_for_url "Envoy HTTPS health" "$public_url/health"
+wait_for_url "Caddy HTTPS health" "$public_url/health"
 wait_for_url "Training Service readiness" "$public_url/health/training/ready"
 wait_for_url "Keycloak OIDC discovery" "$public_url/realms/fit-bridge/.well-known/openid-configuration"
 wait_for_keycloak_redirect

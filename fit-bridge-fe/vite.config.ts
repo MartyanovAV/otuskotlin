@@ -18,7 +18,7 @@ export default defineConfig({
         // config.js is generated when a container starts. It must be read
         // from the network instead of being frozen in the precache manifest.
         globIgnores: ['**/config.js'],
-        // Envoy serves Keycloak on the same origin. A navigation fallback for
+        // Caddy serves Keycloak on the same origin. A navigation fallback for
         // these paths would return the SPA shell instead of Keycloak's OIDC
         // endpoint, causing redirect_uri recursion after the SW is installed.
         navigateFallbackDenylist: [/^\/(?:realms|admin|resources)(?:\/|$)/],

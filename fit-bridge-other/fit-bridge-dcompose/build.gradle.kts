@@ -17,7 +17,7 @@ val resourcesZip = tasks.register<Zip>("resourcesZip") {
     }
     from(deployDirectory) {
         include("volumes/postgres-init/**")
-        include("volumes/envoy/**")
+        include("volumes/caddy/**")
         include("volumes/keycloak/import/**")
     }
 }
@@ -25,7 +25,7 @@ val resourcesZip = tasks.register<Zip>("resourcesZip") {
 val requiredResources = listOf(
     "docker-compose.yml",
     "volumes/postgres-init/init.sh",
-    "volumes/envoy/envoy.yaml",
+    "volumes/caddy/Caddyfile.local",
     "volumes/keycloak/import/fit-bridge-realm.json",
     "volumes/keycloak/import/fit-bridge-users-0.json",
 )

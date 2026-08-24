@@ -11,7 +11,7 @@
 | Контур                  | Ответственность                                                                 | Не делает                                                        |
 |-------------------------|---------------------------------------------------------------------------------|------------------------------------------------------------------|
 | Keycloak                | Регистрация, username, credentials, identity profile, роль `TRAINER`, OIDC/JWT  | Не хранит карточки и планы, не решает domain ownership           |
-| Envoy Gateway           | Маршрутизация, edge JWT validation, проверка issuer/audience                    | Не заменяет backend ownership checks                             |
+| Caddy Gateway           | Маршрутизация, edge JWT validation, проверка issuer/audience                    | Не заменяет backend ownership checks                             |
 | Training Service        | POST Full API, Auth Guard, `ClientCard`, `TrainingPlan`, ownership, persistence | Не хранит credentials и не вызывает UserInfo для каждой операции |
 | PostgreSQL              | Карточки, планы, locks, archive state                                           | Не содержит локального пользователя или профиля тренера          |
 | Fluent Bit / GreptimeDB | Доставка и поиск masked logs                                                    | Не получает JWT, ФИО, заметки или содержимое планов              |

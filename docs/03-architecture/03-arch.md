@@ -30,7 +30,7 @@ FitBridge MVP **Trainer Diary** позволяет зарегистрирова�
 |---|---|
 | Web UI (Vue 3) | OIDC login/registration и приватный кабинет тренера (ADR-008) |
 | Keycloak | Identity Server: username, credentials, profile claims, `TRAINER`, JWT/JWKS |
-| Envoy Gateway | REST/WS-маршрутизация и edge JWT validation, включая WebSocket Upgrade |
+| Caddy Gateway | REST/WS-маршрутизация и edge JWT validation, включая WebSocket Upgrade |
 | Training Service | POST Full и WebSocket API, Auth Guard, ownership и бизнес-правила карточек/планов |
 | PostgreSQL | `ClientCard`, `TrainingPlan`, locks и archive state |
 | Fluent Bit / GreptimeDB | Masked logs и техническая наблюдаемость |

@@ -21,7 +21,7 @@ class FitBridgeStackTest {
     }
 
     @Test
-    fun `envoy rejects API request without access token`() = runBlocking {
+    fun `caddy rejects API request without access token`() = runBlocking {
         FitBridgeE2eClient().use { client ->
             val response = client.post(
                 path = "/v2/clientCard/search",
@@ -34,7 +34,7 @@ class FitBridgeStackTest {
     }
 
     @Test
-    fun `envoy owns browser cors policy`() = runBlocking {
+    fun `caddy owns browser cors policy`() = runBlocking {
         FitBridgeE2eClient().use { client ->
             val allowedOrigin = "http://localhost:5173"
             val path = "/v2/clientCard/search"

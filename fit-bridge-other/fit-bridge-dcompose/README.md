@@ -5,7 +5,7 @@
 распакованный Compose-файл Testcontainers.
 
 Compose orchestration хранится в `compose/docker-compose.yml`. Конфигурации
-PostgreSQL, Envoy и Keycloak берутся из канонического `deploy/`, поэтому они не
+PostgreSQL, Caddy и Keycloak берутся из канонического `deploy/`, поэтому они не
 дублируются. Наблюдаемость, фиксированные host ports, Docker build contexts и
 учебные заготовки Kafka/Spring/WireMock в E2E-артефакт не входят: тесты проверяют
 публичное API уже собранных backend-образов.

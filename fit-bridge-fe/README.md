@@ -30,7 +30,7 @@ cd ..\deploy
 docker compose up --build -d
 ```
 
-The local UI is then served by Envoy at `http://localhost:8080/`. Available variables are
+The local UI is then served by Caddy at `http://localhost:8080/`. Available variables are
 `FITBRIDGE_API_BASE_URL`, `FITBRIDGE_KEYCLOAK_URL`, `FITBRIDGE_KEYCLOAK_REALM` and
 `FITBRIDGE_KEYCLOAK_CLIENT_ID`; their defaults are `/v2`, `http://localhost:8080`,
 `fit-bridge` and `fit-bridge-web`. They must contain no secrets.
@@ -99,7 +99,7 @@ npm run test:e2e -- tests/example.spec.ts
 npm run test:e2e -- --debug
 ```
 
-Playwright tests require local Keycloak, Envoy and Training Service to be running. Override the
+Playwright tests require local Keycloak, Caddy and Training Service to be running. Override the
 test user or frontend origin with `E2E_AUTH_USERNAME`, `E2E_AUTH_PASSWORD` and `E2E_BASE_URL`.
 
 ### Lint with [ESLint](https://eslint.org/)

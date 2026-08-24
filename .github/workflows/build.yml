@@ -115,6 +115,16 @@ jobs:
           docker push ghcr.io/$GHCR_USERNAME/fitbridge-migration-pg-training:$COMMIT_SHA
           docker push ghcr.io/$GHCR_USERNAME/fitbridge-migration-pg-training:latest
 
+          # caddy edge proxy
+          docker tag fitbridge-caddy:local ghcr.io/$GHCR_USERNAME/fitbridge-caddy:2.11.4-$COMMIT_SHA
+          docker tag fitbridge-caddy:local ghcr.io/$GHCR_USERNAME/fitbridge-caddy:2.11.4-latest
+          docker tag fitbridge-caddy:local ghcr.io/$GHCR_USERNAME/fitbridge-caddy:$COMMIT_SHA
+          docker tag fitbridge-caddy:local ghcr.io/$GHCR_USERNAME/fitbridge-caddy:latest
+          docker push ghcr.io/$GHCR_USERNAME/fitbridge-caddy:2.11.4-$COMMIT_SHA
+          docker push ghcr.io/$GHCR_USERNAME/fitbridge-caddy:2.11.4-latest
+          docker push ghcr.io/$GHCR_USERNAME/fitbridge-caddy:$COMMIT_SHA
+          docker push ghcr.io/$GHCR_USERNAME/fitbridge-caddy:latest
+
   deploy-config:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
@@ -166,7 +176,10 @@ jobs:
           test "$POSTGRES_PASSWORD" = "$expected_password"
           sh ./prepare-prod-config.sh
 
-      - name: Validate Compose and Envoy configuration
+      - name: Build Caddy image for validation
+        run: docker build -t fitbridge-caddy:local -f caddy/Dockerfile caddy/
+
+      - name: Validate Compose and Caddy configuration
         run: sh ./validate-prod-config.sh
 
       - name: Smoke-test production Keycloak bootstrap
@@ -317,38 +330,12 @@ jobs:
             echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
-            sh ./cleanup-legacy-certbot.sh
 
-            # Coordinate the edge recreation with host cron. Child Certbot
-            # scripts inherit descriptor 8 and therefore skip reacquiring it.
-            exec 8>.certbot.lock
-            if ! flock -w 180 8; then
-              echo "ERROR: Timed out waiting for an active Certbot operation" >&2
-              exit 1
-            fi
-            CERTBOT_LOCK_HELD=true
-            export CERTBOT_LOCK_HELD
-
-            # Keep the public ACME path available independently of application,
-            # database and observability health. Recreate Envoy so tracked
-            # configuration changes are always applied.
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build --force-recreate certbot-helper envoy
-
-            # Issue the Let's Encrypt certificate automatically on the first
-            # deploy. On later deploys, run the idempotent renewal check so a
-            # broken cron can heal before the certificate reaches expiry.
-            if sh ./certbot-lineage-exists.sh "$domain"; then
-              echo "==> Existing Let's Encrypt lineage found; checking renewal"
-              sh ./certbot-renew.sh
-            else
-              echo "==> No Let's Encrypt renewal config found; issuing the initial certificate"
-              sh ./certbot-init.sh
-            fi
-
-            flock -u 8
-            unset CERTBOT_LOCK_HELD
-
-            sh ./ensure-certbot-cron.sh
+            # Caddy manages ACME itself: the first start obtains and stores the
+            # certificate in the named `caddy-data` volume, subsequent starts
+            # reuse it and the background ACME scheduler renews it before
+            # expiry. No host cron, no certbot, no reload-hook.
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build --force-recreate caddy
 
             # `up -d` already honours health/completion dependency conditions.
             # Avoid Compose --wait here because the project intentionally has

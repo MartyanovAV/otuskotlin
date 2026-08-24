@@ -7,7 +7,7 @@
 | Параметр | Значение |
 |---|---|
 | Статус | Рабочий manual test runbook |
-| Область | Trainer-only MVP, UI + публичная граница Envoy + Training API v2 |
+| Область | Trainer-only MVP, UI + публичная граница Caddy + Training API v2 |
 | Основной браузер | Последняя стабильная версия Chrome или Edge |
 | Приоритеты | `P0` — блокирующий smoke/приёмка; `P1` — обязательная регрессия; `P2` — расширенная проверка |
 | Трассировка | [Requirements Traceability Matrix](../02-analysis/REQUIREMENTS_TRACEABILITY_MATRIX.md) |
@@ -39,7 +39,7 @@ docker compose up --build -d
 docker compose ps
 ```
 
-Ожидается состояние `healthy` у `postgresql`, `keycloak`, `envoy` и `training-service`. Training Service не должен публиковать порт `8081` на хост: внешний доступ к API разрешён только через Envoy.
+Ожидается состояние `healthy` у `postgresql`, `keycloak`, `Caddy` и `training-service`. Training Service не должен публиковать порт `8081` на хост: внешний доступ к API разрешён только через Caddy.
 
 Проверка доступности:
 
@@ -67,8 +67,8 @@ npm run dev
 | Компонент | Адрес |
 |---|---|
 | Frontend | `http://localhost:5173` |
-| Envoy / API / Keycloak routes | `http://localhost:8080` |
-| Keycloak Admin Console | Не публикуется через Envoy; проверка `/admin` и `/admin/` должна возвращать `404` |
+| Caddy / API / Keycloak routes | `http://localhost:8080` |
+| Keycloak Admin Console | Не публикуется через Caddy; проверка `/admin` и `/admin/` должна возвращать `404` |
 | Training readiness | `http://localhost:8080/health/training/ready` |
 | GreptimeDB Dashboard | `http://localhost:4000/dashboard/` |
 
@@ -113,7 +113,7 @@ npm run dev
 | 5       | `MT-CLIENT-003` | Карточка редактируется с optimistic lock              |
 | 6       | `MT-PLAN-001`   | План создаётся только с явно заданным упражнением     |
 | 7       | `MT-OWN-001`    | Данные двух тренеров изолированы                      |
-| 8       | `MT-CORS-001`   | Разрешённый preflight обрабатывается Envoy            |
+| 8       | `MT-CORS-001`   | Разрешённый preflight обрабатывается Caddy            |
 | 9       | `MT-JWT-001`    | API без JWT возвращает `401`                          |
 
 ## Сценарии окружения
@@ -128,7 +128,7 @@ npm run dev
 Шаги:
 
 1. Выполнить `docker compose ps` из `deploy/`.
-2. Открыть `/health` и `/health/training/ready` через Envoy.
+2. Открыть `/health` и `/health/training/ready` через Caddy.
 3. Попробовать открыть `http://localhost:8081/health/ready` с хоста.
 
 Ожидается:
@@ -148,7 +148,7 @@ npm run dev
 Шаги:
 
 1. Запомнить имена созданных объектов.
-2. Выполнить `docker compose restart training-service envoy`.
+2. Выполнить `docker compose restart training-service Caddy`.
 3. Дождаться healthy-состояния.
 4. Обновить страницу и повторить поиск карточки и плана.
 
@@ -607,7 +607,7 @@ curl.exe -i http://localhost:8080/v2/clientCard/search `
 - корректно подписанный token с другим `aud`;
 - token другого issuer.
 
-Ожидается: Envoy возвращает HTTP `401`; `x-jwt-payload` не принимается от клиента как доказательство личности; stack trace и детали ключей подписи не раскрываются.
+Ожидается: Caddy возвращает HTTP `401`; `x-jwt-payload` не принимается от клиента как доказательство личности; stack trace и детали ключей подписи не раскрываются.
 
 ### MT-CORS-001 — Разрешённый preflight
 
@@ -628,7 +628,7 @@ curl.exe -i -X OPTIONS http://localhost:8080/v2/clientCard/search `
 - HTTP `200` без JWT;
 - `access-control-allow-origin: http://localhost:5173`;
 - разрешены только необходимые `POST,OPTIONS` и `authorization,content-type`;
-- ответ формирует Envoy, Training Service не обрабатывает browser CORS.
+- ответ формирует Caddy, Training Service не обрабатывает browser CORS.
 
 ### MT-CORS-002 — Неизвестный origin
 
@@ -652,7 +652,7 @@ curl.exe -i -X OPTIONS http://localhost:8080/v2/clientCard/search `
 2. В UI открыть «Клиенты».
 3. Найти запрос `/api/clientCard/search` и ответ.
 
-Ожидается: запрос проходит через Vite proxy/Envoy, содержит Bearer authorization, возвращает HTTP `200`; CORS не вызывает `403`; response payload принадлежит текущему тренеру. Значение Bearer token не сохранять.
+Ожидается: запрос проходит через Vite proxy/Caddy, содержит Bearer authorization, возвращает HTTP `200`; CORS не вызывает `403`; response payload принадлежит текущему тренеру. Значение Bearer token не сохранять.
 
 ## Ошибки и восстановление
 
@@ -704,7 +704,7 @@ curl.exe -i -X OPTIONS http://localhost:8080/v2/clientCard/search `
 Шаги:
 
 1. Создать или обновить карточку, указав в заметке `SYNTHETIC-SECRET-<suffix>`.
-2. Проверить свежие логи Training Service, Envoy и записи в GreptimeDB.
+2. Проверить свежие логи Training Service, Caddy и записи в GreptimeDB.
 3. Искать точное значение маркера.
 
 Ожидается: секретное значение отсутствует либо замаскировано; access/refresh tokens, Authorization и пароль отсутствуют; допустимы `requestId`, операция, технический status и обезличенные идентификаторы согласно принятой logging policy.
@@ -720,7 +720,7 @@ curl.exe -i -X OPTIONS http://localhost:8080/v2/clientCard/search `
 Шаги:
 
 1. Вызвать контролируемую validation error с уникальным `requestId`.
-2. Найти событие в Envoy и Training Service logs.
+2. Найти событие в Caddy и Training Service logs.
 
 Ожидается: request ID позволяет связать события; логи не содержат raw JWT или пользовательский payload; ошибка имеет корректный уровень без ложного `5xx`.
 
@@ -738,14 +738,14 @@ curl.exe -i -X OPTIONS http://localhost:8080/v2/clientCard/search `
 | `MT-WS-001`  | P2        | подключение к `/v2/training/ws` с валидным Bearer token | WebSocket Upgrade успешен, приходит `InitResponse`         |
 | `MT-WS-002`  | P1        | WebSocket без/с неверным token                          | Upgrade отклонён до обработки сообщений                    |
 
-Для smoke-вызовов можно использовать `deploy/keycloak-tokens.sh` и `deploy/call-envoy.sh` из Git Bash. Они используют только локальный client `fit-bridge-smoke`; browser client не должен включать password grant.
+Для smoke-вызовов можно использовать `deploy/keycloak-tokens.sh` и `deploy/call-Caddy.sh` из Git Bash. Они используют только локальный client `fit-bridge-smoke`; browser client не должен включать password grant.
 
 ## Регрессионная матрица
 
 | Изменённая область                   | Минимальный набор ручной регрессии                                       |
 |--------------------------------------|--------------------------------------------------------------------------|
 | Keycloak realm, roles, frontend auth | `MT-AUTH-001`–`006`, `MT-AUTHZ-001`, `MT-OWN-001`, `MT-JWT-001/002`      |
-| Envoy routes/JWT/CORS                | `MT-ENV-001`, `MT-JWT-001/002`, `MT-CORS-001`–`003`, `MT-WS-002`         |
+| Caddy routes/JWT/CORS                | `MT-ENV-001`, `MT-JWT-001/002`, `MT-CORS-001`–`003`, `MT-WS-002`         |
 | ClientCard UI/API/repository         | `MT-CLIENT-001`–`006`, `MT-OWN-001/002`, `MT-LOG-001`                    |
 | TrainingPlan UI/API/repository       | `MT-PLAN-001`–`004`, `MT-OWN-001/002`, `MT-API-003`–`005`                |
 | Database/migrations                  | `MT-ENV-002`, весь P0-маршрут на чистой базе и на базе предыдущей версии |
@@ -784,7 +784,7 @@ curl.exe -i -X OPTIONS http://localhost:8080/v2/clientCard/search `
 | Дата и время                   |          |
 | Тестировщик                    |          |
 | ОС / браузер                   |          |
-| Docker/Keycloak/Envoy versions |          |
+| Docker/Keycloak/Caddy versions |          |
 | Суффикс тестовых данных        |          |
 
 | Scenario ID     | Priority | Result  | Defect / комментарий |

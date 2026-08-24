@@ -75,17 +75,17 @@ services:
       - --hostname-backchannel-dynamic
       - "true"
 
-  envoy:
-    image: envoyproxy/envoy:v1.39.0
+  caddy:
+    image: fitbridge-caddy:local
     volumes:
-      - ./volumes/envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
+      - ./volumes/caddy/Caddyfile.local:/etc/caddy/Caddyfile:ro
     depends_on:
       keycloak:
         condition: service_healthy
       training-service:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/15001; printf 'GET /ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3; grep -q '200 OK' <&3"]
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/health"]
       interval: 5s
       timeout: 3s
       retries: 18

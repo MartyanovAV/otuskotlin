@@ -1,0 +1,168 @@
+{
+    # Production edge. ACME HTTP-01 is served by the same :443 listener;
+    # :80 only enforces HTTP-to-HTTPS redirect.
+    email ${LETSENCRYPT_EMAIL}
+    admin off
+    default_sni ${FITBRIDGE_PUBLIC_URL_HOST}
+    # The certificate storage lives on a persistent volume mounted at
+    # /data/caddy (see docker-compose.prod.yml). Backup is recommended but
+    # not required: losing the cache simply re-issues the certificate.
+    storage file_system {
+        root /data/caddy
+    }
+    # caddy-jwt's `jwtauth` directive is an ordered middleware; force it to
+    # run before Caddy's default `handle` sorting so the `jwtauth` placed
+    # inside a `handle` block is not silently re-ordered away.
+    order jwtauth before handle
+}
+
+# Plain HTTP listener: ACME HTTP-01 challenge path is served, everything
+# else is 301-redirected to HTTPS.
+:80 {
+    @acme path /.well-known/acme-challenge/*
+    handle @acme {
+        # Caddy v2 issues and serves the ACME HTTP-01 challenge itself
+        # when its storage has the challenge token. The challenge is
+        # generated against the HTTPS listener's certificate, so we
+        # accept and let Caddy reply; no upstream is contacted here.
+        respond 200
+    }
+    redir https://{host}{uri} permanent
+}
+
+# HTTPS listener.
+${FITBRIDGE_PUBLIC_URL_HOST}:443 {
+    tls {
+        protocols tls1.2 tls1.3
+        ciphers TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 \
+               TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 \
+               TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
+    }
+    log {
+        output stdout
+        level INFO
+    }
+
+    # Mirror the Strict-Transport-Security header that Envoy set in the
+    # static configuration.
+    header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+    # Extract the JWT payload (the middle base64url segment) from the
+    # Authorization header and forward it as `x-jwt-payload` to the
+    # upstream. The Ktor backend in
+    # `app-ktor/.../base/JwtHelper.kt` decodes this header to build
+    # the `AuthPrincipal`. Caddy-jwt validates the token; this map
+    # simply repackages the verified payload.
+    map {http.request.header.Authorization} {jwt_payload} {
+        default ""
+        ~^Bearer\s+[A-Za-z0-9_-]+\.([A-Za-z0-9_-]+)\..* $1
+    }
+
+    # 1. Gateway liveness.
+    @health path /health
+    handle @health {
+        respond `{"status":"UP","service":"caddy","check":"liveness"}` 200
+    }
+
+    # 2. Training service health passthrough. The Envoy setup used
+    #    `prefix_rewrite: "/health/live"` for `/health/training/live` and
+    #    `prefix_rewrite: "/health/ready"` for `/health/training/ready`.
+    #    We mirror those two routes explicitly because `{path}` after
+    #    `uri strip_prefix` still contains the original path; a single
+    #    `*`-style rewrite would emit `/health/health/training/live`.
+    handle /health/training/live {
+        rewrite * /health/live
+        reverse_proxy training-service:8081
+    }
+    handle /health/training/ready {
+        rewrite * /health/ready
+        reverse_proxy training-service:8081
+    }
+
+    # 3. CORS preflight for the JWT-protected API. Handled at the site
+    #    level via a sorted `handle` so it short-circuits the `jwtauth`
+    #    ordered middleware in the API `route` below. We use `header_regexp`
+    #    rather than the `origin` matcher because the official `origin`
+    #    module is not part of the default Caddy build.
+    @preflight method OPTIONS path /v1/clientCard/* /v2/clientCard/* /v1/trainingPlan/* /v2/trainingPlan/*
+    handle @preflight {
+        @cors_allowed header_regexp Origin ^{FITBRIDGE_PUBLIC_URL_HOST}$
+        header @cors_allowed Access-Control-Allow-Origin "{http.request.header.Origin}"
+        header @cors_allowed Access-Control-Allow-Methods "POST,OPTIONS"
+        header @cors_allowed Access-Control-Allow-Headers "authorization,content-type"
+        header @cors_allowed Access-Control-Max-Age "600"
+        header @cors_allowed Vary "Origin"
+        respond 200
+    }
+
+    # 4. WebSocket training endpoints with explicit JWT auth. The global
+    #    `order jwtauth before handle` keeps the ordered middleware in place
+    #    inside this `handle` block.
+    @ws path /v1/training/ws /v2/training/ws
+    handle @ws {
+        jwtauth {
+            jwk_url http://keycloak:8080/realms/fit-bridge/protocol/openid-connect/certs
+            issuer_whitelist ${FITBRIDGE_PUBLIC_URL}/realms/fit-bridge
+            audience_whitelist fit-bridge-service
+        }
+        reverse_proxy training-service:8081 {
+            header_up x-jwt-payload {jwt_payload}
+            flush_interval -1
+        }
+    }
+
+    # 5. JWT-protected REST API.
+    @api path /v1/clientCard/* /v2/clientCard/* /v1/trainingPlan/* /v2/trainingPlan/*
+    handle @api {
+        jwtauth {
+            jwk_url http://keycloak:8080/realms/fit-bridge/protocol/openid-connect/certs
+            issuer_whitelist ${FITBRIDGE_PUBLIC_URL}/realms/fit-bridge
+            audience_whitelist fit-bridge-service
+        }
+        @cors_allowed header_regexp Origin ^{FITBRIDGE_PUBLIC_URL_HOST}$
+        header @cors_allowed Access-Control-Allow-Origin "{http.request.header.Origin}"
+        header @cors_allowed Vary "Origin"
+        handle_path /v1/clientCard/* {
+            rewrite * /v1/client-card{path}
+            reverse_proxy training-service:8081 {
+                header_up x-jwt-payload {jwt_payload}
+            }
+        }
+        handle_path /v2/clientCard/* {
+            rewrite * /v2/client-card{path}
+            reverse_proxy training-service:8081 {
+                header_up x-jwt-payload {jwt_payload}
+            }
+        }
+        handle_path /v1/trainingPlan/* {
+            rewrite * /v1/training-plan{path}
+            reverse_proxy training-service:8081 {
+                header_up x-jwt-payload {jwt_payload}
+            }
+        }
+        handle_path /v2/trainingPlan/* {
+            rewrite * /v2/training-plan{path}
+            reverse_proxy training-service:8081 {
+                header_up x-jwt-payload {jwt_payload}
+            }
+        }
+    }
+
+    # 6. Keycloak Admin Console / REST API are operational interfaces and
+    #    must not be exposed by the public application listener.
+    @admin path /admin /admin/*
+    handle @admin {
+        respond "not found\n" 404
+    }
+
+    # 7. Keycloak realms and resources (always public for OIDC discovery).
+    @kc path /realms/* /resources/*
+    handle @kc {
+        reverse_proxy keycloak:8080
+    }
+
+    # 8. Frontend SPA fallback.
+    handle {
+        reverse_proxy frontend:8080
+    }
+}

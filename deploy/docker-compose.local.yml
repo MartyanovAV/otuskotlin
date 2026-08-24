@@ -41,16 +41,17 @@ services:
       - "127.0.0.1:4002:4002"
       - "127.0.0.1:4003:4003"
 
-  envoy:
+  caddy:
     ports:
-      - "${ENVOY_PORT:-8080}:8080"
+      - "${CADDY_PORT:-8080}:8080"
     volumes:
-      - ./volumes/envoy/envoy.local.yaml:/etc/envoy/envoy.yaml:ro
+      - ./volumes/caddy/Caddyfile.local:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data/caddy
     logging:
       driver: "fluentd"
       options:
         fluentd-address: 127.0.0.1:24224
-        tag: envoy.logs
+        tag: caddy.logs
 
   keycloak:
     volumes:

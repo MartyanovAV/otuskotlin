@@ -106,7 +106,7 @@ ADR:
 Целевая инфраструктура MVP описана в архитектурной документации и включает:
 
 - планируемый Web UI приватного кабинета тренера; клиентский и in-product support UI относятся к Phase 2;
-- Envoy Gateway как входной proxy, boundary для проверки JWT и proxy WebSocket Upgrade;
+- Caddy Gateway как входной proxy, boundary для проверки JWT и proxy WebSocket Upgrade;
 - единый Training Service на Kotlin/Ktor для POST Full бизнес-операций и WebSocket transport с теми же v1/v2 DTO;
 - PostgreSQL как прикладное хранилище;
 - Keycloak как внешний Identity Server;
@@ -120,7 +120,7 @@ ADR:
 2. `training-service/api-v1-jackson` — генерация первой версии транспортных моделей (Jackson).
 3. `training-service/api-v2-kmp` — генерация второй версии транспортных моделей (KMP).
 4. `training-service/swagger` — сборка Swagger UI для визуализации API.
-5. WebSocket: внутренние Ktor endpoints `/v1/ws`, `/v2/ws`; публичные Envoy endpoints `/v1/training/ws`, `/v2/training/ws`. Подробнее: [WebSocket transport](docs/03-architecture/api/07-websocket-transport.md).
+5. WebSocket: внутренние Ktor endpoints `/v1/ws`, `/v2/ws`; публичные Caddy endpoints `/v1/training/ws`, `/v2/training/ws`. Подробнее: [WebSocket transport](docs/03-architecture/api/07-websocket-transport.md).
 
 Регистрация, login и identity profile не имеют собственного FitBridge API: они предоставляются Keycloak через OIDC. `JWT.sub` используется как owner id, а `preferred_username` — как уникальный логин внутри realm.
 
