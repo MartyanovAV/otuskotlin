@@ -37,6 +37,14 @@ const variantStyles: Record<ToastVariant, { bg: string; border: string; iconColo
 const styles = computed(() => variantStyles[props.toast.variant])
 
 const close = () => emit('dismiss', props.toast.id)
+
+// Обработчик клика по action-кнопке тоста.
+// Вынесен из шаблона: многострочный @click="…" не парсится rolldown
+// в production-build (Unexpected token at attribute value line 3:10).
+const handleActionClick = () => {
+  props.toast.action?.onClick()
+  close()
+}
 </script>
 
 <template>
@@ -128,10 +136,7 @@ const close = () => emit('dismiss', props.toast.id)
         v-if="toast.action"
         type="button"
         class="mt-1.5 text-xs font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded"
-        @click="
-          toast.action.onClick()
-          close()
-        "
+        @click="handleActionClick"
       >
         {{ toast.action.label }}
       </button>
