@@ -22,6 +22,8 @@ fi
 # Caddy ships with a `validate` subcommand that loads the Caddyfile and
 # confirms it parses, including the JSON adapter conversion. We mount the
 # prepared Caddyfile as the production container would receive it.
+# This script is only called from CI (deploy-config job) where the
+# fitbridge-caddy:local image is built beforehand.
 echo "==> Validating generated Caddy production configuration"
 caddyfile_host="$(pwd)/volumes/caddy/Caddyfile.prod"
 if command -v cygpath >/dev/null 2>&1; then
