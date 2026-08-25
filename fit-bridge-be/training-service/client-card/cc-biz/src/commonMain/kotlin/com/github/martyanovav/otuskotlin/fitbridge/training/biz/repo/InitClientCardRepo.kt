@@ -14,18 +14,17 @@ fun ICorChainDsl<ClientCardContext>.initClientCardRepo(title: String) =
         this.title = title
         description = "Вычисление рабочего репозитория для карточек клиентов"
         handle {
-            val ctx = this@handle as ClientCardContext
-            ctx.clientCardRepo =
+            clientCardRepo =
                 when {
-                    ctx.workMode == WorkMode.TEST -> ctx.corSettings.repoClientCardTest
-                    ctx.workMode == WorkMode.STUB -> ctx.corSettings.repoClientCardStub
-                    else -> ctx.corSettings.repoClientCardProd
+                    workMode == WorkMode.TEST -> corSettings.repoClientCardTest
+                    workMode == WorkMode.STUB -> corSettings.repoClientCardStub
+                    else -> corSettings.repoClientCardProd
                 }
-            if (ctx.workMode != WorkMode.STUB && ctx.clientCardRepo == IRepoClientCard.NONE) {
+            if (workMode != WorkMode.STUB && clientCardRepo == IRepoClientCard.NONE) {
                 fail(
                     errorSystem(
                         violationCode = "dbNotConfigured",
-                        e = FbDbNotConfiguredException(ctx.workMode),
+                        e = FbDbNotConfiguredException(workMode),
                     ),
                 )
             }

@@ -11,12 +11,11 @@ fun ICorChainDsl<ClientCardContext>.clientCardRepoPrepareUpdate(title: String) =
         description = "Подготовка данных карточки клиента к обновлению в БД"
         on { state == State.RUNNING }
         handle {
-            val ctx = this@handle as ClientCardContext
-            ctx.clientCardRepoPrepare =
-                ctx.clientCardRepoRead.deepCopy().apply {
-                    displayName = ctx.clientCardValidated.displayName
-                    note = ctx.clientCardValidated.note
-                    lock = ctx.clientCardValidated.lock
+            clientCardRepoPrepare =
+                clientCardRepoRead.deepCopy().apply {
+                    displayName = clientCardValidated.displayName
+                    note = clientCardValidated.note
+                    lock = clientCardValidated.lock
                 }
         }
     }

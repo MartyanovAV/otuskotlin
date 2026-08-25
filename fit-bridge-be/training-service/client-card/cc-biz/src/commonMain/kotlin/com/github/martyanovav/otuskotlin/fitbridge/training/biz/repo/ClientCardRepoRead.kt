@@ -16,14 +16,13 @@ fun ICorChainDsl<ClientCardContext>.clientCardRepoRead(title: String) =
         description = "Чтение карточки клиента из БД"
         on { state == State.RUNNING }
         handle {
-            val ctx = this@handle as ClientCardContext
-            val request = DbClientCardIdRequest(ctx.clientCardValidated)
-            when (val result = ctx.clientCardRepo.readClientCard(request)) {
-                is DbClientCardResponseOk -> ctx.clientCardRepoRead = result.data
+            val request = DbClientCardIdRequest(clientCardValidated)
+            when (val result = clientCardRepo.readClientCard(request)) {
+                is DbClientCardResponseOk -> clientCardRepoRead = result.data
                 is DbClientCardResponseErr -> fail(result.errors)
                 is DbClientCardResponseErrWithData -> {
                     fail(result.errors)
-                    ctx.clientCardRepoRead = result.data
+                    clientCardRepoRead = result.data
                 }
             }
         }

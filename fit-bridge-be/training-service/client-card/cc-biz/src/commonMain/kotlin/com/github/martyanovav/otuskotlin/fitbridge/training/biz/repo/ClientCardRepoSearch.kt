@@ -15,20 +15,19 @@ fun ICorChainDsl<ClientCardContext>.clientCardRepoSearch(title: String) =
         description = "Поиск карточек клиентов в БД по фильтру"
         on { state == State.RUNNING }
         handle {
-            val ctx = this@handle as ClientCardContext
             val request =
                 DbClientCardFilterRequest(
-                    searchString = ctx.clientCardFilterValidated.searchString,
-                    status = ctx.clientCardFilterValidated.status,
-                    ownerUserId = ctx.principal.userId,
-                    pageNumber = ctx.clientCardFilterValidated.pageNumber,
-                    pageSize = ctx.clientCardFilterValidated.pageSize,
+                    searchString = clientCardFilterValidated.searchString,
+                    status = clientCardFilterValidated.status,
+                    ownerUserId = principal.userId,
+                    pageNumber = clientCardFilterValidated.pageNumber,
+                    pageSize = clientCardFilterValidated.pageSize,
                 )
-            when (val result = ctx.clientCardRepo.searchClientCards(request)) {
+            when (val result = clientCardRepo.searchClientCards(request)) {
                 is DbClientCardsResponseOk -> {
-                    ctx.clientCardsRepoDone = result.data.items.toMutableList()
-                    ctx.clientCardsResponse =
-                        ctx.clientCardsResponse.copy(
+                    clientCardsRepoDone = result.data.items.toMutableList()
+                    clientCardsResponse =
+                        clientCardsResponse.copy(
                             totalSize = result.data.totalSize,
                             pageNumber = result.data.pageNumber,
                             pageSize = result.data.pageSize,

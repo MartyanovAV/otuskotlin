@@ -83,7 +83,7 @@ fun Application.initAppSettings(
         }
     }
 
-    environment.monitor.subscribe(ApplicationStopped) {
+    monitor.subscribe(ApplicationStopped) {
         dsToClose?.close()
     }
 

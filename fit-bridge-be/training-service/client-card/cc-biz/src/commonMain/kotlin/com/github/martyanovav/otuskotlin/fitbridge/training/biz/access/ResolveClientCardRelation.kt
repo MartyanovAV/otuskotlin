@@ -12,11 +12,10 @@ fun ICorChainDsl<ClientCardContext>.resolveClientCardRelation(title: String) =
         description = "Вычисление отношения пользователя к карточке клиента"
         on { principal.userId.isNotBlank() }
         handle {
-            val ctx = this@handle as ClientCardContext
-            ctx.principalRelation =
+            principalRelation =
                 when {
-                    ctx.command == ClientCardCommand.CREATE -> FtcPrincipalRelation.NEW
-                    ctx.clientCardRepoRead.ownerUserId == ctx.principal.userId -> FtcPrincipalRelation.OWNER
+                    command == ClientCardCommand.CREATE -> FtcPrincipalRelation.NEW
+                    clientCardRepoRead.ownerUserId == principal.userId -> FtcPrincipalRelation.OWNER
                     else -> FtcPrincipalRelation.NONE
                 }
         }

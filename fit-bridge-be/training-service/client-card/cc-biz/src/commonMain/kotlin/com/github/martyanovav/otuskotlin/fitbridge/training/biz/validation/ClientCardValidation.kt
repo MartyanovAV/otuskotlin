@@ -24,7 +24,6 @@ fun ICorChainDsl<ClientCardContext>.prepareClientCardValidation(
     resetIdentity: Boolean = false,
 ) = worker {
     this.title = title
-    on { this is ClientCardContext }
     handle {
         val ctx = clientCardContext
         ctx.clientCardValidating =
@@ -49,7 +48,6 @@ fun ICorChainDsl<ClientCardContext>.prepareClientCardValidation(
 fun ICorChainDsl<ClientCardContext>.prepareClientCardFilterValidation(title: String) =
     worker {
         this.title = title
-        on { this is ClientCardContext }
         handle {
             val ctx = clientCardContext
             ctx.clientCardFilterValidating =
@@ -167,7 +165,7 @@ fun ICorChainDsl<ClientCardContext>.validateClientCardPageSize(title: String) =
 fun ICorChainDsl<ClientCardContext>.finishClientCardValidation(title: String) =
     worker {
         this.title = title
-        on { state == State.RUNNING && this is ClientCardContext }
+        on { state == State.RUNNING }
         handle {
             val ctx = clientCardContext
             ctx.clientCardValidated = ctx.clientCardValidating
@@ -177,7 +175,7 @@ fun ICorChainDsl<ClientCardContext>.finishClientCardValidation(title: String) =
 fun ICorChainDsl<ClientCardContext>.finishClientCardFilterValidation(title: String) =
     worker {
         this.title = title
-        on { state == State.RUNNING && this is ClientCardContext }
+        on { state == State.RUNNING }
         handle {
             val ctx = clientCardContext
             ctx.clientCardFilterValidated = ctx.clientCardFilterValidating

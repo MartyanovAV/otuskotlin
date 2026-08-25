@@ -16,14 +16,13 @@ fun ICorChainDsl<ClientCardContext>.clientCardRepoArchive(title: String) =
         description = "Архивирование карточки клиента в БД"
         on { state == State.RUNNING }
         handle {
-            val ctx = this@handle as ClientCardContext
-            val request = DbClientCardIdRequest(ctx.clientCardRepoPrepare)
-            when (val result = ctx.clientCardRepo.archiveClientCard(request)) {
-                is DbClientCardResponseOk -> ctx.clientCardRepoDone = result.data
+            val request = DbClientCardIdRequest(clientCardRepoPrepare)
+            when (val result = clientCardRepo.archiveClientCard(request)) {
+                is DbClientCardResponseOk -> clientCardRepoDone = result.data
                 is DbClientCardResponseErr -> fail(result.errors)
                 is DbClientCardResponseErrWithData -> {
                     fail(result.errors)
-                    ctx.clientCardRepoDone = result.data
+                    clientCardRepoDone = result.data
                 }
             }
         }

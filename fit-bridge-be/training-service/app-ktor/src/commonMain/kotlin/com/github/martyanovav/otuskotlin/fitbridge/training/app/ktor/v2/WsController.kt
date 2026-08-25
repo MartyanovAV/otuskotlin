@@ -100,7 +100,7 @@ private suspend inline fun <reified Q : IRequest, C : IFBContext> processWsReq(
         logger = logger,
         logId = logId,
         receive = { fromTransport(request) },
-        exec = { execProc(this as C) },
+        exec = { execProc(this) },
         respond = { toTransport() },
         toLog = { toLog(it, logId) }
     )
@@ -208,6 +208,5 @@ private suspend fun String.processV2(
                 { toTransport() as IResponse },
                 { ctx, id -> ctx.toLog(id) },
             )
-        else -> error("Unsupported v2 WebSocket request: ${request::class.simpleName}")
     }
 }
