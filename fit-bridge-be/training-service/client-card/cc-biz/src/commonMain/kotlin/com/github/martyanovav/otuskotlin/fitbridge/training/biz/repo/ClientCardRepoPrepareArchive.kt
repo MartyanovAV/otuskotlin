@@ -11,10 +11,9 @@ fun ICorChainDsl<ClientCardContext>.clientCardRepoPrepareArchive(title: String) 
         description = "Подготовка данных карточки клиента к архивированию в БД"
         on { state == State.RUNNING }
         handle {
-            val ctx = this@handle as ClientCardContext
-            ctx.clientCardRepoPrepare =
-                ctx.clientCardRepoRead.deepCopy().apply {
-                    lock = ctx.clientCardValidated.lock
+            clientCardRepoPrepare =
+                clientCardRepoRead.deepCopy().apply {
+                    lock = clientCardValidated.lock
                 }
         }
     }

@@ -16,14 +16,13 @@ fun ICorChainDsl<ClientCardContext>.stubClientCardSuccess(title: String) =
             """
             Кейс успеха для карточки клиента
             """.trimIndent()
-        on { stubCase == Stubs.SUCCESS && state == State.RUNNING && this is ClientCardContext }
+        on { stubCase == Stubs.SUCCESS && state == State.RUNNING }
         handle {
-            val ctx = this as ClientCardContext
-            ctx.state = State.FINISHING
-            if (ctx.command == ClientCardCommand.SEARCH) {
-                ctx.clientCardsResponse = Page(items = ClientCardStub.getList(), totalSize = ClientCardStub.getList().size)
+            state = State.FINISHING
+            if (command == ClientCardCommand.SEARCH) {
+                clientCardsResponse = Page(items = ClientCardStub.getList(), totalSize = ClientCardStub.getList().size)
             } else {
-                ctx.clientCardResponse = ClientCardStub.get().also { it.isArchived = ctx.command == ClientCardCommand.ARCHIVE }
+                clientCardResponse = ClientCardStub.get().also { it.isArchived = command == ClientCardCommand.ARCHIVE }
             }
         }
     }
