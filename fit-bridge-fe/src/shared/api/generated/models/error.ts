@@ -7,8 +7,8 @@
  */
 
 export interface Error {
-  code?: string;
-  group?: string;
-  field?: string;
-  message?: string;
+  code?: string
+  group?: string
+  field?: string
+  message?: string
 }

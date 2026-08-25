@@ -5,10 +5,10 @@
  * Trainer Diary MVP API v2 для управления клиентской базой и тренировочными планами
  * OpenAPI spec version: 2.0.0
  */
-import type { ClientCardId } from './clientCardId';
-import type { Lock } from './lock';
+import type { ClientCardId } from './clientCardId'
+import type { Lock } from './lock'
 
 export interface ClientCardArchiveObject {
-  id?: ClientCardId;
-  lock?: Lock;
+  id?: ClientCardId
+  lock?: Lock
 }

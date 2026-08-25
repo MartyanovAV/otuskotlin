@@ -6,9 +6,9 @@
  * OpenAPI spec version: 2.0.0
  */
 
-export type TrainingPlanUpdateResponseResponseType = typeof TrainingPlanUpdateResponseResponseType[keyof typeof TrainingPlanUpdateResponseResponseType];
-
+export type TrainingPlanUpdateResponseResponseType =
+  (typeof TrainingPlanUpdateResponseResponseType)[keyof typeof TrainingPlanUpdateResponseResponseType]
 
 export const TrainingPlanUpdateResponseResponseType = {
   trainingPlanupdate: 'trainingPlan.update',
-} as const;
+} as const

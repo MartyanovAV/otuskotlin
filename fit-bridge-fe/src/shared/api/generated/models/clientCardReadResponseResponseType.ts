@@ -6,9 +6,9 @@
  * OpenAPI spec version: 2.0.0
  */
 
-export type ClientCardReadResponseResponseType = typeof ClientCardReadResponseResponseType[keyof typeof ClientCardReadResponseResponseType];
-
+export type ClientCardReadResponseResponseType =
+  (typeof ClientCardReadResponseResponseType)[keyof typeof ClientCardReadResponseResponseType]
 
 export const ClientCardReadResponseResponseType = {
   clientCardread: 'clientCard.read',
-} as const;
+} as const

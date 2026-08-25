@@ -5,12 +5,12 @@
  * Trainer Diary MVP API v2 для управления клиентской базой и тренировочными планами
  * OpenAPI spec version: 2.0.0
  */
-import type { IRequest } from './iRequest';
-import type { RequestDebug } from './requestDebug';
-import type { TrainingPlanSearchFilter } from './trainingPlanSearchFilter';
-import type { TrainingPlanSearchRequestRequestType } from './trainingPlanSearchRequestRequestType';
+import type { IRequest } from './iRequest'
+import type { RequestDebug } from './requestDebug'
+import type { TrainingPlanSearchFilter } from './trainingPlanSearchFilter'
+import type { TrainingPlanSearchRequestRequestType } from './trainingPlanSearchRequestRequestType'
 
 export type TrainingPlanSearchRequest = Omit<IRequest & RequestDebug, 'requestType'> & {
-  requestType: TrainingPlanSearchRequestRequestType;
-  trainingPlanFilter?: TrainingPlanSearchFilter;
-};
+  requestType: TrainingPlanSearchRequestRequestType
+  trainingPlanFilter?: TrainingPlanSearchFilter
+}

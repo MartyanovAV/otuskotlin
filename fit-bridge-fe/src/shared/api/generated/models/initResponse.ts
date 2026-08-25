@@ -5,9 +5,9 @@
  * Trainer Diary MVP API v2 для управления клиентской базой и тренировочными планами
  * OpenAPI spec version: 2.0.0
  */
-import type { InitResponseResponseType } from './initResponseResponseType';
-import type { IResponse } from './iResponse';
+import type { InitResponseResponseType } from './initResponseResponseType'
+import type { IResponse } from './iResponse'
 
 export type InitResponse = Omit<IResponse, 'responseType'> & {
-  responseType: InitResponseResponseType;
-};
+  responseType: InitResponseResponseType
+}

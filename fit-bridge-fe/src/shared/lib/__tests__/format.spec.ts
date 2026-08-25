@@ -26,19 +26,39 @@ describe('formatRelativeDate', () => {
   })
 
   it('минуты с правильной плюрализацией: 1/2/5/11/21/22/25', () => {
-    expect(formatRelativeDate(new Date(NOW.getTime() - 1 * 60_000).toISOString())).toBe('1 минуту назад')
-    expect(formatRelativeDate(new Date(NOW.getTime() - 2 * 60_000).toISOString())).toBe('2 минуты назад')
-    expect(formatRelativeDate(new Date(NOW.getTime() - 5 * 60_000).toISOString())).toBe('5 минут назад')
-    expect(formatRelativeDate(new Date(NOW.getTime() - 11 * 60_000).toISOString())).toBe('11 минут назад')
-    expect(formatRelativeDate(new Date(NOW.getTime() - 21 * 60_000).toISOString())).toBe('21 минуту назад')
-    expect(formatRelativeDate(new Date(NOW.getTime() - 22 * 60_000).toISOString())).toBe('22 минуты назад')
-    expect(formatRelativeDate(new Date(NOW.getTime() - 25 * 60_000).toISOString())).toBe('25 минут назад')
+    expect(formatRelativeDate(new Date(NOW.getTime() - 1 * 60_000).toISOString())).toBe(
+      '1 минуту назад',
+    )
+    expect(formatRelativeDate(new Date(NOW.getTime() - 2 * 60_000).toISOString())).toBe(
+      '2 минуты назад',
+    )
+    expect(formatRelativeDate(new Date(NOW.getTime() - 5 * 60_000).toISOString())).toBe(
+      '5 минут назад',
+    )
+    expect(formatRelativeDate(new Date(NOW.getTime() - 11 * 60_000).toISOString())).toBe(
+      '11 минут назад',
+    )
+    expect(formatRelativeDate(new Date(NOW.getTime() - 21 * 60_000).toISOString())).toBe(
+      '21 минуту назад',
+    )
+    expect(formatRelativeDate(new Date(NOW.getTime() - 22 * 60_000).toISOString())).toBe(
+      '22 минуты назад',
+    )
+    expect(formatRelativeDate(new Date(NOW.getTime() - 25 * 60_000).toISOString())).toBe(
+      '25 минут назад',
+    )
   })
 
   it('часы с правильной плюрализацией', () => {
-    expect(formatRelativeDate(new Date(NOW.getTime() - 1 * 3_600_000).toISOString())).toBe('1 час назад')
-    expect(formatRelativeDate(new Date(NOW.getTime() - 3 * 3_600_000).toISOString())).toBe('3 часа назад')
-    expect(formatRelativeDate(new Date(NOW.getTime() - 5 * 3_600_000).toISOString())).toBe('5 часов назад')
+    expect(formatRelativeDate(new Date(NOW.getTime() - 1 * 3_600_000).toISOString())).toBe(
+      '1 час назад',
+    )
+    expect(formatRelativeDate(new Date(NOW.getTime() - 3 * 3_600_000).toISOString())).toBe(
+      '3 часа назад',
+    )
+    expect(formatRelativeDate(new Date(NOW.getTime() - 5 * 3_600_000).toISOString())).toBe(
+      '5 часов назад',
+    )
   })
 
   it('вчера для 1 дня, X дн назад для 2–6', () => {
@@ -50,16 +70,28 @@ describe('formatRelativeDate', () => {
 
   it('недели с плюрализацией 1/2/3 (4 недели → месяцы)', () => {
     const week = 7 * 24 * 3_600_000
-    expect(formatRelativeDate(new Date(NOW.getTime() - 1 * week).toISOString())).toBe('1 неделю назад')
-    expect(formatRelativeDate(new Date(NOW.getTime() - 2 * week).toISOString())).toBe('2 недели назад')
-    expect(formatRelativeDate(new Date(NOW.getTime() - 3 * week).toISOString())).toBe('3 недели назад')
+    expect(formatRelativeDate(new Date(NOW.getTime() - 1 * week).toISOString())).toBe(
+      '1 неделю назад',
+    )
+    expect(formatRelativeDate(new Date(NOW.getTime() - 2 * week).toISOString())).toBe(
+      '2 недели назад',
+    )
+    expect(formatRelativeDate(new Date(NOW.getTime() - 3 * week).toISOString())).toBe(
+      '3 недели назад',
+    )
   })
 
   it('месяцы с плюрализацией', () => {
     const month = 30 * 24 * 3_600_000
-    expect(formatRelativeDate(new Date(NOW.getTime() - 1 * month).toISOString())).toBe('1 месяц назад')
-    expect(formatRelativeDate(new Date(NOW.getTime() - 2 * month).toISOString())).toBe('2 месяца назад')
-    expect(formatRelativeDate(new Date(NOW.getTime() - 11 * month).toISOString())).toBe('11 месяцев назад')
+    expect(formatRelativeDate(new Date(NOW.getTime() - 1 * month).toISOString())).toBe(
+      '1 месяц назад',
+    )
+    expect(formatRelativeDate(new Date(NOW.getTime() - 2 * month).toISOString())).toBe(
+      '2 месяца назад',
+    )
+    expect(formatRelativeDate(new Date(NOW.getTime() - 11 * month).toISOString())).toBe(
+      '11 месяцев назад',
+    )
   })
 
   it('возвращает короткую дату для будущих/далёких дат', () => {

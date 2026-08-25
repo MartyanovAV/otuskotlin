@@ -6,11 +6,10 @@
  * OpenAPI spec version: 2.0.0
  */
 
-export type RequestDebugMode = typeof RequestDebugMode[keyof typeof RequestDebugMode];
-
+export type RequestDebugMode = (typeof RequestDebugMode)[keyof typeof RequestDebugMode]
 
 export const RequestDebugMode = {
   prod: 'prod',
   test: 'test',
   stub: 'stub',
-} as const;
+} as const

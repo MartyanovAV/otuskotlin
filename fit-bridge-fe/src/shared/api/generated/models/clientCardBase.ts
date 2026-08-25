@@ -8,14 +8,14 @@
 
 export interface ClientCardBase {
   /**
-     * Имя или псевдоним клиента для тренера
-     * @minLength 1
-     * @maxLength 120
-     */
-  displayName?: string;
+   * Имя или псевдоним клиента для тренера
+   * @minLength 1
+   * @maxLength 120
+   */
+  displayName?: string
   /**
-     * Внутренняя заметка тренера; не попадает в public payload
-     * @maxLength 1000
-     */
-  note?: string;
+   * Внутренняя заметка тренера; не попадает в public payload
+   * @maxLength 1000
+   */
+  note?: string
 }

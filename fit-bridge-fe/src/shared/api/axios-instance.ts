@@ -1,84 +1,84 @@
-import Axios, { type AxiosError, type AxiosRequestConfig } from 'axios';
+import Axios, { type AxiosError, type AxiosRequestConfig } from 'axios'
 // Импортируем keycloak-объект напрямую: токен всегда актуален после рефреша
-import keycloak from '@/features/auth/keycloak';
-import { fitBridgeConfig } from '@/shared/config/runtime';
+import keycloak from '@/features/auth/keycloak'
+import { fitBridgeConfig } from '@/shared/config/runtime'
 
 export const AXIOS_INSTANCE = Axios.create({
   // Docker deployment gets this value from config.js; Vite .env remains a dev fallback.
   baseURL: fitBridgeConfig.apiBaseUrl,
-});
+})
 
 // JWT-interceptor: читаем токен напрямую из keycloak, обновляя при необходимости
 AXIOS_INSTANCE.interceptors.request.use(async (config) => {
   if (keycloak.authenticated) {
     try {
       // Обновляем токен, если он истекает в течение 30 секунд
-      await keycloak.updateToken(30);
+      await keycloak.updateToken(30)
     } catch (error) {
       // Не отправляем заведомо просроченный JWT и завершаем повреждённую сессию.
-      void keycloak.logout();
-      return Promise.reject(error);
+      void keycloak.logout()
+      return Promise.reject(error)
     }
   }
-  const token = keycloak.token;
+  const token = keycloak.token
   if (!token) {
-    void keycloak.logout();
-    return Promise.reject(new Error('Access token is unavailable'));
+    void keycloak.logout()
+    return Promise.reject(new Error('Access token is unavailable'))
   }
-  config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+  config.headers.Authorization = `Bearer ${token}`
+  return config
+})
 
 // Обработка 401: keycloak.logout() перенаправит на страницу входа Keycloak
 AXIOS_INSTANCE.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      void keycloak.logout();
+      void keycloak.logout()
     }
-    return Promise.reject(error);
-  }
-);
+    return Promise.reject(error)
+  },
+)
 
 // Тип для отмены запроса (совместим с интерфейсом Orval)
-export type PromiseWithCancel<T> = Promise<T> & { cancel: () => void };
+export type PromiseWithCancel<T> = Promise<T> & { cancel: () => void }
 
 export interface CustomInstanceOptions extends AxiosRequestConfig {
-  body?: unknown;
+  body?: unknown
 }
 
 type ApiErrorPayload = {
-  result?: string;
-  errors?: Array<{ message?: string }>;
-};
+  result?: string
+  errors?: Array<{ message?: string }>
+}
 
 export class ApiResponseError extends Error {
-  readonly payload: ApiErrorPayload;
+  readonly payload: ApiErrorPayload
 
   constructor(payload: ApiErrorPayload) {
-    super(payload.errors?.[0]?.message ?? 'Произошла ошибка, попробуйте позже');
-    this.name = 'ApiResponseError';
-    this.payload = payload;
+    super(payload.errors?.[0]?.message ?? 'Произошла ошибка, попробуйте позже')
+    this.name = 'ApiResponseError'
+    this.payload = payload
   }
 }
 
 export const customInstance = <T>(
   url: string,
-  options?: CustomInstanceOptions
+  options?: CustomInstanceOptions,
 ): PromiseWithCancel<T> => {
-  const controller = new AbortController();
-  const { body, ...restOptions } = options ?? {};
+  const controller = new AbortController()
+  const { body, ...restOptions } = options ?? {}
 
-  let data = restOptions.data;
+  let data = restOptions.data
   if (data === undefined && body !== undefined) {
     if (typeof body === 'string') {
       try {
-        data = JSON.parse(body);
+        data = JSON.parse(body)
       } catch {
-        data = body;
+        data = body
       }
     } else {
-      data = body;
+      data = body
     }
   }
 
@@ -88,23 +88,23 @@ export const customInstance = <T>(
     ...restOptions,
     signal: controller.signal,
   }).then((res) => {
-    const payload = res.data as ApiErrorPayload | undefined;
+    const payload = res.data as ApiErrorPayload | undefined
     if (payload?.result === 'error') {
-      throw new ApiResponseError(payload);
+      throw new ApiResponseError(payload)
     }
 
     return {
       data: res.data,
       status: res.status,
       headers: res.headers,
-    };
-  }) as PromiseWithCancel<T>;
+    }
+  }) as PromiseWithCancel<T>
 
   promise.cancel = () => {
-    controller.abort('Query was cancelled');
-  };
+    controller.abort('Query was cancelled')
+  }
 
-  return promise;
-};
+  return promise
+}
 
-export type ErrorType<Error> = AxiosError<Error>;
+export type ErrorType<Error> = AxiosError<Error>

@@ -6,9 +6,9 @@
  * OpenAPI spec version: 2.0.0
  */
 
-export type ClientCardArchiveRequestRequestType = typeof ClientCardArchiveRequestRequestType[keyof typeof ClientCardArchiveRequestRequestType];
-
+export type ClientCardArchiveRequestRequestType =
+  (typeof ClientCardArchiveRequestRequestType)[keyof typeof ClientCardArchiveRequestRequestType]
 
 export const ClientCardArchiveRequestRequestType = {
   clientCardarchive: 'clientCard.archive',
-} as const;
+} as const

@@ -84,11 +84,14 @@ const visiblePages = computed(() => {
 </script>
 
 <template>
-  <div class="flex flex-col sm:flex-row items-center justify-between gap-4 py-3 px-2 text-sm text-text-muted">
+  <div
+    class="flex flex-col sm:flex-row items-center justify-between gap-4 py-3 px-2 text-sm text-text-muted"
+  >
     <!-- Информация о диапазоне и выбор размера страницы -->
     <div class="flex items-center gap-4 text-xs sm:text-sm">
       <span>
-        Показано <strong class="font-medium text-text-main">{{ fromItem }}–{{ toItem }}</strong> из <strong class="font-medium text-text-main">{{ totalSize }}</strong>
+        Показано <strong class="font-medium text-text-main">{{ fromItem }}–{{ toItem }}</strong> из
+        <strong class="font-medium text-text-main">{{ totalSize }}</strong>
       </span>
 
       <div class="flex items-center gap-1.5">
@@ -118,15 +121,25 @@ const visiblePages = computed(() => {
         id="pagination-prev-btn"
         title="Предыдущая страница"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="m15 18-6-6 6-6" />
+        </svg>
         <span class="hidden sm:inline ml-1">Назад</span>
       </Button>
 
       <!-- Номера страниц -->
       <template v-for="(item, idx) in visiblePages" :key="idx">
-        <span v-if="item === '...'" class="px-2 text-xs text-text-faint select-none">
-          …
-        </span>
+        <span v-if="item === '...'" class="px-2 text-xs text-text-faint select-none"> … </span>
         <Button
           v-else
           :variant="item === pageNumber ? 'default' : 'outline'"
@@ -150,7 +163,19 @@ const visiblePages = computed(() => {
         title="Следующая страница"
       >
         <span class="hidden sm:inline mr-1">Вперед</span>
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="m9 18 6-6-6-6" />
+        </svg>
       </Button>
     </div>
   </div>

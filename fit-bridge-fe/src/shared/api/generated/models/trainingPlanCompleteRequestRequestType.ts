@@ -6,9 +6,9 @@
  * OpenAPI spec version: 2.0.0
  */
 
-export type TrainingPlanCompleteRequestRequestType = typeof TrainingPlanCompleteRequestRequestType[keyof typeof TrainingPlanCompleteRequestRequestType];
-
+export type TrainingPlanCompleteRequestRequestType =
+  (typeof TrainingPlanCompleteRequestRequestType)[keyof typeof TrainingPlanCompleteRequestRequestType]
 
 export const TrainingPlanCompleteRequestRequestType = {
   trainingPlancomplete: 'trainingPlan.complete',
-} as const;
+} as const

@@ -5,20 +5,20 @@
  * Trainer Diary MVP API v2 для управления клиентской базой и тренировочными планами
  * OpenAPI spec version: 2.0.0
  */
-import type { ItemType } from './itemType';
+import type { ItemType } from './itemType'
 
 export interface PlanItem {
   /**
-     * UUID элемента, уникальный в пределах тренировочного плана
-     * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$
-     */
-  id?: string;
-  itemType?: ItemType;
+   * UUID элемента, уникальный в пределах тренировочного плана
+   * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$
+   */
+  id?: string
+  itemType?: ItemType
   /** @maxLength 160 */
-  title?: string;
+  title?: string
   /**
-     * Текст задания
-     * @maxLength 2000
-     */
-  description?: string;
+   * Текст задания
+   * @maxLength 2000
+   */
+  description?: string
 }

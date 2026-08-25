@@ -9,4 +9,4 @@
 /**
  * Идентификатор запроса для трассировки без sensitive payload
  */
-export type RequestId = string;
+export type RequestId = string

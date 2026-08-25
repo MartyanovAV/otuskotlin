@@ -5,15 +5,15 @@
  * Trainer Diary MVP API v2 для управления клиентской базой и тренировочными планами
  * OpenAPI spec version: 2.0.0
  */
-import type { ExerciseItemItemType } from './exerciseItemItemType';
-import type { ExerciseSet } from './exerciseSet';
-import type { PlanItem } from './planItem';
+import type { ExerciseItemItemType } from './exerciseItemItemType'
+import type { ExerciseSet } from './exerciseSet'
+import type { PlanItem } from './planItem'
 
 export type ExerciseItem = Omit<PlanItem, 'itemType'> & {
-  itemType: ExerciseItemItemType;
+  itemType: ExerciseItemItemType
   /** Идентификатор словарного упражнения */
-  exerciseId?: string;
-  sets?: ExerciseSet[];
+  exerciseId?: string
+  sets?: ExerciseSet[]
   /** @minimum 0 */
-  restBetweenSetsSeconds?: number;
-};
+  restBetweenSetsSeconds?: number
+}

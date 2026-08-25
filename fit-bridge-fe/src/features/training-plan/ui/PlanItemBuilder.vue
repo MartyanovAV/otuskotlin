@@ -152,7 +152,13 @@ const removeItem = (index: number) => {
                   'bg-primary-soft text-primary-soft-text': item.itemType === 'SUPERSET',
                 }"
               >
-                {{ item.itemType === 'EXERCISE' ? 'Упражнение' : item.itemType === 'CIRCUIT' ? 'Круговая' : 'Суперсет' }}
+                {{
+                  item.itemType === 'EXERCISE'
+                    ? 'Упражнение'
+                    : item.itemType === 'CIRCUIT'
+                      ? 'Круговая'
+                      : 'Суперсет'
+                }}
               </Badge>
               <span class="font-semibold text-text-main">
                 {{ item.itemType === 'EXERCISE' ? item.name : item.title }}
@@ -162,13 +168,17 @@ const removeItem = (index: number) => {
               <template v-if="item.itemType === 'EXERCISE'">
                 {{ item.sets }} подх. × {{ item.reps }} повт.
                 <span v-if="item.weight">({{ item.weight }} кг)</span>
-                <span v-if="item.restBetweenSetsSeconds">, отдых {{ item.restBetweenSetsSeconds }}с</span>
+                <span v-if="item.restBetweenSetsSeconds"
+                  >, отдых {{ item.restBetweenSetsSeconds }}с</span
+                >
               </template>
               <template v-else-if="item.itemType === 'CIRCUIT'">
-                {{ item.rounds }} раунд(ов) • {{ item.items.length }} упр. • отдых {{ item.restBetweenRoundsSeconds || 0 }}с
+                {{ item.rounds }} раунд(ов) • {{ item.items.length }} упр. • отдых
+                {{ item.restBetweenRoundsSeconds || 0 }}с
               </template>
               <template v-else-if="item.itemType === 'SUPERSET'">
-                {{ item.items.length }} упр. без отдыха • отдых {{ item.restBetweenSetsSeconds || 0 }}с
+                {{ item.items.length }} упр. без отдыха • отдых
+                {{ item.restBetweenSetsSeconds || 0 }}с
               </template>
             </div>
           </div>
@@ -194,7 +204,11 @@ const removeItem = (index: number) => {
             type="button"
             @click="activeType = 'EXERCISE'"
             class="px-2.5 py-1 rounded-md transition-colors text-xs font-medium"
-            :class="activeType === 'EXERCISE' ? 'bg-primary text-primary-inverse shadow-xs' : 'text-text-muted hover:text-text-main'"
+            :class="
+              activeType === 'EXERCISE'
+                ? 'bg-primary text-primary-inverse shadow-xs'
+                : 'text-text-muted hover:text-text-main'
+            "
             id="tab-exercise-btn"
             :aria-pressed="activeType === 'EXERCISE'"
           >
@@ -204,7 +218,11 @@ const removeItem = (index: number) => {
             type="button"
             @click="activeType = 'CIRCUIT'"
             class="px-2.5 py-1 rounded-md transition-colors text-xs font-medium"
-            :class="activeType === 'CIRCUIT' ? 'bg-warning text-text-main shadow-xs' : 'text-text-muted hover:text-text-main'"
+            :class="
+              activeType === 'CIRCUIT'
+                ? 'bg-warning text-text-main shadow-xs'
+                : 'text-text-muted hover:text-text-main'
+            "
             id="tab-circuit-btn"
             :aria-pressed="activeType === 'CIRCUIT'"
           >
@@ -214,7 +232,11 @@ const removeItem = (index: number) => {
             type="button"
             @click="activeType = 'SUPERSET'"
             class="px-2.5 py-1 rounded-md transition-colors text-xs font-medium"
-            :class="activeType === 'SUPERSET' ? 'bg-primary text-primary-inverse shadow-xs' : 'text-text-muted hover:text-text-main'"
+            :class="
+              activeType === 'SUPERSET'
+                ? 'bg-primary text-primary-inverse shadow-xs'
+                : 'text-text-muted hover:text-text-main'
+            "
             id="tab-superset-btn"
             :aria-pressed="activeType === 'SUPERSET'"
           >
@@ -235,19 +257,43 @@ const removeItem = (index: number) => {
         <div class="flex flex-wrap items-center gap-2">
           <div class="flex items-center gap-1">
             <label for="ex-sets" class="text-xs text-text-muted">Подх:</label>
-            <Input id="ex-sets" type="number" v-model="exSets" min="1" class="w-14 bg-surface h-7 text-xs" />
+            <Input
+              id="ex-sets"
+              type="number"
+              v-model="exSets"
+              min="1"
+              class="w-14 bg-surface h-7 text-xs"
+            />
           </div>
           <div class="flex items-center gap-1">
             <label for="ex-reps" class="text-xs text-text-muted">Повт:</label>
-            <Input id="ex-reps" type="number" v-model="exReps" min="1" class="w-14 bg-surface h-7 text-xs" />
+            <Input
+              id="ex-reps"
+              type="number"
+              v-model="exReps"
+              min="1"
+              class="w-14 bg-surface h-7 text-xs"
+            />
           </div>
           <div class="flex items-center gap-1">
             <label for="ex-weight" class="text-xs text-text-muted">Вес(кг):</label>
-            <Input id="ex-weight" type="number" v-model="exWeight" min="0" class="w-14 bg-surface h-7 text-xs" />
+            <Input
+              id="ex-weight"
+              type="number"
+              v-model="exWeight"
+              min="0"
+              class="w-14 bg-surface h-7 text-xs"
+            />
           </div>
           <div class="flex items-center gap-1">
             <label for="ex-rest" class="text-xs text-text-muted">Отдых(с):</label>
-            <Input id="ex-rest" type="number" v-model="exRest" min="0" class="w-14 bg-surface h-7 text-xs" />
+            <Input
+              id="ex-rest"
+              type="number"
+              v-model="exRest"
+              min="0"
+              class="w-14 bg-surface h-7 text-xs"
+            />
           </div>
           <Button
             type="button"
@@ -274,11 +320,25 @@ const removeItem = (index: number) => {
         <div class="flex items-center gap-3">
           <div class="flex items-center gap-1.5">
             <label for="circuit-rounds" class="text-xs text-text-muted">Раундов:</label>
-            <Input id="circuit-rounds" type="number" v-model="circuitRounds" min="1" class="w-14 bg-surface h-7 text-xs" />
+            <Input
+              id="circuit-rounds"
+              type="number"
+              v-model="circuitRounds"
+              min="1"
+              class="w-14 bg-surface h-7 text-xs"
+            />
           </div>
           <div class="flex items-center gap-1.5">
-            <label for="circuit-rest" class="text-xs text-text-muted">Отдых между кругами (сек):</label>
-            <Input id="circuit-rest" type="number" v-model="circuitRest" min="0" class="w-16 bg-surface h-7 text-xs" />
+            <label for="circuit-rest" class="text-xs text-text-muted"
+              >Отдых между кругами (сек):</label
+            >
+            <Input
+              id="circuit-rest"
+              type="number"
+              v-model="circuitRest"
+              min="0"
+              class="w-16 bg-surface h-7 text-xs"
+            />
           </div>
         </div>
 
@@ -286,7 +346,9 @@ const removeItem = (index: number) => {
         <div class="border border-warning/30 rounded-lg p-2 bg-warning-soft space-y-1.5">
           <div class="flex items-center justify-between text-[11px] text-text-main font-medium">
             <span>Упражнения круга ({{ circuitSubItems.length }}):</span>
-            <span v-if="circuitSubItems.length === 0" class="text-text-muted">требуется минимум 1</span>
+            <span v-if="circuitSubItems.length === 0" class="text-text-muted"
+              >требуется минимум 1</span
+            >
           </div>
 
           <div v-if="circuitSubItems.length > 0" class="space-y-1 max-h-28 overflow-y-auto">
@@ -295,8 +357,19 @@ const removeItem = (index: number) => {
               :key="sIdx"
               class="flex items-center justify-between bg-surface px-2 py-1 rounded text-xs"
             >
-              <span>{{ sIdx + 1 }}. {{ sub.name }} ({{ sub.reps }} повт.<span v-if="sub.weight">, {{ sub.weight }} кг</span>)</span>
-              <button type="button" @click="removeCircuitSubItem(sIdx)" class="text-danger p-0.5 hover:text-danger/80" :aria-label="`Удалить упражнение ${sub.name} из круговой`">✕</button>
+              <span
+                >{{ sIdx + 1 }}. {{ sub.name }} ({{ sub.reps }} повт.<span v-if="sub.weight"
+                  >, {{ sub.weight }} кг</span
+                >)</span
+              >
+              <button
+                type="button"
+                @click="removeCircuitSubItem(sIdx)"
+                class="text-danger p-0.5 hover:text-danger/80"
+                :aria-label="`Удалить упражнение ${sub.name} из круговой`"
+              >
+                ✕
+              </button>
             </div>
           </div>
 
@@ -309,8 +382,22 @@ const removeItem = (index: number) => {
               id="circuit-sub-name-input"
               @keydown.enter.prevent="addSubExerciseToCircuit"
             />
-            <Input type="number" v-model="circuitSubReps" min="1" placeholder="Повт" title="Повторения" class="w-12 bg-surface h-7 text-xs" />
-            <Input type="number" v-model="circuitSubWeight" min="0" placeholder="Кг" title="Вес (кг)" class="w-12 bg-surface h-7 text-xs" />
+            <Input
+              type="number"
+              v-model="circuitSubReps"
+              min="1"
+              placeholder="Повт"
+              title="Повторения"
+              class="w-12 bg-surface h-7 text-xs"
+            />
+            <Input
+              type="number"
+              v-model="circuitSubWeight"
+              min="0"
+              placeholder="Кг"
+              title="Вес (кг)"
+              class="w-12 bg-surface h-7 text-xs"
+            />
             <Button
               type="button"
               variant="secondary"
@@ -345,15 +432,27 @@ const removeItem = (index: number) => {
           id="superset-title-input"
         />
         <div class="flex items-center gap-1.5">
-          <label for="superset-rest" class="text-xs text-text-muted">Отдых после суперсета (сек):</label>
-          <Input id="superset-rest" type="number" v-model="supersetRest" min="0" class="w-16 bg-surface h-7 text-xs" />
+          <label for="superset-rest" class="text-xs text-text-muted"
+            >Отдых после суперсета (сек):</label
+          >
+          <Input
+            id="superset-rest"
+            type="number"
+            v-model="supersetRest"
+            min="0"
+            class="w-16 bg-surface h-7 text-xs"
+          />
         </div>
 
         <!-- Список упражнений суперсета -->
         <div class="border border-primary/30 rounded-lg p-2 bg-primary-soft space-y-1.5">
-          <div class="flex items-center justify-between text-[11px] text-primary-soft-text font-medium">
+          <div
+            class="flex items-center justify-between text-[11px] text-primary-soft-text font-medium"
+          >
             <span>Упражнения суперсета ({{ supersetSubItems.length }}/мин. 2):</span>
-            <span v-if="supersetSubItems.length < 2" class="text-primary-soft-text/80">добавьте минимум 2</span>
+            <span v-if="supersetSubItems.length < 2" class="text-primary-soft-text/80"
+              >добавьте минимум 2</span
+            >
           </div>
 
           <div v-if="supersetSubItems.length > 0" class="space-y-1 max-h-28 overflow-y-auto">
@@ -362,8 +461,18 @@ const removeItem = (index: number) => {
               :key="sIdx"
               class="flex items-center justify-between bg-surface px-2 py-1 rounded text-xs"
             >
-              <span>{{ String.fromCharCode(65 + sIdx) }}. {{ sub.name }} ({{ sub.sets }}×{{ sub.reps }}<span v-if="sub.weight">, {{ sub.weight }} кг</span>)</span>
-              <button type="button" @click="removeSupersetSubItem(sIdx)" class="text-danger p-0.5 hover:text-danger/80" :aria-label="`Удалить упражнение ${sub.name} из суперсета`">✕</button>
+              <span
+                >{{ String.fromCharCode(65 + sIdx) }}. {{ sub.name }} ({{ sub.sets }}×{{ sub.reps
+                }}<span v-if="sub.weight">, {{ sub.weight }} кг</span>)</span
+              >
+              <button
+                type="button"
+                @click="removeSupersetSubItem(sIdx)"
+                class="text-danger p-0.5 hover:text-danger/80"
+                :aria-label="`Удалить упражнение ${sub.name} из суперсета`"
+              >
+                ✕
+              </button>
             </div>
           </div>
 
@@ -376,9 +485,30 @@ const removeItem = (index: number) => {
               id="superset-sub-name-input"
               @keydown.enter.prevent="addSubExerciseToSuperset"
             />
-            <Input type="number" v-model="supersetSubSets" min="1" placeholder="Подх" title="Подходы" class="w-12 bg-surface h-7 text-xs" />
-            <Input type="number" v-model="supersetSubReps" min="1" placeholder="Повт" title="Повторения" class="w-12 bg-surface h-7 text-xs" />
-            <Input type="number" v-model="supersetSubWeight" min="0" placeholder="Кг" title="Вес (кг)" class="w-12 bg-surface h-7 text-xs" />
+            <Input
+              type="number"
+              v-model="supersetSubSets"
+              min="1"
+              placeholder="Подх"
+              title="Подходы"
+              class="w-12 bg-surface h-7 text-xs"
+            />
+            <Input
+              type="number"
+              v-model="supersetSubReps"
+              min="1"
+              placeholder="Повт"
+              title="Повторения"
+              class="w-12 bg-surface h-7 text-xs"
+            />
+            <Input
+              type="number"
+              v-model="supersetSubWeight"
+              min="0"
+              placeholder="Кг"
+              title="Вес (кг)"
+              class="w-12 bg-surface h-7 text-xs"
+            />
             <Button
               type="button"
               variant="secondary"

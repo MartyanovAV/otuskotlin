@@ -19,27 +19,44 @@ const fromRuntimeOrBuild = (runtimeValue: string | undefined, buildValue: string
 
 export const fitBridgeConfig = {
   get apiBaseUrl() {
-    return fromRuntimeOrBuild(getRuntimeConfig()?.apiBaseUrl, import.meta.env.VITE_API_BASE_URL) ?? '/v2'
+    return (
+      fromRuntimeOrBuild(getRuntimeConfig()?.apiBaseUrl, import.meta.env.VITE_API_BASE_URL) ?? '/v2'
+    )
   },
   get keycloakUrl() {
     return (
       fromRuntimeOrBuild(getRuntimeConfig()?.keycloakUrl, import.meta.env.VITE_KEYCLOAK_URL) ??
-      (typeof window !== 'undefined' && window.location.origin ? window.location.origin : 'http://localhost:8080')
+      (typeof window !== 'undefined' && window.location.origin
+        ? window.location.origin
+        : 'http://localhost:8080')
     )
   },
   get keycloakRealm() {
-    return fromRuntimeOrBuild(getRuntimeConfig()?.keycloakRealm, import.meta.env.VITE_KEYCLOAK_REALM) ?? 'fit-bridge'
+    return (
+      fromRuntimeOrBuild(getRuntimeConfig()?.keycloakRealm, import.meta.env.VITE_KEYCLOAK_REALM) ??
+      'fit-bridge'
+    )
   },
   get keycloakClientId() {
     return (
-      fromRuntimeOrBuild(getRuntimeConfig()?.keycloakClientId, import.meta.env.VITE_KEYCLOAK_CLIENT_ID) ??
-      'fit-bridge-web'
+      fromRuntimeOrBuild(
+        getRuntimeConfig()?.keycloakClientId,
+        import.meta.env.VITE_KEYCLOAK_CLIENT_ID,
+      ) ?? 'fit-bridge-web'
     )
   },
 }
 
 const keycloakPathPrefixes = ['/realms/', '/admin/', '/resources/']
-const oauthCallbackParameters = ['code', 'state', 'session_state', 'iss', 'error', 'error_description', 'error_uri']
+const oauthCallbackParameters = [
+  'code',
+  'state',
+  'session_state',
+  'iss',
+  'error',
+  'error_description',
+  'error_uri',
+]
 
 const hasOAuthCallbackParameter = (parameters: URLSearchParams) =>
   oauthCallbackParameters.some((parameter) => parameters.has(parameter))
@@ -50,7 +67,9 @@ const hasOAuthCallbackParameter = (parameters: URLSearchParams) =>
 // /realms/*.
 export const getFitBridgeRedirectUri = () => {
   const currentUrl = new URL(window.location.href)
-  const isKeycloakPath = keycloakPathPrefixes.some((prefix) => currentUrl.pathname.startsWith(prefix))
+  const isKeycloakPath = keycloakPathPrefixes.some((prefix) =>
+    currentUrl.pathname.startsWith(prefix),
+  )
 
   if (currentUrl.origin !== window.location.origin || isKeycloakPath) {
     return new URL(import.meta.env.BASE_URL, window.location.origin).toString()
@@ -81,5 +100,9 @@ export const clearFitBridgeOAuthCallback = () => {
     currentUrl.hash = ''
   }
 
-  window.history.replaceState(window.history.state, '', `${currentUrl.pathname}${currentUrl.search}${currentUrl.hash}`)
+  window.history.replaceState(
+    window.history.state,
+    '',
+    `${currentUrl.pathname}${currentUrl.search}${currentUrl.hash}`,
+  )
 }

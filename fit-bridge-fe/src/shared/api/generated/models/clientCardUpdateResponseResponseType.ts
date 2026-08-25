@@ -6,9 +6,9 @@
  * OpenAPI spec version: 2.0.0
  */
 
-export type ClientCardUpdateResponseResponseType = typeof ClientCardUpdateResponseResponseType[keyof typeof ClientCardUpdateResponseResponseType];
-
+export type ClientCardUpdateResponseResponseType =
+  (typeof ClientCardUpdateResponseResponseType)[keyof typeof ClientCardUpdateResponseResponseType]
 
 export const ClientCardUpdateResponseResponseType = {
   clientCardupdate: 'clientCard.update',
-} as const;
+} as const

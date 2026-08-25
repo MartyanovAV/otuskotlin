@@ -5,26 +5,26 @@
  * Trainer Diary MVP API v2 для управления клиентской базой и тренировочными планами
  * OpenAPI spec version: 2.0.0
  */
-import type { ClientCardId } from './clientCardId';
-import type { ClientCardStatus } from './clientCardStatus';
-import type { Lock } from './lock';
-import type { Timestamp } from './timestamp';
+import type { ClientCardId } from './clientCardId'
+import type { ClientCardStatus } from './clientCardStatus'
+import type { Lock } from './lock'
+import type { Timestamp } from './timestamp'
 
 export interface ClientCardResponseObject {
   /**
-     * Имя или псевдоним клиента для тренера
-     * @minLength 1
-     * @maxLength 120
-     */
-  displayName?: string;
+   * Имя или псевдоним клиента для тренера
+   * @minLength 1
+   * @maxLength 120
+   */
+  displayName?: string
   /**
-     * Внутренняя заметка тренера; не попадает в public payload
-     * @maxLength 1000
-     */
-  note?: string;
-  id?: ClientCardId;
-  status?: ClientCardStatus;
-  createdAt?: Timestamp;
-  updatedAt?: Timestamp;
-  lock?: Lock;
+   * Внутренняя заметка тренера; не попадает в public payload
+   * @maxLength 1000
+   */
+  note?: string
+  id?: ClientCardId
+  status?: ClientCardStatus
+  createdAt?: Timestamp
+  updatedAt?: Timestamp
+  lock?: Lock
 }

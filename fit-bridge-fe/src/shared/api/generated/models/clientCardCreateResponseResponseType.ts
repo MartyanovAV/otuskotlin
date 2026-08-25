@@ -6,9 +6,9 @@
  * OpenAPI spec version: 2.0.0
  */
 
-export type ClientCardCreateResponseResponseType = typeof ClientCardCreateResponseResponseType[keyof typeof ClientCardCreateResponseResponseType];
-
+export type ClientCardCreateResponseResponseType =
+  (typeof ClientCardCreateResponseResponseType)[keyof typeof ClientCardCreateResponseResponseType]
 
 export const ClientCardCreateResponseResponseType = {
   clientCardcreate: 'clientCard.create',
-} as const;
+} as const

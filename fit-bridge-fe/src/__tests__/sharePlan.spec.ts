@@ -125,10 +125,7 @@ describe('sharePlan utility', () => {
       id: 'exercise-with-sets',
       itemType: 'EXERCISE',
       title: 'Тяга штанги',
-      sets: [
-        { reps: '12', weight: '40', weightUnit: 'кг' },
-        { durationSeconds: 45 },
-      ],
+      sets: [{ reps: '12', weight: '40', weightUnit: 'кг' }, { durationSeconds: 45 }],
       restBetweenSetsSeconds: 60,
     }
     const plan: TrainingPlanResponseObject = {

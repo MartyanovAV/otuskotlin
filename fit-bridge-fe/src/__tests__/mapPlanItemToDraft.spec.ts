@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { mapDraftToPlanItem, mapPlanItemToDraft, type PlanItemDraft } from '../features/training-plan/model/types'
+import {
+  mapDraftToPlanItem,
+  mapPlanItemToDraft,
+  type PlanItemDraft,
+} from '../features/training-plan/model/types'
 import type { ExerciseItem } from '../shared/api/generated/models/exerciseItem'
 import type { CircuitItem } from '../shared/api/generated/models/circuitItem'
 import type { SupersetItem } from '../shared/api/generated/models/supersetItem'

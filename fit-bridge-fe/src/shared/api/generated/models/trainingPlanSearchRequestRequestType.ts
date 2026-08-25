@@ -6,9 +6,9 @@
  * OpenAPI spec version: 2.0.0
  */
 
-export type TrainingPlanSearchRequestRequestType = typeof TrainingPlanSearchRequestRequestType[keyof typeof TrainingPlanSearchRequestRequestType];
-
+export type TrainingPlanSearchRequestRequestType =
+  (typeof TrainingPlanSearchRequestRequestType)[keyof typeof TrainingPlanSearchRequestRequestType]
 
 export const TrainingPlanSearchRequestRequestType = {
   trainingPlansearch: 'trainingPlan.search',
-} as const;
+} as const

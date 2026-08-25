@@ -6,9 +6,9 @@
  * OpenAPI spec version: 2.0.0
  */
 
-export type ClientCardUpdateRequestRequestType = typeof ClientCardUpdateRequestRequestType[keyof typeof ClientCardUpdateRequestRequestType];
-
+export type ClientCardUpdateRequestRequestType =
+  (typeof ClientCardUpdateRequestRequestType)[keyof typeof ClientCardUpdateRequestRequestType]
 
 export const ClientCardUpdateRequestRequestType = {
   clientCardupdate: 'clientCard.update',
-} as const;
+} as const

@@ -5,18 +5,18 @@
  * Trainer Diary MVP API v2 для управления клиентской базой и тренировочными планами
  * OpenAPI spec version: 2.0.0
  */
-import type { CircuitItemItemType } from './circuitItemItemType';
-import type { PlanItem } from './planItem';
+import type { CircuitItemItemType } from './circuitItemItemType'
+import type { PlanItem } from './planItem'
 
 export type CircuitItem = Omit<PlanItem, 'itemType'> & {
-  itemType: CircuitItemItemType;
+  itemType: CircuitItemItemType
   /** @minimum 1 */
-  rounds?: number;
+  rounds?: number
   /**
-     * @minItems 1
-     * @maxItems 200
-     */
-  items?: PlanItem[];
+   * @minItems 1
+   * @maxItems 200
+   */
+  items?: PlanItem[]
   /** @minimum 0 */
-  restBetweenRoundsSeconds?: number;
-};
+  restBetweenRoundsSeconds?: number
+}

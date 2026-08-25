@@ -6,10 +6,9 @@
  * OpenAPI spec version: 2.0.0
  */
 
-export type ClientCardStatus = typeof ClientCardStatus[keyof typeof ClientCardStatus];
-
+export type ClientCardStatus = (typeof ClientCardStatus)[keyof typeof ClientCardStatus]
 
 export const ClientCardStatus = {
   ACTIVE: 'ACTIVE',
   ARCHIVED: 'ARCHIVED',
-} as const;
+} as const

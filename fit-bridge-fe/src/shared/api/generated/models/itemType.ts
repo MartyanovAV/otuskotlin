@@ -6,11 +6,10 @@
  * OpenAPI spec version: 2.0.0
  */
 
-export type ItemType = typeof ItemType[keyof typeof ItemType];
-
+export type ItemType = (typeof ItemType)[keyof typeof ItemType]
 
 export const ItemType = {
   EXERCISE: 'EXERCISE',
   CIRCUIT: 'CIRCUIT',
   SUPERSET: 'SUPERSET',
-} as const;
+} as const
