@@ -9,4 +9,4 @@
 /**
  * Внутренний идентификатор зарегистрированного тренера
  */
-export type UserId = string;
+export type UserId = string

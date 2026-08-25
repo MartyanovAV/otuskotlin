@@ -9,4 +9,4 @@
 /**
  * Идентификатор тренировочного плана
  */
-export type TrainingPlanId = string;
+export type TrainingPlanId = string

@@ -66,7 +66,11 @@ describe('clearFitBridgeOAuthCallback', () => {
   })
 
   it('removes callback parameters returned in the query without changing an application fragment', () => {
-    window.history.replaceState({}, '', '/plans?code=code-value&state=state-value&view=calendar#details')
+    window.history.replaceState(
+      {},
+      '',
+      '/plans?code=code-value&state=state-value&view=calendar#details',
+    )
 
     clearFitBridgeOAuthCallback()
 

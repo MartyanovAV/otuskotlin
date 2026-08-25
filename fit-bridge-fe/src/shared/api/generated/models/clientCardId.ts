@@ -9,4 +9,4 @@
 /**
  * Идентификатор клиентской карточки
  */
-export type ClientCardId = string;
+export type ClientCardId = string

@@ -6,12 +6,11 @@
  * OpenAPI spec version: 2.0.0
  */
 
-export type WorkoutDifficulty = typeof WorkoutDifficulty[keyof typeof WorkoutDifficulty];
-
+export type WorkoutDifficulty = (typeof WorkoutDifficulty)[keyof typeof WorkoutDifficulty]
 
 export const WorkoutDifficulty = {
   EASY: 'EASY',
   NORMAL: 'NORMAL',
   HARD: 'HARD',
   MAX: 'MAX',
-} as const;
+} as const

@@ -5,11 +5,11 @@
  * Trainer Diary MVP API v2 для управления клиентской базой и тренировочными планами
  * OpenAPI spec version: 2.0.0
  */
-import type { ClientCardResponseObject } from './clientCardResponseObject';
-import type { ClientCardUpdateResponseResponseType } from './clientCardUpdateResponseResponseType';
-import type { IResponse } from './iResponse';
+import type { ClientCardResponseObject } from './clientCardResponseObject'
+import type { ClientCardUpdateResponseResponseType } from './clientCardUpdateResponseResponseType'
+import type { IResponse } from './iResponse'
 
 export type ClientCardUpdateResponse = Omit<IResponse, 'responseType'> & {
-  responseType: ClientCardUpdateResponseResponseType;
-  clientCard?: ClientCardResponseObject;
-};
+  responseType: ClientCardUpdateResponseResponseType
+  clientCard?: ClientCardResponseObject
+}

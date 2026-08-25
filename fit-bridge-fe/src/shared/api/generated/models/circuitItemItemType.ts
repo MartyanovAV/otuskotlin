@@ -6,9 +6,8 @@
  * OpenAPI spec version: 2.0.0
  */
 
-export type CircuitItemItemType = typeof CircuitItemItemType[keyof typeof CircuitItemItemType];
-
+export type CircuitItemItemType = (typeof CircuitItemItemType)[keyof typeof CircuitItemItemType]
 
 export const CircuitItemItemType = {
   CIRCUIT: 'CIRCUIT',
-} as const;
+} as const

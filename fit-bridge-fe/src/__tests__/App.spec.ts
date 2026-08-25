@@ -67,9 +67,9 @@ describe('FitBridge UI Components', () => {
   })
 
   it('requires the TRAINER role for the protected cabinet', () => {
-    const protectedRoot = router.getRoutes().find(
-      (route) => route.path === '/' && route.children.length > 0,
-    )
+    const protectedRoot = router
+      .getRoutes()
+      .find((route) => route.path === '/' && route.children.length > 0)
 
     expect(protectedRoot?.meta.requiresAuth).toBe(true)
     expect(protectedRoot?.meta.role).toBe('TRAINER')

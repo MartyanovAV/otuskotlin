@@ -6,9 +6,8 @@
  * OpenAPI spec version: 2.0.0
  */
 
-export type SupersetItemItemType = typeof SupersetItemItemType[keyof typeof SupersetItemItemType];
-
+export type SupersetItemItemType = (typeof SupersetItemItemType)[keyof typeof SupersetItemItemType]
 
 export const SupersetItemItemType = {
   SUPERSET: 'SUPERSET',
-} as const;
+} as const

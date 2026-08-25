@@ -11,7 +11,8 @@ const buttonVariants = cva(
       variant: {
         default: 'bg-primary text-primary-inverse shadow hover:bg-primary-hover',
         destructive: 'bg-danger text-text-inverse shadow-sm hover:bg-danger/90',
-        outline: 'border border-border bg-transparent shadow-sm hover:bg-surface-2 hover:text-text-main',
+        outline:
+          'border border-border bg-transparent shadow-sm hover:bg-surface-2 hover:text-text-main',
         secondary: 'bg-surface-2 text-text-main shadow-sm hover:bg-surface-3',
         ghost: 'hover:bg-surface-2 hover:text-text-main',
         link: 'text-primary underline-offset-4 hover:underline',
@@ -49,11 +50,7 @@ const computedClass = computed(() => {
 </script>
 
 <template>
-  <Primitive
-    :as="as"
-    :as-child="asChild"
-    :class="computedClass"
-  >
+  <Primitive :as="as" :as-child="asChild" :class="computedClass">
     <slot />
   </Primitive>
 </template>

@@ -5,22 +5,22 @@
  * Trainer Diary MVP API v2 для управления клиентской базой и тренировочными планами
  * OpenAPI spec version: 2.0.0
  */
-import type { ClientCardId } from './clientCardId';
-import type { TrainingPlanStatus } from './trainingPlanStatus';
+import type { ClientCardId } from './clientCardId'
+import type { TrainingPlanStatus } from './trainingPlanStatus'
 
 export interface TrainingPlanSearchFilter {
-  clientCardId?: ClientCardId;
+  clientCardId?: ClientCardId
   /**
-     * Поиск по названию плана
-     * @maxLength 120
-     */
-  searchString?: string;
-  status?: TrainingPlanStatus;
+   * Поиск по названию плана
+   * @maxLength 120
+   */
+  searchString?: string
+  status?: TrainingPlanStatus
   /**
-     * @minimum 1
-     * @maximum 100
-     */
-  pageSize?: number;
+   * @minimum 1
+   * @maximum 100
+   */
+  pageSize?: number
   /** @minimum 1 */
-  pageNumber?: number;
+  pageNumber?: number
 }

@@ -7,9 +7,9 @@
  */
 
 export interface ExerciseSet {
-  reps?: string;
-  weight?: string;
-  weightUnit?: string;
+  reps?: string
+  weight?: string
+  weightUnit?: string
   /** @minimum 0 */
-  durationSeconds?: number;
+  durationSeconds?: number
 }

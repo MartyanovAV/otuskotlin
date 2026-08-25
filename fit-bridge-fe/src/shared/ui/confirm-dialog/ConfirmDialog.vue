@@ -38,11 +38,7 @@ const handleOpenChange = (open: boolean) => {
       </DialogHeader>
 
       <DialogFooter class="pt-2 gap-2">
-        <Button
-          variant="outline"
-          @click="cancel"
-          id="confirm-cancel-btn"
-        >
+        <Button variant="outline" @click="cancel" id="confirm-cancel-btn">
           {{ cancelText }}
         </Button>
         <Button

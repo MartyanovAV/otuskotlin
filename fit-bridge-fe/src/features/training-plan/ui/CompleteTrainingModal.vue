@@ -72,7 +72,8 @@ const handleSubmit = async () => {
     difficulty.value = 'NORMAL'
     coachComment.value = ''
   } catch (err: unknown) {
-    errorMessage.value = err instanceof Error ? err.message : 'Произошла ошибка при завершении тренировки'
+    errorMessage.value =
+      err instanceof Error ? err.message : 'Произошла ошибка при завершении тренировки'
   } finally {
     isSubmitting.value = false
   }
@@ -101,7 +102,11 @@ const handleSubmit = async () => {
               v-for="opt in difficultyOptions"
               :key="opt.value"
               class="flex flex-col items-center justify-center p-3 rounded-md border cursor-pointer transition-all"
-              :class="difficulty === opt.value ? 'border-primary bg-primary-soft text-primary' : 'border-border bg-surface-2 text-text-main hover:bg-surface-3'"
+              :class="
+                difficulty === opt.value
+                  ? 'border-primary bg-primary-soft text-primary'
+                  : 'border-border bg-surface-2 text-text-main hover:bg-surface-3'
+              "
             >
               <input
                 type="radio"
@@ -116,7 +121,9 @@ const handleSubmit = async () => {
         </div>
 
         <div class="space-y-1.5">
-          <label class="text-sm font-medium text-text-main" for="coach-comment">Комментарий тренера</label>
+          <label class="text-sm font-medium text-text-main" for="coach-comment"
+            >Комментарий тренера</label
+          >
           <textarea
             id="coach-comment"
             v-model="coachComment"

@@ -253,9 +253,7 @@ describe('TrainingPlanListView Table View and Plan Items', () => {
   })
 
   it('opens edit modal with pre-filled plan data and submits update request', async () => {
-    const mockClients = [
-      { id: 'client-1', displayName: 'Дмитрий Кузнецов' },
-    ]
+    const mockClients = [{ id: 'client-1', displayName: 'Дмитрий Кузнецов' }]
 
     const mockPlan = {
       id: 'plan-101',
@@ -416,9 +414,9 @@ describe('TrainingPlanListView Table View and Plan Items', () => {
       headers: new Headers(),
     })
 
-    const updateMutateAsync = vi.fn<(...args: unknown[]) => unknown>().mockRejectedValue(
-      new Error('План был изменен другим пользователем. Обновите данные.')
-    )
+    const updateMutateAsync = vi
+      .fn<(...args: unknown[]) => unknown>()
+      .mockRejectedValue(new Error('План был изменен другим пользователем. Обновите данные.'))
 
     vi.mocked(planApi.useTrainingPlanUpdate).mockReturnValue({
       mutateAsync: updateMutateAsync,

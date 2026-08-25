@@ -5,9 +5,9 @@
  * Trainer Diary MVP API v2 для управления клиентской базой и тренировочными планами
  * OpenAPI spec version: 2.0.0
  */
-import type { ClientCardReadResponse } from './clientCardReadResponse';
+import type { ClientCardReadResponse } from './clientCardReadResponse'
 
 /**
  * Success
  */
-export type ClientCardReadResponseBodyResponse = ClientCardReadResponse;
+export type ClientCardReadResponseBodyResponse = ClientCardReadResponse

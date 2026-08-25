@@ -15,7 +15,9 @@
     "lint:check": "oxlint . && eslint . --cache=false",
     "lint:oxlint": "oxlint . --fix",
     "lint:eslint": "eslint . --fix --cache",
-    "format": "prettier --write --experimental-cli src/"
+    "format": "prettier --write --experimental-cli src/",
+    "verify": "run-s lint:check type-check test:unit build",
+    "verify:e2e": "playwright test --project=chromium"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/features/auth/authStore'
 import { Button } from '@/shared/ui/button'
-import { LayoutDashboard, UsersRound, Dumbbell } from 'lucide-vue-next'
+import { useNavItems } from '@/shared/lib/nav/useNavItems'
 
 const authStore = useAuthStore()
 
@@ -12,11 +12,15 @@ const emit = defineEmits<{ close: [] }>()
 
 const closeMobile = () => emit('close')
 
-const navItems = [
-  { to: '/', label: 'Дашборд', icon: LayoutDashboard },
-  { to: '/clients', label: 'Клиенты', icon: UsersRound },
-  { to: '/plans', label: 'Планы', icon: Dumbbell },
-]
+const navItems = useNavItems()
+
+// Базовый стиль пункта. Активные состояния (bg-primary + text-text-inverse)
+// подмешиваются RouterLink'ом через active-class/exact-active-class.
+// `!` гарантирует, что активный цвет перебьёт базовый text-text-muted
+// вне зависимости от порядка генерации утилит в Tailwind.
+const baseLinkClass =
+  'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary text-text-muted hover:bg-surface-2 hover:text-text-main'
+const activeLinkClass = '!bg-primary !text-text-inverse'
 </script>
 
 <template>
@@ -46,27 +50,18 @@ const navItems = [
         </button>
       </div>
 
-      <nav class="flex-1 space-y-1">
+      <nav class="flex-1 space-y-1" aria-label="Основная навигация">
         <router-link
           v-for="item in navItems"
           :key="item.to"
           :to="item.to"
-          v-slot="{ href, navigate, isActive, isExactActive }"
-          custom
+          :class="baseLinkClass"
+          :active-class="activeLinkClass"
+          :exact-active-class="activeLinkClass"
+          @click="closeMobile"
         >
-          <a
-            :href="href"
-            @click="navigate(); closeMobile()"
-            :class="[
-              'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-              (item.to === '/' ? isExactActive : isActive)
-                ? 'bg-primary text-text-inverse'
-                : 'text-text-muted hover:bg-surface-2 hover:text-text-main',
-            ]"
-          >
-            <component :is="item.icon" :size="18" aria-hidden="true" />
-            {{ item.label }}
-          </a>
+          <component :is="item.icon" :size="18" aria-hidden="true" />
+          {{ item.label }}
         </router-link>
       </nav>
 

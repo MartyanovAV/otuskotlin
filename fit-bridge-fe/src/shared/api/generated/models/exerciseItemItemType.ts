@@ -6,9 +6,8 @@
  * OpenAPI spec version: 2.0.0
  */
 
-export type ExerciseItemItemType = typeof ExerciseItemItemType[keyof typeof ExerciseItemItemType];
-
+export type ExerciseItemItemType = (typeof ExerciseItemItemType)[keyof typeof ExerciseItemItemType]
 
 export const ExerciseItemItemType = {
   EXERCISE: 'EXERCISE',
-} as const;
+} as const

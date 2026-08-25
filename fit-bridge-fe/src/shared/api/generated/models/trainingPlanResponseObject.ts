@@ -5,36 +5,36 @@
  * Trainer Diary MVP API v2 для управления клиентской базой и тренировочными планами
  * OpenAPI spec version: 2.0.0
  */
-import type { ClientCardId } from './clientCardId';
-import type { Lock } from './lock';
-import type { PlanItem } from './planItem';
-import type { Timestamp } from './timestamp';
-import type { TrainingPlanId } from './trainingPlanId';
-import type { TrainingPlanStatus } from './trainingPlanStatus';
-import type { WorkoutDifficulty } from './workoutDifficulty';
+import type { ClientCardId } from './clientCardId'
+import type { Lock } from './lock'
+import type { PlanItem } from './planItem'
+import type { Timestamp } from './timestamp'
+import type { TrainingPlanId } from './trainingPlanId'
+import type { TrainingPlanStatus } from './trainingPlanStatus'
+import type { WorkoutDifficulty } from './workoutDifficulty'
 
 export interface TrainingPlanResponseObject {
   /**
-     * @minLength 3
-     * @maxLength 120
-     */
-  title?: string;
+   * @minLength 3
+   * @maxLength 120
+   */
+  title?: string
   /**
-     * Не более 200 элементов суммарно с вложенными, максимальная глубина вложенности — 5
-     * @minItems 1
-     * @maxItems 200
-     */
-  planItems?: PlanItem[];
-  id?: TrainingPlanId;
-  clientCardId?: ClientCardId;
-  status?: TrainingPlanStatus;
+   * Не более 200 элементов суммарно с вложенными, максимальная глубина вложенности — 5
+   * @minItems 1
+   * @maxItems 200
+   */
+  planItems?: PlanItem[]
+  id?: TrainingPlanId
+  clientCardId?: ClientCardId
+  status?: TrainingPlanStatus
   /** @minimum 1 */
-  version?: number;
-  createdAt?: Timestamp;
-  updatedAt?: Timestamp;
-  lock?: Lock;
-  completedAt?: Timestamp;
-  difficulty?: WorkoutDifficulty;
+  version?: number
+  createdAt?: Timestamp
+  updatedAt?: Timestamp
+  lock?: Lock
+  completedAt?: Timestamp
+  difficulty?: WorkoutDifficulty
   /** @maxLength 1000 */
-  coachComment?: string;
+  coachComment?: string
 }

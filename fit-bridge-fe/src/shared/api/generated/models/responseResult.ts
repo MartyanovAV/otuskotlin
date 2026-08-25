@@ -6,10 +6,9 @@
  * OpenAPI spec version: 2.0.0
  */
 
-export type ResponseResult = typeof ResponseResult[keyof typeof ResponseResult];
-
+export type ResponseResult = (typeof ResponseResult)[keyof typeof ResponseResult]
 
 export const ResponseResult = {
   success: 'success',
   error: 'error',
-} as const;
+} as const

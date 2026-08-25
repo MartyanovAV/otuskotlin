@@ -9,8 +9,13 @@ const reload = () => window.location.reload()
 </script>
 
 <template>
-  <div v-if="authStore.initializationError" class="flex min-h-screen items-center justify-center bg-bg p-6">
-    <div class="max-w-md space-y-4 rounded-xl border border-border bg-surface p-6 text-center shadow-md">
+  <div
+    v-if="authStore.initializationError"
+    class="flex min-h-screen items-center justify-center bg-bg p-6"
+  >
+    <div
+      class="max-w-md space-y-4 rounded-xl border border-border bg-surface p-6 text-center shadow-md"
+    >
       <h1 class="text-lg font-semibold text-text-main">Не удалось войти в систему</h1>
       <p class="text-sm text-text-muted">{{ authStore.initializationError }}</p>
       <button

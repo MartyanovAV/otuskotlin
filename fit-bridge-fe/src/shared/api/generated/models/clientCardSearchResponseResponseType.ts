@@ -6,9 +6,9 @@
  * OpenAPI spec version: 2.0.0
  */
 
-export type ClientCardSearchResponseResponseType = typeof ClientCardSearchResponseResponseType[keyof typeof ClientCardSearchResponseResponseType];
-
+export type ClientCardSearchResponseResponseType =
+  (typeof ClientCardSearchResponseResponseType)[keyof typeof ClientCardSearchResponseResponseType]
 
 export const ClientCardSearchResponseResponseType = {
   clientCardsearch: 'clientCard.search',
-} as const;
+} as const

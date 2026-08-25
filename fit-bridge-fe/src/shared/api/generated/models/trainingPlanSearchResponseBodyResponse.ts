@@ -5,9 +5,9 @@
  * Trainer Diary MVP API v2 для управления клиентской базой и тренировочными планами
  * OpenAPI spec version: 2.0.0
  */
-import type { TrainingPlanSearchResponse } from './trainingPlanSearchResponse';
+import type { TrainingPlanSearchResponse } from './trainingPlanSearchResponse'
 
 /**
  * Success
  */
-export type TrainingPlanSearchResponseBodyResponse = TrainingPlanSearchResponse;
+export type TrainingPlanSearchResponseBodyResponse = TrainingPlanSearchResponse

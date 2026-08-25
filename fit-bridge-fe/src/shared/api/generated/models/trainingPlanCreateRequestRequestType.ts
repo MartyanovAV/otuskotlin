@@ -6,9 +6,9 @@
  * OpenAPI spec version: 2.0.0
  */
 
-export type TrainingPlanCreateRequestRequestType = typeof TrainingPlanCreateRequestRequestType[keyof typeof TrainingPlanCreateRequestRequestType];
-
+export type TrainingPlanCreateRequestRequestType =
+  (typeof TrainingPlanCreateRequestRequestType)[keyof typeof TrainingPlanCreateRequestRequestType]
 
 export const TrainingPlanCreateRequestRequestType = {
   trainingPlancreate: 'trainingPlan.create',
-} as const;
+} as const

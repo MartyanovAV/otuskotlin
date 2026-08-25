@@ -5,14 +5,14 @@
  * Trainer Diary MVP API v2 для управления клиентской базой и тренировочными планами
  * OpenAPI spec version: 2.0.0
  */
-import type { RequestId } from './requestId';
+import type { RequestId } from './requestId'
 
 /**
  * Базовый интерфейс для всех запросов FitBridge POST Full API
  */
 export interface IRequest {
   /** Поле-дискриминатор для вычисления типа запроса */
-  requestType?: string;
-  requestId?: RequestId;
-  apiVersion?: string;
+  requestType?: string
+  requestId?: RequestId
+  apiVersion?: string
 }

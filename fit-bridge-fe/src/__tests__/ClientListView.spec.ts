@@ -193,10 +193,14 @@ describe('ClientListView with Training Plans', () => {
     await flushPromises()
 
     // Проверяем, что отображается сообщение об отсутствии планов
-    expect(document.body.textContent).toContain('У этого клиента пока нет назначенных тренировочных планов')
+    expect(document.body.textContent).toContain(
+      'У этого клиента пока нет назначенных тренировочных планов',
+    )
 
     // Нажимаем кнопку добавления плана для клиента
-    const addPlanBtn = document.body.querySelector('#add-plan-to-client-btn') as HTMLButtonElement | null
+    const addPlanBtn = document.body.querySelector(
+      '#add-plan-to-client-btn',
+    ) as HTMLButtonElement | null
     expect(addPlanBtn).not.toBeNull()
     addPlanBtn?.click()
     await flushPromises()

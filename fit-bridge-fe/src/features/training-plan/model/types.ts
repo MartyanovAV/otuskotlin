@@ -70,7 +70,9 @@ export function mapDraftToPlanItem(draft: PlanItemDraft): PlanItem {
       description:
         draft.description?.trim() ||
         `Круговая тренировка: ${draft.rounds} раунд(ов)${
-          draft.restBetweenRoundsSeconds ? `, отдых между раундами ${draft.restBetweenRoundsSeconds} с` : ''
+          draft.restBetweenRoundsSeconds
+            ? `, отдых между раундами ${draft.restBetweenRoundsSeconds} с`
+            : ''
         }`,
       rounds: Math.max(1, Number(draft.rounds) || 1),
       restBetweenRoundsSeconds: Math.max(0, Number(draft.restBetweenRoundsSeconds) || 0),
