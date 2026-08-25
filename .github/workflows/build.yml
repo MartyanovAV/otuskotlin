@@ -324,13 +324,13 @@ jobs:
             # certificate in the named `caddy-data` volume, subsequent starts
             # reuse it and the background ACME scheduler renews it before
             # expiry. No host cron, no certbot, no reload-hook.
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build --force-recreate caddy
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build --force-recreate --remove-orphans caddy
 
             # `up -d` already honours health/completion dependency conditions.
             # Avoid Compose --wait here because the project intentionally has
             # successful one-shot db-bootstrap and Liquibase containers. The
             # public verification below is the authoritative readiness gate.
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build --remove-orphans
 
             sh ./verify-prod.sh
             docker compose -f docker-compose.yml -f docker-compose.prod.yml ps
