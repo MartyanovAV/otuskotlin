@@ -98,6 +98,14 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    # Override the base healthcheck: prod Caddy listens on :80/:443 only,
+    # not :8080. The /health endpoint is served on :80 (added to Caddyfile.prod).
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
     volumes:
       - ./volumes/caddy/Caddyfile.prod:/etc/caddy/Caddyfile:ro
       - caddy-data:/data/caddy

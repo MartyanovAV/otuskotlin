@@ -19,15 +19,28 @@
 # Plain HTTP listener: ACME HTTP-01 challenge path is served, everything
 # else is 301-redirected to HTTPS.
 :80 {
+    # Gateway liveness probe for Docker healthcheck. The healthcheck in
+    # docker-compose.prod.yml targets http://127.0.0.1/health (port 80)
+    # because Caddy prod does not expose port 8080.
+    @health path /health
+    handle @health {
+        respond `{"status":"UP","service":"caddy","check":"liveness"}` 200
+    }
+
     @acme path /.well-known/acme-challenge/*
     handle @acme {
         # Caddy v2 issues and serves the ACME HTTP-01 challenge itself
         # when its storage has the challenge token. The challenge is
-        # generated against the HTTPS listener's certificate, so we
-        # accept and let Caddy reply; no upstream is contacted here.
-        respond 200
+        # generated against the HTTPS listener's certificate; Caddy
+        # intercepts the request and replies with the challenge token
+        # before routing reaches this block, so no explicit respond is
+        # needed here — an explicit respond 200 with an empty body would
+        # break Let's Encrypt validation (RFC 8555 requires the token).
     }
-    redir https://{host}{uri} permanent
+
+    handle {
+        redir https://{host}{uri} permanent
+    }
 }
 
 # HTTPS listener.
